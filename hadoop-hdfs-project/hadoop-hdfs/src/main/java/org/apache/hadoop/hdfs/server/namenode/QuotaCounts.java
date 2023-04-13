@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.namenode;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -24,347 +23,350 @@ import org.apache.hadoop.hdfs.protocol.HdfsConstants;
 import org.apache.hadoop.hdfs.util.ConstEnumCounters;
 import org.apache.hadoop.hdfs.util.EnumCounters;
 
-
 /**
  * Counters for namespace, storage space and storage type space quota and usage.
  */
 public class QuotaCounts {
 
-  /**
-   * We pre-define 4 most common used EnumCounters objects. When the nsSsCounts
-   * and tsCounts are set to the 4 most common used value, we just point them to
-   * the pre-defined const EnumCounters objects instead of constructing many
-   * objects with the same value. See HDFS-14547.
-   */
-  final static EnumCounters<Quota> QUOTA_RESET =
-      new ConstEnumCounters<>(Quota.class, HdfsConstants.QUOTA_RESET);
-  final static EnumCounters<Quota> QUOTA_DEFAULT =
-      new ConstEnumCounters<>(Quota.class, 0);
-  final static EnumCounters<StorageType> STORAGE_TYPE_RESET =
-      new ConstEnumCounters<>(StorageType.class, HdfsConstants.QUOTA_RESET);
-  final static EnumCounters<StorageType> STORAGE_TYPE_DEFAULT =
-      new ConstEnumCounters<>(StorageType.class, 0);
+    /**
+     * We pre-define 4 most common used EnumCounters objects. When the nsSsCounts
+     * and tsCounts are set to the 4 most common used value, we just point them to
+     * the pre-defined const EnumCounters objects instead of constructing many
+     * objects with the same value. See HDFS-14547.
+     */
+    final static EnumCounters<Quota> QUOTA_RESET = new ConstEnumCounters<>(Quota.class, HdfsConstants.QUOTA_RESET);
 
-  /**
-   * Modify counter with action. If the counter is ConstEnumCounters, copy all
-   * the values of it to a new EnumCounters object, and modify the new obj.
-   *
-   * @param counter the EnumCounters to be modified.
-   * @param action the modifying action on counter.
-   * @return the modified counter.
-   */
-  static <T extends Enum<T>> EnumCounters<T> modify(EnumCounters<T> counter,
-      ModifyAction<T> action) {
-    if (counter instanceof ConstEnumCounters) {
-      counter = counter.deepCopyEnumCounter();
-    }
-    action.accept(counter);
-    return counter;
-  }
+    final static EnumCounters<Quota> QUOTA_DEFAULT = new ConstEnumCounters<>(Quota.class, 0);
 
-  private interface ModifyAction<T extends Enum<T>> {
-    void accept(EnumCounters<T> counter);
-  }
+    final static EnumCounters<StorageType> STORAGE_TYPE_RESET = new ConstEnumCounters<>(StorageType.class, HdfsConstants.QUOTA_RESET);
 
-  // Name space and storage space counts (HDFS-7775 refactors the original disk
-  // space count to storage space counts)
-  @VisibleForTesting
-  EnumCounters<Quota> nsSsCounts;
-  // Storage type space counts
-  @VisibleForTesting
-  EnumCounters<StorageType> tsCounts;
+    final static EnumCounters<StorageType> STORAGE_TYPE_DEFAULT = new ConstEnumCounters<>(StorageType.class, 0);
 
-  public static class Builder {
-    private EnumCounters<Quota> nsSsCounts;
-    private EnumCounters<StorageType> tsCounts;
-
-    public Builder() {
-      this.nsSsCounts = QUOTA_DEFAULT;
-      this.tsCounts = STORAGE_TYPE_DEFAULT;
+    /**
+     * Modify counter with action. If the counter is ConstEnumCounters, copy all
+     * the values of it to a new EnumCounters object, and modify the new obj.
+     *
+     * @param counter the EnumCounters to be modified.
+     * @param action the modifying action on counter.
+     * @return the modified counter.
+     */
+    static <T extends Enum<T>> EnumCounters<T> modify(EnumCounters<T> counter, ModifyAction<T> action) {
+        if (counter instanceof ConstEnumCounters) {
+            counter = counter.deepCopyEnumCounter();
+        }
+        action.accept(counter);
+        return counter;
     }
 
-    public Builder nameSpace(long val) {
-      nsSsCounts =
-          setQuotaCounter(nsSsCounts, Quota.NAMESPACE, Quota.STORAGESPACE, val);
-      return this;
+    private interface ModifyAction<T extends Enum<T>> {
+
+        void accept(EnumCounters<T> counter);
     }
 
-    public Builder storageSpace(long val) {
-      nsSsCounts =
-          setQuotaCounter(nsSsCounts, Quota.STORAGESPACE, Quota.NAMESPACE, val);
-      return this;
+    // Name space and storage space counts (HDFS-7775 refactors the original disk
+    // space count to storage space counts)
+    @VisibleForTesting
+    EnumCounters<Quota> nsSsCounts;
+
+    // Storage type space counts
+    @VisibleForTesting
+    EnumCounters<StorageType> tsCounts;
+
+    public static class Builder {
+
+        private EnumCounters<Quota> nsSsCounts;
+
+        private EnumCounters<StorageType> tsCounts;
+
+        public Builder() {
+            this.nsSsCounts = QUOTA_DEFAULT;
+            this.tsCounts = STORAGE_TYPE_DEFAULT;
+        }
+
+        public Builder nameSpace(long val) {
+            nsSsCounts = setQuotaCounter(nsSsCounts, Quota.NAMESPACE, Quota.STORAGESPACE, val);
+            return this;
+        }
+
+        public Builder storageSpace(long val) {
+            nsSsCounts = setQuotaCounter(nsSsCounts, Quota.STORAGESPACE, Quota.NAMESPACE, val);
+            return this;
+        }
+
+        public Builder typeSpaces(final EnumCounters<StorageType> val) {
+            if (val != null) {
+                if (val == STORAGE_TYPE_DEFAULT || val == STORAGE_TYPE_RESET) {
+                    tsCounts = val;
+                } else {
+                    tsCounts = modify(tsCounts, new ModifyAction<StorageType>() {
+
+                        @Override
+                        public void accept(EnumCounters<StorageType> counter) {
+                            counter.set(val);
+                        }
+                    });
+                }
+            }
+            return this;
+        }
+
+        public Builder typeSpaces(final long val) {
+            if (val == HdfsConstants.QUOTA_RESET) {
+                tsCounts = STORAGE_TYPE_RESET;
+            } else if (val == 0) {
+                tsCounts = STORAGE_TYPE_DEFAULT;
+            } else {
+                tsCounts = modify(tsCounts, new ModifyAction<StorageType>() {
+
+                    @Override
+                    public void accept(EnumCounters<StorageType> counter) {
+                        counter.reset(val);
+                    }
+                });
+            }
+            return this;
+        }
+
+        public Builder quotaCount(final QuotaCounts that) {
+            if (that.nsSsCounts == QUOTA_DEFAULT || that.nsSsCounts == QUOTA_RESET) {
+                nsSsCounts = that.nsSsCounts;
+            } else {
+                nsSsCounts = modify(nsSsCounts, new ModifyAction<Quota>() {
+
+                    @Override
+                    public void accept(EnumCounters<Quota> counter) {
+                        counter.set(that.nsSsCounts);
+                    }
+                });
+            }
+            if (that.tsCounts == STORAGE_TYPE_DEFAULT || that.tsCounts == STORAGE_TYPE_RESET) {
+                tsCounts = that.tsCounts;
+            } else {
+                tsCounts = modify(tsCounts, new ModifyAction<StorageType>() {
+
+                    @Override
+                    public void accept(EnumCounters<StorageType> counter) {
+                        counter.set(that.tsCounts);
+                    }
+                });
+            }
+            return this;
+        }
+
+        public QuotaCounts build() {
+            return new QuotaCounts(this);
+        }
     }
 
-    public Builder typeSpaces(final EnumCounters<StorageType> val) {
-      if (val != null) {
-        if (val == STORAGE_TYPE_DEFAULT || val == STORAGE_TYPE_RESET) {
-          tsCounts = val;
-        } else {
-          tsCounts = modify(tsCounts, new ModifyAction<StorageType>() {
+    private QuotaCounts(Builder builder) {
+        this.nsSsCounts = builder.nsSsCounts;
+        this.tsCounts = builder.tsCounts;
+    }
+
+    public QuotaCounts add(final QuotaCounts that) {
+        nsSsCounts = modify(nsSsCounts, new ModifyAction<Quota>() {
+
+            @Override
+            public void accept(EnumCounters<Quota> counter) {
+                counter.add(that.nsSsCounts);
+            }
+        });
+        tsCounts = modify(tsCounts, new ModifyAction<StorageType>() {
+
             @Override
             public void accept(EnumCounters<StorageType> counter) {
-              counter.set(val);
+                counter.add(that.tsCounts);
             }
-          });
-        }
-      }
-      return this;
-    }
-
-    public Builder typeSpaces(final long val) {
-      if (val == HdfsConstants.QUOTA_RESET) {
-        tsCounts = STORAGE_TYPE_RESET;
-      } else if (val == 0) {
-        tsCounts = STORAGE_TYPE_DEFAULT;
-      } else {
-        tsCounts = modify(tsCounts, new ModifyAction<StorageType>() {
-          @Override
-          public void accept(EnumCounters<StorageType> counter) {
-            counter.reset(val);
-          }
         });
-      }
-      return this;
+        return this;
     }
 
-    public Builder quotaCount(final QuotaCounts that) {
-      if (that.nsSsCounts == QUOTA_DEFAULT || that.nsSsCounts == QUOTA_RESET) {
-        nsSsCounts = that.nsSsCounts;
-      } else {
+    public QuotaCounts subtract(final QuotaCounts that) {
         nsSsCounts = modify(nsSsCounts, new ModifyAction<Quota>() {
-          @Override
-          public void accept(EnumCounters<Quota> counter) {
-            counter.set(that.nsSsCounts);
-          }
+
+            @Override
+            public void accept(EnumCounters<Quota> counter) {
+                counter.subtract(that.nsSsCounts);
+            }
         });
-      }
-      if (that.tsCounts == STORAGE_TYPE_DEFAULT
-          || that.tsCounts == STORAGE_TYPE_RESET) {
-        tsCounts = that.tsCounts;
-      } else {
         tsCounts = modify(tsCounts, new ModifyAction<StorageType>() {
-          @Override
-          public void accept(EnumCounters<StorageType> counter) {
-            counter.set(that.tsCounts);
-          }
+
+            @Override
+            public void accept(EnumCounters<StorageType> counter) {
+                counter.subtract(that.tsCounts);
+            }
         });
-      }
-      return this;
+        return this;
     }
 
-    public QuotaCounts build() {
-      return new QuotaCounts(this);
+    /**
+     * Returns a QuotaCounts whose value is {@code (-this)}.
+     *
+     * @return {@code -this}
+     */
+    public QuotaCounts negation() {
+        QuotaCounts ret = new QuotaCounts.Builder().quotaCount(this).build();
+        ret.nsSsCounts = modify(ret.nsSsCounts, new ModifyAction<Quota>() {
+
+            @Override
+            public void accept(EnumCounters<Quota> counter) {
+                counter.negation();
+            }
+        });
+        ret.tsCounts = modify(ret.tsCounts, new ModifyAction<StorageType>() {
+
+            @Override
+            public void accept(EnumCounters<StorageType> counter) {
+                counter.negation();
+            }
+        });
+        return ret;
     }
-  }
 
-  private QuotaCounts(Builder builder) {
-    this.nsSsCounts = builder.nsSsCounts;
-    this.tsCounts = builder.tsCounts;
-  }
+    public long getNameSpace() {
+        return nsSsCounts.get(Quota.NAMESPACE);
+    }
 
-  public QuotaCounts add(final QuotaCounts that) {
-    nsSsCounts = modify(nsSsCounts, new ModifyAction<Quota>() {
-      @Override
-      public void accept(EnumCounters<Quota> counter) {
-        counter.add(that.nsSsCounts);
-      }
-    });
-    tsCounts = modify(tsCounts, new ModifyAction<StorageType>() {
-      @Override
-      public void accept(EnumCounters<StorageType> counter) {
-        counter.add(that.tsCounts);
-      }
-    });
-    return this;
-  }
+    public void setNameSpace(long nameSpaceCount) {
+        nsSsCounts = setQuotaCounter(nsSsCounts, Quota.NAMESPACE, Quota.STORAGESPACE, nameSpaceCount);
+    }
 
-  public QuotaCounts subtract(final QuotaCounts that) {
-    nsSsCounts = modify(nsSsCounts, new ModifyAction<Quota>() {
-      @Override
-      public void accept(EnumCounters<Quota> counter) {
-        counter.subtract(that.nsSsCounts);
-      }
-    });
-    tsCounts = modify(tsCounts, new ModifyAction<StorageType>() {
-      @Override
-      public void accept(EnumCounters<StorageType> counter) {
-        counter.subtract(that.tsCounts);
-      }
-    });
-    return this;
-  }
+    public void addNameSpace(final long nsDelta) {
+        nsSsCounts = modify(nsSsCounts, new ModifyAction<Quota>() {
 
-  /**
-   * Returns a QuotaCounts whose value is {@code (-this)}.
-   *
-   * @return {@code -this}
-   */
-  public QuotaCounts negation() {
-    QuotaCounts ret = new QuotaCounts.Builder().quotaCount(this).build();
-    ret.nsSsCounts = modify(ret.nsSsCounts, new ModifyAction<Quota>() {
-      @Override
-      public void accept(EnumCounters<Quota> counter) {
-        counter.negation();
-      }
-    });
-    ret.tsCounts = modify(ret.tsCounts, new ModifyAction<StorageType>() {
-      @Override
-      public void accept(EnumCounters<StorageType> counter) {
-        counter.negation();
-      }
-    });
-    return ret;
-  }
+            @Override
+            public void accept(EnumCounters<Quota> counter) {
+                counter.add(Quota.NAMESPACE, nsDelta);
+            }
+        });
+    }
 
-  public long getNameSpace(){
-    return nsSsCounts.get(Quota.NAMESPACE);
-  }
+    public long getStorageSpace() {
+        return nsSsCounts.get(Quota.STORAGESPACE);
+    }
 
-  public void setNameSpace(long nameSpaceCount) {
-    nsSsCounts =
-        setQuotaCounter(nsSsCounts, Quota.NAMESPACE, Quota.STORAGESPACE,
-            nameSpaceCount);
-  }
+    public void setStorageSpace(long spaceCount) {
+        nsSsCounts = setQuotaCounter(nsSsCounts, Quota.STORAGESPACE, Quota.NAMESPACE, spaceCount);
+    }
 
-  public void addNameSpace(final long nsDelta) {
-    nsSsCounts = modify(nsSsCounts, new ModifyAction<Quota>() {
-      @Override
-      public void accept(EnumCounters<Quota> counter) {
-        counter.add(Quota.NAMESPACE, nsDelta);
-      }
-    });
-  }
+    public void addStorageSpace(final long dsDelta) {
+        nsSsCounts = modify(nsSsCounts, new ModifyAction<Quota>() {
 
-  public long getStorageSpace(){
-    return nsSsCounts.get(Quota.STORAGESPACE);
-  }
+            @Override
+            public void accept(EnumCounters<Quota> counter) {
+                counter.add(Quota.STORAGESPACE, dsDelta);
+            }
+        });
+    }
 
-  public void setStorageSpace(long spaceCount) {
-    nsSsCounts =
-        setQuotaCounter(nsSsCounts, Quota.STORAGESPACE, Quota.NAMESPACE,
-            spaceCount);
-  }
+    public EnumCounters<StorageType> getTypeSpaces() {
+        EnumCounters<StorageType> ret = new EnumCounters<StorageType>(StorageType.class);
+        ret.set(tsCounts);
+        return ret;
+    }
 
-  public void addStorageSpace(final long dsDelta) {
-    nsSsCounts = modify(nsSsCounts, new ModifyAction<Quota>() {
-      @Override
-      public void accept(EnumCounters<Quota> counter) {
-        counter.add(Quota.STORAGESPACE, dsDelta);
-      }
-    });
-  }
+    void setTypeSpaces(final EnumCounters<StorageType> that) {
+        if (that == STORAGE_TYPE_DEFAULT || that == STORAGE_TYPE_RESET) {
+            tsCounts = that;
+        } else if (that != null) {
+            tsCounts = modify(tsCounts, new ModifyAction<StorageType>() {
 
-  public EnumCounters<StorageType> getTypeSpaces() {
-    EnumCounters<StorageType> ret =
-        new EnumCounters<StorageType>(StorageType.class);
-    ret.set(tsCounts);
-    return ret;
-  }
-
-  void setTypeSpaces(final EnumCounters<StorageType> that) {
-    if (that == STORAGE_TYPE_DEFAULT || that == STORAGE_TYPE_RESET) {
-      tsCounts = that;
-    } else if (that != null) {
-      tsCounts = modify(tsCounts, new ModifyAction<StorageType>() {
-        @Override
-        public void accept(EnumCounters<StorageType> counter) {
-          counter.set(that);
+                @Override
+                public void accept(EnumCounters<StorageType> counter) {
+                    counter.set(that);
+                }
+            });
         }
-      });
     }
-  }
 
-  long getTypeSpace(StorageType type) {
-    return this.tsCounts.get(type);
-  }
-
-  void setTypeSpace(final StorageType type, final long spaceCount) {
-    tsCounts = modify(tsCounts, new ModifyAction<StorageType>() {
-      @Override
-      public void accept(EnumCounters<StorageType> counter) {
-        counter.set(type, spaceCount);
-      }
-    });
-  }
-
-  public void addTypeSpace(final StorageType type, final long delta) {
-    tsCounts = modify(tsCounts, new ModifyAction<StorageType>() {
-      @Override
-      public void accept(EnumCounters<StorageType> counter) {
-        counter.add(type, delta);
-      }
-    });
-  }
-
-  public boolean anyNsSsCountGreaterOrEqual(long val) {
-    if (nsSsCounts == QUOTA_DEFAULT) {
-      return val <= 0;
-    } else if (nsSsCounts == QUOTA_RESET) {
-      return val <= HdfsConstants.QUOTA_RESET;
+    long getTypeSpace(StorageType type) {
+        return this.tsCounts.get(type);
     }
-    return nsSsCounts.anyGreaterOrEqual(val);
-  }
 
-  public boolean anyTypeSpaceCountGreaterOrEqual(long val) {
-    if (tsCounts == STORAGE_TYPE_DEFAULT) {
-      return val <= 0;
-    } else if (tsCounts == STORAGE_TYPE_RESET) {
-      return val <= HdfsConstants.QUOTA_RESET;
+    void setTypeSpace(final StorageType type, final long spaceCount) {
+        tsCounts = modify(tsCounts, new ModifyAction<StorageType>() {
+
+            @Override
+            public void accept(EnumCounters<StorageType> counter) {
+                counter.set(type, spaceCount);
+            }
+        });
     }
-    return tsCounts.anyGreaterOrEqual(val);
-  }
 
-  /**
-   * Set inputCounts' value of Quota type quotaToSet to val.
-   * inputCounts should be the left side value of this method.
-   *
-   * @param inputCounts the EnumCounters instance.
-   * @param quotaToSet the quota type to be set.
-   * @param otherQuota the other quota type besides quotaToSet.
-   * @param val the value to be set.
-   * @return the modified inputCounts.
-   */
-  private static EnumCounters<Quota> setQuotaCounter(
-      EnumCounters<Quota> inputCounts, final Quota quotaToSet, Quota otherQuota,
-      final long val) {
-    if (val == HdfsConstants.QUOTA_RESET
-        && inputCounts.get(otherQuota) == HdfsConstants.QUOTA_RESET) {
-      return QUOTA_RESET;
-    } else if (val == 0 && inputCounts.get(otherQuota) == 0) {
-      return QUOTA_DEFAULT;
-    } else {
-      return modify(inputCounts, new ModifyAction<Quota>() {
-        @Override
-        public void accept(EnumCounters<Quota> counter) {
-          counter.set(quotaToSet, val);
+    public void addTypeSpace(final StorageType type, final long delta) {
+        tsCounts = modify(tsCounts, new ModifyAction<StorageType>() {
+
+            @Override
+            public void accept(EnumCounters<StorageType> counter) {
+                counter.add(type, delta);
+            }
+        });
+    }
+
+    public boolean anyNsSsCountGreaterOrEqual(long val) {
+        if (nsSsCounts == QUOTA_DEFAULT) {
+            return val <= 0;
+        } else if (nsSsCounts == QUOTA_RESET) {
+            return val <= HdfsConstants.QUOTA_RESET;
         }
-      });
+        return nsSsCounts.anyGreaterOrEqual(val);
     }
-  }
 
-  @Override
-  public String toString() {
-    return "name space=" + getNameSpace() +
-        "\nstorage space=" + getStorageSpace() +
-        "\nstorage types=" + getTypeSpaces();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == this) {
-      return true;
-    } else if (obj == null || !(obj instanceof QuotaCounts)) {
-      return false;
+    public boolean anyTypeSpaceCountGreaterOrEqual(long val) {
+        if (tsCounts == STORAGE_TYPE_DEFAULT) {
+            return val <= 0;
+        } else if (tsCounts == STORAGE_TYPE_RESET) {
+            return val <= HdfsConstants.QUOTA_RESET;
+        }
+        return tsCounts.anyGreaterOrEqual(val);
     }
-    final QuotaCounts that = (QuotaCounts)obj;
-    return this.nsSsCounts.equals(that.nsSsCounts)
-        && this.tsCounts.equals(that.tsCounts);
-  }
 
-  @Override
-  public int hashCode() {
-    assert false : "hashCode not designed";
-    return 42; // any arbitrary constant will do
-  }
+    /**
+     * Set inputCounts' value of Quota type quotaToSet to val.
+     * inputCounts should be the left side value of this method.
+     *
+     * @param inputCounts the EnumCounters instance.
+     * @param quotaToSet the quota type to be set.
+     * @param otherQuota the other quota type besides quotaToSet.
+     * @param val the value to be set.
+     * @return the modified inputCounts.
+     */
+    private static EnumCounters<Quota> setQuotaCounter(EnumCounters<Quota> inputCounts, final Quota quotaToSet, Quota otherQuota, final long val) {
+        if (val == HdfsConstants.QUOTA_RESET && inputCounts.get(otherQuota) == HdfsConstants.QUOTA_RESET) {
+            return QUOTA_RESET;
+        } else if (val == 0 && inputCounts.get(otherQuota) == 0) {
+            return QUOTA_DEFAULT;
+        } else {
+            return modify(inputCounts, new ModifyAction<Quota>() {
 
+                @Override
+                public void accept(EnumCounters<Quota> counter) {
+                    counter.set(quotaToSet, val);
+                }
+            });
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "name space=" + getNameSpace() + "\nstorage space=" + getStorageSpace() + "\nstorage types=" + getTypeSpaces();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        } else if (obj == null || !(obj instanceof QuotaCounts)) {
+            return false;
+        }
+        final QuotaCounts that = (QuotaCounts) obj;
+        return this.nsSsCounts.equals(that.nsSsCounts) && this.tsCounts.equals(that.tsCounts);
+    }
+
+    @Override
+    public int hashCode() {
+        assert false : "hashCode not designed";
+        // any arbitrary constant will do
+        return 42;
+    }
 }

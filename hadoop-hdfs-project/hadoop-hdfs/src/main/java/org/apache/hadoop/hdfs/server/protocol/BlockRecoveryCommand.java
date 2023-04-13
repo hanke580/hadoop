@@ -19,14 +19,12 @@ package org.apache.hadoop.hdfs.server.protocol;
 
 import java.util.Collection;
 import java.util.ArrayList;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
 import org.apache.hadoop.hdfs.protocol.ExtendedBlock;
 import org.apache.hadoop.hdfs.protocol.LocatedBlock;
-
 import com.google.common.base.Joiner;
 
 /**
@@ -42,96 +40,100 @@ import com.google.common.base.Joiner;
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
 public class BlockRecoveryCommand extends DatanodeCommand {
-  final Collection<RecoveringBlock> recoveringBlocks;
 
-  /**
-   * This is a block with locations from which it should be recovered
-   * and the new generation stamp, which the block will have after 
-   * successful recovery.
-   * 
-   * The new generation stamp of the block, also plays role of the recovery id.
-   */
-  @InterfaceAudience.Private
-  @InterfaceStability.Evolving
-  public static class RecoveringBlock extends LocatedBlock {
-    private final long newGenerationStamp;
-    private final Block recoveryBlock;
+    final Collection<RecoveringBlock> recoveringBlocks;
 
     /**
-     * Create RecoveringBlock.
+     * This is a block with locations from which it should be recovered
+     * and the new generation stamp, which the block will have after
+     * successful recovery.
+     *
+     * The new generation stamp of the block, also plays role of the recovery id.
      */
-    public RecoveringBlock(ExtendedBlock b, DatanodeInfo[] locs, long newGS) {
-      super(b, locs); // startOffset is unknown
-      this.newGenerationStamp = newGS;
-      this.recoveryBlock = null;
+    @InterfaceAudience.Private
+    @InterfaceStability.Evolving
+    public static class RecoveringBlock extends LocatedBlock {
+
+        private final long newGenerationStamp;
+
+        private final Block recoveryBlock;
+
+        /**
+         * Create RecoveringBlock.
+         */
+        public RecoveringBlock(ExtendedBlock b, DatanodeInfo[] locs, long newGS) {
+            // startOffset is unknown
+            super(b, locs);
+            this.newGenerationStamp = newGS;
+            this.recoveryBlock = null;
+        }
+
+        /**
+         * Create RecoveringBlock with copy-on-truncate option.
+         */
+        public RecoveringBlock(ExtendedBlock b, DatanodeInfo[] locs, Block recoveryBlock) {
+            // startOffset is unknown
+            super(b, locs);
+            this.newGenerationStamp = recoveryBlock.getGenerationStamp();
+            this.recoveryBlock = recoveryBlock;
+        }
+
+        /**
+         * Return the new generation stamp of the block,
+         * which also plays role of the recovery id.
+         */
+        public long getNewGenerationStamp() {
+            return newGenerationStamp;
+        }
+
+        /**
+         * Return the new block.
+         */
+        public Block getNewBlock() {
+            return recoveryBlock;
+        }
     }
 
     /**
-     * Create RecoveringBlock with copy-on-truncate option.
+     * Create empty BlockRecoveryCommand.
      */
-    public RecoveringBlock(ExtendedBlock b, DatanodeInfo[] locs,
-        Block recoveryBlock) {
-      super(b, locs); // startOffset is unknown
-      this.newGenerationStamp = recoveryBlock.getGenerationStamp();
-      this.recoveryBlock = recoveryBlock;
+    public BlockRecoveryCommand() {
+        this(0);
     }
 
     /**
-     * Return the new generation stamp of the block,
-     * which also plays role of the recovery id.
+     * Create BlockRecoveryCommand with
+     * the specified capacity for recovering blocks.
      */
-    public long getNewGenerationStamp() {
-      return newGenerationStamp;
+    public BlockRecoveryCommand(int capacity) {
+        this(new ArrayList<RecoveringBlock>(capacity));
+    }
+
+    public BlockRecoveryCommand(Collection<RecoveringBlock> blocks) {
+        super(DatanodeProtocol.DNA_RECOVERBLOCK);
+        recoveringBlocks = blocks;
     }
 
     /**
-     * Return the new block.
+     * Return the list of recovering blocks.
      */
-    public Block getNewBlock() {
-      return recoveryBlock;
+    public Collection<RecoveringBlock> getRecoveringBlocks() {
+        return recoveringBlocks;
     }
-  }
 
-  /**
-   * Create empty BlockRecoveryCommand.
-   */
-  public BlockRecoveryCommand() {
-    this(0);
-  }
+    /**
+     * Add recovering block to the command.
+     */
+    public void add(RecoveringBlock block) {
+        recoveringBlocks.add(block);
+    }
 
-  /**
-   * Create BlockRecoveryCommand with
-   * the specified capacity for recovering blocks.
-   */
-  public BlockRecoveryCommand(int capacity) {
-    this(new ArrayList<RecoveringBlock>(capacity));
-  }
-  
-  public BlockRecoveryCommand(Collection<RecoveringBlock> blocks) {
-    super(DatanodeProtocol.DNA_RECOVERBLOCK);
-    recoveringBlocks = blocks;
-  }
-
-  /**
-   * Return the list of recovering blocks.
-   */
-  public Collection<RecoveringBlock> getRecoveringBlocks() {
-    return recoveringBlocks;
-  }
-
-  /**
-   * Add recovering block to the command.
-   */
-  public void add(RecoveringBlock block) {
-    recoveringBlocks.add(block);
-  }
-  
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("BlockRecoveryCommand(\n  ");
-    Joiner.on("\n  ").appendTo(sb, recoveringBlocks);
-    sb.append("\n)");
-    return sb.toString();
-  }
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("BlockRecoveryCommand(\n  ");
+        Joiner.on("\n  ").appendTo(sb, recoveringBlocks);
+        sb.append("\n)");
+        return sb.toString();
+    }
 }

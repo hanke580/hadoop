@@ -21,75 +21,77 @@ import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.fs.permission.PermissionStatus;
 import org.apache.hadoop.hdfs.server.namenode.INodeFile.HeaderFormat;
 import org.apache.hadoop.hdfs.server.namenode.XAttrFeature;
+
 /**
  * The attributes of a file.
  */
 @InterfaceAudience.Private
 public interface INodeFileAttributes extends INodeAttributes {
-  /** @return the file replication. */
-  public short getFileReplication();
 
-  /** @return preferred block size in bytes */
-  public long getPreferredBlockSize();
+    /**
+     * @return the file replication.
+     */
+    public short getFileReplication();
 
-  /** @return the header as a long. */
-  public long getHeaderLong();
+    /**
+     * @return preferred block size in bytes
+     */
+    public long getPreferredBlockSize();
 
-  public boolean metadataEquals(INodeFileAttributes other);
+    /**
+     * @return the header as a long.
+     */
+    public long getHeaderLong();
 
-  public byte getLocalStoragePolicyID();
+    public boolean metadataEquals(INodeFileAttributes other);
 
-  /** A copy of the inode file attributes */
-  public static class SnapshotCopy extends INodeAttributes.SnapshotCopy
-      implements INodeFileAttributes {
-    private final long header;
+    public byte getLocalStoragePolicyID();
 
-    public SnapshotCopy(byte[] name, PermissionStatus permissions,
-        AclFeature aclFeature, long modificationTime, long accessTime,
-        short replication, long preferredBlockSize, byte storagePolicyID,
-        XAttrFeature xAttrsFeature) {
-      super(name, permissions, aclFeature, modificationTime, accessTime, 
-          xAttrsFeature);
-      header = HeaderFormat.toLong(preferredBlockSize, replication, storagePolicyID);
+    /**
+     * A copy of the inode file attributes
+     */
+    public static class SnapshotCopy extends INodeAttributes.SnapshotCopy implements INodeFileAttributes {
+
+        private final long header;
+
+        public SnapshotCopy(byte[] name, PermissionStatus permissions, AclFeature aclFeature, long modificationTime, long accessTime, short replication, long preferredBlockSize, byte storagePolicyID, XAttrFeature xAttrsFeature) {
+            super(name, permissions, aclFeature, modificationTime, accessTime, xAttrsFeature);
+            header = HeaderFormat.toLong(preferredBlockSize, replication, storagePolicyID);
+        }
+
+        public SnapshotCopy(INodeFile file) {
+            super(file);
+            this.header = file.getHeaderLong();
+        }
+
+        @Override
+        public boolean isDirectory() {
+            return false;
+        }
+
+        @Override
+        public short getFileReplication() {
+            return HeaderFormat.getReplication(header);
+        }
+
+        @Override
+        public long getPreferredBlockSize() {
+            return HeaderFormat.getPreferredBlockSize(header);
+        }
+
+        @Override
+        public byte getLocalStoragePolicyID() {
+            return HeaderFormat.getStoragePolicyID(header);
+        }
+
+        @Override
+        public long getHeaderLong() {
+            return header;
+        }
+
+        @Override
+        public boolean metadataEquals(INodeFileAttributes other) {
+            return other != null && getHeaderLong() == other.getHeaderLong() && getPermissionLong() == other.getPermissionLong() && getAclFeature() == other.getAclFeature() && getXAttrFeature() == other.getXAttrFeature();
+        }
     }
-
-    public SnapshotCopy(INodeFile file) {
-      super(file);
-      this.header = file.getHeaderLong();
-    }
-
-    @Override
-    public boolean isDirectory() {
-      return false;
-    }
-
-    @Override
-    public short getFileReplication() {
-      return HeaderFormat.getReplication(header);
-    }
-
-    @Override
-    public long getPreferredBlockSize() {
-      return HeaderFormat.getPreferredBlockSize(header);
-    }
-
-    @Override
-    public byte getLocalStoragePolicyID() {
-      return HeaderFormat.getStoragePolicyID(header);
-    }
-
-    @Override
-    public long getHeaderLong() {
-      return header;
-    }
-
-    @Override
-    public boolean metadataEquals(INodeFileAttributes other) {
-      return other != null
-          && getHeaderLong()== other.getHeaderLong()
-          && getPermissionLong() == other.getPermissionLong()
-          && getAclFeature() == other.getAclFeature()
-          && getXAttrFeature() == other.getXAttrFeature();
-    }
-  }
 }

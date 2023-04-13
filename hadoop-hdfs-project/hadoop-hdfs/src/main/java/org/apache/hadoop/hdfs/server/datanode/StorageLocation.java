@@ -15,16 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.datanode;
 
 import java.util.regex.Pattern;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.regex.Matcher;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
@@ -39,110 +36,104 @@ import org.apache.hadoop.util.StringUtils;
  * Encapsulates the URI and storage medium that together describe a
  * storage directory.
  * The default storage medium is assumed to be DISK, if none is specified.
- *
  */
 @InterfaceAudience.Private
-public class StorageLocation
-    implements Checkable<StorageLocation.CheckContext, VolumeCheckResult> {
-  final StorageType storageType;
-  final File file;
+public class StorageLocation implements Checkable<StorageLocation.CheckContext, VolumeCheckResult> {
 
-  /** Regular expression that describes a storage uri with a storage type.
-   *  e.g. [Disk]/storages/storage1/
-   */
-  private static final Pattern regex = Pattern.compile("^\\[(\\w*)\\](.+)$");
+    final StorageType storageType;
 
-  private StorageLocation(StorageType storageType, URI uri) {
-    this.storageType = storageType;
+    final File file;
 
-    if (uri.getScheme() == null ||
-        "file".equalsIgnoreCase(uri.getScheme())) {
-      // drop any (illegal) authority in the URI for backwards compatibility
-      this.file = new File(uri.getPath());
-    } else {
-      throw new IllegalArgumentException("Unsupported URI schema in " + uri);
-    }
-  }
+    /**
+     * Regular expression that describes a storage uri with a storage type.
+     *  e.g. [Disk]/storages/storage1/
+     */
+    private static final Pattern regex = Pattern.compile("^\\[(\\w*)\\](.+)$");
 
-  public StorageType getStorageType() {
-    return this.storageType;
-  }
-
-  URI getUri() {
-    return file.toURI();
-  }
-
-  public File getFile() {
-    return this.file;
-  }
-
-  /**
-   * Attempt to parse a storage uri with storage class and URI. The storage
-   * class component of the uri is case-insensitive.
-   *
-   * @param rawLocation Location string of the format [type]uri, where [type] is
-   *                    optional.
-   * @return A StorageLocation object if successfully parsed, null otherwise.
-   *         Does not throw any exceptions.
-   */
-  public static StorageLocation parse(String rawLocation)
-      throws IOException, SecurityException {
-    Matcher matcher = regex.matcher(rawLocation);
-    StorageType storageType = StorageType.DEFAULT;
-    String location = rawLocation;
-
-    if (matcher.matches()) {
-      String classString = matcher.group(1);
-      location = matcher.group(2).trim();
-      if (!classString.isEmpty()) {
-        storageType =
-            StorageType.valueOf(StringUtils.toUpperCase(classString));
-      }
+    private StorageLocation(StorageType storageType, URI uri) {
+        this.storageType = storageType;
+        if (uri.getScheme() == null || "file".equalsIgnoreCase(uri.getScheme())) {
+            // drop any (illegal) authority in the URI for backwards compatibility
+            this.file = new File(uri.getPath());
+        } else {
+            throw new IllegalArgumentException("Unsupported URI schema in " + uri);
+        }
     }
 
-    return new StorageLocation(storageType, new Path(location).toUri());
-  }
-
-  @Override
-  public String toString() {
-    return "[" + storageType + "]" + file.toURI();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == this) {
-      return true;
-    } else if (obj == null || !(obj instanceof StorageLocation)) {
-      return false;
+    public StorageType getStorageType() {
+        return this.storageType;
     }
-    return toString().equals(obj.toString());
-  }
 
-  @Override
-  public int hashCode() {
-    return toString().hashCode();
-  }
-
-  @Override  // Checkable
-  public VolumeCheckResult check(CheckContext context) throws IOException {
-    DiskChecker.checkDir(
-        context.localFileSystem,
-        new Path(file.toURI()),
-        context.expectedPermission);
-    return VolumeCheckResult.HEALTHY;
-  }
-
-  /**
-   * Class to hold the parameters for running a {@link #check}.
-   */
-  public static final class CheckContext {
-    private final LocalFileSystem localFileSystem;
-    private final FsPermission expectedPermission;
-
-    public CheckContext(LocalFileSystem localFileSystem,
-                        FsPermission expectedPermission) {
-      this.localFileSystem = localFileSystem;
-      this.expectedPermission = expectedPermission;
+    URI getUri() {
+        return file.toURI();
     }
-  }
+
+    public File getFile() {
+        return this.file;
+    }
+
+    /**
+     * Attempt to parse a storage uri with storage class and URI. The storage
+     * class component of the uri is case-insensitive.
+     *
+     * @param rawLocation Location string of the format [type]uri, where [type] is
+     *                    optional.
+     * @return A StorageLocation object if successfully parsed, null otherwise.
+     *         Does not throw any exceptions.
+     */
+    public static StorageLocation parse(String rawLocation) throws IOException, SecurityException {
+        Matcher matcher = regex.matcher(rawLocation);
+        StorageType storageType = StorageType.DEFAULT;
+        String location = rawLocation;
+        if (matcher.matches()) {
+            String classString = matcher.group(1);
+            location = matcher.group(2).trim();
+            if (!classString.isEmpty()) {
+                storageType = StorageType.valueOf(StringUtils.toUpperCase(classString));
+            }
+        }
+        return new StorageLocation(storageType, new Path(location).toUri());
+    }
+
+    @Override
+    public String toString() {
+        return "[" + storageType + "]" + file.toURI();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        } else if (obj == null || !(obj instanceof StorageLocation)) {
+            return false;
+        }
+        return toString().equals(obj.toString());
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
+
+    // Checkable
+    @Override
+    public VolumeCheckResult check(CheckContext context) throws IOException {
+        DiskChecker.checkDir(context.localFileSystem, new Path(file.toURI()), context.expectedPermission);
+        return VolumeCheckResult.HEALTHY;
+    }
+
+    /**
+     * Class to hold the parameters for running a {@link #check}.
+     */
+    public static final class CheckContext {
+
+        private final LocalFileSystem localFileSystem;
+
+        private final FsPermission expectedPermission;
+
+        public CheckContext(LocalFileSystem localFileSystem, FsPermission expectedPermission) {
+            this.localFileSystem = localFileSystem;
+            this.expectedPermission = expectedPermission;
+        }
+    }
 }

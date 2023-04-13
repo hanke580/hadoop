@@ -19,7 +19,6 @@ package org.apache.hadoop.hdfs.server.datanode;
 
 import java.io.File;
 import java.io.IOException;
-
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.server.common.HdfsServerConstants.ReplicaState;
 import org.apache.hadoop.hdfs.server.datanode.fsdataset.FsVolumeSpi;
@@ -28,109 +27,110 @@ import org.apache.hadoop.hdfs.server.datanode.fsdataset.FsVolumeSpi;
  * This class describes a replica that has been finalized.
  */
 public class FinalizedReplica extends ReplicaInfo {
-  private byte[] lastPartialChunkChecksum;
-  /**
-   * Constructor
-   * @param blockId block id
-   * @param len replica length
-   * @param genStamp replica generation stamp
-   * @param vol volume where replica is located
-   * @param dir directory path where block and meta files are located
-   */
-  public FinalizedReplica(long blockId, long len, long genStamp,
-      FsVolumeSpi vol, File dir) {
-    this(blockId, len, genStamp, vol, dir, null);
-  }
 
-  /**
-   * Constructor.
-   * @param blockId block id
-   * @param len replica length
-   * @param genStamp replica generation stamp
-   * @param vol volume where replica is located
-   * @param dir directory path where block and meta files are located
-   * @param checksum the last partial chunk checksum
-   */
-  public FinalizedReplica(long blockId, long len, long genStamp,
-      FsVolumeSpi vol, File dir, byte[] checksum) {
-    super(blockId, len, genStamp, vol, dir);
-    this.setLastPartialChunkChecksum(checksum);
-  }
+    private byte[] lastPartialChunkChecksum;
 
-  /**
-   * Constructor
-   * @param block a block
-   * @param vol volume where replica is located
-   * @param dir directory path where block and meta files are located
-   */
-  public FinalizedReplica(Block block, FsVolumeSpi vol, File dir) {
-    this(block, vol, dir, null);
-  }
+    /**
+     * Constructor
+     * @param blockId block id
+     * @param len replica length
+     * @param genStamp replica generation stamp
+     * @param vol volume where replica is located
+     * @param dir directory path where block and meta files are located
+     */
+    public FinalizedReplica(long blockId, long len, long genStamp, FsVolumeSpi vol, File dir) {
+        this(blockId, len, genStamp, vol, dir, null);
+    }
 
-  /**
-   * Constructor.
-   * @param block a block
-   * @param vol volume where replica is located
-   * @param dir directory path where block and meta files are located
-   * @param checksum the last partial chunk checksum
-   */
-  public FinalizedReplica(Block block, FsVolumeSpi vol, File dir,
-      byte[] checksum) {
-    super(block, vol, dir);
-    this.setLastPartialChunkChecksum(checksum);
-  }
+    /**
+     * Constructor.
+     * @param blockId block id
+     * @param len replica length
+     * @param genStamp replica generation stamp
+     * @param vol volume where replica is located
+     * @param dir directory path where block and meta files are located
+     * @param checksum the last partial chunk checksum
+     */
+    public FinalizedReplica(long blockId, long len, long genStamp, FsVolumeSpi vol, File dir, byte[] checksum) {
+        super(blockId, len, genStamp, vol, dir);
+        this.setLastPartialChunkChecksum(checksum);
+    }
 
-  /**
-   * Copy constructor.
-   * @param from where to copy construct from
-   */
-  public FinalizedReplica(FinalizedReplica from) {
-    super(from);
-    this.setLastPartialChunkChecksum(from.getLastPartialChunkChecksum());
-  }
+    /**
+     * Constructor
+     * @param block a block
+     * @param vol volume where replica is located
+     * @param dir directory path where block and meta files are located
+     */
+    public FinalizedReplica(Block block, FsVolumeSpi vol, File dir) {
+        this(block, vol, dir, null);
+    }
 
-  @Override  // ReplicaInfo
-  public ReplicaState getState() {
-    return ReplicaState.FINALIZED;
-  }
-  
-  @Override
-  public long getVisibleLength() {
-    return getNumBytes();       // all bytes are visible
-  }
+    /**
+     * Constructor.
+     * @param block a block
+     * @param vol volume where replica is located
+     * @param dir directory path where block and meta files are located
+     * @param checksum the last partial chunk checksum
+     */
+    public FinalizedReplica(Block block, FsVolumeSpi vol, File dir, byte[] checksum) {
+        super(block, vol, dir);
+        this.setLastPartialChunkChecksum(checksum);
+    }
 
-  @Override
-  public long getBytesOnDisk() {
-    return getNumBytes();
-  }
+    /**
+     * Copy constructor.
+     * @param from where to copy construct from
+     */
+    public FinalizedReplica(FinalizedReplica from) {
+        super(from);
+        this.setLastPartialChunkChecksum(from.getLastPartialChunkChecksum());
+    }
 
-  @Override  // Object
-  public boolean equals(Object o) {
-    return super.equals(o);
-  }
-  
-  @Override  // Object
-  public int hashCode() {
-    return super.hashCode();
-  }
-  
-  @Override
-  public String toString() {
-    return super.toString();
-  }
+    // ReplicaInfo
+    @Override
+    public ReplicaState getState() {
+        return ReplicaState.FINALIZED;
+    }
 
-  public byte[] getLastPartialChunkChecksum() {
-    return lastPartialChunkChecksum;
-  }
+    @Override
+    public long getVisibleLength() {
+        // all bytes are visible
+        return getNumBytes();
+    }
 
-  public void setLastPartialChunkChecksum(byte[] checksum) {
-    lastPartialChunkChecksum = checksum;
-  }
+    @Override
+    public long getBytesOnDisk() {
+        return getNumBytes();
+    }
 
-  public void loadLastPartialChunkChecksum()
-      throws IOException {
-    byte[] lastChecksum = getVolume().loadLastPartialChunkChecksum(
-        getBlockFile(), getMetaFile());
-    setLastPartialChunkChecksum(lastChecksum);
-  }
+    // Object
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o);
+    }
+
+    // Object
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
+
+    public byte[] getLastPartialChunkChecksum() {
+        return lastPartialChunkChecksum;
+    }
+
+    public void setLastPartialChunkChecksum(byte[] checksum) {
+        lastPartialChunkChecksum = checksum;
+    }
+
+    public void loadLastPartialChunkChecksum() throws IOException {
+        byte[] lastChecksum = getVolume().loadLastPartialChunkChecksum(getBlockFile(), getMetaFile());
+        setLastPartialChunkChecksum(lastChecksum);
+    }
 }

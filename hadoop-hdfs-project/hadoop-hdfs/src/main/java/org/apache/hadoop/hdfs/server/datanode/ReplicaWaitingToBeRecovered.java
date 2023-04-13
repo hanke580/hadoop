@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.server.datanode;
 
 import java.io.File;
-
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.server.common.HdfsServerConstants.ReplicaState;
 import org.apache.hadoop.hdfs.server.datanode.fsdataset.FsVolumeSpi;
@@ -34,64 +33,68 @@ import org.apache.hadoop.hdfs.server.datanode.fsdataset.FsVolumeSpi;
  */
 public class ReplicaWaitingToBeRecovered extends ReplicaInfo {
 
-  /**
-   * Constructor
-   * @param blockId block id
-   * @param len replica length
-   * @param genStamp replica generation stamp
-   * @param vol volume where replica is located
-   * @param dir directory path where block and meta files are located
-   */
-  public ReplicaWaitingToBeRecovered(long blockId, long len, long genStamp,
-      FsVolumeSpi vol, File dir) {
-    super(blockId, len, genStamp, vol, dir);
-  }
-  
-  /**
-   * Constructor
-   * @param block a block
-   * @param vol volume where replica is located
-   * @param dir directory path where block and meta files are located
-   */
-  public ReplicaWaitingToBeRecovered(Block block, FsVolumeSpi vol, File dir) {
-    super(block, vol, dir);
-  }
-  
-  /**
-   * Copy constructor.
-   * @param from where to copy from
-   */
-  public ReplicaWaitingToBeRecovered(ReplicaWaitingToBeRecovered from) {
-    super(from);
-  }
+    /**
+     * Constructor
+     * @param blockId block id
+     * @param len replica length
+     * @param genStamp replica generation stamp
+     * @param vol volume where replica is located
+     * @param dir directory path where block and meta files are located
+     */
+    public ReplicaWaitingToBeRecovered(long blockId, long len, long genStamp, FsVolumeSpi vol, File dir) {
+        super(blockId, len, genStamp, vol, dir);
+    }
 
-  @Override //ReplicaInfo
-  public ReplicaState getState() {
-    return ReplicaState.RWR;
-  }
-  
-  @Override //ReplicaInfo
-  public long getVisibleLength() {
-    return -1;  //no bytes are visible
-  }
-  
-  @Override
-  public long getBytesOnDisk() {
-    return getNumBytes();
-  }
+    /**
+     * Constructor
+     * @param block a block
+     * @param vol volume where replica is located
+     * @param dir directory path where block and meta files are located
+     */
+    public ReplicaWaitingToBeRecovered(Block block, FsVolumeSpi vol, File dir) {
+        super(block, vol, dir);
+    }
 
-  @Override  // Object
-  public boolean equals(Object o) {
-    return super.equals(o);
-  }
-  
-  @Override  // Object
-  public int hashCode() {
-    return super.hashCode();
-  }
+    /**
+     * Copy constructor.
+     * @param from where to copy from
+     */
+    public ReplicaWaitingToBeRecovered(ReplicaWaitingToBeRecovered from) {
+        super(from);
+    }
 
-  @Override
-  public String toString() {
-    return super.toString();
-  }
+    //ReplicaInfo
+    @Override
+    public ReplicaState getState() {
+        return ReplicaState.RWR;
+    }
+
+    //ReplicaInfo
+    @Override
+    public long getVisibleLength() {
+        //no bytes are visible
+        return -1;
+    }
+
+    @Override
+    public long getBytesOnDisk() {
+        return getNumBytes();
+    }
+
+    // Object
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o);
+    }
+
+    // Object
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 }

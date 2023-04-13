@@ -27,17 +27,16 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Private
 @InterfaceStability.Unstable
 public enum VolumeCheckResult {
-  HEALTHY(1),
-  DEGRADED(2),
-  FAILED(3);
 
-  private final int value;
+    HEALTHY(1), DEGRADED(2), FAILED(3);
 
-  VolumeCheckResult(int value) {
-    this.value = value;
-  }
+    private final int value;
 
-  int getValue() {
-    return value;
-  }
+    VolumeCheckResult(int value) {
+        this.value = value;
+    }
+
+    int getValue() {
+        return value;
+    }
 }

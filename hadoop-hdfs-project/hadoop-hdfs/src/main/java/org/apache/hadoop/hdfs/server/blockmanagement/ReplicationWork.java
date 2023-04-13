@@ -18,82 +18,83 @@
 package org.apache.hadoop.hdfs.server.blockmanagement;
 
 import org.apache.hadoop.net.Node;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 class ReplicationWork {
-  private final BlockInfo block;
-  private final String srcPath;
-  private final long blockSize;
-  private final byte storagePolicyID;
-  private final DatanodeDescriptor srcNode;
-  private final int additionalReplRequired;
-  private final int priority;
-  private final List<DatanodeDescriptor> containingNodes;
-  private final List<DatanodeStorageInfo> liveReplicaStorages;
-  private DatanodeStorageInfo[] targets;
 
-  public ReplicationWork(BlockInfo block, BlockCollection bc,
-      DatanodeDescriptor srcNode, List<DatanodeDescriptor> containingNodes,
-      List<DatanodeStorageInfo> liveReplicaStorages, int additionalReplRequired,
-      int priority) {
-    this.block = block;
-    this.srcPath = bc.getName();
-    this.blockSize = block.getNumBytes();
-    this.storagePolicyID = bc.getStoragePolicyID();
-    this.srcNode = srcNode;
-    this.srcNode.incrementPendingReplicationWithoutTargets();
-    this.containingNodes = containingNodes;
-    this.liveReplicaStorages = liveReplicaStorages;
-    this.additionalReplRequired = additionalReplRequired;
-    this.priority = priority;
-    this.targets = null;
-  }
+    private final BlockInfo block;
 
-  void chooseTargets(BlockPlacementPolicy blockplacement,
-      BlockStoragePolicySuite storagePolicySuite,
-      Set<Node> excludedNodes) {
-    try {
-      targets = blockplacement.chooseTarget(getSrcPath(),
-          additionalReplRequired, srcNode, liveReplicaStorages, false,
-          excludedNodes, blockSize,
-          storagePolicySuite.getPolicy(getStoragePolicyID()), null);
-    } finally {
-      srcNode.decrementPendingReplicationWithoutTargets();
+    private final String srcPath;
+
+    private final long blockSize;
+
+    private final byte storagePolicyID;
+
+    private final DatanodeDescriptor srcNode;
+
+    private final int additionalReplRequired;
+
+    private final int priority;
+
+    private final List<DatanodeDescriptor> containingNodes;
+
+    private final List<DatanodeStorageInfo> liveReplicaStorages;
+
+    private DatanodeStorageInfo[] targets;
+
+    public ReplicationWork(BlockInfo block, BlockCollection bc, DatanodeDescriptor srcNode, List<DatanodeDescriptor> containingNodes, List<DatanodeStorageInfo> liveReplicaStorages, int additionalReplRequired, int priority) {
+        this.block = block;
+        this.srcPath = bc.getName();
+        this.blockSize = block.getNumBytes();
+        this.storagePolicyID = bc.getStoragePolicyID();
+        this.srcNode = srcNode;
+        this.srcNode.incrementPendingReplicationWithoutTargets();
+        this.containingNodes = containingNodes;
+        this.liveReplicaStorages = liveReplicaStorages;
+        this.additionalReplRequired = additionalReplRequired;
+        this.priority = priority;
+        this.targets = null;
     }
-  }
 
-  DatanodeStorageInfo[] getTargets() {
-    return targets;
-  }
+    void chooseTargets(BlockPlacementPolicy blockplacement, BlockStoragePolicySuite storagePolicySuite, Set<Node> excludedNodes) {
+        try {
+            targets = blockplacement.chooseTarget(getSrcPath(), additionalReplRequired, srcNode, liveReplicaStorages, false, excludedNodes, blockSize, storagePolicySuite.getPolicy(getStoragePolicyID()), null);
+        } finally {
+            srcNode.decrementPendingReplicationWithoutTargets();
+        }
+    }
 
-  void resetTargets() {
-    this.targets = null;
-  }
+    DatanodeStorageInfo[] getTargets() {
+        return targets;
+    }
 
-  List<DatanodeDescriptor> getContainingNodes() {
-    return Collections.unmodifiableList(containingNodes);
-  }
+    void resetTargets() {
+        this.targets = null;
+    }
 
-  public int getPriority() {
-    return priority;
-  }
+    List<DatanodeDescriptor> getContainingNodes() {
+        return Collections.unmodifiableList(containingNodes);
+    }
 
-  public BlockInfo getBlock() {
-    return block;
-  }
+    public int getPriority() {
+        return priority;
+    }
 
-  public DatanodeDescriptor getSrcNode() {
-    return srcNode;
-  }
+    public BlockInfo getBlock() {
+        return block;
+    }
 
-  public String getSrcPath() {
-    return srcPath;
-  }
+    public DatanodeDescriptor getSrcNode() {
+        return srcNode;
+    }
 
-  public byte getStoragePolicyID() {
-    return storagePolicyID;
-  }
+    public String getSrcPath() {
+        return srcPath;
+    }
+
+    public byte getStoragePolicyID() {
+        return storagePolicyID;
+    }
 }

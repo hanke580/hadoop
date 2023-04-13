@@ -22,26 +22,32 @@ import org.apache.hadoop.hdfs.server.blockmanagement.BlockCollection;
 import org.apache.hadoop.hdfs.server.namenode.ha.HAContext;
 import org.apache.hadoop.hdfs.util.RwLock;
 
-/** Namesystem operations. */
+/**
+ * Namesystem operations.
+ */
 @InterfaceAudience.Private
 public interface Namesystem extends RwLock, SafeMode {
-  /** Is this name system running? */
-  boolean isRunning();
 
-  BlockCollection getBlockCollection(long id);
+    /**
+     * Is this name system running?
+     */
+    boolean isRunning();
 
-  FSDirectory getFSDirectory();
+    BlockCollection getBlockCollection(long id);
 
-  void startSecretManagerIfNecessary();
+    FSDirectory getFSDirectory();
 
-  boolean isInSnapshot(long blockCollectionID);
+    void startSecretManagerIfNecessary();
 
-  CacheManager getCacheManager();
-  HAContext getHAContext();
+    boolean isInSnapshot(long blockCollectionID);
 
-  /**
-   * @return Whether the namenode is transitioning to active state and is in the
-   *         middle of the starting active services.
-   */
-  boolean inTransitionToActive();
+    CacheManager getCacheManager();
+
+    HAContext getHAContext();
+
+    /**
+     * @return Whether the namenode is transitioning to active state and is in the
+     *         middle of the starting active services.
+     */
+    boolean inTransitionToActive();
 }

@@ -20,11 +20,9 @@ package org.apache.hadoop.hdfs.server.namenode;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.PrivilegedExceptionAction;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.ContentSummary;
@@ -34,51 +32,54 @@ import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.util.ServletUtil;
 import org.znerd.xmlenc.XMLOutputter;
 
-/** Servlets for file checksum */
+/**
+ * Servlets for file checksum
+ */
 @InterfaceAudience.Private
 public class ContentSummaryServlet extends DfsServlet {
-  /** For java.io.Serializable */
-  private static final long serialVersionUID = 1L;
-  
-  @Override
-  public void doGet(final HttpServletRequest request,
-      final HttpServletResponse response) throws ServletException, IOException {
-    final Configuration conf = 
-      (Configuration) getServletContext().getAttribute(JspHelper.CURRENT_CONF);
-    final UserGroupInformation ugi = getUGI(request, conf);
-    try {
-      ugi.doAs(new PrivilegedExceptionAction<Void>() {
-        @Override
-        public Void run() throws Exception {
-          final String path = ServletUtil.getDecodedPath(request, "/contentSummary");
-          final PrintWriter out = response.getWriter();
-          final XMLOutputter xml = new XMLOutputter(out, "UTF-8");
-          xml.declaration();
-          try {
-            //get content summary
-            final ClientProtocol nnproxy = createNameNodeProxy();
-            final ContentSummary cs = nnproxy.getContentSummary(path);
 
-            //write xml
-            xml.startTag(ContentSummary.class.getName());
-            if (cs != null) {
-              xml.attribute("length"        , "" + cs.getLength());
-              xml.attribute("fileCount"     , "" + cs.getFileCount());
-              xml.attribute("directoryCount", "" + cs.getDirectoryCount());
-              xml.attribute("quota"         , "" + cs.getQuota());
-              xml.attribute("spaceConsumed" , "" + cs.getSpaceConsumed());
-              xml.attribute("spaceQuota"    , "" + cs.getSpaceQuota());
-            }
-            xml.endTag();
-          } catch(IOException ioe) {
-            writeXml(ioe, path, xml);
-          }
-          xml.endDocument();
-          return null;
+    /**
+     * For java.io.Serializable
+     */
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    public void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
+        final Configuration conf = (Configuration) getServletContext().getAttribute(JspHelper.CURRENT_CONF);
+        final UserGroupInformation ugi = getUGI(request, conf);
+        try {
+            ugi.doAs(new PrivilegedExceptionAction<Void>() {
+
+                @Override
+                public Void run() throws Exception {
+                    final String path = ServletUtil.getDecodedPath(request, "/contentSummary");
+                    final PrintWriter out = response.getWriter();
+                    final XMLOutputter xml = new XMLOutputter(out, "UTF-8");
+                    xml.declaration();
+                    try {
+                        //get content summary
+                        final ClientProtocol nnproxy = createNameNodeProxy();
+                        final ContentSummary cs = nnproxy.getContentSummary(path);
+                        //write xml
+                        xml.startTag(ContentSummary.class.getName());
+                        if (cs != null) {
+                            xml.attribute("length", "" + cs.getLength());
+                            xml.attribute("fileCount", "" + cs.getFileCount());
+                            xml.attribute("directoryCount", "" + cs.getDirectoryCount());
+                            xml.attribute("quota", "" + cs.getQuota());
+                            xml.attribute("spaceConsumed", "" + cs.getSpaceConsumed());
+                            xml.attribute("spaceQuota", "" + cs.getSpaceQuota());
+                        }
+                        xml.endTag();
+                    } catch (IOException ioe) {
+                        writeXml(ioe, path, xml);
+                    }
+                    xml.endDocument();
+                    return null;
+                }
+            });
+        } catch (InterruptedException e) {
+            throw new IOException(e);
         }
-      });
-    } catch (InterruptedException e) {
-      throw new IOException(e);
     }
-  }
 }

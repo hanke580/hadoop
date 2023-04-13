@@ -20,7 +20,6 @@ package org.apache.hadoop.hdfs.server.namenode.snapshot;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Arrays;
-
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockInfo;
 import org.apache.hadoop.hdfs.server.namenode.FSImageSerialization;
 import org.apache.hadoop.hdfs.server.namenode.INode;
@@ -32,95 +31,94 @@ import org.apache.hadoop.hdfs.server.namenode.snapshot.SnapshotFSImageFormat.Ref
 /**
  * The difference of an {@link INodeFile} between two snapshots.
  */
-public class FileDiff extends
-    AbstractINodeDiff<INodeFile, INodeFileAttributes, FileDiff> {
+public class FileDiff extends AbstractINodeDiff<INodeFile, INodeFileAttributes, FileDiff> {
 
-  /** The file size at snapshot creation time. */
-  private final long fileSize;
-  /** A copy of the INodeFile block list. Used in truncate. */
-  private BlockInfo[] blocks;
+    /**
+     * The file size at snapshot creation time.
+     */
+    private final long fileSize;
 
-  FileDiff(int snapshotId, INodeFile file) {
-    super(snapshotId, null, null);
-    fileSize = file.computeFileSize();
-    blocks = null;
-  }
+    /**
+     * A copy of the INodeFile block list. Used in truncate.
+     */
+    private BlockInfo[] blocks;
 
-  /** Constructor used by FSImage loading */
-  FileDiff(int snapshotId, INodeFileAttributes snapshotINode,
-      FileDiff posteriorDiff, long fileSize) {
-    super(snapshotId, snapshotINode, posteriorDiff);
-    this.fileSize = fileSize;
-    blocks = null;
-  }
-
-  /** @return the file size in the snapshot. */
-  public long getFileSize() {
-    return fileSize;
-  }
-
-  /**
-   * Copy block references into the snapshot
-   * up to the current {@link #fileSize}.
-   * Should be done only once.
-   */
-  public void setBlocks(BlockInfo[] blocks) {
-    if(this.blocks != null)
-      return;
-    int numBlocks = 0;
-    for(long s = 0; numBlocks < blocks.length && s < fileSize; numBlocks++)
-      s += blocks[numBlocks].getNumBytes();
-    this.blocks = Arrays.copyOf(blocks, numBlocks);
-  }
-
-  public BlockInfo[] getBlocks() {
-    return blocks;
-  }
-
-  @Override
-  void combinePosteriorAndCollectBlocks(
-      INode.ReclaimContext reclaimContext, INodeFile currentINode,
-      FileDiff posterior) {
-    FileWithSnapshotFeature sf = currentINode.getFileWithSnapshotFeature();
-    assert sf != null : "FileWithSnapshotFeature is null";
-    sf.updateQuotaAndCollectBlocks(reclaimContext, currentINode, posterior);
-  }
-  
-  @Override
-  public String toString() {
-    return super.toString() + " fileSize=" + fileSize + ", rep="
-        + (snapshotINode == null? "?": snapshotINode.getFileReplication());
-  }
-
-  @Override
-  void write(DataOutput out, ReferenceMap referenceMap) throws IOException {
-    writeSnapshot(out);
-    out.writeLong(fileSize);
-
-    // write snapshotINode
-    if (snapshotINode != null) {
-      out.writeBoolean(true);
-      FSImageSerialization.writeINodeFileAttributes(snapshotINode, out);
-    } else {
-      out.writeBoolean(false);
+    FileDiff(int snapshotId, INodeFile file) {
+        super(snapshotId, null, null);
+        fileSize = file.computeFileSize();
+        blocks = null;
     }
-  }
 
-  @Override
-  void destroyDiffAndCollectBlocks(INode.ReclaimContext reclaimContext,
-      INodeFile currentINode) {
-    currentINode.getFileWithSnapshotFeature().updateQuotaAndCollectBlocks(
-        reclaimContext, currentINode, this);
-  }
+    /**
+     * Constructor used by FSImage loading
+     */
+    FileDiff(int snapshotId, INodeFileAttributes snapshotINode, FileDiff posteriorDiff, long fileSize) {
+        super(snapshotId, snapshotINode, posteriorDiff);
+        this.fileSize = fileSize;
+        blocks = null;
+    }
 
-  public void destroyAndCollectSnapshotBlocks(
-      BlocksMapUpdateInfo collectedBlocks) {
-    if (blocks == null || collectedBlocks == null) {
-      return;
+    /**
+     * @return the file size in the snapshot.
+     */
+    public long getFileSize() {
+        return fileSize;
     }
-    for (BlockInfo blk : blocks) {
-      collectedBlocks.addDeleteBlock(blk);
+
+    /**
+     * Copy block references into the snapshot
+     * up to the current {@link #fileSize}.
+     * Should be done only once.
+     */
+    public void setBlocks(BlockInfo[] blocks) {
+        if (this.blocks != null)
+            return;
+        int numBlocks = 0;
+        for (long s = 0; numBlocks < blocks.length && s < fileSize; numBlocks++) s += blocks[numBlocks].getNumBytes();
+        this.blocks = Arrays.copyOf(blocks, numBlocks);
     }
-    blocks = null;
-  }
+
+    public BlockInfo[] getBlocks() {
+        return blocks;
+    }
+
+    @Override
+    void combinePosteriorAndCollectBlocks(INode.ReclaimContext reclaimContext, INodeFile currentINode, FileDiff posterior) {
+        FileWithSnapshotFeature sf = currentINode.getFileWithSnapshotFeature();
+        assert sf != null : "FileWithSnapshotFeature is null";
+        sf.updateQuotaAndCollectBlocks(reclaimContext, currentINode, posterior);
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + " fileSize=" + fileSize + ", rep=" + (snapshotINode == null ? "?" : snapshotINode.getFileReplication());
+    }
+
+    @Override
+    void write(DataOutput out, ReferenceMap referenceMap) throws IOException {
+        writeSnapshot(out);
+        out.writeLong(fileSize);
+        // write snapshotINode
+        if (snapshotINode != null) {
+            out.writeBoolean(true);
+            FSImageSerialization.writeINodeFileAttributes(snapshotINode, out);
+        } else {
+            out.writeBoolean(false);
+        }
+    }
+
+    @Override
+    void destroyDiffAndCollectBlocks(INode.ReclaimContext reclaimContext, INodeFile currentINode) {
+        currentINode.getFileWithSnapshotFeature().updateQuotaAndCollectBlocks(reclaimContext, currentINode, this);
+    }
+
+    public void destroyAndCollectSnapshotBlocks(BlocksMapUpdateInfo collectedBlocks) {
+        if (blocks == null || collectedBlocks == null) {
+            return;
+        }
+        for (BlockInfo blk : blocks) {
+            collectedBlocks.addDeleteBlock(blk);
+        }
+        blocks = null;
+    }
 }

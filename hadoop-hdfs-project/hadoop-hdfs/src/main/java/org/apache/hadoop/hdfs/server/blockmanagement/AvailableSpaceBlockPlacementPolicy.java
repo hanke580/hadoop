@@ -15,15 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.blockmanagement;
 
 import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_NAMENODE_AVAILABLE_SPACE_BLOCK_PLACEMENT_POLICY_BALANCED_SPACE_PREFERENCE_FRACTION_KEY;
 import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_NAMENODE_AVAILABLE_SPACE_BLOCK_PLACEMENT_POLICY_BALANCED_SPACE_PREFERENCE_FRACTION_DEFAULT;
-
 import java.util.Collection;
 import java.util.Random;
-
 import com.google.common.base.Preconditions;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,89 +34,67 @@ import org.apache.hadoop.net.Node;
 /**
  * Space balanced block placement policy.
  */
-public class AvailableSpaceBlockPlacementPolicy extends
-    BlockPlacementPolicyDefault {
-  private static final Log LOG = LogFactory
-      .getLog(AvailableSpaceBlockPlacementPolicy.class);
-  private static final Random RAND = new Random();
-  private int balancedPreference =
-      (int) (100 * DFS_NAMENODE_AVAILABLE_SPACE_BLOCK_PLACEMENT_POLICY_BALANCED_SPACE_PREFERENCE_FRACTION_DEFAULT);
+public class AvailableSpaceBlockPlacementPolicy extends BlockPlacementPolicyDefault {
 
-  @Override
-  public void initialize(Configuration conf, FSClusterStats stats,
-      NetworkTopology clusterMap, Host2NodesMap host2datanodeMap) {
-    super.initialize(conf, stats, clusterMap, host2datanodeMap);
-    float balancedPreferencePercent =
-        conf.getFloat(
-          DFS_NAMENODE_AVAILABLE_SPACE_BLOCK_PLACEMENT_POLICY_BALANCED_SPACE_PREFERENCE_FRACTION_KEY,
-          DFS_NAMENODE_AVAILABLE_SPACE_BLOCK_PLACEMENT_POLICY_BALANCED_SPACE_PREFERENCE_FRACTION_DEFAULT);
+    private static final Log LOG = LogFactory.getLog(AvailableSpaceBlockPlacementPolicy.class);
 
-    LOG.info("Available space block placement policy initialized: "
-        + DFSConfigKeys.DFS_NAMENODE_AVAILABLE_SPACE_BLOCK_PLACEMENT_POLICY_BALANCED_SPACE_PREFERENCE_FRACTION_KEY
-        + " = " + balancedPreferencePercent);
+    private static final Random RAND = new Random();
 
-    if (balancedPreferencePercent > 1.0) {
-      LOG.warn("The value of "
-          + DFS_NAMENODE_AVAILABLE_SPACE_BLOCK_PLACEMENT_POLICY_BALANCED_SPACE_PREFERENCE_FRACTION_KEY
-          + " is greater than 1.0 but should be in the range 0.0 - 1.0");
+    private int balancedPreference = (int) (100 * DFS_NAMENODE_AVAILABLE_SPACE_BLOCK_PLACEMENT_POLICY_BALANCED_SPACE_PREFERENCE_FRACTION_DEFAULT);
+
+    @Override
+    public void initialize(Configuration conf, FSClusterStats stats, NetworkTopology clusterMap, Host2NodesMap host2datanodeMap) {
+        super.initialize(conf, stats, clusterMap, host2datanodeMap);
+        float balancedPreferencePercent = conf.getFloat(DFS_NAMENODE_AVAILABLE_SPACE_BLOCK_PLACEMENT_POLICY_BALANCED_SPACE_PREFERENCE_FRACTION_KEY, DFS_NAMENODE_AVAILABLE_SPACE_BLOCK_PLACEMENT_POLICY_BALANCED_SPACE_PREFERENCE_FRACTION_DEFAULT);
+        LOG.info("Available space block placement policy initialized: " + DFSConfigKeys.DFS_NAMENODE_AVAILABLE_SPACE_BLOCK_PLACEMENT_POLICY_BALANCED_SPACE_PREFERENCE_FRACTION_KEY + " = " + balancedPreferencePercent);
+        if (balancedPreferencePercent > 1.0) {
+            LOG.warn("The value of " + DFS_NAMENODE_AVAILABLE_SPACE_BLOCK_PLACEMENT_POLICY_BALANCED_SPACE_PREFERENCE_FRACTION_KEY + " is greater than 1.0 but should be in the range 0.0 - 1.0");
+        }
+        if (balancedPreferencePercent < 0.5) {
+            LOG.warn("The value of " + DFS_NAMENODE_AVAILABLE_SPACE_BLOCK_PLACEMENT_POLICY_BALANCED_SPACE_PREFERENCE_FRACTION_KEY + " is less than 0.5 so datanodes with more used percent will" + " receive  more block allocations.");
+        }
+        balancedPreference = (int) (100 * balancedPreferencePercent);
     }
-    if (balancedPreferencePercent < 0.5) {
-      LOG.warn("The value of "
-          + DFS_NAMENODE_AVAILABLE_SPACE_BLOCK_PLACEMENT_POLICY_BALANCED_SPACE_PREFERENCE_FRACTION_KEY
-          + " is less than 0.5 so datanodes with more used percent will"
-          + " receive  more block allocations.");
+
+    @Override
+    protected DatanodeDescriptor chooseDataNode(final String scope, final Collection<Node> excludedNode, StorageType type) {
+        // only the code that uses DFSNetworkTopology should trigger this code path.
+        Preconditions.checkArgument(clusterMap instanceof DFSNetworkTopology);
+        DFSNetworkTopology dfsClusterMap = (DFSNetworkTopology) clusterMap;
+        DatanodeDescriptor a = (DatanodeDescriptor) dfsClusterMap.chooseRandomWithStorageType(scope, excludedNode, type);
+        DatanodeDescriptor b = (DatanodeDescriptor) dfsClusterMap.chooseRandomWithStorageType(scope, excludedNode, type);
+        return select(a, b);
     }
-    balancedPreference = (int) (100 * balancedPreferencePercent);
-  }
 
-  @Override
-  protected DatanodeDescriptor chooseDataNode(final String scope,
-      final Collection<Node> excludedNode, StorageType type) {
-    // only the code that uses DFSNetworkTopology should trigger this code path.
-    Preconditions.checkArgument(clusterMap instanceof DFSNetworkTopology);
-    DFSNetworkTopology dfsClusterMap = (DFSNetworkTopology)clusterMap;
-    DatanodeDescriptor a = (DatanodeDescriptor) dfsClusterMap
-        .chooseRandomWithStorageType(scope, excludedNode, type);
-    DatanodeDescriptor b = (DatanodeDescriptor) dfsClusterMap
-        .chooseRandomWithStorageType(scope, excludedNode, type);
-    return select(a, b);
-  }
-
-  @Override
-  protected DatanodeDescriptor chooseDataNode(final String scope,
-      final Collection<Node> excludedNode) {
-    DatanodeDescriptor a =
-        (DatanodeDescriptor) clusterMap.chooseRandom(scope, excludedNode);
-    DatanodeDescriptor b =
-        (DatanodeDescriptor) clusterMap.chooseRandom(scope, excludedNode);
-    return select(a, b);
-  }
-
-  private DatanodeDescriptor select(
-      DatanodeDescriptor a, DatanodeDescriptor b) {
-    if (a != null && b != null){
-      int ret = compareDataNode(a, b);
-      if (ret == 0) {
-        return a;
-      } else if (ret < 0) {
-        return (RAND.nextInt(100) < balancedPreference) ? a : b;
-      } else {
-        return (RAND.nextInt(100) < balancedPreference) ? b : a;
-      }
-    } else {
-      return a == null ? b : a;
+    @Override
+    protected DatanodeDescriptor chooseDataNode(final String scope, final Collection<Node> excludedNode) {
+        DatanodeDescriptor a = (DatanodeDescriptor) clusterMap.chooseRandom(scope, excludedNode);
+        DatanodeDescriptor b = (DatanodeDescriptor) clusterMap.chooseRandom(scope, excludedNode);
+        return select(a, b);
     }
-  }
 
-  /**
-   * Compare the two data nodes.
-   */
-  protected int compareDataNode(final DatanodeDescriptor a,
-      final DatanodeDescriptor b) {
-    if (a.equals(b)
-        || Math.abs(a.getDfsUsedPercent() - b.getDfsUsedPercent()) < 5) {
-      return 0;
+    private DatanodeDescriptor select(DatanodeDescriptor a, DatanodeDescriptor b) {
+        if (a != null && b != null) {
+            int ret = compareDataNode(a, b);
+            if (ret == 0) {
+                return a;
+            } else if (ret < 0) {
+                return (RAND.nextInt(100) < balancedPreference) ? a : b;
+            } else {
+                return (RAND.nextInt(100) < balancedPreference) ? b : a;
+            }
+        } else {
+            return a == null ? b : a;
+        }
     }
-    return a.getDfsUsedPercent() < b.getDfsUsedPercent() ? -1 : 1;
-  }
+
+    /**
+     * Compare the two data nodes.
+     */
+    protected int compareDataNode(final DatanodeDescriptor a, final DatanodeDescriptor b) {
+        if (a.equals(b) || Math.abs(a.getDfsUsedPercent() - b.getDfsUsedPercent()) < 5) {
+            return 0;
+        }
+        return a.getDfsUsedPercent() < b.getDfsUsedPercent() ? -1 : 1;
+    }
 }

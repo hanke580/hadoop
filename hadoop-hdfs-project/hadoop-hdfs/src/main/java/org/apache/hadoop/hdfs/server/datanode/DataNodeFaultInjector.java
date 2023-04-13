@@ -18,75 +18,74 @@
 package org.apache.hadoop.hdfs.server.datanode;
 
 import com.google.common.annotations.VisibleForTesting;
-
 import org.apache.hadoop.classification.InterfaceAudience;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
  * Used for injecting faults in DFSClient and DFSOutputStream tests.
- * Calls into this are a no-op in production code. 
+ * Calls into this are a no-op in production code.
  */
 @VisibleForTesting
 @InterfaceAudience.Private
 public class DataNodeFaultInjector {
-  private static DataNodeFaultInjector instance = new DataNodeFaultInjector();
 
-  public static DataNodeFaultInjector get() {
-    return instance;
-  }
+    private static DataNodeFaultInjector instance = new DataNodeFaultInjector();
 
-  public static void set(DataNodeFaultInjector injector) {
-    instance = injector;
-  }
+    public static DataNodeFaultInjector get() {
+        return instance;
+    }
 
-  public void getHdfsBlocksMetadata() {}
+    public static void set(DataNodeFaultInjector injector) {
+        instance = injector;
+    }
 
-  public void writeBlockAfterFlush() throws IOException {}
+    public void getHdfsBlocksMetadata() {
+    }
 
-  public void sendShortCircuitShmResponse() throws IOException {}
+    public void writeBlockAfterFlush() throws IOException {
+    }
 
-  public boolean dropHeartbeatPacket() {
-    return false;
-  }
+    public void sendShortCircuitShmResponse() throws IOException {
+    }
 
-  public void stopSendingPacketDownstream(final String mirrAddr)
-      throws IOException {
-  }
+    public boolean dropHeartbeatPacket() {
+        return false;
+    }
 
-  /**
-   * Used as a hook to intercept the latency of sending packet.
-   */
-  public void logDelaySendingPacketDownstream(
-      final String mirrAddr,
-      final long delayMs) throws IOException {
-  }
+    public void stopSendingPacketDownstream(final String mirrAddr) throws IOException {
+    }
 
-  public void delaySendingAckToUpstream(final String upstreamAddr)
-      throws IOException {
-  }
+    /**
+     * Used as a hook to intercept the latency of sending packet.
+     */
+    public void logDelaySendingPacketDownstream(final String mirrAddr, final long delayMs) throws IOException {
+    }
 
-  /**
-   * Used as a hook to intercept the latency of sending ack.
-   */
-  public void logDelaySendingAckToUpstream(
-      final String upstreamAddr,
-      final long delayMs)
-      throws IOException {
-  }
+    public void delaySendingAckToUpstream(final String upstreamAddr) throws IOException {
+    }
 
-  public void noRegistration() throws IOException { }
+    /**
+     * Used as a hook to intercept the latency of sending ack.
+     */
+    public void logDelaySendingAckToUpstream(final String upstreamAddr, final long delayMs) throws IOException {
+    }
 
-  public void failMirrorConnection() throws IOException { }
+    public void noRegistration() throws IOException {
+    }
 
-  public void failPipeline(ReplicaInPipelineInterface replicaInfo,
-      String mirrorAddr) throws IOException { }
+    public void failMirrorConnection() throws IOException {
+    }
 
-  public void startOfferService() throws Exception {}
+    public void failPipeline(ReplicaInPipelineInterface replicaInfo, String mirrorAddr) throws IOException {
+    }
 
-  public void endOfferService() throws Exception {}
+    public void startOfferService() throws Exception {
+    }
 
-  public void throwTooManyOpenFiles() throws FileNotFoundException {
-  }
+    public void endOfferService() throws Exception {
+    }
+
+    public void throwTooManyOpenFiles() throws FileNotFoundException {
+    }
 }

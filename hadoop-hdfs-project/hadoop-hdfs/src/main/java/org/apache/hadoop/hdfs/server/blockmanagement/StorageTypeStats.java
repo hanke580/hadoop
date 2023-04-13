@@ -15,111 +15,110 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.blockmanagement;
 
 import java.beans.ConstructorProperties;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
 /**
  * Statistics per StorageType.
- *
  */
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
 public class StorageTypeStats {
-  private long capacityTotal = 0L;
-  private long capacityUsed = 0L;
-  private long capacityNonDfsUsed = 0L;
-  private long capacityRemaining = 0L;
-  private long blockPoolUsed = 0L;
-  private int nodesInService = 0;
 
-  @ConstructorProperties({"capacityTotal", "capacityUsed", "capacityNonDfsUsed",
-      "capacityRemaining", "blockPoolUsed", "nodesInService"})
-  public StorageTypeStats(
-      long capacityTotal, long capacityUsed, long capacityNonDfsUsedUsed,
-      long capacityRemaining, long blockPoolUsed, int nodesInService) {
-    this.capacityTotal = capacityTotal;
-    this.capacityUsed = capacityUsed;
-    this.capacityNonDfsUsed = capacityNonDfsUsedUsed;
-    this.capacityRemaining = capacityRemaining;
-    this.blockPoolUsed = blockPoolUsed;
-    this.nodesInService = nodesInService;
-  }
+    private long capacityTotal = 0L;
 
-  public long getCapacityTotal() {
-    return capacityTotal;
-  }
+    private long capacityUsed = 0L;
 
-  public long getCapacityUsed() {
-    return capacityUsed;
-  }
+    private long capacityNonDfsUsed = 0L;
 
-  public long getCapacityNonDfsUsed() {
-    return capacityNonDfsUsed;
-  }
+    private long capacityRemaining = 0L;
 
-  public long getCapacityRemaining() {
-    return capacityRemaining;
-  }
+    private long blockPoolUsed = 0L;
 
-  public long getBlockPoolUsed() {
-    return blockPoolUsed;
-  }
+    private int nodesInService = 0;
 
-  public int getNodesInService() {
-    return nodesInService;
-  }
-
-  StorageTypeStats() {}
-
-  StorageTypeStats(StorageTypeStats other) {
-    capacityTotal = other.capacityTotal;
-    capacityUsed = other.capacityUsed;
-    capacityNonDfsUsed = other.capacityNonDfsUsed;
-    capacityRemaining = other.capacityRemaining;
-    blockPoolUsed = other.blockPoolUsed;
-    nodesInService = other.nodesInService;
-  }
-
-  void addStorage(final DatanodeStorageInfo info,
-      final DatanodeDescriptor node) {
-    capacityUsed += info.getDfsUsed();
-    capacityNonDfsUsed += info.getNonDfsUsed();
-    blockPoolUsed += info.getBlockPoolUsed();
-    if (node.isInService()) {
-      capacityTotal += info.getCapacity();
-      capacityRemaining += info.getRemaining();
-    } else {
-      capacityTotal += info.getDfsUsed();
+    @ConstructorProperties({ "capacityTotal", "capacityUsed", "capacityNonDfsUsed", "capacityRemaining", "blockPoolUsed", "nodesInService" })
+    public StorageTypeStats(long capacityTotal, long capacityUsed, long capacityNonDfsUsedUsed, long capacityRemaining, long blockPoolUsed, int nodesInService) {
+        this.capacityTotal = capacityTotal;
+        this.capacityUsed = capacityUsed;
+        this.capacityNonDfsUsed = capacityNonDfsUsedUsed;
+        this.capacityRemaining = capacityRemaining;
+        this.blockPoolUsed = blockPoolUsed;
+        this.nodesInService = nodesInService;
     }
-  }
 
-  void addNode(final DatanodeDescriptor node) {
-    if (node.isInService()) {
-      nodesInService++;
+    public long getCapacityTotal() {
+        return capacityTotal;
     }
-  }
 
-  void subtractStorage(final DatanodeStorageInfo info,
-      final DatanodeDescriptor node) {
-    capacityUsed -= info.getDfsUsed();
-    capacityNonDfsUsed -= info.getNonDfsUsed();
-    blockPoolUsed -= info.getBlockPoolUsed();
-    if (node.isInService()) {
-      capacityTotal -= info.getCapacity();
-      capacityRemaining -= info.getRemaining();
-    } else {
-      capacityTotal -= info.getDfsUsed();
+    public long getCapacityUsed() {
+        return capacityUsed;
     }
-  }
 
-  void subtractNode(final DatanodeDescriptor node) {
-    if (node.isInService()) {
-      nodesInService--;
+    public long getCapacityNonDfsUsed() {
+        return capacityNonDfsUsed;
     }
-  }
+
+    public long getCapacityRemaining() {
+        return capacityRemaining;
+    }
+
+    public long getBlockPoolUsed() {
+        return blockPoolUsed;
+    }
+
+    public int getNodesInService() {
+        return nodesInService;
+    }
+
+    StorageTypeStats() {
+    }
+
+    StorageTypeStats(StorageTypeStats other) {
+        capacityTotal = other.capacityTotal;
+        capacityUsed = other.capacityUsed;
+        capacityNonDfsUsed = other.capacityNonDfsUsed;
+        capacityRemaining = other.capacityRemaining;
+        blockPoolUsed = other.blockPoolUsed;
+        nodesInService = other.nodesInService;
+    }
+
+    void addStorage(final DatanodeStorageInfo info, final DatanodeDescriptor node) {
+        capacityUsed += info.getDfsUsed();
+        capacityNonDfsUsed += info.getNonDfsUsed();
+        blockPoolUsed += info.getBlockPoolUsed();
+        if (node.isInService()) {
+            capacityTotal += info.getCapacity();
+            capacityRemaining += info.getRemaining();
+        } else {
+            capacityTotal += info.getDfsUsed();
+        }
+    }
+
+    void addNode(final DatanodeDescriptor node) {
+        if (node.isInService()) {
+            nodesInService++;
+        }
+    }
+
+    void subtractStorage(final DatanodeStorageInfo info, final DatanodeDescriptor node) {
+        capacityUsed -= info.getDfsUsed();
+        capacityNonDfsUsed -= info.getNonDfsUsed();
+        blockPoolUsed -= info.getBlockPoolUsed();
+        if (node.isInService()) {
+            capacityTotal -= info.getCapacity();
+            capacityRemaining -= info.getRemaining();
+        } else {
+            capacityTotal -= info.getDfsUsed();
+        }
+    }
+
+    void subtractNode(final DatanodeDescriptor node) {
+        if (node.isInService()) {
+            nodesInService--;
+        }
+    }
 }

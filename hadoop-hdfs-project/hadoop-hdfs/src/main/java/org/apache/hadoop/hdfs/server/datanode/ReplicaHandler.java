@@ -19,7 +19,6 @@ package org.apache.hadoop.hdfs.server.datanode;
 
 import org.apache.hadoop.hdfs.server.datanode.fsdataset.FsVolumeReference;
 import org.apache.hadoop.hdfs.server.datanode.fsdataset.FsVolumeSpi;
-
 import java.io.Closeable;
 import java.io.IOException;
 
@@ -28,27 +27,28 @@ import java.io.IOException;
  * the fs volume where this replica is located.
  */
 public class ReplicaHandler implements Closeable {
-  private final ReplicaInPipelineInterface replica;
-  private final FsVolumeReference volumeReference;
 
-  public ReplicaHandler(
-      ReplicaInPipelineInterface replica, FsVolumeReference reference) {
-    this.replica = replica;
-    this.volumeReference = reference;
-  }
+    private final ReplicaInPipelineInterface replica;
 
-  @Override
-  public void close() throws IOException {
-    if (this.volumeReference != null) {
-      volumeReference.close();
+    private final FsVolumeReference volumeReference;
+
+    public ReplicaHandler(ReplicaInPipelineInterface replica, FsVolumeReference reference) {
+        this.replica = replica;
+        this.volumeReference = reference;
     }
-  }
 
-  public ReplicaInPipelineInterface getReplica() {
-    return replica;
-  }
+    @Override
+    public void close() throws IOException {
+        if (this.volumeReference != null) {
+            volumeReference.close();
+        }
+    }
 
-  public FsVolumeSpi getVolume() {
-    return volumeReference.getVolume();
-  }
+    public ReplicaInPipelineInterface getReplica() {
+        return replica;
+    }
+
+    public FsVolumeSpi getVolume() {
+        return volumeReference.getVolume();
+    }
 }

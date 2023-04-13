@@ -23,32 +23,28 @@ import org.apache.hadoop.hdfs.DFSClient;
 import org.apache.hadoop.hdfs.server.common.JspHelper;
 import org.apache.hadoop.net.NetUtils;
 import org.apache.hadoop.security.UserGroupInformation;
-
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.security.PrivilegedExceptionAction;
 
 @InterfaceAudience.Private
 public class DatanodeJspHelper {
-  private static DFSClient getDFSClient(final UserGroupInformation user,
-                                        final String addr,
-                                        final Configuration conf
-                                        ) throws IOException,
-                                                 InterruptedException {
-    return
-      user.doAs(new PrivilegedExceptionAction<DFSClient>() {
-        @Override
-        public DFSClient run() throws IOException {
-          return new DFSClient(NetUtils.createSocketAddr(addr), conf);
-        }
-      });
-  }
-  
-  /** Get DFSClient for a namenode corresponding to the BPID from a datanode */
-  public static DFSClient getDFSClient(final HttpServletRequest request,
-      final DataNode datanode, final Configuration conf,
-      final UserGroupInformation ugi) throws IOException, InterruptedException {
-    final String nnAddr = request.getParameter(JspHelper.NAMENODE_ADDRESS);
-    return getDFSClient(ugi, nnAddr, conf);
-  }
+
+    private static DFSClient getDFSClient(final UserGroupInformation user, final String addr, final Configuration conf) throws IOException, InterruptedException {
+        return user.doAs(new PrivilegedExceptionAction<DFSClient>() {
+
+            @Override
+            public DFSClient run() throws IOException {
+                return new DFSClient(NetUtils.createSocketAddr(addr), conf);
+            }
+        });
+    }
+
+    /**
+     * Get DFSClient for a namenode corresponding to the BPID from a datanode
+     */
+    public static DFSClient getDFSClient(final HttpServletRequest request, final DataNode datanode, final Configuration conf, final UserGroupInformation ugi) throws IOException, InterruptedException {
+        final String nnAddr = request.getParameter(JspHelper.NAMENODE_ADDRESS);
+        return getDFSClient(ugi, nnAddr, conf);
+    }
 }

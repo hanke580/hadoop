@@ -26,68 +26,69 @@ import io.netty.handler.codec.http.LastHttpContent;
 import org.apache.commons.logging.Log;
 import org.apache.hadoop.hdfs.DFSClient;
 import org.apache.hadoop.io.IOUtils;
-
 import java.io.IOException;
 import java.io.OutputStream;
-
 import static io.netty.handler.codec.http.HttpHeaders.Names.CONNECTION;
 import static io.netty.handler.codec.http.HttpHeaders.Values.CLOSE;
 
 class HdfsWriter extends SimpleChannelInboundHandler<HttpContent> {
-  private final DFSClient client;
-  private final OutputStream out;
-  private final DefaultHttpResponse response;
-  private static final Log LOG = WebHdfsHandler.LOG;
 
-  HdfsWriter(DFSClient client, OutputStream out, DefaultHttpResponse response) {
-    this.client = client;
-    this.out = out;
-    this.response = response;
-  }
+    private final DFSClient client;
 
-  @Override
-  public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-    ctx.flush();
-  }
+    private final OutputStream out;
 
-  @Override
-  protected void channelRead0(ChannelHandlerContext ctx, HttpContent chunk)
-    throws IOException {
-    chunk.content().readBytes(out, chunk.content().readableBytes());
-    if (chunk instanceof LastHttpContent) {
-      try {
-        releaseDfsResourcesAndThrow();
-        response.headers().set(CONNECTION, CLOSE);
-        ctx.write(response).addListener(ChannelFutureListener.CLOSE);
-      } catch (Exception cause) {
-        exceptionCaught(ctx, cause);
-      }
+    private final DefaultHttpResponse response;
+
+    private static final Log LOG = WebHdfsHandler.LOG;
+
+    HdfsWriter(DFSClient client, OutputStream out, DefaultHttpResponse response) {
+        this.client = client;
+        this.out = out;
+        this.response = response;
     }
-  }
 
-  @Override
-  public void channelInactive(ChannelHandlerContext ctx) {
-    releaseDfsResources();
-  }
-
-  @Override
-  public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-    releaseDfsResources();
-    DefaultHttpResponse resp = ExceptionHandler.exceptionCaught(cause);
-    resp.headers().set(CONNECTION, CLOSE);
-    ctx.writeAndFlush(resp).addListener(ChannelFutureListener.CLOSE);
-    if (LOG != null && LOG.isDebugEnabled()) {
-      LOG.debug("Exception in channel handler ", cause);
+    @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+        ctx.flush();
     }
-  }
 
-  private void releaseDfsResources() {
-    IOUtils.cleanup(LOG, out);
-    IOUtils.cleanup(LOG, client);
-  }
+    @Override
+    protected void channelRead0(ChannelHandlerContext ctx, HttpContent chunk) throws IOException {
+        chunk.content().readBytes(out, chunk.content().readableBytes());
+        if (chunk instanceof LastHttpContent) {
+            try {
+                releaseDfsResourcesAndThrow();
+                response.headers().set(CONNECTION, CLOSE);
+                ctx.write(response).addListener(ChannelFutureListener.CLOSE);
+            } catch (Exception cause) {
+                exceptionCaught(ctx, cause);
+            }
+        }
+    }
 
-  private void releaseDfsResourcesAndThrow() throws Exception {
-    out.close();
-    client.close();
-  }
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) {
+        releaseDfsResources();
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        releaseDfsResources();
+        DefaultHttpResponse resp = ExceptionHandler.exceptionCaught(cause);
+        resp.headers().set(CONNECTION, CLOSE);
+        ctx.writeAndFlush(resp).addListener(ChannelFutureListener.CLOSE);
+        if (LOG != null && LOG.isDebugEnabled()) {
+            LOG.debug("Exception in channel handler ", cause);
+        }
+    }
+
+    private void releaseDfsResources() {
+        IOUtils.cleanup(LOG, out);
+        IOUtils.cleanup(LOG, client);
+    }
+
+    private void releaseDfsResourcesAndThrow() throws Exception {
+        out.close();
+        client.close();
+    }
 }

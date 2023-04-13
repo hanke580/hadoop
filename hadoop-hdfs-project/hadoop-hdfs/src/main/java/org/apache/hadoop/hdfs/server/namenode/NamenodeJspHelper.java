@@ -22,11 +22,10 @@ import org.apache.hadoop.net.NodeBase;
 
 class NamenodeJspHelper {
 
-
-  /** @return a randomly chosen datanode. */
-  static DatanodeDescriptor getRandomDatanode(final NameNode namenode) {
-    return (DatanodeDescriptor)namenode.getNamesystem().getBlockManager(
-        ).getDatanodeManager().getNetworkTopology().chooseRandom(
-        NodeBase.ROOT);
-  }
+    /**
+     * @return a randomly chosen datanode.
+     */
+    static DatanodeDescriptor getRandomDatanode(final NameNode namenode) {
+        return (DatanodeDescriptor) namenode.getNamesystem().getBlockManager().getDatanodeManager().getNetworkTopology().chooseRandom(NodeBase.ROOT);
+    }
 }

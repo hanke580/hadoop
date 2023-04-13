@@ -24,25 +24,28 @@ import org.apache.hadoop.classification.InterfaceAudience;
  */
 @InterfaceAudience.Private
 public class JournalInfo {
-  private final int layoutVersion;
-  private final String clusterId;
-  private final int namespaceId;
 
-  public JournalInfo(int lv, String clusterId, int nsId) {
-    this.layoutVersion = lv;
-    this.clusterId = clusterId;
-    this.namespaceId = nsId;
-  }
+    private final int layoutVersion;
 
-  public int getLayoutVersion() {
-    return layoutVersion;
-  }
+    private final String clusterId;
 
-  public String getClusterId() {
-    return clusterId;
-  }
+    private final int namespaceId;
 
-  public int getNamespaceId() {
-    return namespaceId;
-  }
+    public JournalInfo(int lv, String clusterId, int nsId) {
+        this.layoutVersion = lv;
+        this.clusterId = clusterId;
+        this.namespaceId = nsId;
+    }
+
+    public int getLayoutVersion() {
+        return layoutVersion;
+    }
+
+    public String getClusterId() {
+        return clusterId;
+    }
+
+    public int getNamespaceId() {
+        return namespaceId;
+    }
 }

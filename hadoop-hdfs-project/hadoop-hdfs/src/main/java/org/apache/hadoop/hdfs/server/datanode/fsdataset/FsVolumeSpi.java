@@ -21,7 +21,6 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
-
 import org.apache.hadoop.fs.StorageType;
 import org.apache.hadoop.hdfs.protocol.ExtendedBlock;
 import org.apache.hadoop.hdfs.server.datanode.FileIoProvider;
@@ -31,185 +30,198 @@ import org.apache.hadoop.hdfs.server.datanode.checker.VolumeCheckResult;
 /**
  * This is an interface for the underlying volume.
  */
-public interface FsVolumeSpi
-    extends Checkable<FsVolumeSpi.VolumeCheckContext, VolumeCheckResult> {
+public interface FsVolumeSpi extends Checkable<FsVolumeSpi.VolumeCheckContext, VolumeCheckResult> {
 
-  /**
-   * Obtain a reference object that had increased 1 reference count of the
-   * volume.
-   *
-   * It is caller's responsibility to close {@link FsVolumeReference} to decrease
-   * the reference count on the volume.
-   */
-  FsVolumeReference obtainReference() throws ClosedChannelException;
-
-  /** @return the StorageUuid of the volume */
-  String getStorageID();
-
-  /** @return a list of block pools. */
-  String[] getBlockPoolList();
-
-  /** @return the available storage space in bytes. */
-  long getAvailable() throws IOException;
-
-  /** @return the base path to the volume */
-  String getBasePath();
-
-  /** @return the path to the volume */
-  String getPath(String bpid) throws IOException;
-
-  /** @return the directory for the finalized blocks in the block pool. */
-  File getFinalizedDir(String bpid) throws IOException;
-  
-  StorageType getStorageType();
-
-  /** Returns true if the volume is NOT backed by persistent storage. */
-  boolean isTransientStorage();
-
-  /**
-   * Reserve disk space for a block (RBW or Re-replicating)
-   * so a writer does not run out of space before the block is full.
-   */
-  void reserveSpaceForReplica(long bytesToReserve);
-
-  /**
-   * Release disk space previously reserved for block opened for write.
-   */
-  void releaseReservedSpace(long bytesToRelease);
-
-  /**
-   * Release reserved memory for an RBW block written to transient storage
-   * i.e. RAM.
-   * bytesToRelease will be rounded down to the OS page size since locked
-   * memory reservation must always be a multiple of the page size.
-   */
-  void releaseLockedMemory(long bytesToRelease);
-
-  /**
-   * BlockIterator will return ExtendedBlock entries from a block pool in
-   * this volume.  The entries will be returned in sorted order.<p/>
-   *
-   * BlockIterator objects themselves do not always have internal
-   * synchronization, so they can only safely be used by a single thread at a
-   * time.<p/>
-   *
-   * Closing the iterator does not save it.  You must call save to save it.
-   */
-  interface BlockIterator extends Closeable {
     /**
-     * Get the next block.<p/>
+     * Obtain a reference object that had increased 1 reference count of the
+     * volume.
      *
-     * Note that this block may be removed in between the time we list it,
-     * and the time the caller tries to use it, or it may represent a stale
-     * entry.  Callers should handle the case where the returned block no
-     * longer exists.
+     * It is caller's responsibility to close {@link FsVolumeReference} to decrease
+     * the reference count on the volume.
+     */
+    FsVolumeReference obtainReference() throws ClosedChannelException;
+
+    /**
+     * @return the StorageUuid of the volume
+     */
+    String getStorageID();
+
+    /**
+     * @return a list of block pools.
+     */
+    String[] getBlockPoolList();
+
+    /**
+     * @return the available storage space in bytes.
+     */
+    long getAvailable() throws IOException;
+
+    /**
+     * @return the base path to the volume
+     */
+    String getBasePath();
+
+    /**
+     * @return the path to the volume
+     */
+    String getPath(String bpid) throws IOException;
+
+    /**
+     * @return the directory for the finalized blocks in the block pool.
+     */
+    File getFinalizedDir(String bpid) throws IOException;
+
+    StorageType getStorageType();
+
+    /**
+     * Returns true if the volume is NOT backed by persistent storage.
+     */
+    boolean isTransientStorage();
+
+    /**
+     * Reserve disk space for a block (RBW or Re-replicating)
+     * so a writer does not run out of space before the block is full.
+     */
+    void reserveSpaceForReplica(long bytesToReserve);
+
+    /**
+     * Release disk space previously reserved for block opened for write.
+     */
+    void releaseReservedSpace(long bytesToRelease);
+
+    /**
+     * Release reserved memory for an RBW block written to transient storage
+     * i.e. RAM.
+     * bytesToRelease will be rounded down to the OS page size since locked
+     * memory reservation must always be a multiple of the page size.
+     */
+    void releaseLockedMemory(long bytesToRelease);
+
+    /**
+     * BlockIterator will return ExtendedBlock entries from a block pool in
+     * this volume.  The entries will be returned in sorted order.<p/>
      *
-     * @return               The next block, or null if there are no
-     *                         more blocks.  Null if there was an error
-     *                         determining the next block.
+     * BlockIterator objects themselves do not always have internal
+     * synchronization, so they can only safely be used by a single thread at a
+     * time.<p/>
      *
-     * @throws IOException   If there was an error getting the next block in
-     *                         this volume.  In this case, EOF will be set on
-     *                         the iterator.
+     * Closing the iterator does not save it.  You must call save to save it.
      */
-    ExtendedBlock nextBlock() throws IOException;
+    interface BlockIterator extends Closeable {
+
+        /**
+         * Get the next block.<p/>
+         *
+         * Note that this block may be removed in between the time we list it,
+         * and the time the caller tries to use it, or it may represent a stale
+         * entry.  Callers should handle the case where the returned block no
+         * longer exists.
+         *
+         * @return               The next block, or null if there are no
+         *                         more blocks.  Null if there was an error
+         *                         determining the next block.
+         *
+         * @throws IOException   If there was an error getting the next block in
+         *                         this volume.  In this case, EOF will be set on
+         *                         the iterator.
+         */
+        ExtendedBlock nextBlock() throws IOException;
+
+        /**
+         * Returns true if we got to the end of the block pool.
+         */
+        boolean atEnd();
+
+        /**
+         * Repositions the iterator at the beginning of the block pool.
+         */
+        void rewind();
+
+        /**
+         * Save this block iterator to the underlying volume.
+         * Any existing saved block iterator with this name will be overwritten.
+         * maxStalenessMs will not be saved.
+         *
+         * @throws IOException   If there was an error when saving the block
+         *                         iterator.
+         */
+        void save() throws IOException;
+
+        /**
+         * Set the maximum staleness of entries that we will return.<p/>
+         *
+         * A maximum staleness of 0 means we will never return stale entries; a
+         * larger value will allow us to reduce resource consumption in exchange
+         * for returning more potentially stale entries.  Even with staleness set
+         * to 0, consumers of this API must handle race conditions where block
+         * disappear before they can be processed.
+         */
+        void setMaxStalenessMs(long maxStalenessMs);
+
+        /**
+         * Get the wall-clock time, measured in milliseconds since the Epoch,
+         * when this iterator was created.
+         */
+        long getIterStartMs();
+
+        /**
+         * Get the wall-clock time, measured in milliseconds since the Epoch,
+         * when this iterator was last saved.  Returns iterStartMs if the
+         * iterator was never saved.
+         */
+        long getLastSavedMs();
+
+        /**
+         * Get the id of the block pool which this iterator traverses.
+         */
+        String getBlockPoolId();
+    }
 
     /**
-     * Returns true if we got to the end of the block pool.
-     */
-    boolean atEnd();
-
-    /**
-     * Repositions the iterator at the beginning of the block pool.
-     */
-    void rewind();
-
-    /**
-     * Save this block iterator to the underlying volume.
-     * Any existing saved block iterator with this name will be overwritten.
-     * maxStalenessMs will not be saved.
+     * Create a new block iterator.  It will start at the beginning of the
+     * block set.
      *
-     * @throws IOException   If there was an error when saving the block
-     *                         iterator.
-     */
-    void save() throws IOException;
-
-    /**
-     * Set the maximum staleness of entries that we will return.<p/>
+     * @param bpid             The block pool id to iterate over.
+     * @param name             The name of the block iterator to create.
      *
-     * A maximum staleness of 0 means we will never return stale entries; a
-     * larger value will allow us to reduce resource consumption in exchange
-     * for returning more potentially stale entries.  Even with staleness set
-     * to 0, consumers of this API must handle race conditions where block
-     * disappear before they can be processed.
+     * @return                 The new block iterator.
      */
-    void setMaxStalenessMs(long maxStalenessMs);
+    BlockIterator newBlockIterator(String bpid, String name);
 
     /**
-     * Get the wall-clock time, measured in milliseconds since the Epoch,
-     * when this iterator was created.
+     * Load a saved block iterator.
+     *
+     * @param bpid             The block pool id to iterate over.
+     * @param name             The name of the block iterator to load.
+     *
+     * @return                 The saved block iterator.
+     * @throws IOException     If there was an IO error loading the saved
+     *                           block iterator.
      */
-    long getIterStartMs();
+    BlockIterator loadBlockIterator(String bpid, String name) throws IOException;
 
     /**
-     * Get the wall-clock time, measured in milliseconds since the Epoch,
-     * when this iterator was last saved.  Returns iterStartMs if the
-     * iterator was never saved.
+     * Get the FSDatasetSpi which this volume is a part of.
      */
-    long getLastSavedMs();
+    FsDatasetSpi getDataset();
 
     /**
-     * Get the id of the block pool which this iterator traverses.
+     * Load last partial chunk checksum from checksum file.
+     * Need to be called with FsDataset lock acquired.
+     * @param blockFile
+     * @param metaFile
+     * @return the last partial checksum
+     * @throws IOException
      */
-    String getBlockPoolId();
-  }
+    byte[] loadLastPartialChunkChecksum(File blockFile, File metaFile) throws IOException;
 
-  /**
-   * Create a new block iterator.  It will start at the beginning of the
-   * block set.
-   *
-   * @param bpid             The block pool id to iterate over.
-   * @param name             The name of the block iterator to create.
-   *
-   * @return                 The new block iterator.
-   */
-  BlockIterator newBlockIterator(String bpid, String name);
+    /**
+     * Context for the {@link #check} call.
+     */
+    class VolumeCheckContext {
+    }
 
-  /**
-   * Load a saved block iterator.
-   *
-   * @param bpid             The block pool id to iterate over.
-   * @param name             The name of the block iterator to load.
-   *
-   * @return                 The saved block iterator.
-   * @throws IOException     If there was an IO error loading the saved
-   *                           block iterator.
-   */
-  BlockIterator loadBlockIterator(String bpid, String name) throws IOException;
+    FileIoProvider getFileIoProvider();
 
-  /**
-   * Get the FSDatasetSpi which this volume is a part of.
-   */
-  FsDatasetSpi getDataset();
-
-  /**
-   * Load last partial chunk checksum from checksum file.
-   * Need to be called with FsDataset lock acquired.
-   * @param blockFile
-   * @param metaFile
-   * @return the last partial checksum
-   * @throws IOException
-   */
-  byte[] loadLastPartialChunkChecksum(File blockFile, File metaFile)
-      throws IOException;
-
-  /**
-   * Context for the {@link #check} call.
-   */
-  class VolumeCheckContext {
-  }
-
-  FileIoProvider getFileIoProvider();
-
-  DataNodeVolumeMetrics getMetrics();
+    DataNodeVolumeMetrics getMetrics();
 }

@@ -25,83 +25,83 @@ import org.apache.hadoop.hdfs.protocol.Block;
  */
 @InterfaceAudience.Private
 public class BlockInfoContiguous extends BlockInfo {
-  public static final BlockInfoContiguous[] EMPTY_ARRAY = {};
 
-  public BlockInfoContiguous(short size) {
-    super(size);
-  }
+    public static final BlockInfoContiguous[] EMPTY_ARRAY = {};
 
-  public BlockInfoContiguous(Block blk, short size) {
-    super(blk, size);
-  }
-
-  /**
-   * Copy construction.
-   * @param from BlockInfoContiguous to copy from.
-   */
-  protected BlockInfoContiguous(BlockInfoContiguous from) {
-    super(from);
-  }
-
-  /**
-   * Ensure that there is enough  space to include num more triplets.
-   * @return first free triplet index.
-   */
-  private int ensureCapacity(int num) {
-    assert this.triplets != null : "BlockInfo is not initialized";
-    int last = numNodes();
-    if (triplets.length >= (last+num)*3) {
-      return last;
+    public BlockInfoContiguous(short size) {
+        super(size);
     }
-    /* Not enough space left. Create a new array. Should normally
+
+    public BlockInfoContiguous(Block blk, short size) {
+        super(blk, size);
+    }
+
+    /**
+     * Copy construction.
+     * @param from BlockInfoContiguous to copy from.
+     */
+    protected BlockInfoContiguous(BlockInfoContiguous from) {
+        super(from);
+    }
+
+    /**
+     * Ensure that there is enough  space to include num more triplets.
+     * @return first free triplet index.
+     */
+    private int ensureCapacity(int num) {
+        assert this.triplets != null : "BlockInfo is not initialized";
+        int last = numNodes();
+        if (triplets.length >= (last + num) * 3) {
+            return last;
+        }
+        /* Not enough space left. Create a new array. Should normally
      * happen only when replication is manually increased by the user. */
-    Object[] old = triplets;
-    triplets = new Object[(last+num)*3];
-    System.arraycopy(old, 0, triplets, 0, last * 3);
-    return last;
-  }
-
-  @Override
-  boolean addStorage(DatanodeStorageInfo storage) {
-    // find the last null node
-    int lastNode = ensureCapacity(1);
-    setStorageInfo(lastNode, storage);
-    setNext(lastNode, null);
-    setPrevious(lastNode, null);
-    return true;
-  }
-
-  @Override
-  boolean removeStorage(DatanodeStorageInfo storage) {
-    int dnIndex = findStorageInfo(storage);
-    if (dnIndex < 0) { // the node is not found
-      return false;
+        Object[] old = triplets;
+        triplets = new Object[(last + num) * 3];
+        System.arraycopy(old, 0, triplets, 0, last * 3);
+        return last;
     }
-    assert getPrevious(dnIndex) == null && getNext(dnIndex) == null :
-        "Block is still in the list and must be removed first.";
-    // find the last not null node
-    int lastNode = numNodes()-1;
-    // replace current node triplet by the lastNode one
-    setStorageInfo(dnIndex, getStorageInfo(lastNode));
-    setNext(dnIndex, getNext(lastNode));
-    setPrevious(dnIndex, getPrevious(lastNode));
-    // set the last triplet to null
-    setStorageInfo(lastNode, null);
-    setNext(lastNode, null);
-    setPrevious(lastNode, null);
-    return true;
-  }
 
-  @Override
-  public int numNodes() {
-    assert this.triplets != null : "BlockInfo is not initialized";
-    assert triplets.length % 3 == 0 : "Malformed BlockInfo";
-
-    for (int idx = getCapacity()-1; idx >= 0; idx--) {
-      if (getDatanode(idx) != null) {
-        return idx + 1;
-      }
+    @Override
+    boolean addStorage(DatanodeStorageInfo storage) {
+        // find the last null node
+        int lastNode = ensureCapacity(1);
+        setStorageInfo(lastNode, storage);
+        setNext(lastNode, null);
+        setPrevious(lastNode, null);
+        return true;
     }
-    return 0;
-  }
+
+    @Override
+    boolean removeStorage(DatanodeStorageInfo storage) {
+        int dnIndex = findStorageInfo(storage);
+        if (dnIndex < 0) {
+            // the node is not found
+            return false;
+        }
+        assert getPrevious(dnIndex) == null && getNext(dnIndex) == null : "Block is still in the list and must be removed first.";
+        // find the last not null node
+        int lastNode = numNodes() - 1;
+        // replace current node triplet by the lastNode one
+        setStorageInfo(dnIndex, getStorageInfo(lastNode));
+        setNext(dnIndex, getNext(lastNode));
+        setPrevious(dnIndex, getPrevious(lastNode));
+        // set the last triplet to null
+        setStorageInfo(lastNode, null);
+        setNext(lastNode, null);
+        setPrevious(lastNode, null);
+        return true;
+    }
+
+    @Override
+    public int numNodes() {
+        assert this.triplets != null : "BlockInfo is not initialized";
+        assert triplets.length % 3 == 0 : "Malformed BlockInfo";
+        for (int idx = getCapacity() - 1; idx >= 0; idx--) {
+            if (getDatanode(idx) != null) {
+                return idx + 1;
+            }
+        }
+        return 0;
+    }
 }
