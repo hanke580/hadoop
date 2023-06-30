@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.protocolPB;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -27,14 +26,8 @@ import org.apache.hadoop.security.KerberosInfo;
 /**
  * Protocol used by a DataNode to send lifeline messages to a NameNode.
  */
-@KerberosInfo(
-    serverPrincipal = DFSConfigKeys.DFS_NAMENODE_KERBEROS_PRINCIPAL_KEY,
-    clientPrincipal = DFSConfigKeys.DFS_DATANODE_KERBEROS_PRINCIPAL_KEY)
-@ProtocolInfo(
-    protocolName =
-        "org.apache.hadoop.hdfs.server.protocol.DatanodeLifelineProtocol",
-    protocolVersion = 1)
+@KerberosInfo(serverPrincipal = DFSConfigKeys.DFS_NAMENODE_KERBEROS_PRINCIPAL_KEY, clientPrincipal = DFSConfigKeys.DFS_DATANODE_KERBEROS_PRINCIPAL_KEY)
+@ProtocolInfo(protocolName = "org.apache.hadoop.hdfs.server.protocol.DatanodeLifelineProtocol", protocolVersion = 1)
 @InterfaceAudience.Private
-public interface DatanodeLifelineProtocolPB extends
-    DatanodeLifelineProtocolService.BlockingInterface {
+public interface DatanodeLifelineProtocolPB extends DatanodeLifelineProtocolService.BlockingInterface {
 }

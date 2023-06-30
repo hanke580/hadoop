@@ -35,13 +35,11 @@ import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.util.Time;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import static org.apache.hadoop.hdfs.server.namenode.top.window.RollingWindowManager.TopWindow;
 
 /**
@@ -66,125 +64,111 @@ import static org.apache.hadoop.hdfs.server.namenode.top.window.RollingWindowMan
  */
 @InterfaceAudience.Private
 public class TopMetrics implements MetricsSource {
-  public static final Logger LOG = LoggerFactory.getLogger(TopMetrics.class);
-  public static final String TOPMETRICS_METRICS_SOURCE_NAME =
-      "NNTopUserOpCounts";
-  private final boolean isMetricsSourceEnabled;
 
-  private static void logConf(Configuration conf) {
-    LOG.info("NNTop conf: " + DFSConfigKeys.NNTOP_BUCKETS_PER_WINDOW_KEY +
-        " = " +  conf.get(DFSConfigKeys.NNTOP_BUCKETS_PER_WINDOW_KEY));
-    LOG.info("NNTop conf: " + DFSConfigKeys.NNTOP_NUM_USERS_KEY +
-        " = " +  conf.get(DFSConfigKeys.NNTOP_NUM_USERS_KEY));
-    LOG.info("NNTop conf: " + DFSConfigKeys.NNTOP_WINDOWS_MINUTES_KEY +
-        " = " +  conf.get(DFSConfigKeys.NNTOP_WINDOWS_MINUTES_KEY));
-  }
+    public static final Logger LOG = LoggerFactory.getLogger(TopMetrics.class);
 
-  /**
-   * A map from reporting periods to WindowManager. Thread-safety is provided by
-   * the fact that the mapping is not changed after construction.
-   */
-  final Map<Integer, RollingWindowManager> rollingWindowManagers =
-      new HashMap<Integer, RollingWindowManager>();
+    public static final String TOPMETRICS_METRICS_SOURCE_NAME = "NNTopUserOpCounts";
 
-  public TopMetrics(Configuration conf, int[] reportingPeriods) {
-    logConf(conf);
-    for (int i = 0; i < reportingPeriods.length; i++) {
-      rollingWindowManagers.put(reportingPeriods[i], new RollingWindowManager(
-          conf, reportingPeriods[i]));
-    }
-    isMetricsSourceEnabled = conf.getBoolean(DFSConfigKeys.NNTOP_ENABLED_KEY,
-        DFSConfigKeys.NNTOP_ENABLED_DEFAULT);
-  }
+    private final boolean isMetricsSourceEnabled;
 
-  /**
-   * Get a list of the current TopWindow statistics, one TopWindow per tracked
-   * time interval.
-   */
-  public List<TopWindow> getTopWindows() {
-    long monoTime = Time.monotonicNow();
-    List<TopWindow> windows = Lists.newArrayListWithCapacity
-        (rollingWindowManagers.size());
-    for (Entry<Integer, RollingWindowManager> entry : rollingWindowManagers
-        .entrySet()) {
-      TopWindow window = entry.getValue().snapshot(monoTime);
-      windows.add(window);
-    }
-    return windows;
-  }
-
-  /**
-   * Pick the same information that DefaultAuditLogger does before writing to a
-   * log file. This is to be consistent when {@link TopMetrics} is charged with
-   * data read back from log files instead of being invoked directly by the
-   * FsNamesystem
-   * @param succeeded
-   * @param userName
-   * @param addr
-   * @param cmd
-   * @param src
-   * @param dst
-   * @param status
-   */
-  public void report(boolean succeeded, String userName, InetAddress addr,
-      String cmd, String src, String dst, FileStatus status) {
-    // currently nntop only makes use of the username and the command
-    report(userName, cmd);
-  }
-
-  public void report(String userName, String cmd) {
-    long currTime = Time.monotonicNow();
-    report(currTime, userName, cmd);
-  }
-
-  public void report(long currTime, String userName, String cmd) {
-    LOG.debug("a metric is reported: cmd: {} user: {}", cmd, userName);
-    userName = UserGroupInformation.trimLoginMethod(userName);
-    for (RollingWindowManager rollingWindowManager : rollingWindowManagers
-        .values()) {
-      rollingWindowManager.recordMetric(currTime, cmd, userName, 1);
-    }
-  }
-
-  /**
-   * Flatten out the top window metrics into
-   * {@link org.apache.hadoop.metrics2.MetricsRecord}s for consumption by
-   * external metrics systems. Each metrics record added corresponds to the
-   * reporting period a.k.a window length of the configured rolling windows.
-   * @param collector
-   * @param all
-   */
-  @Override
-  public void getMetrics(MetricsCollector collector, boolean all) {
-    if (!isMetricsSourceEnabled) {
-      return;
+    private static void logConf(Configuration conf) {
+        LOG.info("NNTop conf: " + DFSConfigKeys.NNTOP_BUCKETS_PER_WINDOW_KEY + " = " + conf.get(DFSConfigKeys.NNTOP_BUCKETS_PER_WINDOW_KEY));
+        LOG.info("NNTop conf: " + DFSConfigKeys.NNTOP_NUM_USERS_KEY + " = " + conf.get(DFSConfigKeys.NNTOP_NUM_USERS_KEY));
+        LOG.info("NNTop conf: " + DFSConfigKeys.NNTOP_WINDOWS_MINUTES_KEY + " = " + conf.get(DFSConfigKeys.NNTOP_WINDOWS_MINUTES_KEY));
     }
 
-    for (final TopWindow window : getTopWindows()) {
-      MetricsRecordBuilder rb = collector.addRecord(buildOpRecordName(window))
-          .setContext("dfs");
-      for (final Op op: window.getOps()) {
-        rb.addCounter(buildOpTotalCountMetricsInfo(op), op.getTotalCount());
-        for (User user : op.getTopUsers()) {
-          rb.addCounter(buildOpRecordMetricsInfo(op, user), user.getCount());
+    /**
+     * A map from reporting periods to WindowManager. Thread-safety is provided by
+     * the fact that the mapping is not changed after construction.
+     */
+    final Map<Integer, RollingWindowManager> rollingWindowManagers = new HashMap<Integer, RollingWindowManager>();
+
+    public TopMetrics(Configuration conf, int[] reportingPeriods) {
+        logConf(conf);
+        for (int i = 0; i < reportingPeriods.length; i++) {
+            rollingWindowManagers.put(reportingPeriods[i], new RollingWindowManager(conf, reportingPeriods[i]));
         }
-      }
+        isMetricsSourceEnabled = conf.getBoolean(DFSConfigKeys.NNTOP_ENABLED_KEY, DFSConfigKeys.NNTOP_ENABLED_DEFAULT);
     }
-  }
 
-  private String buildOpRecordName(TopWindow window) {
-    return TOPMETRICS_METRICS_SOURCE_NAME + ".windowMs="
-      + window.getWindowLenMs();
-  }
+    /**
+     * Get a list of the current TopWindow statistics, one TopWindow per tracked
+     * time interval.
+     */
+    public List<TopWindow> getTopWindows() {
+        long monoTime = Time.monotonicNow();
+        List<TopWindow> windows = Lists.newArrayListWithCapacity(rollingWindowManagers.size());
+        for (Entry<Integer, RollingWindowManager> entry : rollingWindowManagers.entrySet()) {
+            TopWindow window = entry.getValue().snapshot(monoTime);
+            windows.add(window);
+        }
+        return windows;
+    }
 
-  private MetricsInfo buildOpTotalCountMetricsInfo(Op op) {
-    return Interns.info("op=" + StringUtils.deleteWhitespace(op.getOpType())
-      + ".TotalCount", "Total operation count");
-  }
+    /**
+     * Pick the same information that DefaultAuditLogger does before writing to a
+     * log file. This is to be consistent when {@link TopMetrics} is charged with
+     * data read back from log files instead of being invoked directly by the
+     * FsNamesystem
+     * @param succeeded
+     * @param userName
+     * @param addr
+     * @param cmd
+     * @param src
+     * @param dst
+     * @param status
+     */
+    public void report(boolean succeeded, String userName, InetAddress addr, String cmd, String src, String dst, FileStatus status) {
+        // currently nntop only makes use of the username and the command
+        report(userName, cmd);
+    }
 
-  private MetricsInfo buildOpRecordMetricsInfo(Op op, User user) {
-    return Interns.info("op=" + StringUtils.deleteWhitespace(op.getOpType())
-      + ".user=" + user.getUser()
-      + ".count", "Total operations performed by user");
-  }
+    public void report(String userName, String cmd) {
+        long currTime = Time.monotonicNow();
+        report(currTime, userName, cmd);
+    }
+
+    public void report(long currTime, String userName, String cmd) {
+        LOG.debug("a metric is reported: cmd: {} user: {}", cmd, userName);
+        userName = UserGroupInformation.trimLoginMethod(userName);
+        for (RollingWindowManager rollingWindowManager : rollingWindowManagers.values()) {
+            rollingWindowManager.recordMetric(currTime, cmd, userName, 1);
+        }
+    }
+
+    /**
+     * Flatten out the top window metrics into
+     * {@link org.apache.hadoop.metrics2.MetricsRecord}s for consumption by
+     * external metrics systems. Each metrics record added corresponds to the
+     * reporting period a.k.a window length of the configured rolling windows.
+     * @param collector
+     * @param all
+     */
+    @Override
+    public void getMetrics(MetricsCollector collector, boolean all) {
+        if (!isMetricsSourceEnabled) {
+            return;
+        }
+        for (final TopWindow window : getTopWindows()) {
+            MetricsRecordBuilder rb = collector.addRecord(buildOpRecordName(window)).setContext("dfs");
+            for (final Op op : window.getOps()) {
+                rb.addCounter(buildOpTotalCountMetricsInfo(op), op.getTotalCount());
+                for (User user : op.getTopUsers()) {
+                    rb.addCounter(buildOpRecordMetricsInfo(op, user), user.getCount());
+                }
+            }
+        }
+    }
+
+    private String buildOpRecordName(TopWindow window) {
+        return TOPMETRICS_METRICS_SOURCE_NAME + ".windowMs=" + window.getWindowLenMs();
+    }
+
+    private MetricsInfo buildOpTotalCountMetricsInfo(Op op) {
+        return Interns.info("op=" + StringUtils.deleteWhitespace(op.getOpType()) + ".TotalCount", "Total operation count");
+    }
+
+    private MetricsInfo buildOpRecordMetricsInfo(Op op, User user) {
+        return Interns.info("op=" + StringUtils.deleteWhitespace(op.getOpType()) + ".user=" + user.getUser() + ".count", "Total operations performed by user");
+    }
 }

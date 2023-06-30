@@ -25,13 +25,13 @@ import org.apache.hadoop.classification.InterfaceAudience;
 @InterfaceAudience.Private
 public class NameNodeFormatException extends IOException {
 
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  public NameNodeFormatException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    public NameNodeFormatException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-  public NameNodeFormatException(String message) {
-    super(message);
-  }
+    public NameNodeFormatException(String message) {
+        super(message);
+    }
 }

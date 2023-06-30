@@ -15,11 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.namenode.sps;
 
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.hdfs.server.protocol.BlockStorageMovementCommand.BlockMovingInfo;
@@ -33,11 +31,10 @@ import org.apache.hadoop.hdfs.server.protocol.BlockStorageMovementCommand.BlockM
 @InterfaceStability.Evolving
 public interface BlockMoveTaskHandler {
 
-  /**
-   * This is an interface method to handle the move tasks. BlockMovingInfo must
-   * contain the required info to move the block, that source location,
-   * destination location and storage types.
-   */
-  void submitMoveTask(BlockMovingInfo blkMovingInfo) throws IOException;
-
+    /**
+     * This is an interface method to handle the move tasks. BlockMovingInfo must
+     * contain the required info to move the block, that source location,
+     * destination location and storage types.
+     */
+    void submitMoveTask(BlockMovingInfo blkMovingInfo) throws IOException;
 }

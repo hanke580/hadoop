@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.protocol;
 
 import org.apache.hadoop.hdfs.protocol.BlockListAsLongs;
@@ -24,19 +23,21 @@ import org.apache.hadoop.hdfs.protocol.BlockListAsLongs;
  * Block report for a Datanode storage
  */
 public class StorageBlockReport {
-  private final DatanodeStorage storage;
-  private final BlockListAsLongs blocks;
-  
-  public StorageBlockReport(DatanodeStorage storage, BlockListAsLongs blocks) {
-    this.storage = storage;
-    this.blocks = blocks;
-  }
 
-  public DatanodeStorage getStorage() {
-    return storage;
-  }
+    private final DatanodeStorage storage;
 
-  public BlockListAsLongs getBlocks() {
-    return blocks;
-  }
+    private final BlockListAsLongs blocks;
+
+    public StorageBlockReport(DatanodeStorage storage, BlockListAsLongs blocks) {
+        this.storage = storage;
+        this.blocks = blocks;
+    }
+
+    public DatanodeStorage getStorage() {
+        return storage;
+    }
+
+    public BlockListAsLongs getBlocks() {
+        return blocks;
+    }
 }

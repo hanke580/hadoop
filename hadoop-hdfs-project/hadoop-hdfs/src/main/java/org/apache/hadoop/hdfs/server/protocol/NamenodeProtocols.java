@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.protocol;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -28,18 +27,9 @@ import org.apache.hadoop.ipc.RefreshCallQueueProtocol;
 import org.apache.hadoop.ipc.GenericRefreshProtocol;
 import org.apache.hadoop.tools.GetUserMappingsProtocol;
 
-/** The full set of RPC methods implemented by the Namenode.  */
+/**
+ * The full set of RPC methods implemented by the Namenode.
+ */
 @InterfaceAudience.Private
-public interface NamenodeProtocols
-  extends ClientProtocol,
-          DatanodeProtocol,
-          DatanodeLifelineProtocol,
-          NamenodeProtocol,
-          RefreshAuthorizationPolicyProtocol,
-          ReconfigurationProtocol,
-          RefreshUserMappingsProtocol,
-          RefreshCallQueueProtocol,
-          GenericRefreshProtocol,
-          GetUserMappingsProtocol,
-          HAServiceProtocol {
+public interface NamenodeProtocols extends ClientProtocol, DatanodeProtocol, DatanodeLifelineProtocol, NamenodeProtocol, RefreshAuthorizationPolicyProtocol, ReconfigurationProtocol, RefreshUserMappingsProtocol, RefreshCallQueueProtocol, GenericRefreshProtocol, GetUserMappingsProtocol, HAServiceProtocol {
 }

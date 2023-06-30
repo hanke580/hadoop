@@ -28,6 +28,5 @@ import org.apache.hadoop.hdfs.protocol.Block;
 @InterfaceStability.Evolving
 public interface BlockAlias {
 
-  Block getBlock();
-
+    Block getBlock();
 }

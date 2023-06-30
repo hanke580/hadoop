@@ -14,7 +14,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package org.apache.hadoop.hdfs.server.diskbalancer.planner;
 
 import org.apache.hadoop.hdfs.server.diskbalancer.datamodel.DiskBalancerVolume;
@@ -23,87 +22,86 @@ import org.apache.hadoop.hdfs.server.diskbalancer.datamodel.DiskBalancerVolume;
  * A step in the plan.
  */
 public interface Step {
-  /**
-   * Return the number of bytes to move.
-   *
-   * @return bytes
-   */
-  long getBytesToMove();
 
-  /**
-   * Gets the destination volume.
-   *
-   * @return - volume
-   */
-  DiskBalancerVolume getDestinationVolume();
+    /**
+     * Return the number of bytes to move.
+     *
+     * @return bytes
+     */
+    long getBytesToMove();
 
-  /**
-   * Gets the IdealStorage.
-   *
-   * @return idealStorage
-   */
-  double getIdealStorage();
+    /**
+     * Gets the destination volume.
+     *
+     * @return - volume
+     */
+    DiskBalancerVolume getDestinationVolume();
 
-  /**
-   * Gets Source Volume.
-   *
-   * @return -- Source Volume
-   */
-  DiskBalancerVolume getSourceVolume();
+    /**
+     * Gets the IdealStorage.
+     *
+     * @return idealStorage
+     */
+    double getIdealStorage();
 
-  /**
-   * Gets a volume Set ID.
-   *
-   * @return String
-   */
-  String getVolumeSetID();
+    /**
+     * Gets Source Volume.
+     *
+     * @return -- Source Volume
+     */
+    DiskBalancerVolume getSourceVolume();
 
-  /**
-   * Returns a String representation of the Step Size.
-   *
-   * @return String
-   */
-  String getSizeString(long size);
+    /**
+     * Gets a volume Set ID.
+     *
+     * @return String
+     */
+    String getVolumeSetID();
 
-  /**
-   * Returns maximum number of disk erros tolerated.
-   * @return long.
-   */
-  long getMaxDiskErrors();
+    /**
+     * Returns a String representation of the Step Size.
+     *
+     * @return String
+     */
+    String getSizeString(long size);
 
-  /**
-   * Returns tolerance percentage, the good enough value
-   * when we move data from one to disk to another.
-   * @return long.
-   */
-  long getTolerancePercent();
+    /**
+     * Returns maximum number of disk erros tolerated.
+     * @return long.
+     */
+    long getMaxDiskErrors();
 
-  /**
-   * Returns max disk bandwidth that disk balancer will use.
-   * Expressed in MB/sec. For example, a value like 10
-   * indicates that disk balancer will only move 10 MB / sec
-   * while it is running.
-   * @return long.
-   */
-  long getBandwidth();
+    /**
+     * Returns tolerance percentage, the good enough value
+     * when we move data from one to disk to another.
+     * @return long.
+     */
+    long getTolerancePercent();
 
-  /**
-   * Sets Tolerance percent on a specific step.
-   * @param tolerancePercent - tolerance in percentage.
-   */
-  void setTolerancePercent(long tolerancePercent);
+    /**
+     * Returns max disk bandwidth that disk balancer will use.
+     * Expressed in MB/sec. For example, a value like 10
+     * indicates that disk balancer will only move 10 MB / sec
+     * while it is running.
+     * @return long.
+     */
+    long getBandwidth();
 
-  /**
-   * Set Bandwidth on a specific step.
-   * @param bandwidth - in MB/s
-   */
-  void setBandwidth(long bandwidth);
+    /**
+     * Sets Tolerance percent on a specific step.
+     * @param tolerancePercent - tolerance in percentage.
+     */
+    void setTolerancePercent(long tolerancePercent);
 
-  /**
-   * Set maximum errors to tolerate before disk balancer step fails.
-   * @param maxDiskErrors - error count.
-   */
-  void setMaxDiskErrors(long maxDiskErrors);
+    /**
+     * Set Bandwidth on a specific step.
+     * @param bandwidth - in MB/s
+     */
+    void setBandwidth(long bandwidth);
 
-
+    /**
+     * Set maximum errors to tolerate before disk balancer step fails.
+     * @param maxDiskErrors - error count.
+     */
+    void setMaxDiskErrors(long maxDiskErrors);
 }

@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.hdfs.protocol.Block;
@@ -36,283 +35,274 @@ import org.apache.hadoop.util.LightWeightResizableGSet;
  * It provides a general interface for meta information of a replica.
  */
 @InterfaceAudience.Private
-abstract public class ReplicaInfo extends Block
-    implements Replica, LightWeightResizableGSet.LinkedElement {
+abstract public class ReplicaInfo extends Block implements Replica, LightWeightResizableGSet.LinkedElement {
 
-  /** For implementing {@link LightWeightResizableGSet.LinkedElement}. */
-  private LightWeightResizableGSet.LinkedElement next;
+    /**
+     * For implementing {@link LightWeightResizableGSet.LinkedElement}.
+     */
+    private LightWeightResizableGSet.LinkedElement next;
 
-  /** volume where the replica belongs. */
-  private FsVolumeSpi volume;
+    /**
+     * volume where the replica belongs.
+     */
+    private FsVolumeSpi volume;
 
-  /** This is used by some tests and FsDatasetUtil#computeChecksum. */
-  private static final FileIoProvider DEFAULT_FILE_IO_PROVIDER =
-      new FileIoProvider(null, null);
+    /**
+     * This is used by some tests and FsDatasetUtil#computeChecksum.
+     */
+    private static final FileIoProvider DEFAULT_FILE_IO_PROVIDER = new FileIoProvider(null, null);
 
-  /**
-   * Constructor.
-   * @param block a block
-   * @param vol volume where replica is located
-   */
-  ReplicaInfo(Block block, FsVolumeSpi vol) {
-    this(vol, block.getBlockId(), block.getNumBytes(),
-        block.getGenerationStamp());
-  }
+    /**
+     * Constructor.
+     * @param block a block
+     * @param vol volume where replica is located
+     */
+    ReplicaInfo(Block block, FsVolumeSpi vol) {
+        this(vol, block.getBlockId(), block.getNumBytes(), block.getGenerationStamp());
+    }
 
-  /**
-  * Constructor
-  * @param vol volume where replica is located
-  * @param blockId block id
-  * @param len replica length
-  * @param genStamp replica generation stamp
-  */
-  ReplicaInfo(FsVolumeSpi vol, long blockId, long len, long genStamp) {
-    super(blockId, len, genStamp);
-    this.volume = vol;
-  }
-  
-  /**
-   * Copy constructor.
-   * @param from where to copy from
-   */
-  ReplicaInfo(ReplicaInfo from) {
-    this(from, from.getVolume());
-  }
+    /**
+     * Constructor
+     * @param vol volume where replica is located
+     * @param blockId block id
+     * @param len replica length
+     * @param genStamp replica generation stamp
+     */
+    ReplicaInfo(FsVolumeSpi vol, long blockId, long len, long genStamp) {
+        super(blockId, len, genStamp);
+        this.volume = vol;
+    }
 
-  /**
-   * @return the volume where this replica is located on disk
-   */
-  public FsVolumeSpi getVolume() {
-    return volume;
-  }
+    /**
+     * Copy constructor.
+     * @param from where to copy from
+     */
+    ReplicaInfo(ReplicaInfo from) {
+        this(from, from.getVolume());
+    }
 
-  /**
-   * Get the {@link FileIoProvider} for disk IO operations.
-   */
-  public FileIoProvider getFileIoProvider() {
-    // In tests and when invoked via FsDatasetUtil#computeChecksum, the
-    // target volume for this replica may be unknown and hence null.
-    // Use the DEFAULT_FILE_IO_PROVIDER with no-op hooks.
-    return (volume != null) ? volume.getFileIoProvider()
-        : DEFAULT_FILE_IO_PROVIDER;
-  }
+    /**
+     * @return the volume where this replica is located on disk
+     */
+    public FsVolumeSpi getVolume() {
+        return volume;
+    }
 
-  /**
-   * Set the volume where this replica is located on disk.
-   */
-  void setVolume(FsVolumeSpi vol) {
-    this.volume = vol;
-  }
+    /**
+     * Get the {@link FileIoProvider} for disk IO operations.
+     */
+    public FileIoProvider getFileIoProvider() {
+        // In tests and when invoked via FsDatasetUtil#computeChecksum, the
+        // target volume for this replica may be unknown and hence null.
+        // Use the DEFAULT_FILE_IO_PROVIDER with no-op hooks.
+        return (volume != null) ? volume.getFileIoProvider() : DEFAULT_FILE_IO_PROVIDER;
+    }
 
-  /**
-   * Get the storageUuid of the volume that stores this replica.
-   */
-  @Override
-  public String getStorageUuid() {
-    return volume.getStorageID();
-  }
+    /**
+     * Set the volume where this replica is located on disk.
+     */
+    void setVolume(FsVolumeSpi vol) {
+        this.volume = vol;
+    }
 
-  /**
-   * Number of bytes reserved for this replica on disk.
-   */
-  public long getBytesReserved() {
-    return 0;
-  }
+    /**
+     * Get the storageUuid of the volume that stores this replica.
+     */
+    @Override
+    public String getStorageUuid() {
+        return volume.getStorageID();
+    }
 
-  /**
-   * Get the {@code URI} for where the data of this replica is stored.
-   * @return {@code URI} for the location of replica data.
-   */
-  abstract public URI getBlockURI();
+    /**
+     * Number of bytes reserved for this replica on disk.
+     */
+    public long getBytesReserved() {
+        return 0;
+    }
 
-  /**
-   * Returns an {@link InputStream} to the replica's data.
-   * @param seekOffset the offset at which the read is started from.
-   * @return the {@link InputStream} to read the replica data.
-   * @throws IOException if an error occurs in opening a stream to the data.
-   */
-  abstract public InputStream getDataInputStream(long seekOffset)
-      throws IOException;
+    /**
+     * Get the {@code URI} for where the data of this replica is stored.
+     * @return {@code URI} for the location of replica data.
+     */
+    abstract public URI getBlockURI();
 
-  /**
-   * Returns an {@link OutputStream} to the replica's data.
-   * @param append indicates if the block should be opened for append.
-   * @return the {@link OutputStream} to write to the replica.
-   * @throws IOException if an error occurs in creating an {@link OutputStream}.
-   */
-  abstract public OutputStream getDataOutputStream(boolean append)
-      throws IOException;
+    /**
+     * Returns an {@link InputStream} to the replica's data.
+     * @param seekOffset the offset at which the read is started from.
+     * @return the {@link InputStream} to read the replica data.
+     * @throws IOException if an error occurs in opening a stream to the data.
+     */
+    abstract public InputStream getDataInputStream(long seekOffset) throws IOException;
 
-  /**
-   * @return true if the replica's data exists.
-   */
-  abstract public boolean blockDataExists();
+    /**
+     * Returns an {@link OutputStream} to the replica's data.
+     * @param append indicates if the block should be opened for append.
+     * @return the {@link OutputStream} to write to the replica.
+     * @throws IOException if an error occurs in creating an {@link OutputStream}.
+     */
+    abstract public OutputStream getDataOutputStream(boolean append) throws IOException;
 
-  /**
-   * Used to deletes the replica's block data.
-   *
-   * @return true if the replica's data is successfully deleted.
-   */
-  abstract public boolean deleteBlockData();
+    /**
+     * @return true if the replica's data exists.
+     */
+    abstract public boolean blockDataExists();
 
-  /**
-   * @return the length of the block on storage.
-   */
-  abstract public long getBlockDataLength();
+    /**
+     * Used to deletes the replica's block data.
+     *
+     * @return true if the replica's data is successfully deleted.
+     */
+    abstract public boolean deleteBlockData();
 
-  /**
-   * Get the {@code URI} for where the metadata of this replica is stored.
-   *
-   * @return {@code URI} for the location of replica metadata.
-   */
-  abstract public URI getMetadataURI();
+    /**
+     * @return the length of the block on storage.
+     */
+    abstract public long getBlockDataLength();
 
-  /**
-   * Returns an {@link InputStream} to the replica's metadata.
-   * @param offset the offset at which the read is started from.
-   * @return the {@link LengthInputStream} to read the replica metadata.
-   * @throws IOException
-   */
-  abstract public LengthInputStream getMetadataInputStream(long offset)
-      throws IOException;
+    /**
+     * Get the {@code URI} for where the metadata of this replica is stored.
+     *
+     * @return {@code URI} for the location of replica metadata.
+     */
+    abstract public URI getMetadataURI();
 
-  /**
-   * Returns an {@link OutputStream} to the replica's metadata.
-   * @param append indicates if the block metadata should be opened for append.
-   * @return the {@link OutputStream} to write to the replica's metadata.
-   * @throws IOException if an error occurs in creating an {@link OutputStream}.
-   */
-  abstract public OutputStream getMetadataOutputStream(boolean append)
-      throws IOException;
+    /**
+     * Returns an {@link InputStream} to the replica's metadata.
+     * @param offset the offset at which the read is started from.
+     * @return the {@link LengthInputStream} to read the replica metadata.
+     * @throws IOException
+     */
+    abstract public LengthInputStream getMetadataInputStream(long offset) throws IOException;
 
-  /**
-   * @return true if the replica's metadata exists.
-   */
-  abstract public boolean metadataExists();
+    /**
+     * Returns an {@link OutputStream} to the replica's metadata.
+     * @param append indicates if the block metadata should be opened for append.
+     * @return the {@link OutputStream} to write to the replica's metadata.
+     * @throws IOException if an error occurs in creating an {@link OutputStream}.
+     */
+    abstract public OutputStream getMetadataOutputStream(boolean append) throws IOException;
 
-  /**
-   * Used to deletes the replica's metadata.
-   *
-   * @return true if the replica's metadata is successfully deleted.
-   */
-  abstract public boolean deleteMetadata();
+    /**
+     * @return true if the replica's metadata exists.
+     */
+    abstract public boolean metadataExists();
 
-  /**
-   * @return the length of the metadata on storage.
-   */
-  abstract public long getMetadataLength();
+    /**
+     * Used to deletes the replica's metadata.
+     *
+     * @return true if the replica's metadata is successfully deleted.
+     */
+    abstract public boolean deleteMetadata();
 
-  /**
-   * Rename the metadata {@link URI} to that referenced by {@code destURI}.
-   *
-   * @param destURI the target {@link URI}.
-   * @return true if the rename is successful.
-   * @throws IOException if an exception occurs in the rename.
-   */
-  abstract public boolean renameMeta(URI destURI) throws IOException;
+    /**
+     * @return the length of the metadata on storage.
+     */
+    abstract public long getMetadataLength();
 
-  /**
-   * Rename the data {@link URI} to that referenced by {@code destURI}.
-   *
-   * @param destURI the target {@link URI}.
-   * @return true if the rename is successful.
-   * @throws IOException if an exception occurs in the rename.
-   */
-  abstract public boolean renameData(URI destURI) throws IOException;
+    /**
+     * Rename the metadata {@link URI} to that referenced by {@code destURI}.
+     *
+     * @param destURI the target {@link URI}.
+     * @return true if the rename is successful.
+     * @throws IOException if an exception occurs in the rename.
+     */
+    abstract public boolean renameMeta(URI destURI) throws IOException;
 
-  /**
-   * Update this replica with the {@link StorageLocation} found.
-   * @param replicaLocation the {@link StorageLocation} found for this replica.
-   */
-  abstract public void updateWithReplica(StorageLocation replicaLocation);
+    /**
+     * Rename the data {@link URI} to that referenced by {@code destURI}.
+     *
+     * @param destURI the target {@link URI}.
+     * @return true if the rename is successful.
+     * @throws IOException if an exception occurs in the rename.
+     */
+    abstract public boolean renameData(URI destURI) throws IOException;
 
-  /**
-   * Check whether the block was pinned.
-   * @param localFS the local filesystem to use.
-   * @return true if the block is pinned.
-   * @throws IOException
-   */
-  abstract public boolean getPinning(LocalFileSystem localFS)
-      throws IOException;
+    /**
+     * Update this replica with the {@link StorageLocation} found.
+     * @param replicaLocation the {@link StorageLocation} found for this replica.
+     */
+    abstract public void updateWithReplica(StorageLocation replicaLocation);
 
-  /**
-   * Set a block to be pinned on this datanode so that it cannot be moved
-   * by Balancer/Mover.
-   *
-   * @param localFS the local filesystem to use.
-   * @throws IOException if there is an exception in the pinning.
-   */
-  abstract public void setPinning(LocalFileSystem localFS) throws IOException;
+    /**
+     * Check whether the block was pinned.
+     * @param localFS the local filesystem to use.
+     * @return true if the block is pinned.
+     * @throws IOException
+     */
+    abstract public boolean getPinning(LocalFileSystem localFS) throws IOException;
 
-  /**
-   * Bump a replica's generation stamp to a new one.
-   * Its on-disk meta file name is renamed to be the new one too.
-   *
-   * @param newGS new generation stamp
-   * @throws IOException if the change fails
-   */
-  abstract public void bumpReplicaGS(long newGS) throws IOException;
+    /**
+     * Set a block to be pinned on this datanode so that it cannot be moved
+     * by Balancer/Mover.
+     *
+     * @param localFS the local filesystem to use.
+     * @throws IOException if there is an exception in the pinning.
+     */
+    abstract public void setPinning(LocalFileSystem localFS) throws IOException;
 
-  abstract public ReplicaInfo getOriginalReplica();
+    /**
+     * Bump a replica's generation stamp to a new one.
+     * Its on-disk meta file name is renamed to be the new one too.
+     *
+     * @param newGS new generation stamp
+     * @throws IOException if the change fails
+     */
+    abstract public void bumpReplicaGS(long newGS) throws IOException;
 
-  /**
-   * Get the recovery id.
-   * @return the generation stamp that the replica will be bumped to
-   */
-  abstract public long getRecoveryID();
+    abstract public ReplicaInfo getOriginalReplica();
 
-  /**
-   * Set the recovery id.
-   * @param recoveryId the new recoveryId
-   */
-  abstract public void setRecoveryID(long recoveryId);
+    /**
+     * Get the recovery id.
+     * @return the generation stamp that the replica will be bumped to
+     */
+    abstract public long getRecoveryID();
 
-  abstract public boolean breakHardLinksIfNeeded() throws IOException;
+    /**
+     * Set the recovery id.
+     * @param recoveryId the new recoveryId
+     */
+    abstract public void setRecoveryID(long recoveryId);
 
-  abstract public ReplicaRecoveryInfo createInfo();
+    abstract public boolean breakHardLinksIfNeeded() throws IOException;
 
-  abstract public int compareWith(ScanInfo info);
+    abstract public ReplicaRecoveryInfo createInfo();
 
-  abstract public void truncateBlock(long newLength) throws IOException;
+    abstract public int compareWith(ScanInfo info);
 
-  abstract public void copyMetadata(URI destination) throws IOException;
+    abstract public void truncateBlock(long newLength) throws IOException;
 
-  abstract public void copyBlockdata(URI destination) throws IOException;
+    abstract public void copyMetadata(URI destination) throws IOException;
 
-  /**
-   * Number of bytes originally reserved for this replica. The actual
-   * reservation is adjusted as data is written to disk.
-   *
-   * @return the number of bytes originally reserved for this replica.
-   */
-  public long getOriginalBytesReserved() {
-    return 0;
-  }
+    abstract public void copyBlockdata(URI destination) throws IOException;
 
-  @Override  //Object
-  public String toString() {
-    return getClass().getSimpleName()
-        + ", " + super.toString()
-        + ", " + getState()
-        + "\n  getNumBytes()     = " + getNumBytes()
-        + "\n  getBytesOnDisk()  = " + getBytesOnDisk()
-        + "\n  getVisibleLength()= " + getVisibleLength()
-        + "\n  getVolume()       = " + getVolume()
-        + "\n  getBlockURI()     = " + getBlockURI();
-  }
+    /**
+     * Number of bytes originally reserved for this replica. The actual
+     * reservation is adjusted as data is written to disk.
+     *
+     * @return the number of bytes originally reserved for this replica.
+     */
+    public long getOriginalBytesReserved() {
+        return 0;
+    }
 
-  @Override
-  public boolean isOnTransientStorage() {
-    return volume.isTransientStorage();
-  }
+    //Object
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + ", " + super.toString() + ", " + getState() + "\n  getNumBytes()     = " + getNumBytes() + "\n  getBytesOnDisk()  = " + getBytesOnDisk() + "\n  getVisibleLength()= " + getVisibleLength() + "\n  getVolume()       = " + getVolume() + "\n  getBlockURI()     = " + getBlockURI();
+    }
 
-  @Override
-  public LightWeightResizableGSet.LinkedElement getNext() {
-    return next;
-  }
+    @Override
+    public boolean isOnTransientStorage() {
+        return volume.isTransientStorage();
+    }
 
-  @Override
-  public void setNext(LightWeightResizableGSet.LinkedElement next) {
-    this.next = next;
-  }
+    @Override
+    public LightWeightResizableGSet.LinkedElement getNext() {
+        return next;
+    }
+
+    @Override
+    public void setNext(LightWeightResizableGSet.LinkedElement next) {
+        this.next = next;
+    }
 }

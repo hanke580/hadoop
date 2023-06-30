@@ -15,12 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * Datanode support for running disk checks.
  */
-@InterfaceAudience.LimitedPrivate({"HDFS"})
+@InterfaceAudience.LimitedPrivate({ "HDFS" })
 @InterfaceStability.Evolving
 package org.apache.hadoop.hdfs.server.datanode.checker;
+
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

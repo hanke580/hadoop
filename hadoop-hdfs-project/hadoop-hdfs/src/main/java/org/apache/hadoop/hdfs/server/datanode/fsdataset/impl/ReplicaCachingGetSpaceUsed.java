@@ -26,7 +26,6 @@ import org.apache.hadoop.hdfs.server.datanode.fsdataset.FsDatasetSpi;
 import org.apache.hadoop.util.Time;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Objects;
@@ -49,61 +48,52 @@ import java.util.Objects;
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
 public class ReplicaCachingGetSpaceUsed extends FSCachingGetSpaceUsed {
-  static final Logger LOG =
-      LoggerFactory.getLogger(ReplicaCachingGetSpaceUsed.class);
 
-  private static final long DEEP_COPY_REPLICA_THRESHOLD_MS = 50;
-  private static final long REPLICA_CACHING_GET_SPACE_USED_THRESHOLD_MS = 1000;
-  private final FsVolumeImpl volume;
-  private final String bpid;
+    static final Logger LOG = LoggerFactory.getLogger(ReplicaCachingGetSpaceUsed.class);
 
-  public ReplicaCachingGetSpaceUsed(Builder builder) throws IOException {
-    super(builder);
-    setShouldFirstRefresh(false);
-    volume = builder.getVolume();
-    bpid = builder.getBpid();
-  }
+    private static final long DEEP_COPY_REPLICA_THRESHOLD_MS = 50;
 
-  @Override
-  protected void refresh() {
-    long start = Time.monotonicNow();
-    long dfsUsed = 0;
-    long count = 0;
+    private static final long REPLICA_CACHING_GET_SPACE_USED_THRESHOLD_MS = 1000;
 
-    FsDatasetSpi fsDataset = volume.getDataset();
-    try {
-      Collection<ReplicaInfo> replicaInfos =
-          (Collection<ReplicaInfo>) fsDataset.deepCopyReplica(bpid);
-      long cost = Time.monotonicNow() - start;
-      if (cost > DEEP_COPY_REPLICA_THRESHOLD_MS) {
-        LOG.debug(
-            "Copy replica infos, blockPoolId: {}, replicas size: {}, "
-                + "duration: {}ms",
-            bpid, replicaInfos.size(), Time.monotonicNow() - start);
-      }
+    private final FsVolumeImpl volume;
 
-      if (CollectionUtils.isNotEmpty(replicaInfos)) {
-        for (ReplicaInfo replicaInfo : replicaInfos) {
-          if (Objects.equals(replicaInfo.getVolume().getStorageID(),
-              volume.getStorageID())) {
-            dfsUsed += replicaInfo.getBytesOnDisk();
-            dfsUsed += replicaInfo.getMetadataLength();
-            count++;
-          }
-        }
-      }
+    private final String bpid;
 
-      this.used.set(dfsUsed);
-      cost = Time.monotonicNow() - start;
-      if (cost > REPLICA_CACHING_GET_SPACE_USED_THRESHOLD_MS) {
-        LOG.debug(
-            "Refresh dfs used, bpid: {}, replicas size: {}, dfsUsed: {} "
-                + "on volume: {}, duration: {}ms",
-            bpid, count, used, volume.getStorageID(),
-            Time.monotonicNow() - start);
-      }
-    } catch (Exception e) {
-      LOG.error("ReplicaCachingGetSpaceUsed refresh error", e);
+    public ReplicaCachingGetSpaceUsed(Builder builder) throws IOException {
+        super(builder);
+        setShouldFirstRefresh(false);
+        volume = builder.getVolume();
+        bpid = builder.getBpid();
     }
-  }
+
+    @Override
+    protected void refresh() {
+        long start = Time.monotonicNow();
+        long dfsUsed = 0;
+        long count = 0;
+        FsDatasetSpi fsDataset = volume.getDataset();
+        try {
+            Collection<ReplicaInfo> replicaInfos = (Collection<ReplicaInfo>) fsDataset.deepCopyReplica(bpid);
+            long cost = Time.monotonicNow() - start;
+            if (cost > DEEP_COPY_REPLICA_THRESHOLD_MS) {
+                LOG.debug("Copy replica infos, blockPoolId: {}, replicas size: {}, " + "duration: {}ms", bpid, replicaInfos.size(), Time.monotonicNow() - start);
+            }
+            if (CollectionUtils.isNotEmpty(replicaInfos)) {
+                for (ReplicaInfo replicaInfo : replicaInfos) {
+                    if (Objects.equals(replicaInfo.getVolume().getStorageID(), volume.getStorageID())) {
+                        dfsUsed += replicaInfo.getBytesOnDisk();
+                        dfsUsed += replicaInfo.getMetadataLength();
+                        count++;
+                    }
+                }
+            }
+            this.used.set(dfsUsed);
+            cost = Time.monotonicNow() - start;
+            if (cost > REPLICA_CACHING_GET_SPACE_USED_THRESHOLD_MS) {
+                LOG.debug("Refresh dfs used, bpid: {}, replicas size: {}, dfsUsed: {} " + "on volume: {}, duration: {}ms", bpid, count, used, volume.getStorageID(), Time.monotonicNow() - start);
+            }
+        } catch (Exception e) {
+            LOG.error("ReplicaCachingGetSpaceUsed refresh error", e);
+        }
+    }
 }

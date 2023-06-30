@@ -23,13 +23,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import org.apache.hadoop.thirdparty.com.google.common.base.Objects;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.DFSUtil;
 import org.apache.hadoop.hdfs.HAUtil;
 import org.apache.hadoop.hdfs.server.namenode.NameNode;
-
 import org.apache.hadoop.thirdparty.com.google.common.base.Preconditions;
 
 /**
@@ -37,97 +35,93 @@ import org.apache.hadoop.thirdparty.com.google.common.base.Preconditions;
  */
 public class RemoteNameNodeInfo {
 
-  public static List<RemoteNameNodeInfo> getRemoteNameNodes(Configuration conf) throws IOException {
-    String nsId = DFSUtil.getNamenodeNameServiceId(conf);
-    return getRemoteNameNodes(conf, nsId);
-  }
-
-  public static List<RemoteNameNodeInfo> getRemoteNameNodes(Configuration conf, String nsId)
-      throws IOException {
-    // there is only a single NN configured (and no federation) so we don't have any more NNs
-    if (nsId == null) {
-      return Collections.emptyList();
+    public static List<RemoteNameNodeInfo> getRemoteNameNodes(Configuration conf) throws IOException {
+        String nsId = DFSUtil.getNamenodeNameServiceId(conf);
+        return getRemoteNameNodes(conf, nsId);
     }
-    List<Configuration> otherNodes = HAUtil.getConfForOtherNodes(conf);
-    List<RemoteNameNodeInfo> nns = new ArrayList<RemoteNameNodeInfo>();
 
-    for (Configuration otherNode : otherNodes) {
-      String otherNNId = HAUtil.getNameNodeId(otherNode, nsId);
-      // don't do any validation here as in some cases, it can be overwritten later
-      InetSocketAddress otherIpcAddr = NameNode.getServiceAddress(otherNode, true);
-
-
-      final String scheme = DFSUtil.getHttpClientScheme(conf);
-      URL otherHttpAddr = DFSUtil.getInfoServerWithDefaultHost(otherIpcAddr.getHostName(),
-          otherNode, scheme).toURL();
-
-      nns.add(new RemoteNameNodeInfo(otherNode, otherNNId, otherIpcAddr, otherHttpAddr));
+    public static List<RemoteNameNodeInfo> getRemoteNameNodes(Configuration conf, String nsId) throws IOException {
+        // there is only a single NN configured (and no federation) so we don't have any more NNs
+        if (nsId == null) {
+            return Collections.emptyList();
+        }
+        List<Configuration> otherNodes = HAUtil.getConfForOtherNodes(conf);
+        List<RemoteNameNodeInfo> nns = new ArrayList<RemoteNameNodeInfo>();
+        for (Configuration otherNode : otherNodes) {
+            String otherNNId = HAUtil.getNameNodeId(otherNode, nsId);
+            // don't do any validation here as in some cases, it can be overwritten later
+            InetSocketAddress otherIpcAddr = NameNode.getServiceAddress(otherNode, true);
+            final String scheme = DFSUtil.getHttpClientScheme(conf);
+            URL otherHttpAddr = DFSUtil.getInfoServerWithDefaultHost(otherIpcAddr.getHostName(), otherNode, scheme).toURL();
+            nns.add(new RemoteNameNodeInfo(otherNode, otherNNId, otherIpcAddr, otherHttpAddr));
+        }
+        return nns;
     }
-    return nns;
-  }
 
-  private final Configuration conf;
-  private final String nnId;
-  private InetSocketAddress ipcAddress;
-  private final URL httpAddress;
+    private final Configuration conf;
 
-  private RemoteNameNodeInfo(Configuration conf, String nnId, InetSocketAddress ipcAddress,
-      URL httpAddress) {
-    this.conf = conf;
-    this.nnId = nnId;
-    this.ipcAddress = ipcAddress;
-    this.httpAddress = httpAddress;
-  }
+    private final String nnId;
 
-  public InetSocketAddress getIpcAddress() {
-    return this.ipcAddress;
-  }
+    private InetSocketAddress ipcAddress;
 
-  public String getNameNodeID() {
-    return this.nnId;
-  }
+    private final URL httpAddress;
 
-  public URL getHttpAddress() {
-    return this.httpAddress;
-  }
+    private RemoteNameNodeInfo(Configuration conf, String nnId, InetSocketAddress ipcAddress, URL httpAddress) {
+        this.conf = conf;
+        this.nnId = nnId;
+        this.ipcAddress = ipcAddress;
+        this.httpAddress = httpAddress;
+    }
 
-  public Configuration getConfiguration() {
-    return this.conf;
-  }
+    public InetSocketAddress getIpcAddress() {
+        return this.ipcAddress;
+    }
 
-  public void setIpcAddress(InetSocketAddress ipc) {
-    this.ipcAddress = ipc;
-  }
+    public String getNameNodeID() {
+        return this.nnId;
+    }
 
-  @Override
-  public String toString() {
-    return "RemoteNameNodeInfo [nnId=" + nnId + ", ipcAddress=" + ipcAddress
-        + ", httpAddress=" + httpAddress + "]";
-  }
+    public URL getHttpAddress() {
+        return this.httpAddress;
+    }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    public Configuration getConfiguration() {
+        return this.conf;
+    }
 
-    RemoteNameNodeInfo that = (RemoteNameNodeInfo) o;
+    public void setIpcAddress(InetSocketAddress ipc) {
+        this.ipcAddress = ipc;
+    }
 
-    if (!nnId.equals(that.nnId)) return false;
-    if (!ipcAddress.equals(that.ipcAddress)) return false;
-    // convert to the standard strings since URL.equals does address resolution, which is a
-    // blocking call and a a FindBugs issue.
-    String httpString = httpAddress.toString();
-    String thatHttpString  = that.httpAddress.toString();
-    return httpString.equals(thatHttpString);
+    @Override
+    public String toString() {
+        return "RemoteNameNodeInfo [nnId=" + nnId + ", ipcAddress=" + ipcAddress + ", httpAddress=" + httpAddress + "]";
+    }
 
-  }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        RemoteNameNodeInfo that = (RemoteNameNodeInfo) o;
+        if (!nnId.equals(that.nnId))
+            return false;
+        if (!ipcAddress.equals(that.ipcAddress))
+            return false;
+        // convert to the standard strings since URL.equals does address resolution, which is a
+        // blocking call and a a FindBugs issue.
+        String httpString = httpAddress.toString();
+        String thatHttpString = that.httpAddress.toString();
+        return httpString.equals(thatHttpString);
+    }
 
-  @Override
-  public int hashCode() {
-    int result = nnId.hashCode();
-    result = 31 * result + ipcAddress.hashCode();
-    // toString rather than hashCode b/c Url.hashCode is a blocking call.
-    result = 31 * result + httpAddress.toString().hashCode();
-    return result;
-  }
+    @Override
+    public int hashCode() {
+        int result = nnId.hashCode();
+        result = 31 * result + ipcAddress.hashCode();
+        // toString rather than hashCode b/c Url.hashCode is a blocking call.
+        result = 31 * result + httpAddress.toString().hashCode();
+        return result;
+    }
 }

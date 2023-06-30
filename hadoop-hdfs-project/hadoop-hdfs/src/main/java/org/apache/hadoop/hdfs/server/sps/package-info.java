@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * This package provides a mechanism for satisfying the storage policy of a
  * path.
@@ -26,3 +25,4 @@ package org.apache.hadoop.hdfs.server.sps;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

@@ -14,7 +14,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package org.apache.hadoop.hdfs.server.diskbalancer.planner;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -27,232 +26,230 @@ import org.apache.hadoop.util.StringUtils;
  * So we will avoid serializing them into JSON.
  */
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-/**
+public class /**
  * Move step is a step that planner can execute that will move data from one
  * volume to another.
  */
-public class MoveStep implements Step {
-  private DiskBalancerVolume sourceVolume;
-  private DiskBalancerVolume destinationVolume;
-  private double idealStorage;
-  private long bytesToMove;
-  private String volumeSetID;
+MoveStep implements Step {
 
-  private long maxDiskErrors;
-  private long tolerancePercent;
-  private long bandwidth;
+    private DiskBalancerVolume sourceVolume;
 
-  /**
-   * Constructs a MoveStep for the volume set.
-   *
-   * @param sourceVolume      - Source Disk
-   * @param idealStorage      - Ideal Storage Value for this disk set
-   * @param destinationVolume - Destination dis
-   * @param bytesToMove       - number of bytes to move
-   * @param volumeSetID       - a diskBalancer generated id.
-   */
-  public MoveStep(DiskBalancerVolume sourceVolume, double idealStorage,
-                  DiskBalancerVolume destinationVolume, long bytesToMove,
-                  String volumeSetID) {
-    this.destinationVolume = destinationVolume;
-    this.idealStorage = idealStorage;
-    this.sourceVolume = sourceVolume;
-    this.bytesToMove = bytesToMove;
-    this.volumeSetID = volumeSetID;
+    private DiskBalancerVolume destinationVolume;
 
-  }
+    private double idealStorage;
 
-  /**
-   * Empty Constructor for JSON serialization.
-   */
-  public MoveStep() {
-  }
+    private long bytesToMove;
 
-  /**
-   * Returns number of bytes to move.
-   *
-   * @return - long
-   */
-  @Override
-  public long getBytesToMove() {
-    return bytesToMove;
-  }
+    private String volumeSetID;
 
-  /**
-   * Gets the destination volume.
-   *
-   * @return - volume
-   */
-  @Override
-  public DiskBalancerVolume getDestinationVolume() {
-    return destinationVolume;
-  }
+    private long maxDiskErrors;
 
-  /**
-   * Gets the IdealStorage.
-   *
-   * @return float
-   */
-  @Override
-  public double getIdealStorage() {
-    return idealStorage;
-  }
+    private long tolerancePercent;
 
-  /**
-   * Gets Source Volume.
-   *
-   * @return -- Source Volume
-   */
+    private long bandwidth;
 
-  @Override
-  public DiskBalancerVolume getSourceVolume() {
-    return sourceVolume;
-  }
+    /**
+     * Constructs a MoveStep for the volume set.
+     *
+     * @param sourceVolume      - Source Disk
+     * @param idealStorage      - Ideal Storage Value for this disk set
+     * @param destinationVolume - Destination dis
+     * @param bytesToMove       - number of bytes to move
+     * @param volumeSetID       - a diskBalancer generated id.
+     */
+    public MoveStep(DiskBalancerVolume sourceVolume, double idealStorage, DiskBalancerVolume destinationVolume, long bytesToMove, String volumeSetID) {
+        this.destinationVolume = destinationVolume;
+        this.idealStorage = idealStorage;
+        this.sourceVolume = sourceVolume;
+        this.bytesToMove = bytesToMove;
+        this.volumeSetID = volumeSetID;
+    }
 
-  /**
-   * Gets a volume Set ID.
-   *
-   * @return String
-   */
-  @Override
-  public String getVolumeSetID() {
-    return volumeSetID;
-  }
+    /**
+     * Empty Constructor for JSON serialization.
+     */
+    public MoveStep() {
+    }
 
-  /**
-   * Set source volume.
-   *
-   * @param sourceVolume - volume
-   */
-  public void setSourceVolume(DiskBalancerVolume sourceVolume) {
-    this.sourceVolume = sourceVolume;
-  }
+    /**
+     * Returns number of bytes to move.
+     *
+     * @return - long
+     */
+    @Override
+    public long getBytesToMove() {
+        return bytesToMove;
+    }
 
-  /**
-   * Sets destination volume.
-   *
-   * @param destinationVolume - volume
-   */
-  public void setDestinationVolume(DiskBalancerVolume destinationVolume) {
-    this.destinationVolume = destinationVolume;
-  }
+    /**
+     * Gets the destination volume.
+     *
+     * @return - volume
+     */
+    @Override
+    public DiskBalancerVolume getDestinationVolume() {
+        return destinationVolume;
+    }
 
-  /**
-   * Sets Ideal Storage.
-   *
-   * @param idealStorage - ideal Storage
-   */
-  public void setIdealStorage(double idealStorage) {
-    this.idealStorage = idealStorage;
-  }
+    /**
+     * Gets the IdealStorage.
+     *
+     * @return float
+     */
+    @Override
+    public double getIdealStorage() {
+        return idealStorage;
+    }
 
-  /**
-   * Sets bytes to move.
-   *
-   * @param bytesToMove - number of bytes
-   */
-  public void setBytesToMove(long bytesToMove) {
-    this.bytesToMove = bytesToMove;
-  }
+    /**
+     * Gets Source Volume.
+     *
+     * @return -- Source Volume
+     */
+    @Override
+    public DiskBalancerVolume getSourceVolume() {
+        return sourceVolume;
+    }
 
-  /**
-   * Sets volume id.
-   *
-   * @param volumeSetID - volume ID
-   */
-  public void setVolumeSetID(String volumeSetID) {
-    this.volumeSetID = volumeSetID;
-  }
+    /**
+     * Gets a volume Set ID.
+     *
+     * @return String
+     */
+    @Override
+    public String getVolumeSetID() {
+        return volumeSetID;
+    }
 
-  /**
-   * Returns a string representation of the object.
-   *
-   * @return a string representation of the object.
-   */
-  @Override
-  public String toString() {
-    return String.format("%s\t %s\t %s\t %s%n",
-        this.getSourceVolume().getPath(),
-        this.getDestinationVolume().getPath(),
-        getSizeString(this.getBytesToMove()),
-        this.getDestinationVolume().getStorageType());
+    /**
+     * Set source volume.
+     *
+     * @param sourceVolume - volume
+     */
+    public void setSourceVolume(DiskBalancerVolume sourceVolume) {
+        this.sourceVolume = sourceVolume;
+    }
 
-  }
+    /**
+     * Sets destination volume.
+     *
+     * @param destinationVolume - volume
+     */
+    public void setDestinationVolume(DiskBalancerVolume destinationVolume) {
+        this.destinationVolume = destinationVolume;
+    }
 
-  /**
-   * Returns human readable move sizes.
-   *
-   * @param size - bytes being moved.
-   * @return String
-   */
-  @Override
-  public String getSizeString(long size) {
-    return StringUtils.TraditionalBinaryPrefix.long2String(size, "", 1);
-  }
+    /**
+     * Sets Ideal Storage.
+     *
+     * @param idealStorage - ideal Storage
+     */
+    public void setIdealStorage(double idealStorage) {
+        this.idealStorage = idealStorage;
+    }
 
-  /**
-   * Gets Maximum numbers of errors to be tolerated before this
-   * move operation is aborted.
-   * @return  long.
-   */
-  @Override
-  public long getMaxDiskErrors() {
-    return maxDiskErrors;
-  }
+    /**
+     * Sets bytes to move.
+     *
+     * @param bytesToMove - number of bytes
+     */
+    public void setBytesToMove(long bytesToMove) {
+        this.bytesToMove = bytesToMove;
+    }
 
-  /**
-   * Sets the maximum numbers of Errors to be tolerated before this
-   * step is aborted.
-   * @param maxDiskErrors - long
-   */
-  @Override
-  public void setMaxDiskErrors(long maxDiskErrors) {
-    this.maxDiskErrors = maxDiskErrors;
-  }
+    /**
+     * Sets volume id.
+     *
+     * @param volumeSetID - volume ID
+     */
+    public void setVolumeSetID(String volumeSetID) {
+        this.volumeSetID = volumeSetID;
+    }
 
-  /**
-   * Tolerance Percentage indicates when a move operation is considered good
-   * enough. This is a percentage of deviation from ideal that is considered
-   * fine.
-   *
-   * For example : if the ideal amount on each disk was 1 TB and the
-   * tolerance was 10%, then getting to 900 GB on the destination disk is
-   * considerd good enough.
-   *
-   * @return tolerance percentage.
-   */
-  @Override
-  public long getTolerancePercent() {
-    return tolerancePercent;
-  }
+    /**
+     * Returns a string representation of the object.
+     *
+     * @return a string representation of the object.
+     */
+    @Override
+    public String toString() {
+        return String.format("%s\t %s\t %s\t %s%n", this.getSourceVolume().getPath(), this.getDestinationVolume().getPath(), getSizeString(this.getBytesToMove()), this.getDestinationVolume().getStorageType());
+    }
 
-  /**
-   * Sets the tolerance percentage.
-   * @param tolerancePercent  - long
-   */
-  @Override
-  public void setTolerancePercent(long tolerancePercent) {
-    this.tolerancePercent = tolerancePercent;
-  }
+    /**
+     * Returns human readable move sizes.
+     *
+     * @param size - bytes being moved.
+     * @return String
+     */
+    @Override
+    public String getSizeString(long size) {
+        return StringUtils.TraditionalBinaryPrefix.long2String(size, "", 1);
+    }
 
-  /**
-   * Gets the disk Bandwidth. That is the MB/Sec to copied. We will max out
-   * on this amount of throughput. This is useful to prevent too much I/O on
-   * datanode while data node is in use.
-   * @return  long.
-   */
-  @Override
-  public long getBandwidth() {
-    return bandwidth;
-  }
+    /**
+     * Gets Maximum numbers of errors to be tolerated before this
+     * move operation is aborted.
+     * @return  long.
+     */
+    @Override
+    public long getMaxDiskErrors() {
+        return maxDiskErrors;
+    }
 
-  /**
-   * Sets the maximum disk bandwidth per sec to use for this step.
-   * @param bandwidth  - Long, MB / Sec of data to be moved between
-   *                   source and destinatin volume.
-   */
-  @Override
-  public void setBandwidth(long bandwidth) {
-    this.bandwidth = bandwidth;
-  }
+    /**
+     * Sets the maximum numbers of Errors to be tolerated before this
+     * step is aborted.
+     * @param maxDiskErrors - long
+     */
+    @Override
+    public void setMaxDiskErrors(long maxDiskErrors) {
+        this.maxDiskErrors = maxDiskErrors;
+    }
+
+    /**
+     * Tolerance Percentage indicates when a move operation is considered good
+     * enough. This is a percentage of deviation from ideal that is considered
+     * fine.
+     *
+     * For example : if the ideal amount on each disk was 1 TB and the
+     * tolerance was 10%, then getting to 900 GB on the destination disk is
+     * considerd good enough.
+     *
+     * @return tolerance percentage.
+     */
+    @Override
+    public long getTolerancePercent() {
+        return tolerancePercent;
+    }
+
+    /**
+     * Sets the tolerance percentage.
+     * @param tolerancePercent  - long
+     */
+    @Override
+    public void setTolerancePercent(long tolerancePercent) {
+        this.tolerancePercent = tolerancePercent;
+    }
+
+    /**
+     * Gets the disk Bandwidth. That is the MB/Sec to copied. We will max out
+     * on this amount of throughput. This is useful to prevent too much I/O on
+     * datanode while data node is in use.
+     * @return  long.
+     */
+    @Override
+    public long getBandwidth() {
+        return bandwidth;
+    }
+
+    /**
+     * Sets the maximum disk bandwidth per sec to use for this step.
+     * @param bandwidth  - Long, MB / Sec of data to be moved between
+     *                   source and destinatin volume.
+     */
+    @Override
+    public void setBandwidth(long bandwidth) {
+        this.bandwidth = bandwidth;
+    }
 }

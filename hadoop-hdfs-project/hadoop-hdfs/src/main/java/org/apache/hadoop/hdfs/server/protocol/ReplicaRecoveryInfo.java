@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.protocol;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -29,30 +28,30 @@ import org.apache.hadoop.hdfs.server.common.HdfsServerConstants.ReplicaState;
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
 public class ReplicaRecoveryInfo extends Block {
-  private final ReplicaState originalState;
 
-  public ReplicaRecoveryInfo(long blockId, long diskLen, long gs, ReplicaState rState) {
-    set(blockId, diskLen, gs);
-    originalState = rState;
-  }
+    private final ReplicaState originalState;
 
-  public ReplicaState getOriginalReplicaState() {
-    return originalState;
-  }
+    public ReplicaRecoveryInfo(long blockId, long diskLen, long gs, ReplicaState rState) {
+        set(blockId, diskLen, gs);
+        originalState = rState;
+    }
 
-  @Override
-  public boolean equals(Object o) {
-    return super.equals(o);
-  }
+    public ReplicaState getOriginalReplicaState() {
+        return originalState;
+    }
 
-  @Override
-  public int hashCode() {
-    return super.hashCode();
-  }
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o);
+    }
 
-  @Override
-  public String toString() {
-    return super.toString() + "[numBytes=" + this.getNumBytes() +
-        ",originalReplicaState=" + this.originalState.name() + "]";
-  }
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + "[numBytes=" + this.getNumBytes() + ",originalReplicaState=" + this.originalState.name() + "]";
+    }
 }

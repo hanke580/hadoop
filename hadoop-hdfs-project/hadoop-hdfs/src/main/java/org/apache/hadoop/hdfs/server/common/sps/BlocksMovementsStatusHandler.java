@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.common.sps;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -29,11 +28,11 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceStability.Evolving
 public interface BlocksMovementsStatusHandler {
 
-  /**
-   * Collect all the storage movement attempt finished blocks.
-   *
-   * @param moveAttemptFinishedBlk
-   *          storage movement attempt finished block
-   */
-  void handle(BlockMovementAttemptFinished moveAttemptFinishedBlk);
+    /**
+     * Collect all the storage movement attempt finished blocks.
+     *
+     * @param moveAttemptFinishedBlk
+     *          storage movement attempt finished block
+     */
+    void handle(BlockMovementAttemptFinished moveAttemptFinishedBlk);
 }

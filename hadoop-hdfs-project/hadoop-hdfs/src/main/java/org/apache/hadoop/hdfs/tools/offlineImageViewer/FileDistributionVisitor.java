@@ -19,23 +19,22 @@ package org.apache.hadoop.hdfs.tools.offlineImageViewer;
 
 import java.io.IOException;
 import java.util.LinkedList;
-
 import org.apache.hadoop.util.StringUtils;
 
 /**
  * File size distribution visitor.
- * 
+ *
  * <h3>Description.</h3>
  * This is the tool for analyzing file sizes in the namespace image.
  * In order to run the tool one should define a range of integers
  * <tt>[0, maxSize]</tt> by specifying <tt>maxSize</tt> and a <tt>step</tt>.
- * The range of integers is divided into segments of size <tt>step</tt>: 
+ * The range of integers is divided into segments of size <tt>step</tt>:
  * <tt>[0, s<sub>1</sub>, ..., s<sub>n-1</sub>, maxSize]</tt>,
- * and the visitor calculates how many files in the system fall into 
- * each segment <tt>[s<sub>i-1</sub>, s<sub>i</sub>)</tt>. 
- * Note that files larger than <tt>maxSize</tt> always fall into 
+ * and the visitor calculates how many files in the system fall into
+ * each segment <tt>[s<sub>i-1</sub>, s<sub>i</sub>)</tt>.
+ * Note that files larger than <tt>maxSize</tt> always fall into
  * the very last segment.
- * 
+ *
  * <h3>Input.</h3>
  * <ul>
  * <li><tt>filename</tt> specifies the location of the image file;</li>
@@ -47,167 +46,169 @@ import org.apache.hadoop.util.StringUtils;
  * <h3>Output.</h3>
  * The output file is formatted as a tab separated two column table:
  * Size and NumFiles. Where Size represents the start of the segment,
- * and numFiles is the number of files form the image which size falls in 
+ * and numFiles is the number of files form the image which size falls in
  * this segment.
  */
 class FileDistributionVisitor extends TextWriterImageVisitor {
-  final private LinkedList<ImageElement> elemS = new LinkedList<ImageElement>();
 
-  private final static long MAX_SIZE_DEFAULT = 0x2000000000L;   // 1/8 TB = 2^37
-  private final static int INTERVAL_DEFAULT = 0x200000;         // 2 MB = 2^21
+    final private LinkedList<ImageElement> elemS = new LinkedList<ImageElement>();
 
-  private int[] distribution;
-  private long maxSize;
-  private int step;
+    // 1/8 TB = 2^37
+    private final static long MAX_SIZE_DEFAULT = 0x2000000000L;
 
-  private int totalFiles;
-  private int totalDirectories;
-  private int totalBlocks;
-  private long totalSpace;
-  private long maxFileSize;
+    // 2 MB = 2^21
+    private final static int INTERVAL_DEFAULT = 0x200000;
 
-  private FileContext current;
+    private int[] distribution;
 
-  private boolean inInode = false;
-  private boolean formatOutput = false;
+    private long maxSize;
 
-  /**
-   * File or directory information.
-   */
-  private static class FileContext {
-    String path;
-    long fileSize;
-    int numBlocks;
-    int replication;
-  }
+    private int step;
 
-  public FileDistributionVisitor(String filename, long maxSize, int step,
-      boolean formatOutput) throws IOException {
-    super(filename, false);
-    this.maxSize = (maxSize == 0 ? MAX_SIZE_DEFAULT : maxSize);
-    this.step = (step == 0 ? INTERVAL_DEFAULT : step);
-    this.formatOutput = formatOutput;
-    long numIntervals = this.maxSize / this.step;
-    if(numIntervals >= Integer.MAX_VALUE)
-      throw new IOException("Too many distribution intervals " + numIntervals);
-    this.distribution = new int[1 + (int)(numIntervals)];
-    this.totalFiles = 0;
-    this.totalDirectories = 0;
-    this.totalBlocks = 0;
-    this.totalSpace = 0;
-    this.maxFileSize = 0;
-  }
+    private int totalFiles;
 
-  @Override
-  void start() throws IOException {}
+    private int totalDirectories;
 
-  @Override
-  void finish() throws IOException {
-    output();
-    super.finish();
-  }
+    private int totalBlocks;
 
-  @Override
-  void finishAbnormally() throws IOException {
-    System.out.println("*** Image processing finished abnormally.  Ending ***");
-    output();
-    super.finishAbnormally();
-  }
+    private long totalSpace;
 
-  private void output() throws IOException {
-    // write the distribution into the output file
-    write((formatOutput ? "Size Range" : "Size") + "\tNumFiles\n");
-    for (int i = 0; i < distribution.length; i++) {
-      if (distribution[i] > 0) {
-        if (formatOutput) {
-          write((i == 0 ? "[" : "(")
-              + StringUtils.byteDesc(((long) (i == 0 ? 0 : i - 1) * step))
-              + ", "
-              + StringUtils.byteDesc((long)
-                  (i == distribution.length - 1 ? maxFileSize : i * step))
-                  + "]\t"
-              + distribution[i] + "\n");
-        } else {
-          write(((long) i * step) + "\t" + distribution[i] + "\n");
+    private long maxFileSize;
+
+    private FileContext current;
+
+    private boolean inInode = false;
+
+    private boolean formatOutput = false;
+
+    /**
+     * File or directory information.
+     */
+    private static class FileContext {
+
+        String path;
+
+        long fileSize;
+
+        int numBlocks;
+
+        int replication;
+    }
+
+    public FileDistributionVisitor(String filename, long maxSize, int step, boolean formatOutput) throws IOException {
+        super(filename, false);
+        this.maxSize = (maxSize == 0 ? MAX_SIZE_DEFAULT : maxSize);
+        this.step = (step == 0 ? INTERVAL_DEFAULT : step);
+        this.formatOutput = formatOutput;
+        long numIntervals = this.maxSize / this.step;
+        if (numIntervals >= Integer.MAX_VALUE)
+            throw new IOException("Too many distribution intervals " + numIntervals);
+        this.distribution = new int[1 + (int) (numIntervals)];
+        this.totalFiles = 0;
+        this.totalDirectories = 0;
+        this.totalBlocks = 0;
+        this.totalSpace = 0;
+        this.maxFileSize = 0;
+    }
+
+    @Override
+    void start() throws IOException {
+    }
+
+    @Override
+    void finish() throws IOException {
+        output();
+        super.finish();
+    }
+
+    @Override
+    void finishAbnormally() throws IOException {
+        System.out.println("*** Image processing finished abnormally.  Ending ***");
+        output();
+        super.finishAbnormally();
+    }
+
+    private void output() throws IOException {
+        // write the distribution into the output file
+        write((formatOutput ? "Size Range" : "Size") + "\tNumFiles\n");
+        for (int i = 0; i < distribution.length; i++) {
+            if (distribution[i] > 0) {
+                if (formatOutput) {
+                    write((i == 0 ? "[" : "(") + StringUtils.byteDesc(((long) (i == 0 ? 0 : i - 1) * step)) + ", " + StringUtils.byteDesc((long) (i == distribution.length - 1 ? maxFileSize : i * step)) + "]\t" + distribution[i] + "\n");
+                } else {
+                    write(((long) i * step) + "\t" + distribution[i] + "\n");
+                }
+            }
         }
-      }
+        System.out.println("totalFiles = " + totalFiles);
+        System.out.println("totalDirectories = " + totalDirectories);
+        System.out.println("totalBlocks = " + totalBlocks);
+        System.out.println("totalSpace = " + totalSpace);
+        System.out.println("maxFileSize = " + maxFileSize);
     }
-    System.out.println("totalFiles = " + totalFiles);
-    System.out.println("totalDirectories = " + totalDirectories);
-    System.out.println("totalBlocks = " + totalBlocks);
-    System.out.println("totalSpace = " + totalSpace);
-    System.out.println("maxFileSize = " + maxFileSize);
-  }
 
-  @Override
-  void leaveEnclosingElement() throws IOException {
-    ImageElement elem = elemS.pop();
-
-    if(elem != ImageElement.INODE &&
-       elem != ImageElement.INODE_UNDER_CONSTRUCTION)
-      return;
-    inInode = false;
-    if(current.numBlocks < 0) {
-      totalDirectories ++;
-      return;
+    @Override
+    void leaveEnclosingElement() throws IOException {
+        ImageElement elem = elemS.pop();
+        if (elem != ImageElement.INODE && elem != ImageElement.INODE_UNDER_CONSTRUCTION)
+            return;
+        inInode = false;
+        if (current.numBlocks < 0) {
+            totalDirectories++;
+            return;
+        }
+        totalFiles++;
+        totalBlocks += current.numBlocks;
+        totalSpace += current.fileSize * current.replication;
+        if (maxFileSize < current.fileSize)
+            maxFileSize = current.fileSize;
+        int high;
+        if (current.fileSize > maxSize)
+            high = distribution.length - 1;
+        else
+            high = (int) Math.ceil((double) current.fileSize / step);
+        if (high >= distribution.length) {
+            high = distribution.length - 1;
+        }
+        distribution[high]++;
+        if (totalFiles % 1000000 == 1)
+            System.out.println("Files processed: " + totalFiles + "  Current: " + current.path);
     }
-    totalFiles++;
-    totalBlocks += current.numBlocks;
-    totalSpace += current.fileSize * current.replication;
-    if(maxFileSize < current.fileSize)
-      maxFileSize = current.fileSize;
-    int high;
-    if(current.fileSize > maxSize)
-      high = distribution.length-1;
-    else
-      high = (int)Math.ceil((double)current.fileSize / step);
 
-    if (high >= distribution.length) {
-      high = distribution.length - 1;
+    @Override
+    void visit(ImageElement element, String value) throws IOException {
+        if (inInode) {
+            switch(element) {
+                case INODE_PATH:
+                    current.path = (value.equals("") ? "/" : value);
+                    break;
+                case REPLICATION:
+                    current.replication = Integer.parseInt(value);
+                    break;
+                case NUM_BYTES:
+                    current.fileSize += Long.parseLong(value);
+                    break;
+                default:
+                    break;
+            }
+        }
     }
-    distribution[high]++;
-    if(totalFiles % 1000000 == 1)
-      System.out.println("Files processed: " + totalFiles
-          + "  Current: " + current.path);
-  }
 
-  @Override
-  void visit(ImageElement element, String value) throws IOException {
-    if(inInode) {
-      switch(element) {
-      case INODE_PATH:
-        current.path = (value.equals("") ? "/" : value);
-        break;
-      case REPLICATION:
-        current.replication = Integer.parseInt(value);
-        break;
-      case NUM_BYTES:
-        current.fileSize += Long.parseLong(value);
-        break;
-      default:
-        break;
-      }
+    @Override
+    void visitEnclosingElement(ImageElement element) throws IOException {
+        elemS.push(element);
+        if (element == ImageElement.INODE || element == ImageElement.INODE_UNDER_CONSTRUCTION) {
+            current = new FileContext();
+            inInode = true;
+        }
     }
-  }
 
-  @Override
-  void visitEnclosingElement(ImageElement element) throws IOException {
-    elemS.push(element);
-    if(element == ImageElement.INODE ||
-       element == ImageElement.INODE_UNDER_CONSTRUCTION) {
-      current = new FileContext();
-      inInode = true;
+    @Override
+    void visitEnclosingElement(ImageElement element, ImageElement key, String value) throws IOException {
+        elemS.push(element);
+        if (element == ImageElement.INODE || element == ImageElement.INODE_UNDER_CONSTRUCTION)
+            inInode = true;
+        else if (element == ImageElement.BLOCKS)
+            current.numBlocks = Integer.parseInt(value);
     }
-  }
-
-  @Override
-  void visitEnclosingElement(ImageElement element,
-      ImageElement key, String value) throws IOException {
-    elemS.push(element);
-    if(element == ImageElement.INODE ||
-       element == ImageElement.INODE_UNDER_CONSTRUCTION)
-      inInode = true;
-    else if(element == ImageElement.BLOCKS)
-      current.numBlocks = Integer.parseInt(value);
-  }
 }

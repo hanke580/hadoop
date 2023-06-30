@@ -14,11 +14,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package org.apache.hadoop.hdfs.server.diskbalancer.connectors;
 
 import org.apache.hadoop.hdfs.server.diskbalancer.datamodel.DiskBalancerDataNode;
-
 import java.util.List;
 
 /**
@@ -28,17 +26,17 @@ import java.util.List;
  */
 public interface ClusterConnector {
 
-  /**
-   * getNodes function returns a list of DiskBalancerDataNodes.
-   *
-   * @return Array of DiskBalancerDataNodes
-   */
-  List<DiskBalancerDataNode> getNodes() throws Exception;
+    /**
+     * getNodes function returns a list of DiskBalancerDataNodes.
+     *
+     * @return Array of DiskBalancerDataNodes
+     */
+    List<DiskBalancerDataNode> getNodes() throws Exception;
 
-  /**
-   * Returns info about the connector.
-   *
-   * @return String.
-   */
-  String getConnectorInfo();
+    /**
+     * Returns info about the connector.
+     *
+     * @return String.
+     */
+    String getConnectorInfo();
 }

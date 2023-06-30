@@ -29,7 +29,6 @@ import org.apache.hadoop.metrics2.lib.MetricsRegistry;
 import org.apache.hadoop.metrics2.lib.MutableCounterLong;
 import org.apache.hadoop.metrics2.lib.MutableQuantiles;
 import org.apache.hadoop.metrics2.lib.MutableRate;
-
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -38,316 +37,305 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
-@Metrics(name = "DataNodeVolume", about = "DataNode Volume metrics",
-    context = "dfs")
+@Metrics(name = "DataNodeVolume", about = "DataNode Volume metrics", context = "dfs")
 public class DataNodeVolumeMetrics {
-  private final MetricsRegistry registry = new MetricsRegistry("FsVolume");
 
-  @Metric("number of metadata operations")
-  private MutableCounterLong totalMetadataOperations;
-  @Metric("metadata operation rate")
-  private MutableRate metadataOperationRate;
-  private MutableQuantiles[] metadataOperationLatencyQuantiles;
+    private final MetricsRegistry registry = new MetricsRegistry("FsVolume");
 
-  @Metric("number of data file io operations")
-  private MutableCounterLong totalDataFileIos;
-  @Metric("data file io operation rate")
-  private MutableRate dataFileIoRate;
-  private MutableQuantiles[] dataFileIoLatencyQuantiles;
+    @Metric("number of metadata operations")
+    private MutableCounterLong totalMetadataOperations;
 
-  @Metric("file io flush rate")
-  private MutableRate flushIoRate;
-  private MutableQuantiles[] flushIoLatencyQuantiles;
+    @Metric("metadata operation rate")
+    private MutableRate metadataOperationRate;
 
-  @Metric("file io sync rate")
-  private MutableRate syncIoRate;
-  private MutableQuantiles[] syncIoLatencyQuantiles;
+    private MutableQuantiles[] metadataOperationLatencyQuantiles;
 
-  @Metric("file io read rate")
-  private MutableRate readIoRate;
-  private MutableQuantiles[] readIoLatencyQuantiles;
+    @Metric("number of data file io operations")
+    private MutableCounterLong totalDataFileIos;
 
-  @Metric("file io write rate")
-  private MutableRate writeIoRate;
-  private MutableQuantiles[] writeIoLatencyQuantiles;
+    @Metric("data file io operation rate")
+    private MutableRate dataFileIoRate;
 
-  @Metric("file io transfer rate")
-  private MutableRate transferIoRate;
-  private MutableQuantiles[] transferIoLatencyQuantiles;
+    private MutableQuantiles[] dataFileIoLatencyQuantiles;
 
-  @Metric("file io nativeCopy rate")
-  private MutableRate nativeCopyIoRate;
-  private MutableQuantiles[] nativeCopyIoLatencyQuantiles;
+    @Metric("file io flush rate")
+    private MutableRate flushIoRate;
 
-  @Metric("number of file io errors")
-  private MutableCounterLong totalFileIoErrors;
-  @Metric("file io error rate")
-  private MutableRate fileIoErrorRate;
+    private MutableQuantiles[] flushIoLatencyQuantiles;
 
-  public long getTotalMetadataOperations() {
-    return totalMetadataOperations.value();
-  }
+    @Metric("file io sync rate")
+    private MutableRate syncIoRate;
 
-  // Based on metadataOperationRate
-  public long getMetadataOperationSampleCount() {
-    return metadataOperationRate.lastStat().numSamples();
-  }
+    private MutableQuantiles[] syncIoLatencyQuantiles;
 
-  public double getMetadataOperationMean() {
-    return metadataOperationRate.lastStat().mean();
-  }
+    @Metric("file io read rate")
+    private MutableRate readIoRate;
 
-  public double getMetadataOperationStdDev() {
-    return metadataOperationRate.lastStat().stddev();
-  }
+    private MutableQuantiles[] readIoLatencyQuantiles;
 
-  public long getTotalDataFileIos() {
-    return totalDataFileIos.value();
-  }
+    @Metric("file io write rate")
+    private MutableRate writeIoRate;
 
-  // Based on dataFileIoRate
-  public long getDataFileIoSampleCount() {
-    return dataFileIoRate.lastStat().numSamples();
-  }
+    private MutableQuantiles[] writeIoLatencyQuantiles;
 
-  public double getDataFileIoMean() {
-    return dataFileIoRate.lastStat().mean();
-  }
+    @Metric("file io transfer rate")
+    private MutableRate transferIoRate;
 
-  public double getDataFileIoStdDev() {
-    return dataFileIoRate.lastStat().stddev();
-  }
+    private MutableQuantiles[] transferIoLatencyQuantiles;
 
-  // Based on flushIoRate
-  public long getFlushIoSampleCount() {
-    return flushIoRate.lastStat().numSamples();
-  }
+    @Metric("file io nativeCopy rate")
+    private MutableRate nativeCopyIoRate;
 
-  public double getFlushIoMean() {
-    return flushIoRate.lastStat().mean();
-  }
+    private MutableQuantiles[] nativeCopyIoLatencyQuantiles;
 
-  public double getFlushIoStdDev() {
-    return flushIoRate.lastStat().stddev();
-  }
+    @Metric("number of file io errors")
+    private MutableCounterLong totalFileIoErrors;
 
-  // Based on syncIoRate
-  public long getSyncIoSampleCount() {
-    return syncIoRate.lastStat().numSamples();
-  }
+    @Metric("file io error rate")
+    private MutableRate fileIoErrorRate;
 
-  public double getSyncIoMean() {
-    return syncIoRate.lastStat().mean();
-  }
-
-  public double getSyncIoStdDev() {
-    return syncIoRate.lastStat().stddev();
-  }
-
-  // Based on readIoRate
-  public long getReadIoSampleCount() {
-    return readIoRate.lastStat().numSamples();
-  }
-
-  public double getReadIoMean() {
-    return readIoRate.lastStat().mean();
-  }
-
-  public double getReadIoStdDev() {
-    return readIoRate.lastStat().stddev();
-  }
-
-  // Based on writeIoRate
-  public long getWriteIoSampleCount() {
-    return writeIoRate.lastStat().numSamples();
-  }
-
-  public double getWriteIoMean() {
-    return writeIoRate.lastStat().mean();
-  }
-
-  public double getWriteIoStdDev() {
-    return writeIoRate.lastStat().stddev();
-  }
-
-  // Based on transferIoRate
-  public long getTransferIoSampleCount() {
-    return transferIoRate.lastStat().numSamples();
-  }
-
-  public double getTransferIoMean() {
-    return transferIoRate.lastStat().mean();
-  }
-
-  public double getTransferIoStdDev() {
-    return transferIoRate.lastStat().stddev();
-  }
-
-  public MutableQuantiles[] getTransferIoQuantiles() {
-    return transferIoLatencyQuantiles;
-  }
-
-  // Based on nativeCopyIoRate
-  public long getNativeCopyIoSampleCount() {
-    return nativeCopyIoRate.lastStat().numSamples();
-  }
-
-  public double getNativeCopyIoMean() {
-    return nativeCopyIoRate.lastStat().mean();
-  }
-
-  public double getNativeCopyIoStdDev() {
-    return nativeCopyIoRate.lastStat().stddev();
-  }
-
-  public MutableQuantiles[] getNativeCopyIoQuantiles() {
-    return nativeCopyIoLatencyQuantiles;
-  }
-
-  public long getTotalFileIoErrors() {
-    return totalFileIoErrors.value();
-  }
-
-  // Based on fileIoErrorRate
-  public long getFileIoErrorSampleCount() {
-    return fileIoErrorRate.lastStat().numSamples();
-  }
-
-  public double getFileIoErrorMean() {
-    return fileIoErrorRate.lastStat().mean();
-  }
-
-  public double getFileIoErrorStdDev() {
-    return fileIoErrorRate.lastStat().stddev();
-  }
-
-  private final String name;
-  private final MetricsSystem ms;
-
-  public DataNodeVolumeMetrics(final MetricsSystem metricsSystem,
-      final String volumeName, final int[] intervals) {
-    this.ms = metricsSystem;
-    this.name = volumeName;
-    final int len = intervals.length;
-    metadataOperationLatencyQuantiles = new MutableQuantiles[len];
-    dataFileIoLatencyQuantiles = new MutableQuantiles[len];
-    flushIoLatencyQuantiles = new MutableQuantiles[len];
-    syncIoLatencyQuantiles = new MutableQuantiles[len];
-    readIoLatencyQuantiles = new MutableQuantiles[len];
-    writeIoLatencyQuantiles = new MutableQuantiles[len];
-    transferIoLatencyQuantiles = new MutableQuantiles[len];
-    nativeCopyIoLatencyQuantiles = new MutableQuantiles[len];
-    for (int i = 0; i < len; i++) {
-      int interval = intervals[i];
-      metadataOperationLatencyQuantiles[i] = registry.newQuantiles(
-          "metadataOperationLatency" + interval + "s",
-          "Metadata Operation Latency in ms", "ops", "latency", interval);
-      dataFileIoLatencyQuantiles[i] = registry.newQuantiles(
-          "dataFileIoLatency" + interval + "s",
-          "Data File Io Latency in ms", "ops", "latency", interval);
-      flushIoLatencyQuantiles[i] = registry.newQuantiles(
-          "flushIoLatency" + interval + "s",
-          "Data flush Io Latency in ms", "ops", "latency", interval);
-      syncIoLatencyQuantiles[i] = registry.newQuantiles(
-          "syncIoLatency" + interval + "s",
-          "Data sync Io Latency in ms", "ops", "latency", interval);
-      readIoLatencyQuantiles[i] = registry.newQuantiles(
-          "readIoLatency" + interval + "s",
-          "Data read Io Latency in ms", "ops", "latency", interval);
-      writeIoLatencyQuantiles[i] = registry.newQuantiles(
-          "writeIoLatency" + interval + "s",
-          "Data write Io Latency in ms", "ops", "latency", interval);
-      transferIoLatencyQuantiles[i] = registry.newQuantiles(
-          "transferIoLatency" + interval + "s",
-          "Data transfer Io Latency in ms", "ops", "latency", interval);
-      nativeCopyIoLatencyQuantiles[i] = registry.newQuantiles(
-          "nativeCopyIoLatency" + interval + "s",
-          "Data nativeCopy Io Latency in ms", "ops", "latency", interval);
+    public long getTotalMetadataOperations() {
+        return totalMetadataOperations.value();
     }
-  }
 
-  public static DataNodeVolumeMetrics create(final Configuration conf,
-      final String volumeName) {
-    MetricsSystem ms = DefaultMetricsSystem.instance();
-    String name = "DataNodeVolume-"+ (volumeName.isEmpty()
-        ? "UndefinedDataNodeVolume"+ ThreadLocalRandom.current().nextInt()
-        : volumeName.replace(':', '-'));
-
-    // Percentile measurement is off by default, by watching no intervals
-    int[] intervals =
-        conf.getInts(DFSConfigKeys.DFS_METRICS_PERCENTILES_INTERVALS_KEY);
-    return ms.register(name, null, new DataNodeVolumeMetrics(ms, name,
-        intervals));
-  }
-
-  public String name() {
-    return name;
-  }
-
-  public void unRegister() {
-    ms.unregisterSource(name);
-  }
-
-  public void addMetadataOperationLatency(final long latency) {
-    totalMetadataOperations.incr();
-    metadataOperationRate.add(latency);
-    for (MutableQuantiles q : metadataOperationLatencyQuantiles) {
-      q.add(latency);
+    // Based on metadataOperationRate
+    public long getMetadataOperationSampleCount() {
+        return metadataOperationRate.lastStat().numSamples();
     }
-  }
 
-  public void addDataFileIoLatency(final long latency) {
-    totalDataFileIos.incr();
-    dataFileIoRate.add(latency);
-    for (MutableQuantiles q : dataFileIoLatencyQuantiles) {
-      q.add(latency);
+    public double getMetadataOperationMean() {
+        return metadataOperationRate.lastStat().mean();
     }
-  }
 
-  public void addSyncIoLatency(final long latency) {
-    syncIoRate.add(latency);
-    for (MutableQuantiles q : syncIoLatencyQuantiles) {
-      q.add(latency);
+    public double getMetadataOperationStdDev() {
+        return metadataOperationRate.lastStat().stddev();
     }
-  }
 
-  public void addFlushIoLatency(final long latency) {
-    flushIoRate.add(latency);
-    for (MutableQuantiles q : flushIoLatencyQuantiles) {
-      q.add(latency);
+    public long getTotalDataFileIos() {
+        return totalDataFileIos.value();
     }
-  }
 
-  public void addReadIoLatency(final long latency) {
-    readIoRate.add(latency);
-    for (MutableQuantiles q : readIoLatencyQuantiles) {
-      q.add(latency);
+    // Based on dataFileIoRate
+    public long getDataFileIoSampleCount() {
+        return dataFileIoRate.lastStat().numSamples();
     }
-  }
 
-  public void addWriteIoLatency(final long latency) {
-    writeIoRate.add(latency);
-    for (MutableQuantiles q: writeIoLatencyQuantiles) {
-      q.add(latency);
+    public double getDataFileIoMean() {
+        return dataFileIoRate.lastStat().mean();
     }
-  }
 
-  public void addTransferIoLatency(final long latency) {
-    transferIoRate.add(latency);
-    for (MutableQuantiles q: transferIoLatencyQuantiles) {
-      q.add(latency);
+    public double getDataFileIoStdDev() {
+        return dataFileIoRate.lastStat().stddev();
     }
-  }
 
-  public void addNativeCopyIoLatency(final long latency) {
-    nativeCopyIoRate.add(latency);
-    for (MutableQuantiles q: nativeCopyIoLatencyQuantiles) {
-      q.add(latency);
+    // Based on flushIoRate
+    public long getFlushIoSampleCount() {
+        return flushIoRate.lastStat().numSamples();
     }
-  }
 
-  public void addFileIoError(final long latency) {
-    totalFileIoErrors.incr();
-    fileIoErrorRate.add(latency);
-  }
+    public double getFlushIoMean() {
+        return flushIoRate.lastStat().mean();
+    }
+
+    public double getFlushIoStdDev() {
+        return flushIoRate.lastStat().stddev();
+    }
+
+    // Based on syncIoRate
+    public long getSyncIoSampleCount() {
+        return syncIoRate.lastStat().numSamples();
+    }
+
+    public double getSyncIoMean() {
+        return syncIoRate.lastStat().mean();
+    }
+
+    public double getSyncIoStdDev() {
+        return syncIoRate.lastStat().stddev();
+    }
+
+    // Based on readIoRate
+    public long getReadIoSampleCount() {
+        return readIoRate.lastStat().numSamples();
+    }
+
+    public double getReadIoMean() {
+        return readIoRate.lastStat().mean();
+    }
+
+    public double getReadIoStdDev() {
+        return readIoRate.lastStat().stddev();
+    }
+
+    // Based on writeIoRate
+    public long getWriteIoSampleCount() {
+        return writeIoRate.lastStat().numSamples();
+    }
+
+    public double getWriteIoMean() {
+        return writeIoRate.lastStat().mean();
+    }
+
+    public double getWriteIoStdDev() {
+        return writeIoRate.lastStat().stddev();
+    }
+
+    // Based on transferIoRate
+    public long getTransferIoSampleCount() {
+        return transferIoRate.lastStat().numSamples();
+    }
+
+    public double getTransferIoMean() {
+        return transferIoRate.lastStat().mean();
+    }
+
+    public double getTransferIoStdDev() {
+        return transferIoRate.lastStat().stddev();
+    }
+
+    public MutableQuantiles[] getTransferIoQuantiles() {
+        return transferIoLatencyQuantiles;
+    }
+
+    // Based on nativeCopyIoRate
+    public long getNativeCopyIoSampleCount() {
+        return nativeCopyIoRate.lastStat().numSamples();
+    }
+
+    public double getNativeCopyIoMean() {
+        return nativeCopyIoRate.lastStat().mean();
+    }
+
+    public double getNativeCopyIoStdDev() {
+        return nativeCopyIoRate.lastStat().stddev();
+    }
+
+    public MutableQuantiles[] getNativeCopyIoQuantiles() {
+        return nativeCopyIoLatencyQuantiles;
+    }
+
+    public long getTotalFileIoErrors() {
+        return totalFileIoErrors.value();
+    }
+
+    // Based on fileIoErrorRate
+    public long getFileIoErrorSampleCount() {
+        return fileIoErrorRate.lastStat().numSamples();
+    }
+
+    public double getFileIoErrorMean() {
+        return fileIoErrorRate.lastStat().mean();
+    }
+
+    public double getFileIoErrorStdDev() {
+        return fileIoErrorRate.lastStat().stddev();
+    }
+
+    private final String name;
+
+    private final MetricsSystem ms;
+
+    public DataNodeVolumeMetrics(final MetricsSystem metricsSystem, final String volumeName, final int[] intervals) {
+        this.ms = metricsSystem;
+        this.name = volumeName;
+        final int len = intervals.length;
+        metadataOperationLatencyQuantiles = new MutableQuantiles[len];
+        dataFileIoLatencyQuantiles = new MutableQuantiles[len];
+        flushIoLatencyQuantiles = new MutableQuantiles[len];
+        syncIoLatencyQuantiles = new MutableQuantiles[len];
+        readIoLatencyQuantiles = new MutableQuantiles[len];
+        writeIoLatencyQuantiles = new MutableQuantiles[len];
+        transferIoLatencyQuantiles = new MutableQuantiles[len];
+        nativeCopyIoLatencyQuantiles = new MutableQuantiles[len];
+        for (int i = 0; i < len; i++) {
+            int interval = intervals[i];
+            metadataOperationLatencyQuantiles[i] = registry.newQuantiles("metadataOperationLatency" + interval + "s", "Metadata Operation Latency in ms", "ops", "latency", interval);
+            dataFileIoLatencyQuantiles[i] = registry.newQuantiles("dataFileIoLatency" + interval + "s", "Data File Io Latency in ms", "ops", "latency", interval);
+            flushIoLatencyQuantiles[i] = registry.newQuantiles("flushIoLatency" + interval + "s", "Data flush Io Latency in ms", "ops", "latency", interval);
+            syncIoLatencyQuantiles[i] = registry.newQuantiles("syncIoLatency" + interval + "s", "Data sync Io Latency in ms", "ops", "latency", interval);
+            readIoLatencyQuantiles[i] = registry.newQuantiles("readIoLatency" + interval + "s", "Data read Io Latency in ms", "ops", "latency", interval);
+            writeIoLatencyQuantiles[i] = registry.newQuantiles("writeIoLatency" + interval + "s", "Data write Io Latency in ms", "ops", "latency", interval);
+            transferIoLatencyQuantiles[i] = registry.newQuantiles("transferIoLatency" + interval + "s", "Data transfer Io Latency in ms", "ops", "latency", interval);
+            nativeCopyIoLatencyQuantiles[i] = registry.newQuantiles("nativeCopyIoLatency" + interval + "s", "Data nativeCopy Io Latency in ms", "ops", "latency", interval);
+        }
+    }
+
+    public static DataNodeVolumeMetrics create(final Configuration conf, final String volumeName) {
+        MetricsSystem ms = DefaultMetricsSystem.instance();
+        String name = "DataNodeVolume-" + (volumeName.isEmpty() ? "UndefinedDataNodeVolume" + ThreadLocalRandom.current().nextInt() : volumeName.replace(':', '-'));
+        // Percentile measurement is off by default, by watching no intervals
+        int[] intervals = conf.getInts(DFSConfigKeys.DFS_METRICS_PERCENTILES_INTERVALS_KEY);
+        return ms.register(name, null, new DataNodeVolumeMetrics(ms, name, intervals));
+    }
+
+    public String name() {
+        return name;
+    }
+
+    public void unRegister() {
+        ms.unregisterSource(name);
+    }
+
+    public void addMetadataOperationLatency(final long latency) {
+        totalMetadataOperations.incr();
+        metadataOperationRate.add(latency);
+        for (MutableQuantiles q : metadataOperationLatencyQuantiles) {
+            q.add(latency);
+        }
+    }
+
+    public void addDataFileIoLatency(final long latency) {
+        totalDataFileIos.incr();
+        dataFileIoRate.add(latency);
+        for (MutableQuantiles q : dataFileIoLatencyQuantiles) {
+            q.add(latency);
+        }
+    }
+
+    public void addSyncIoLatency(final long latency) {
+        syncIoRate.add(latency);
+        for (MutableQuantiles q : syncIoLatencyQuantiles) {
+            q.add(latency);
+        }
+    }
+
+    public void addFlushIoLatency(final long latency) {
+        flushIoRate.add(latency);
+        for (MutableQuantiles q : flushIoLatencyQuantiles) {
+            q.add(latency);
+        }
+    }
+
+    public void addReadIoLatency(final long latency) {
+        readIoRate.add(latency);
+        for (MutableQuantiles q : readIoLatencyQuantiles) {
+            q.add(latency);
+        }
+    }
+
+    public void addWriteIoLatency(final long latency) {
+        writeIoRate.add(latency);
+        for (MutableQuantiles q : writeIoLatencyQuantiles) {
+            q.add(latency);
+        }
+    }
+
+    public void addTransferIoLatency(final long latency) {
+        transferIoRate.add(latency);
+        for (MutableQuantiles q : transferIoLatencyQuantiles) {
+            q.add(latency);
+        }
+    }
+
+    public void addNativeCopyIoLatency(final long latency) {
+        nativeCopyIoRate.add(latency);
+        for (MutableQuantiles q : nativeCopyIoLatencyQuantiles) {
+            q.add(latency);
+        }
+    }
+
+    public void addFileIoError(final long latency) {
+        totalFileIoErrors.incr();
+        fileIoErrorRate.add(latency);
+    }
 }

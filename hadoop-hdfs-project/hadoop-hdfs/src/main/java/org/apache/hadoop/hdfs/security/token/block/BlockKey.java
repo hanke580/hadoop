@@ -15,11 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.security.token.block;
 
 import javax.crypto.SecretKey;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.security.token.delegation.DelegationKey;
 
@@ -29,15 +27,15 @@ import org.apache.hadoop.security.token.delegation.DelegationKey;
 @InterfaceAudience.Private
 public class BlockKey extends DelegationKey {
 
-  public BlockKey() {
-    super();
-  }
+    public BlockKey() {
+        super();
+    }
 
-  public BlockKey(int keyId, long expiryDate, SecretKey key) {
-    super(keyId, expiryDate, key);
-  }
-  
-  public BlockKey(int keyId, long expiryDate, byte[] encodedKey) {
-    super(keyId, expiryDate, encodedKey);
-  }
+    public BlockKey(int keyId, long expiryDate, SecretKey key) {
+        super(keyId, expiryDate, key);
+    }
+
+    public BlockKey(int keyId, long expiryDate, byte[] encodedKey) {
+        super(keyId, expiryDate, encodedKey);
+    }
 }

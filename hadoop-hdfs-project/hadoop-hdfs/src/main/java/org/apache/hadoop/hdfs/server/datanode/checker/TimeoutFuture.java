@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 /**
  * Some portions of this class have been modified to make it functional in this
  * package.
@@ -25,7 +24,6 @@ import org.apache.hadoop.thirdparty.com.google.common.util.concurrent.Listenable
 import org.apache.hadoop.hdfs.server.datanode.checker.AbstractFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.annotation.Nullable;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -41,22 +39,18 @@ import java.util.concurrent.TimeoutException;
  * cancelled if it times out.
  */
 final class TimeoutFuture<V> extends AbstractFuture.TrustedFuture<V> {
-  public static final Logger LOG = LoggerFactory.getLogger(
-      TimeoutFuture.class);
 
-  static <V> ListenableFuture<V> create(
-      ListenableFuture<V> delegate,
-      long time,
-      TimeUnit unit,
-      ScheduledExecutorService scheduledExecutor) {
-    TimeoutFuture<V> result = new TimeoutFuture<V>(delegate);
-    TimeoutFuture.Fire<V> fire = new TimeoutFuture.Fire<V>(result);
-    result.timer = scheduledExecutor.schedule(fire, time, unit);
-    delegate.addListener(fire, directExecutor());
-    return result;
-  }
+    public static final Logger LOG = LoggerFactory.getLogger(TimeoutFuture.class);
 
-  /*
+    static <V> ListenableFuture<V> create(ListenableFuture<V> delegate, long time, TimeUnit unit, ScheduledExecutorService scheduledExecutor) {
+        TimeoutFuture<V> result = new TimeoutFuture<V>(delegate);
+        TimeoutFuture.Fire<V> fire = new TimeoutFuture.Fire<V>(result);
+        result.timer = scheduledExecutor.schedule(fire, time, unit);
+        delegate.addListener(fire, directExecutor());
+        return result;
+    }
+
+    /*
    * Memory visibility of these fields. There are two cases to consider.
    *
    * 1. visibility of the writes to these fields to Fire.run:
@@ -82,40 +76,41 @@ final class TimeoutFuture<V> extends AbstractFuture.TrustedFuture<V> {
    * purely theoretical problem (since the other actions should supply
    * sufficient write-barriers).
    */
-
-  @Nullable private ListenableFuture<V> delegateRef;
-  @Nullable private Future<?> timer;
-
-  private TimeoutFuture(ListenableFuture<V> delegate) {
-    this.delegateRef = Preconditions.checkNotNull(delegate);
-  }
-
-  /**
-   * A runnable that is called when the delegate or the timer completes.
-   */
-  private static final class Fire<V> implements Runnable {
     @Nullable
-    TimeoutFuture<V> timeoutFutureRef;
+    private ListenableFuture<V> delegateRef;
 
-    Fire(
-        TimeoutFuture<V> timeoutFuture) {
-      this.timeoutFutureRef = timeoutFuture;
+    @Nullable
+    private Future<?> timer;
+
+    private TimeoutFuture(ListenableFuture<V> delegate) {
+        this.delegateRef = Preconditions.checkNotNull(delegate);
     }
 
-    @Override
-    public void run() {
-      // If either of these reads return null then we must be after a
-      // successful cancel or another call to this method.
-      TimeoutFuture<V> timeoutFuture = timeoutFutureRef;
-      if (timeoutFuture == null) {
-        return;
-      }
-      ListenableFuture<V> delegate = timeoutFuture.delegateRef;
-      if (delegate == null) {
-        return;
-      }
+    /**
+     * A runnable that is called when the delegate or the timer completes.
+     */
+    private static final class Fire<V> implements Runnable {
 
-      /*
+        @Nullable
+        TimeoutFuture<V> timeoutFutureRef;
+
+        Fire(TimeoutFuture<V> timeoutFuture) {
+            this.timeoutFutureRef = timeoutFuture;
+        }
+
+        @Override
+        public void run() {
+            // If either of these reads return null then we must be after a
+            // successful cancel or another call to this method.
+            TimeoutFuture<V> timeoutFuture = timeoutFutureRef;
+            if (timeoutFuture == null) {
+                return;
+            }
+            ListenableFuture<V> delegate = timeoutFuture.delegateRef;
+            if (delegate == null) {
+                return;
+            }
+            /*
        * If we're about to complete the TimeoutFuture, we want to release our
        * reference to it. Otherwise, we'll pin it (and its result) in memory
        * until the timeout task is GCed. (The need to clear our reference to
@@ -129,34 +124,31 @@ final class TimeoutFuture<V> extends AbstractFuture.TrustedFuture<V> {
        * reasons: run() can still be invoked concurrently in different threads,
        * even with the above null checks.)
        */
-      timeoutFutureRef = null;
-      if (delegate.isDone()) {
-        timeoutFuture.setFuture(delegate);
-      } else {
-        try {
-          timeoutFuture.setException(
-              new TimeoutException("Future timed out: " + delegate));
-        } finally {
-          delegate.cancel(true);
+            timeoutFutureRef = null;
+            if (delegate.isDone()) {
+                timeoutFuture.setFuture(delegate);
+            } else {
+                try {
+                    timeoutFuture.setException(new TimeoutException("Future timed out: " + delegate));
+                } finally {
+                    delegate.cancel(true);
+                }
+            }
         }
-      }
-    }
-  }
-
-  @Override
-  protected void afterDone() {
-    maybePropagateCancellation(delegateRef);
-
-    Future<?> localTimer = timer;
-    // Try to cancel the timer as an optimization.
-    // timer may be null if this call to run was by the timer task since there
-    // is no happens-before edge between the assignment to timer and an
-    // execution of the timer task.
-    if (localTimer != null) {
-      localTimer.cancel(false);
     }
 
-    delegateRef = null;
-    timer = null;
-  }
+    @Override
+    protected void afterDone() {
+        maybePropagateCancellation(delegateRef);
+        Future<?> localTimer = timer;
+        // Try to cancel the timer as an optimization.
+        // timer may be null if this call to run was by the timer task since there
+        // is no happens-before edge between the assignment to timer and an
+        // execution of the timer task.
+        if (localTimer != null) {
+            localTimer.cancel(false);
+        }
+        delegateRef = null;
+        timer = null;
+    }
 }

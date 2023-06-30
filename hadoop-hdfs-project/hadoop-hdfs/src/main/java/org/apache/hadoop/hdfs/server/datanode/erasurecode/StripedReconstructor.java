@@ -37,7 +37,6 @@ import org.apache.hadoop.io.erasurecode.rawcoder.RawErasureDecoder;
 import org.apache.hadoop.net.NetUtils;
 import org.apache.hadoop.util.DataChecksum;
 import org.slf4j.Logger;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -62,7 +61,6 @@ import java.util.concurrent.atomic.AtomicLong;
  * |cell_8|   |cell_9|   |cell10|   |cell11|  ...
  * +------+   +------+   +------+   +------+
  *  ...         ...       ...         ...
- *
  *
  * We use following steps to reconstruct striped block group, in each round, we
  * reconstruct <code>bufferSize</code> data until finish, the
@@ -100,231 +98,235 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 @InterfaceAudience.Private
 abstract class StripedReconstructor {
-  protected static final Logger LOG = DataNode.LOG;
 
-  private final Configuration conf;
-  private final DataNode datanode;
-  private final ErasureCodingPolicy ecPolicy;
-  private final ErasureCoderOptions coderOptions;
-  private RawErasureDecoder decoder;
-  private final ExtendedBlock blockGroup;
-  private static final ByteBufferPool BUFFER_POOL = new ElasticByteBufferPool();
+    protected static final Logger LOG = DataNode.LOG;
 
-  private final boolean isValidationEnabled;
-  private DecodingValidator validator;
+    private final Configuration conf;
 
-  // position in striped internal block
-  private long positionInBlock;
-  private StripedReader stripedReader;
-  private ErasureCodingWorker erasureCodingWorker;
-  private final CachingStrategy cachingStrategy;
-  private long maxTargetLength = 0L;
-  private final BitSet liveBitSet;
+    private final DataNode datanode;
 
-  // metrics
-  private AtomicLong bytesRead = new AtomicLong(0);
-  private AtomicLong bytesWritten = new AtomicLong(0);
-  private AtomicLong remoteBytesRead = new AtomicLong(0);
+    private final ErasureCodingPolicy ecPolicy;
 
-  StripedReconstructor(ErasureCodingWorker worker,
-      StripedReconstructionInfo stripedReconInfo) {
-    this.erasureCodingWorker = worker;
-    this.datanode = worker.getDatanode();
-    this.conf = worker.getConf();
-    this.ecPolicy = stripedReconInfo.getEcPolicy();
-    liveBitSet = new BitSet(
-        ecPolicy.getNumDataUnits() + ecPolicy.getNumParityUnits());
-    for (int i = 0; i < stripedReconInfo.getLiveIndices().length; i++) {
-      liveBitSet.set(stripedReconInfo.getLiveIndices()[i]);
+    private final ErasureCoderOptions coderOptions;
+
+    private RawErasureDecoder decoder;
+
+    private final ExtendedBlock blockGroup;
+
+    private static final ByteBufferPool BUFFER_POOL = new ElasticByteBufferPool();
+
+    private final boolean isValidationEnabled;
+
+    private DecodingValidator validator;
+
+    // position in striped internal block
+    private long positionInBlock;
+
+    private StripedReader stripedReader;
+
+    private ErasureCodingWorker erasureCodingWorker;
+
+    private final CachingStrategy cachingStrategy;
+
+    private long maxTargetLength = 0L;
+
+    private final BitSet liveBitSet;
+
+    // metrics
+    private AtomicLong bytesRead = new AtomicLong(0);
+
+    private AtomicLong bytesWritten = new AtomicLong(0);
+
+    private AtomicLong remoteBytesRead = new AtomicLong(0);
+
+    StripedReconstructor(ErasureCodingWorker worker, StripedReconstructionInfo stripedReconInfo) {
+        this.erasureCodingWorker = worker;
+        this.datanode = worker.getDatanode();
+        this.conf = worker.getConf();
+        this.ecPolicy = stripedReconInfo.getEcPolicy();
+        liveBitSet = new BitSet(ecPolicy.getNumDataUnits() + ecPolicy.getNumParityUnits());
+        for (int i = 0; i < stripedReconInfo.getLiveIndices().length; i++) {
+            liveBitSet.set(stripedReconInfo.getLiveIndices()[i]);
+        }
+        blockGroup = stripedReconInfo.getBlockGroup();
+        stripedReader = new StripedReader(this, datanode, conf, stripedReconInfo);
+        cachingStrategy = CachingStrategy.newDefaultStrategy();
+        positionInBlock = 0L;
+        coderOptions = new ErasureCoderOptions(ecPolicy.getNumDataUnits(), ecPolicy.getNumParityUnits());
+        isValidationEnabled = conf.getBoolean(DFSConfigKeys.DFS_DN_EC_RECONSTRUCTION_VALIDATION_KEY, DFSConfigKeys.DFS_DN_EC_RECONSTRUCTION_VALIDATION_VALUE) && !coderOptions.allowChangeInputs();
     }
-    blockGroup = stripedReconInfo.getBlockGroup();
-    stripedReader = new StripedReader(this, datanode, conf, stripedReconInfo);
-    cachingStrategy = CachingStrategy.newDefaultStrategy();
 
-    positionInBlock = 0L;
-
-    coderOptions = new ErasureCoderOptions(
-        ecPolicy.getNumDataUnits(), ecPolicy.getNumParityUnits());
-    isValidationEnabled = conf.getBoolean(
-        DFSConfigKeys.DFS_DN_EC_RECONSTRUCTION_VALIDATION_KEY,
-        DFSConfigKeys.DFS_DN_EC_RECONSTRUCTION_VALIDATION_VALUE)
-        && !coderOptions.allowChangeInputs();
-  }
-
-  public void incrBytesRead(boolean local, long delta) {
-    if (local) {
-      bytesRead.addAndGet(delta);
-    } else {
-      bytesRead.addAndGet(delta);
-      remoteBytesRead.addAndGet(delta);
+    public void incrBytesRead(boolean local, long delta) {
+        if (local) {
+            bytesRead.addAndGet(delta);
+        } else {
+            bytesRead.addAndGet(delta);
+            remoteBytesRead.addAndGet(delta);
+        }
     }
-  }
 
-  public void incrBytesWritten(long delta) {
-    bytesWritten.addAndGet(delta);
-  }
-
-  public long getBytesRead() {
-    return bytesRead.get();
-  }
-
-  public long getRemoteBytesRead() {
-    return remoteBytesRead.get();
-  }
-
-  public long getBytesWritten() {
-    return bytesWritten.get();
-  }
-
-  /**
-   * Reconstruct one or more missed striped block in the striped block group,
-   * the minimum number of live striped blocks should be no less than data
-   * block number.
-   *
-   * @throws IOException
-   */
-  abstract void reconstruct() throws IOException;
-
-  boolean useDirectBuffer() {
-    return decoder.preferDirectBuffer();
-  }
-
-  ByteBuffer allocateBuffer(int length) {
-    return BUFFER_POOL.getBuffer(useDirectBuffer(), length);
-  }
-
-  void freeBuffer(ByteBuffer buffer) {
-    BUFFER_POOL.putBuffer(buffer);
-  }
-
-  ExtendedBlock getBlock(int i) {
-    return StripedBlockUtil.constructInternalBlock(blockGroup, ecPolicy, i);
-  }
-
-  long getBlockLen(int i) {
-    return StripedBlockUtil.getInternalBlockLength(blockGroup.getNumBytes(),
-        ecPolicy, i);
-  }
-
-  // Initialize decoder
-  protected void initDecoderIfNecessary() {
-    if (decoder == null) {
-      decoder = CodecUtil.createRawDecoder(conf, ecPolicy.getCodecName(),
-          coderOptions);
+    public void incrBytesWritten(long delta) {
+        bytesWritten.addAndGet(delta);
     }
-  }
 
-  // Initialize decoding validator
-  protected void initDecodingValidatorIfNecessary() {
-    if (isValidationEnabled && validator == null) {
-      validator = new DecodingValidator(decoder);
+    public long getBytesRead() {
+        return bytesRead.get();
     }
-  }
 
-  long getPositionInBlock() {
-    return positionInBlock;
-  }
-
-  InetSocketAddress getSocketAddress4Transfer(DatanodeInfo dnInfo) {
-    return NetUtils.createSocketAddr(dnInfo.getXferAddr(
-        datanode.getDnConf().getConnectToDnViaHostname()));
-  }
-
-  int getBufferSize() {
-    return stripedReader.getBufferSize();
-  }
-
-  public DataChecksum getChecksum() {
-    return stripedReader.getChecksum();
-  }
-
-  CachingStrategy getCachingStrategy() {
-    return cachingStrategy;
-  }
-
-  CompletionService<BlockReadStats> createReadService() {
-    return erasureCodingWorker.createReadService();
-  }
-
-  ExtendedBlock getBlockGroup() {
-    return blockGroup;
-  }
-
-  /**
-   * Get the xmits that _will_ be used for this reconstruction task.
-   */
-  int getXmits() {
-    return stripedReader.getXmits();
-  }
-
-  BitSet getLiveBitSet() {
-    return liveBitSet;
-  }
-
-  long getMaxTargetLength() {
-    return maxTargetLength;
-  }
-
-  void setMaxTargetLength(long maxTargetLength) {
-    this.maxTargetLength = maxTargetLength;
-  }
-
-  void updatePositionInBlock(long positionInBlockArg) {
-    this.positionInBlock += positionInBlockArg;
-  }
-
-  RawErasureDecoder getDecoder() {
-    return decoder;
-  }
-
-  void cleanup() {
-    if (decoder != null) {
-      decoder.release();
+    public long getRemoteBytesRead() {
+        return remoteBytesRead.get();
     }
-  }
 
-  StripedReader getStripedReader() {
-    return stripedReader;
-  }
-
-  Configuration getConf() {
-    return conf;
-  }
-
-  DataNode getDatanode() {
-    return datanode;
-  }
-
-  public ErasureCodingWorker getErasureCodingWorker() {
-    return erasureCodingWorker;
-  }
-
-  @VisibleForTesting
-  static ByteBufferPool getBufferPool() {
-    return BUFFER_POOL;
-  }
-
-  boolean isValidationEnabled() {
-    return isValidationEnabled;
-  }
-
-  DecodingValidator getValidator() {
-    return validator;
-  }
-
-  protected static void markBuffers(ByteBuffer[] buffers) {
-    for (ByteBuffer buffer: buffers) {
-      if (buffer != null) {
-        buffer.mark();
-      }
+    public long getBytesWritten() {
+        return bytesWritten.get();
     }
-  }
 
-  protected static void resetBuffers(ByteBuffer[] buffers) {
-    for (ByteBuffer buffer: buffers) {
-      if (buffer != null) {
-        buffer.reset();
-      }
+    /**
+     * Reconstruct one or more missed striped block in the striped block group,
+     * the minimum number of live striped blocks should be no less than data
+     * block number.
+     *
+     * @throws IOException
+     */
+    abstract void reconstruct() throws IOException;
+
+    boolean useDirectBuffer() {
+        return decoder.preferDirectBuffer();
     }
-  }
+
+    ByteBuffer allocateBuffer(int length) {
+        return BUFFER_POOL.getBuffer(useDirectBuffer(), length);
+    }
+
+    void freeBuffer(ByteBuffer buffer) {
+        BUFFER_POOL.putBuffer(buffer);
+    }
+
+    ExtendedBlock getBlock(int i) {
+        return StripedBlockUtil.constructInternalBlock(blockGroup, ecPolicy, i);
+    }
+
+    long getBlockLen(int i) {
+        return StripedBlockUtil.getInternalBlockLength(blockGroup.getNumBytes(), ecPolicy, i);
+    }
+
+    // Initialize decoder
+    protected void initDecoderIfNecessary() {
+        if (decoder == null) {
+            decoder = CodecUtil.createRawDecoder(conf, ecPolicy.getCodecName(), coderOptions);
+        }
+    }
+
+    // Initialize decoding validator
+    protected void initDecodingValidatorIfNecessary() {
+        if (isValidationEnabled && validator == null) {
+            validator = new DecodingValidator(decoder);
+        }
+    }
+
+    long getPositionInBlock() {
+        return positionInBlock;
+    }
+
+    InetSocketAddress getSocketAddress4Transfer(DatanodeInfo dnInfo) {
+        return NetUtils.createSocketAddr(dnInfo.getXferAddr(datanode.getDnConf().getConnectToDnViaHostname()));
+    }
+
+    int getBufferSize() {
+        return stripedReader.getBufferSize();
+    }
+
+    public DataChecksum getChecksum() {
+        return stripedReader.getChecksum();
+    }
+
+    CachingStrategy getCachingStrategy() {
+        return cachingStrategy;
+    }
+
+    CompletionService<BlockReadStats> createReadService() {
+        return erasureCodingWorker.createReadService();
+    }
+
+    ExtendedBlock getBlockGroup() {
+        return blockGroup;
+    }
+
+    /**
+     * Get the xmits that _will_ be used for this reconstruction task.
+     */
+    int getXmits() {
+        return stripedReader.getXmits();
+    }
+
+    BitSet getLiveBitSet() {
+        return liveBitSet;
+    }
+
+    long getMaxTargetLength() {
+        return maxTargetLength;
+    }
+
+    void setMaxTargetLength(long maxTargetLength) {
+        this.maxTargetLength = maxTargetLength;
+    }
+
+    void updatePositionInBlock(long positionInBlockArg) {
+        this.positionInBlock += positionInBlockArg;
+    }
+
+    RawErasureDecoder getDecoder() {
+        return decoder;
+    }
+
+    void cleanup() {
+        if (decoder != null) {
+            decoder.release();
+        }
+    }
+
+    StripedReader getStripedReader() {
+        return stripedReader;
+    }
+
+    Configuration getConf() {
+        return conf;
+    }
+
+    DataNode getDatanode() {
+        return datanode;
+    }
+
+    public ErasureCodingWorker getErasureCodingWorker() {
+        return erasureCodingWorker;
+    }
+
+    @VisibleForTesting
+    static ByteBufferPool getBufferPool() {
+        return BUFFER_POOL;
+    }
+
+    boolean isValidationEnabled() {
+        return isValidationEnabled;
+    }
+
+    DecodingValidator getValidator() {
+        return validator;
+    }
+
+    protected static void markBuffers(ByteBuffer[] buffers) {
+        for (ByteBuffer buffer : buffers) {
+            if (buffer != null) {
+                buffer.mark();
+            }
+        }
+    }
+
+    protected static void resetBuffers(ByteBuffer[] buffers) {
+        for (ByteBuffer buffer : buffers) {
+            if (buffer != null) {
+                buffer.reset();
+            }
+        }
+    }
 }

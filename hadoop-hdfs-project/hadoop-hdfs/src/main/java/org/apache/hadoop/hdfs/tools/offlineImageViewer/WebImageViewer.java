@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CommonConfigurationKeysPublic;
 import org.apache.hadoop.security.UserGroupInformation;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -47,97 +46,91 @@ import java.net.InetSocketAddress;
  * namespace.
  */
 public class WebImageViewer implements Closeable {
-  public static final Logger LOG =
-      LoggerFactory.getLogger(WebImageViewer.class);
 
-  private Channel channel;
-  private InetSocketAddress address;
+    public static final Logger LOG = LoggerFactory.getLogger(WebImageViewer.class);
 
-  private final ServerBootstrap bootstrap;
-  private final EventLoopGroup bossGroup;
-  private final EventLoopGroup workerGroup;
-  private final ChannelGroup allChannels;
-  private final Configuration conf;
+    private Channel channel;
 
-  public WebImageViewer(InetSocketAddress address) {
-    this(address, new Configuration());
-  }
-  public WebImageViewer(InetSocketAddress address, Configuration conf) {
-    this.address = address;
-    this.bossGroup = new NioEventLoopGroup();
-    this.workerGroup = new NioEventLoopGroup();
-    this.allChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-    this.bootstrap = new ServerBootstrap()
-      .group(bossGroup, workerGroup)
-      .channel(NioServerSocketChannel.class);
-    this.conf = conf;
-    UserGroupInformation.setConfiguration(conf);
-  }
+    private InetSocketAddress address;
 
-  /**
-   * Start WebImageViewer and wait until the thread is interrupted.
-   * @param fsimage the fsimage to load.
-   * @throws IOException if failed to load the fsimage.
-   * @throws RuntimeException if security is enabled in configuration.
-   */
-  public void start(String fsimage) throws IOException {
-    try {
-      if (UserGroupInformation.isSecurityEnabled()) {
-        throw new RuntimeException(
-            "WebImageViewer does not support secure mode. To start in " +
-                "non-secure mode, pass -D" +
-                CommonConfigurationKeysPublic.HADOOP_SECURITY_AUTHENTICATION +
-                "=simple");
-      }
-      initServer(fsimage);
-      channel.closeFuture().await();
-    } catch (InterruptedException e) {
-      LOG.info("Interrupted. Stopping the WebImageViewer.");
-      close();
+    private final ServerBootstrap bootstrap;
+
+    private final EventLoopGroup bossGroup;
+
+    private final EventLoopGroup workerGroup;
+
+    private final ChannelGroup allChannels;
+
+    private final Configuration conf;
+
+    public WebImageViewer(InetSocketAddress address) {
+        this(address, new Configuration());
     }
-  }
 
-  /**
-   * Start WebImageViewer.
-   * @param fsimage the fsimage to load.
-   * @throws IOException if fail to load the fsimage.
-   */
-  @VisibleForTesting
-  public void initServer(String fsimage)
-          throws IOException, InterruptedException {
-    final FSImageLoader loader = FSImageLoader.load(fsimage);
+    public WebImageViewer(InetSocketAddress address, Configuration conf) {
+        this.address = address;
+        this.bossGroup = new NioEventLoopGroup();
+        this.workerGroup = new NioEventLoopGroup();
+        this.allChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+        this.bootstrap = new ServerBootstrap().group(bossGroup, workerGroup).channel(NioServerSocketChannel.class);
+        this.conf = conf;
+        UserGroupInformation.setConfiguration(conf);
+    }
 
-    bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
-      @Override
-      protected void initChannel(SocketChannel ch) throws Exception {
-        ChannelPipeline p = ch.pipeline();
-        p.addLast(new HttpRequestDecoder(),
-          new StringEncoder(),
-          new HttpResponseEncoder(),
-          new FSImageHandler(loader, allChannels));
-      }
-    });
+    /**
+     * Start WebImageViewer and wait until the thread is interrupted.
+     * @param fsimage the fsimage to load.
+     * @throws IOException if failed to load the fsimage.
+     * @throws RuntimeException if security is enabled in configuration.
+     */
+    public void start(String fsimage) throws IOException {
+        try {
+            if (UserGroupInformation.isSecurityEnabled()) {
+                throw new RuntimeException("WebImageViewer does not support secure mode. To start in " + "non-secure mode, pass -D" + CommonConfigurationKeysPublic.HADOOP_SECURITY_AUTHENTICATION + "=simple");
+            }
+            initServer(fsimage);
+            channel.closeFuture().await();
+        } catch (InterruptedException e) {
+            LOG.info("Interrupted. Stopping the WebImageViewer.");
+            close();
+        }
+    }
 
-    channel = bootstrap.bind(address).sync().channel();
-    allChannels.add(channel);
+    /**
+     * Start WebImageViewer.
+     * @param fsimage the fsimage to load.
+     * @throws IOException if fail to load the fsimage.
+     */
+    @VisibleForTesting
+    public void initServer(String fsimage) throws IOException, InterruptedException {
+        final FSImageLoader loader = FSImageLoader.load(fsimage);
+        bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
 
-    address = (InetSocketAddress) channel.localAddress();
-    LOG.info("WebImageViewer started. Listening on " + address.toString() + ". Press Ctrl+C to stop the viewer.");
-  }
+            @Override
+            protected void initChannel(SocketChannel ch) throws Exception {
+                ChannelPipeline p = ch.pipeline();
+                p.addLast(new HttpRequestDecoder(), new StringEncoder(), new HttpResponseEncoder(), new FSImageHandler(loader, allChannels));
+            }
+        });
+        channel = bootstrap.bind(address).sync().channel();
+        allChannels.add(channel);
+        address = (InetSocketAddress) channel.localAddress();
+        LOG.info("WebImageViewer started. Listening on " + address.toString() + ". Press Ctrl+C to stop the viewer.");
+    }
 
-  /**
-   * Get the listening port.
-   * @return the port WebImageViewer is listening on
-   */
-  @VisibleForTesting
-  public int getPort() {
-    return address.getPort();
-  }
+    /**
+     * Get the listening port.
+     * @return the port WebImageViewer is listening on
+     */
+    @VisibleForTesting
+    public int getPort() {
+        return address.getPort();
+    }
 
-  @Override
-  public void close() {
-    allChannels.close().awaitUninterruptibly();
-    bossGroup.shutdownGracefully();
-    workerGroup.shutdownGracefully();
-  }
+    @Override
+    public void close() {
+        allChannels.close().awaitUninterruptibly();
+        bossGroup.shutdownGracefully();
+        workerGroup.shutdownGracefully();
+    }
 }

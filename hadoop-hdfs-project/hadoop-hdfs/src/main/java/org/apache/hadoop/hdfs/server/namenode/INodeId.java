@@ -28,15 +28,20 @@ import org.apache.hadoop.util.SequentialNumber;
  */
 @InterfaceAudience.Private
 public class INodeId extends SequentialNumber {
-  /**
-   * The last reserved inode id. InodeIDs are allocated from LAST_RESERVED_ID +
-   * 1.
-   */
-  public static final long LAST_RESERVED_ID = 1 << 14; // 16384
-  public static final long ROOT_INODE_ID = LAST_RESERVED_ID + 1; // 16385
-  public static final long INVALID_INODE_ID = -1;
 
-  INodeId() {
-    super(ROOT_INODE_ID);
-  }
+    /**
+     * The last reserved inode id. InodeIDs are allocated from LAST_RESERVED_ID +
+     * 1.
+     */
+    // 16384
+    public static final long LAST_RESERVED_ID = 1 << 14;
+
+    // 16385
+    public static final long ROOT_INODE_ID = LAST_RESERVED_ID + 1;
+
+    public static final long INVALID_INODE_ID = -1;
+
+    INodeId() {
+        super(ROOT_INODE_ID);
+    }
 }

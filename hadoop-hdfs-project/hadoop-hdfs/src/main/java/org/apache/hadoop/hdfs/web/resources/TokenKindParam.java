@@ -15,28 +15,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.web.resources;
 
 public class TokenKindParam extends StringParam {
 
-  /** Parameter name */
-  public static final String NAME = "kind";
-  /** Default parameter value. */
-  public static final String DEFAULT = NULL;
+    /**
+     * Parameter name
+     */
+    public static final String NAME = "kind";
 
-  private static final StringParam.Domain DOMAIN = new StringParam.Domain(NAME, null);
+    /**
+     * Default parameter value.
+     */
+    public static final String DEFAULT = NULL;
 
-  /**
-   * Constructor.
-   * @param str a string representation of the parameter value.
-   */
-  public TokenKindParam(final String str) {
-    super(DOMAIN, str == null || str.equals(DEFAULT)? null: str);
-  }
+    private static final StringParam.Domain DOMAIN = new StringParam.Domain(NAME, null);
 
-  @Override
-  public String getName() {
-    return NAME;
-  }
+    /**
+     * Constructor.
+     * @param str a string representation of the parameter value.
+     */
+    public TokenKindParam(final String str) {
+        super(DOMAIN, str == null || str.equals(DEFAULT) ? null : str);
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
+    }
 }

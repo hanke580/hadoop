@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.datanode.checker;
 
 import org.apache.hadoop.thirdparty.com.google.common.util.concurrent.FutureCallback;
@@ -26,10 +25,8 @@ import org.apache.hadoop.thirdparty.com.google.common.util.concurrent.MoreExecut
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.util.Timer;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -57,193 +54,178 @@ import java.util.concurrent.TimeUnit;
 @InterfaceAudience.Private
 @InterfaceStability.Unstable
 public class ThrottledAsyncChecker<K, V> implements AsyncChecker<K, V> {
-  public static final Logger LOG =
-      LoggerFactory.getLogger(ThrottledAsyncChecker.class);
 
-  private final Timer timer;
+    public static final Logger LOG = LoggerFactory.getLogger(ThrottledAsyncChecker.class);
 
-  /**
-   * The ExecutorService used to schedule asynchronous checks.
-   */
-  private final ListeningExecutorService executorService;
-  private final ScheduledExecutorService scheduledExecutorService;
+    private final Timer timer;
 
-  /**
-   * The minimum gap in milliseconds between two successive checks
-   * of the same object. This is the throttle.
-   */
-  private final long minMsBetweenChecks;
-  private final long diskCheckTimeout;
+    /**
+     * The ExecutorService used to schedule asynchronous checks.
+     */
+    private final ListeningExecutorService executorService;
 
-  /**
-   * Map of checks that are currently in progress. Protected by the object
-   * lock.
-   */
-  private final Map<Checkable, ListenableFuture<V>> checksInProgress;
+    private final ScheduledExecutorService scheduledExecutorService;
 
-  /**
-   * Maps Checkable objects to a future that can be used to retrieve
-   * the results of the operation.
-   * Protected by the object lock.
-   */
-  private final Map<Checkable, LastCheckResult<V>> completedChecks;
+    /**
+     * The minimum gap in milliseconds between two successive checks
+     * of the same object. This is the throttle.
+     */
+    private final long minMsBetweenChecks;
 
-  public ThrottledAsyncChecker(final Timer timer,
-                        final long minMsBetweenChecks,
-                        final long diskCheckTimeout,
-                        final ExecutorService executorService) {
-    this.timer = timer;
-    this.minMsBetweenChecks = minMsBetweenChecks;
-    this.diskCheckTimeout = diskCheckTimeout;
-    this.executorService = MoreExecutors.listeningDecorator(executorService);
-    this.checksInProgress = new HashMap<>();
-    this.completedChecks = new WeakHashMap<>();
+    private final long diskCheckTimeout;
 
-    if (this.diskCheckTimeout > 0) {
-      ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new
-          ScheduledThreadPoolExecutor(1);
-      this.scheduledExecutorService = MoreExecutors
-          .getExitingScheduledExecutorService(scheduledThreadPoolExecutor);
-    } else {
-      this.scheduledExecutorService = null;
-    }
-  }
+    /**
+     * Map of checks that are currently in progress. Protected by the object
+     * lock.
+     */
+    private final Map<Checkable, ListenableFuture<V>> checksInProgress;
 
-  /**
-   * See {@link AsyncChecker#schedule}
-   *
-   * If the object has been checked recently then the check will
-   * be skipped. Multiple concurrent checks for the same object
-   * will receive the same Future.
-   */
-  @Override
-  public synchronized Optional<ListenableFuture<V>> schedule(
-      Checkable<K, V> target, K context) {
-    if (checksInProgress.containsKey(target)) {
-      return Optional.empty();
+    /**
+     * Maps Checkable objects to a future that can be used to retrieve
+     * the results of the operation.
+     * Protected by the object lock.
+     */
+    private final Map<Checkable, LastCheckResult<V>> completedChecks;
+
+    public ThrottledAsyncChecker(final Timer timer, final long minMsBetweenChecks, final long diskCheckTimeout, final ExecutorService executorService) {
+        this.timer = timer;
+        this.minMsBetweenChecks = minMsBetweenChecks;
+        this.diskCheckTimeout = diskCheckTimeout;
+        this.executorService = MoreExecutors.listeningDecorator(executorService);
+        this.checksInProgress = new HashMap<>();
+        this.completedChecks = new WeakHashMap<>();
+        if (this.diskCheckTimeout > 0) {
+            ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1);
+            this.scheduledExecutorService = MoreExecutors.getExitingScheduledExecutorService(scheduledThreadPoolExecutor);
+        } else {
+            this.scheduledExecutorService = null;
+        }
     }
 
-    final LastCheckResult<V> result = completedChecks.get(target);
-    if (result != null) {
-      final long msSinceLastCheck = timer.monotonicNow() - result.completedAt;
-      if (msSinceLastCheck < minMsBetweenChecks) {
-        LOG.debug("Skipped checking {}. Time since last check {}ms " +
-                "is less than the min gap {}ms.",
-            target, msSinceLastCheck, minMsBetweenChecks);
-        return Optional.empty();
-      }
-    }
+    /**
+     * See {@link AsyncChecker#schedule}
+     *
+     * If the object has been checked recently then the check will
+     * be skipped. Multiple concurrent checks for the same object
+     * will receive the same Future.
+     */
+    @Override
+    public synchronized Optional<ListenableFuture<V>> schedule(Checkable<K, V> target, K context) {
+        if (checksInProgress.containsKey(target)) {
+            return Optional.empty();
+        }
+        final LastCheckResult<V> result = completedChecks.get(target);
+        if (result != null) {
+            final long msSinceLastCheck = timer.monotonicNow() - result.completedAt;
+            if (msSinceLastCheck < minMsBetweenChecks) {
+                LOG.debug("Skipped checking {}. Time since last check {}ms " + "is less than the min gap {}ms.", target, msSinceLastCheck, minMsBetweenChecks);
+                return Optional.empty();
+            }
+        }
+        LOG.info("Scheduling a check for {}", target);
+        final ListenableFuture<V> lfWithoutTimeout = executorService.submit(new Callable<V>() {
 
-    LOG.info("Scheduling a check for {}", target);
-    final ListenableFuture<V> lfWithoutTimeout = executorService.submit(
-        new Callable<V>() {
-          @Override
-          public V call() throws Exception {
-            return target.check(context);
-          }
+            @Override
+            public V call() throws Exception {
+                return target.check(context);
+            }
         });
-    final ListenableFuture<V> lf;
-
-    if (diskCheckTimeout > 0) {
-      lf = TimeoutFuture
-          .create(lfWithoutTimeout, diskCheckTimeout, TimeUnit.MILLISECONDS,
-              scheduledExecutorService);
-    } else {
-      lf = lfWithoutTimeout;
-    }
-
-    checksInProgress.put(target, lf);
-    addResultCachingCallback(target, lf);
-    return Optional.of(lf);
-  }
-
-  /**
-   * Register a callback to cache the result of a check.
-   * @param target
-   * @param lf
-   */
-  private void addResultCachingCallback(
-      Checkable<K, V> target, ListenableFuture<V> lf) {
-    Futures.addCallback(lf, new FutureCallback<V>() {
-      @Override
-      public void onSuccess(V result) {
-        synchronized (ThrottledAsyncChecker.this) {
-          checksInProgress.remove(target);
-          completedChecks.put(target, new LastCheckResult<>(
-              result, timer.monotonicNow()));
+        final ListenableFuture<V> lf;
+        if (diskCheckTimeout > 0) {
+            lf = TimeoutFuture.create(lfWithoutTimeout, diskCheckTimeout, TimeUnit.MILLISECONDS, scheduledExecutorService);
+        } else {
+            lf = lfWithoutTimeout;
         }
-      }
+        checksInProgress.put(target, lf);
+        addResultCachingCallback(target, lf);
+        return Optional.of(lf);
+    }
 
-      @Override
-      public void onFailure(@Nonnull Throwable t) {
-        synchronized (ThrottledAsyncChecker.this) {
-          checksInProgress.remove(target);
-          completedChecks.put(target, new LastCheckResult<>(
-              t, timer.monotonicNow()));
+    /**
+     * Register a callback to cache the result of a check.
+     * @param target
+     * @param lf
+     */
+    private void addResultCachingCallback(Checkable<K, V> target, ListenableFuture<V> lf) {
+        Futures.addCallback(lf, new FutureCallback<V>() {
+
+            @Override
+            public void onSuccess(V result) {
+                synchronized (ThrottledAsyncChecker.this) {
+                    checksInProgress.remove(target);
+                    completedChecks.put(target, new LastCheckResult<>(result, timer.monotonicNow()));
+                }
+            }
+
+            @Override
+            public void onFailure(@Nonnull Throwable t) {
+                synchronized (ThrottledAsyncChecker.this) {
+                    checksInProgress.remove(target);
+                    completedChecks.put(target, new LastCheckResult<>(t, timer.monotonicNow()));
+                }
+            }
+        }, MoreExecutors.directExecutor());
+    }
+
+    /**
+     * {@inheritDoc}.
+     *
+     * The results of in-progress checks are not useful during shutdown,
+     * so we optimize for faster shutdown by interrupt all actively
+     * executing checks.
+     */
+    @Override
+    public void shutdownAndWait(long timeout, TimeUnit timeUnit) throws InterruptedException {
+        if (scheduledExecutorService != null) {
+            scheduledExecutorService.shutdownNow();
+            scheduledExecutorService.awaitTermination(timeout, timeUnit);
         }
-      }
-    }, MoreExecutors.directExecutor());
-  }
-
-  /**
-   * {@inheritDoc}.
-   *
-   * The results of in-progress checks are not useful during shutdown,
-   * so we optimize for faster shutdown by interrupt all actively
-   * executing checks.
-   */
-  @Override
-  public void shutdownAndWait(long timeout, TimeUnit timeUnit)
-      throws InterruptedException {
-    if (scheduledExecutorService != null) {
-      scheduledExecutorService.shutdownNow();
-      scheduledExecutorService.awaitTermination(timeout, timeUnit);
-    }
-
-    executorService.shutdownNow();
-    executorService.awaitTermination(timeout, timeUnit);
-  }
-
-  /**
-   * Status of running a check. It can either be a result or an
-   * exception, depending on whether the check completed or threw.
-   */
-  private static final class LastCheckResult<V> {
-    /**
-     * Timestamp at which the check completed.
-     */
-    private final long completedAt;
-
-    /**
-     * Result of running the check if it completed. null if it threw.
-     */
-    @Nullable
-    private final V result;
-
-    /**
-     * Exception thrown by the check. null if it returned a result.
-     */
-    private final Throwable exception; // null on success.
-
-    /**
-     * Initialize with a result.
-     * @param result
-     */
-    private LastCheckResult(V result, long completedAt) {
-      this.result = result;
-      this.exception = null;
-      this.completedAt = completedAt;
+        executorService.shutdownNow();
+        executorService.awaitTermination(timeout, timeUnit);
     }
 
     /**
-     * Initialize with an exception.
-     * @param completedAt
-     * @param t
+     * Status of running a check. It can either be a result or an
+     * exception, depending on whether the check completed or threw.
      */
-    private LastCheckResult(Throwable t, long completedAt) {
-      this.result = null;
-      this.exception = t;
-      this.completedAt = completedAt;
+    private static final class LastCheckResult<V> {
+
+        /**
+         * Timestamp at which the check completed.
+         */
+        private final long completedAt;
+
+        /**
+         * Result of running the check if it completed. null if it threw.
+         */
+        @Nullable
+        private final V result;
+
+        /**
+         * Exception thrown by the check. null if it returned a result.
+         */
+        // null on success.
+        private final Throwable exception;
+
+        /**
+         * Initialize with a result.
+         * @param result
+         */
+        private LastCheckResult(V result, long completedAt) {
+            this.result = result;
+            this.exception = null;
+            this.completedAt = completedAt;
+        }
+
+        /**
+         * Initialize with an exception.
+         * @param completedAt
+         * @param t
+         */
+        private LastCheckResult(Throwable t, long completedAt) {
+            this.result = null;
+            this.exception = t;
+            this.completedAt = completedAt;
+        }
     }
-  }
 }

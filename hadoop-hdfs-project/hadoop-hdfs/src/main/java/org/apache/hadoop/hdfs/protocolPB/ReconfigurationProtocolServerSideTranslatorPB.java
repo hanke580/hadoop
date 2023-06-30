@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.protocolPB;
 
 import java.io.IOException;
-
 import org.apache.hadoop.hdfs.protocol.ReconfigurationProtocol;
 import org.apache.hadoop.hdfs.protocol.proto.ReconfigurationProtocolProtos.GetReconfigurationStatusRequestProto;
 import org.apache.hadoop.hdfs.protocol.proto.ReconfigurationProtocolProtos.GetReconfigurationStatusResponseProto;
@@ -26,7 +25,6 @@ import org.apache.hadoop.hdfs.protocol.proto.ReconfigurationProtocolProtos.ListR
 import org.apache.hadoop.hdfs.protocol.proto.ReconfigurationProtocolProtos.ListReconfigurablePropertiesResponseProto;
 import org.apache.hadoop.hdfs.protocol.proto.ReconfigurationProtocolProtos.StartReconfigurationRequestProto;
 import org.apache.hadoop.hdfs.protocol.proto.ReconfigurationProtocolProtos.StartReconfigurationResponseProto;
-
 import org.apache.hadoop.thirdparty.protobuf.RpcController;
 import org.apache.hadoop.thirdparty.protobuf.ServiceException;
 
@@ -37,53 +35,41 @@ import org.apache.hadoop.thirdparty.protobuf.ServiceException;
  * to the native data types used inside the NN/DN as specified in the generic
  * ReconfigurationProtocol.
  */
-public class ReconfigurationProtocolServerSideTranslatorPB implements
-    ReconfigurationProtocolPB {
+public class ReconfigurationProtocolServerSideTranslatorPB implements ReconfigurationProtocolPB {
 
-  private final ReconfigurationProtocol impl;
+    private final ReconfigurationProtocol impl;
 
-  private static final StartReconfigurationResponseProto START_RECONFIG_RESP =
-      StartReconfigurationResponseProto.newBuilder().build();
+    private static final StartReconfigurationResponseProto START_RECONFIG_RESP = StartReconfigurationResponseProto.newBuilder().build();
 
-  public ReconfigurationProtocolServerSideTranslatorPB(
-      ReconfigurationProtocol impl) {
-    this.impl = impl;
-  }
-
-  @Override
-  public StartReconfigurationResponseProto startReconfiguration(
-      RpcController controller, StartReconfigurationRequestProto request)
-      throws ServiceException {
-    try {
-      impl.startReconfiguration();
-    } catch (IOException e) {
-      throw new ServiceException(e);
+    public ReconfigurationProtocolServerSideTranslatorPB(ReconfigurationProtocol impl) {
+        this.impl = impl;
     }
-    return START_RECONFIG_RESP;
-  }
 
-  @Override
-  public ListReconfigurablePropertiesResponseProto listReconfigurableProperties(
-      RpcController controller,
-      ListReconfigurablePropertiesRequestProto request)
-      throws ServiceException {
-    try {
-      return ReconfigurationProtocolServerSideUtils
-          .listReconfigurableProperties(impl.listReconfigurableProperties());
-    } catch (IOException e) {
-      throw new ServiceException(e);
+    @Override
+    public StartReconfigurationResponseProto startReconfiguration(RpcController controller, StartReconfigurationRequestProto request) throws ServiceException {
+        try {
+            impl.startReconfiguration();
+        } catch (IOException e) {
+            throw new ServiceException(e);
+        }
+        return START_RECONFIG_RESP;
     }
-  }
 
-  @Override
-  public GetReconfigurationStatusResponseProto getReconfigurationStatus(
-      RpcController unused, GetReconfigurationStatusRequestProto request)
-      throws ServiceException {
-    try {
-      return ReconfigurationProtocolServerSideUtils
-          .getReconfigurationStatus(impl.getReconfigurationStatus());
-    } catch (IOException e) {
-      throw new ServiceException(e);
+    @Override
+    public ListReconfigurablePropertiesResponseProto listReconfigurableProperties(RpcController controller, ListReconfigurablePropertiesRequestProto request) throws ServiceException {
+        try {
+            return ReconfigurationProtocolServerSideUtils.listReconfigurableProperties(impl.listReconfigurableProperties());
+        } catch (IOException e) {
+            throw new ServiceException(e);
+        }
     }
-  }
+
+    @Override
+    public GetReconfigurationStatusResponseProto getReconfigurationStatus(RpcController unused, GetReconfigurationStatusRequestProto request) throws ServiceException {
+        try {
+            return ReconfigurationProtocolServerSideUtils.getReconfigurationStatus(impl.getReconfigurationStatus());
+        } catch (IOException e) {
+            throw new ServiceException(e);
+        }
+    }
 }

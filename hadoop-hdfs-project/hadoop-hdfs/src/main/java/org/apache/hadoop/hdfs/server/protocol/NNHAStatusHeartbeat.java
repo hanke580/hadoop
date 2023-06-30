@@ -26,19 +26,20 @@ import org.apache.hadoop.hdfs.server.common.HdfsServerConstants;
 @InterfaceStability.Evolving
 public class NNHAStatusHeartbeat {
 
-  private final HAServiceState state;
-  private long txid = HdfsServerConstants.INVALID_TXID;
-  
-  public NNHAStatusHeartbeat(HAServiceState state, long txid) {
-    this.state = state;
-    this.txid = txid;
-  }
+    private final HAServiceState state;
 
-  public HAServiceState getState() {
-    return state;
-  }
-  
-  public long getTxId() {
-    return txid;
-  }
+    private long txid = HdfsServerConstants.INVALID_TXID;
+
+    public NNHAStatusHeartbeat(HAServiceState state, long txid) {
+        this.state = state;
+        this.txid = txid;
+    }
+
+    public HAServiceState getState() {
+        return state;
+    }
+
+    public long getTxId() {
+        return txid;
+    }
 }

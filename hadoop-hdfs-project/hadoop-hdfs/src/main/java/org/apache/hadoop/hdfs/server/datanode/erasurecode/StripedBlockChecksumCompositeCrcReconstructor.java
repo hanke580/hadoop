@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.server.datanode.erasurecode;
 
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.io.DataOutputBuffer;
 import org.apache.hadoop.util.CrcComposer;
@@ -27,54 +26,43 @@ import org.apache.hadoop.util.CrcComposer;
  * Computes striped composite CRCs over reconstructed chunk CRCs.
  */
 @InterfaceAudience.Private
-public class StripedBlockChecksumCompositeCrcReconstructor
-    extends StripedBlockChecksumReconstructor {
-  private final int ecPolicyCellSize;
+public class StripedBlockChecksumCompositeCrcReconstructor extends StripedBlockChecksumReconstructor {
 
-  private byte[] digestValue;
-  private CrcComposer digester;
+    private final int ecPolicyCellSize;
 
-  public StripedBlockChecksumCompositeCrcReconstructor(
-      ErasureCodingWorker worker,
-      StripedReconstructionInfo stripedReconInfo,
-      DataOutputBuffer checksumWriter,
-      long requestedBlockLength) throws IOException {
-    super(worker, stripedReconInfo, checksumWriter, requestedBlockLength);
-    this.ecPolicyCellSize = stripedReconInfo.getEcPolicy().getCellSize();
-  }
+    private byte[] digestValue;
 
-  @Override
-  public Object getDigestObject() {
-    return digestValue;
-  }
+    private CrcComposer digester;
 
-  @Override
-  void prepareDigester() throws IOException {
-    digester = CrcComposer.newStripedCrcComposer(
-        getChecksum().getChecksumType(),
-        getChecksum().getBytesPerChecksum(),
-        ecPolicyCellSize);
-  }
-
-  @Override
-  void updateDigester(byte[] checksumBytes, int dataBytesPerChecksum)
-      throws IOException {
-    if (digester == null) {
-      throw new IOException(String.format(
-          "Called updatedDigester with checksumBytes.length=%d, "
-          + "dataBytesPerChecksum=%d but digester is null",
-          checksumBytes.length, dataBytesPerChecksum));
+    public StripedBlockChecksumCompositeCrcReconstructor(ErasureCodingWorker worker, StripedReconstructionInfo stripedReconInfo, DataOutputBuffer checksumWriter, long requestedBlockLength) throws IOException {
+        super(worker, stripedReconInfo, checksumWriter, requestedBlockLength);
+        this.ecPolicyCellSize = stripedReconInfo.getEcPolicy().getCellSize();
     }
-    digester.update(
-        checksumBytes, 0, checksumBytes.length, dataBytesPerChecksum);
-  }
 
-  @Override
-  void commitDigest() throws IOException {
-    if (digester == null) {
-      throw new IOException("Called commitDigest() but digester is null");
+    @Override
+    public Object getDigestObject() {
+        return digestValue;
     }
-    digestValue = digester.digest();
-    getChecksumWriter().write(digestValue, 0, digestValue.length);
-  }
+
+    @Override
+    void prepareDigester() throws IOException {
+        digester = CrcComposer.newStripedCrcComposer(getChecksum().getChecksumType(), getChecksum().getBytesPerChecksum(), ecPolicyCellSize);
+    }
+
+    @Override
+    void updateDigester(byte[] checksumBytes, int dataBytesPerChecksum) throws IOException {
+        if (digester == null) {
+            throw new IOException(String.format("Called updatedDigester with checksumBytes.length=%d, " + "dataBytesPerChecksum=%d but digester is null", checksumBytes.length, dataBytesPerChecksum));
+        }
+        digester.update(checksumBytes, 0, checksumBytes.length, dataBytesPerChecksum);
+    }
+
+    @Override
+    void commitDigest() throws IOException {
+        if (digester == null) {
+            throw new IOException("Called commitDigest() but digester is null");
+        }
+        digestValue = digester.digest();
+        getChecksumWriter().write(digestValue, 0, digestValue.length);
+    }
 }

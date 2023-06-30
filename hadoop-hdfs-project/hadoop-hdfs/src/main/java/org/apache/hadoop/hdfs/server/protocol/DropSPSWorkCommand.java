@@ -27,10 +27,10 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
 public class DropSPSWorkCommand extends DatanodeCommand {
-  public static final DropSPSWorkCommand DNA_DROP_SPS_WORK_COMMAND =
-      new DropSPSWorkCommand();
 
-  public DropSPSWorkCommand() {
-    super(DatanodeProtocol.DNA_DROP_SPS_WORK_COMMAND);
-  }
+    public static final DropSPSWorkCommand DNA_DROP_SPS_WORK_COMMAND = new DropSPSWorkCommand();
+
+    public DropSPSWorkCommand() {
+        super(DatanodeProtocol.DNA_DROP_SPS_WORK_COMMAND);
+    }
 }
