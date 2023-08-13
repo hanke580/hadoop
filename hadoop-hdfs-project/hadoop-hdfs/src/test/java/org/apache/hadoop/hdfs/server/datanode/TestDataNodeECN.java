@@ -25,27 +25,26 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
-
 import java.io.IOException;
 
 public class TestDataNodeECN {
 
-  @Rule
-  public Timeout globalTimeout = new Timeout(300000);
+    @Rule
+    public Timeout globalTimeout = new Timeout(300000);
 
-  @Test
-  public void testECNFlag() throws IOException {
-    Configuration conf = new Configuration();
-    conf.setBoolean(DFSConfigKeys.DFS_PIPELINE_ECN_ENABLED, true);
-    MiniDFSCluster cluster = null;
-    try {
-      cluster = new MiniDFSCluster.Builder(conf).numDataNodes(1).build();
-      PipelineAck.ECN ecn = cluster.getDataNodes().get(0).getECN();
-      Assert.assertNotEquals(PipelineAck.ECN.DISABLED, ecn);
-    } finally {
-      if (cluster != null) {
-        cluster.shutdown();
-      }
+    @Test
+    public void testECNFlag() throws IOException {
+        Configuration conf = new Configuration();
+        conf.setBoolean(DFSConfigKeys.DFS_PIPELINE_ECN_ENABLED, true);
+        MiniDFSCluster cluster = null;
+        try {
+            cluster = new MiniDFSCluster.Builder(conf).numDataNodes(1).build();
+            PipelineAck.ECN ecn = cluster.getDataNodes().get(0).getECN();
+            Assert.assertNotEquals(PipelineAck.ECN.DISABLED, ecn);
+        } finally {
+            if (cluster != null) {
+                cluster.shutdown();
+            }
+        }
     }
-  }
 }

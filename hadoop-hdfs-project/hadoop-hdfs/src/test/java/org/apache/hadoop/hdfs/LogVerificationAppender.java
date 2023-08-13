@@ -19,7 +19,6 @@ package org.apache.hadoop.hdfs;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.spi.LoggingEvent;
 import org.apache.log4j.spi.ThrowableInformation;
@@ -28,48 +27,49 @@ import org.apache.log4j.spi.ThrowableInformation;
  * Used to verify that certain exceptions or messages are present in log output.
  */
 public class LogVerificationAppender extends AppenderSkeleton {
-  private final List<LoggingEvent> log = new ArrayList<LoggingEvent>();
 
-  @Override
-  public boolean requiresLayout() {
-    return false;
-  }
+    private final List<LoggingEvent> log = new ArrayList<LoggingEvent>();
 
-  @Override
-  protected void append(final LoggingEvent loggingEvent) {
-    log.add(loggingEvent);
-  }
+    @Override
+    public boolean requiresLayout() {
+        return false;
+    }
 
-  @Override
-  public void close() {
-  }
+    @Override
+    protected void append(final LoggingEvent loggingEvent) {
+        log.add(loggingEvent);
+    }
 
-  public List<LoggingEvent> getLog() {
-    return new ArrayList<LoggingEvent>(log);
-  }
-  
-  public int countExceptionsWithMessage(final String text) {
-    int count = 0;
-    for (LoggingEvent e: getLog()) {
-      ThrowableInformation t = e.getThrowableInformation();
-      if (t != null) {
-        String m = t.getThrowable().getMessage();
-        if (m.contains(text)) {
-          count++;
+    @Override
+    public void close() {
+    }
+
+    public List<LoggingEvent> getLog() {
+        return new ArrayList<LoggingEvent>(log);
+    }
+
+    public int countExceptionsWithMessage(final String text) {
+        int count = 0;
+        for (LoggingEvent e : getLog()) {
+            ThrowableInformation t = e.getThrowableInformation();
+            if (t != null) {
+                String m = t.getThrowable().getMessage();
+                if (m.contains(text)) {
+                    count++;
+                }
+            }
         }
-      }
+        return count;
     }
-    return count;
-  }
 
-  public int countLinesWithMessage(final String text) {
-    int count = 0;
-    for (LoggingEvent e: getLog()) {
-      String msg = e.getRenderedMessage();
-      if (msg != null && msg.contains(text)) {
-        count++;
-      }
+    public int countLinesWithMessage(final String text) {
+        int count = 0;
+        for (LoggingEvent e : getLog()) {
+            String msg = e.getRenderedMessage();
+            if (msg != null && msg.contains(text)) {
+                count++;
+            }
+        }
+        return count;
     }
-    return count;
-  }
 }

@@ -21,15 +21,22 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 
-/** Helper methods for the find expression unit tests. */
+/**
+ * Helper methods for the find expression unit tests.
+ */
 class TestHelper {
-  /** Adds an argument string to an expression */
-  static void addArgument(Expression expr, String arg) {
-    expr.addArguments(new LinkedList<String>(Collections.singletonList(arg)));
-  }
 
-  /** Converts a command string into a list of arguments. */
-  static LinkedList<String> getArgs(String cmd) {
-    return new LinkedList<String>(Arrays.asList(cmd.split(" ")));
-  }
+    /**
+     * Adds an argument string to an expression
+     */
+    static void addArgument(Expression expr, String arg) {
+        expr.addArguments(new LinkedList<String>(Collections.singletonList(arg)));
+    }
+
+    /**
+     * Converts a command string into a list of arguments.
+     */
+    static LinkedList<String> getArgs(String cmd) {
+        return new LinkedList<String>(Arrays.asList(cmd.split(" ")));
+    }
 }

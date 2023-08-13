@@ -18,9 +18,7 @@
 package org.apache.hadoop.hdfs.server.federation.store.records;
 
 import static org.junit.Assert.assertEquals;
-
 import java.io.IOException;
-
 import org.apache.hadoop.hdfs.server.federation.router.RouterServiceState;
 import org.apache.hadoop.hdfs.server.federation.store.driver.StateStoreSerializer;
 import org.junit.Test;
@@ -30,56 +28,56 @@ import org.junit.Test;
  */
 public class TestRouterState {
 
-  private static final String ADDRESS = "address";
-  private static final String VERSION = "version";
-  private static final String COMPILE_INFO = "compileInfo";
-  private static final long START_TIME = 100;
-  private static final long DATE_MODIFIED = 200;
-  private static final long DATE_CREATED = 300;
-  private static final long FILE_RESOLVER_VERSION = 500;
-  private static final RouterServiceState STATE = RouterServiceState.RUNNING;
+    private static final String ADDRESS = "address";
 
+    private static final String VERSION = "version";
 
-  private RouterState generateRecord() throws IOException {
-    RouterState record = RouterState.newInstance(ADDRESS, START_TIME, STATE);
-    record.setVersion(VERSION);
-    record.setCompileInfo(COMPILE_INFO);
-    record.setDateCreated(DATE_CREATED);
-    record.setDateModified(DATE_MODIFIED);
+    private static final String COMPILE_INFO = "compileInfo";
 
-    StateStoreVersion version = StateStoreVersion.newInstance();
-    version.setMountTableVersion(FILE_RESOLVER_VERSION);
-    record.setStateStoreVersion(version);
-    return record;
-  }
+    private static final long START_TIME = 100;
 
-  private void validateRecord(RouterState record) throws IOException {
-    assertEquals(ADDRESS, record.getAddress());
-    assertEquals(START_TIME, record.getDateStarted());
-    assertEquals(STATE, record.getStatus());
-    assertEquals(COMPILE_INFO, record.getCompileInfo());
-    assertEquals(VERSION, record.getVersion());
+    private static final long DATE_MODIFIED = 200;
 
-    StateStoreVersion version = record.getStateStoreVersion();
-    assertEquals(FILE_RESOLVER_VERSION, version.getMountTableVersion());
-  }
+    private static final long DATE_CREATED = 300;
 
-  @Test
-  public void testGetterSetter() throws IOException {
-    RouterState record = generateRecord();
-    validateRecord(record);
-  }
+    private static final long FILE_RESOLVER_VERSION = 500;
 
-  @Test
-  public void testSerialization() throws IOException {
+    private static final RouterServiceState STATE = RouterServiceState.RUNNING;
 
-    RouterState record = generateRecord();
+    private RouterState generateRecord() throws IOException {
+        RouterState record = RouterState.newInstance(ADDRESS, START_TIME, STATE);
+        record.setVersion(VERSION);
+        record.setCompileInfo(COMPILE_INFO);
+        record.setDateCreated(DATE_CREATED);
+        record.setDateModified(DATE_MODIFIED);
+        StateStoreVersion version = StateStoreVersion.newInstance();
+        version.setMountTableVersion(FILE_RESOLVER_VERSION);
+        record.setStateStoreVersion(version);
+        return record;
+    }
 
-    StateStoreSerializer serializer = StateStoreSerializer.getSerializer();
-    String serializedString = serializer.serializeString(record);
-    RouterState newRecord =
-        serializer.deserialize(serializedString, RouterState.class);
+    private void validateRecord(RouterState record) throws IOException {
+        assertEquals(ADDRESS, record.getAddress());
+        assertEquals(START_TIME, record.getDateStarted());
+        assertEquals(STATE, record.getStatus());
+        assertEquals(COMPILE_INFO, record.getCompileInfo());
+        assertEquals(VERSION, record.getVersion());
+        StateStoreVersion version = record.getStateStoreVersion();
+        assertEquals(FILE_RESOLVER_VERSION, version.getMountTableVersion());
+    }
 
-    validateRecord(newRecord);
-  }
+    @Test
+    public void testGetterSetter() throws IOException {
+        RouterState record = generateRecord();
+        validateRecord(record);
+    }
+
+    @Test
+    public void testSerialization() throws IOException {
+        RouterState record = generateRecord();
+        StateStoreSerializer serializer = StateStoreSerializer.getSerializer();
+        String serializedString = serializer.serializeString(record);
+        RouterState newRecord = serializer.deserialize(serializedString, RouterState.class);
+        validateRecord(newRecord);
+    }
 }

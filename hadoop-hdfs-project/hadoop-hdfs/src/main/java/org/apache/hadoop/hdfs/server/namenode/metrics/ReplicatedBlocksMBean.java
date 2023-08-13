@@ -31,38 +31,39 @@ import org.apache.hadoop.classification.InterfaceAudience;
  */
 @InterfaceAudience.Private
 public interface ReplicatedBlocksMBean {
-  /**
-   * Return low redundancy blocks count.
-   */
-  long getLowRedundancyReplicatedBlocks();
 
-  /**
-   * Return corrupt blocks count.
-   */
-  long getCorruptReplicatedBlocks();
+    /**
+     * Return low redundancy blocks count.
+     */
+    long getLowRedundancyReplicatedBlocks();
 
-  /**
-   * Return missing blocks count.
-   */
-  long getMissingReplicatedBlocks();
+    /**
+     * Return corrupt blocks count.
+     */
+    long getCorruptReplicatedBlocks();
 
-  /**
-   * Return count of missing blocks with replication factor one.
-   */
-  long getMissingReplicationOneBlocks();
+    /**
+     * Return missing blocks count.
+     */
+    long getMissingReplicatedBlocks();
 
-  /**
-   * Return total bytes of future blocks.
-   */
-  long getBytesInFutureReplicatedBlocks();
+    /**
+     * Return count of missing blocks with replication factor one.
+     */
+    long getMissingReplicationOneBlocks();
 
-  /**
-   * Return count of blocks that are pending deletion.
-   */
-  long getPendingDeletionReplicatedBlocks();
+    /**
+     * Return total bytes of future blocks.
+     */
+    long getBytesInFutureReplicatedBlocks();
 
-  /**
-   * Return total number of replicated blocks.
-   */
-  long getTotalReplicatedBlocks();
+    /**
+     * Return count of blocks that are pending deletion.
+     */
+    long getPendingDeletionReplicatedBlocks();
+
+    /**
+     * Return total number of replicated blocks.
+     */
+    long getTotalReplicatedBlocks();
 }

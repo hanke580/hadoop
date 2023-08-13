@@ -18,7 +18,6 @@ package org.apache.hadoop.fs;
 
 import org.apache.hadoop.thirdparty.protobuf.ByteString;
 import org.apache.hadoop.fs.FSProtos.LocalFileSystemPathHandleProto;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Objects;
@@ -29,72 +28,66 @@ import java.util.Optional;
  */
 public class LocalFileSystemPathHandle implements PathHandle {
 
-  private final String path;
-  private final Long mtime;
+    private final String path;
 
-  public LocalFileSystemPathHandle(String path, Optional<Long> mtime) {
-    this.path = path;
-    this.mtime = mtime.orElse(null);
-  }
+    private final Long mtime;
 
-  public LocalFileSystemPathHandle(ByteBuffer bytes) throws IOException {
-    if (null == bytes) {
-      throw new IOException("Missing PathHandle");
+    public LocalFileSystemPathHandle(String path, Optional<Long> mtime) {
+        this.path = path;
+        this.mtime = mtime.orElse(null);
     }
-    LocalFileSystemPathHandleProto p =
-        LocalFileSystemPathHandleProto.parseFrom(ByteString.copyFrom(bytes));
-    path = p.hasPath()   ? p.getPath()  : null;
-    mtime = p.hasMtime() ? p.getMtime() : null;
-  }
 
-  public String getPath() {
-    return path;
-  }
-
-  public void verify(FileStatus stat) throws InvalidPathHandleException {
-    if (null == stat) {
-      throw new InvalidPathHandleException("Could not resolve handle");
+    public LocalFileSystemPathHandle(ByteBuffer bytes) throws IOException {
+        if (null == bytes) {
+            throw new IOException("Missing PathHandle");
+        }
+        LocalFileSystemPathHandleProto p = LocalFileSystemPathHandleProto.parseFrom(ByteString.copyFrom(bytes));
+        path = p.hasPath() ? p.getPath() : null;
+        mtime = p.hasMtime() ? p.getMtime() : null;
     }
-    if (mtime != null && mtime != stat.getModificationTime()) {
-      throw new InvalidPathHandleException("Content changed");
+
+    public String getPath() {
+        return path;
     }
-  }
 
-  @Override
-  public ByteBuffer bytes() {
-    LocalFileSystemPathHandleProto.Builder b =
-        LocalFileSystemPathHandleProto.newBuilder();
-    b.setPath(path);
-    if (mtime != null) {
-      b.setMtime(mtime);
+    public void verify(FileStatus stat) throws InvalidPathHandleException {
+        if (null == stat) {
+            throw new InvalidPathHandleException("Could not resolve handle");
+        }
+        if (mtime != null && mtime != stat.getModificationTime()) {
+            throw new InvalidPathHandleException("Content changed");
+        }
     }
-    return b.build().toByteString().asReadOnlyByteBuffer();
-  }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    @Override
+    public ByteBuffer bytes() {
+        LocalFileSystemPathHandleProto.Builder b = LocalFileSystemPathHandleProto.newBuilder();
+        b.setPath(path);
+        if (mtime != null) {
+            b.setMtime(mtime);
+        }
+        return b.build().toByteString().asReadOnlyByteBuffer();
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        LocalFileSystemPathHandle that = (LocalFileSystemPathHandle) o;
+        return Objects.equals(path, that.path) && Objects.equals(mtime, that.mtime);
     }
-    LocalFileSystemPathHandle that = (LocalFileSystemPathHandle) o;
-    return Objects.equals(path, that.path) &&
-        Objects.equals(mtime, that.mtime);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(path, mtime);
-  }
+    @Override
+    public int hashCode() {
+        return Objects.hash(path, mtime);
+    }
 
-  @Override
-  public String toString() {
-    return "LocalFileSystemPathHandle{" +
-        "path='" + path + '\'' +
-        ", mtime=" + mtime +
-        '}';
-  }
-
+    @Override
+    public String toString() {
+        return "LocalFileSystemPathHandle{" + "path='" + path + '\'' + ", mtime=" + mtime + '}';
+    }
 }

@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * The resolver package contains indepedent data resolvers used in HDFS
  * federation. The data resolvers collect data from the cluster, including from
@@ -40,3 +39,4 @@ package org.apache.hadoop.hdfs.server.federation.resolver;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

@@ -21,11 +21,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.security.authentication.client.AuthenticationException;
@@ -35,7 +33,6 @@ import org.apache.hadoop.security.authentication.server.AuthenticationToken;
 import org.apache.hadoop.security.authentication.server.CompositeAuthenticationHandler;
 import org.apache.hadoop.security.authentication.server.HttpConstants;
 import org.apache.hadoop.security.authentication.server.MultiSchemeAuthenticationHandler;
-
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 
@@ -75,109 +72,89 @@ import com.google.common.base.Splitter;
  */
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
-public class MultiSchemeDelegationTokenAuthenticationHandler extends
-    DelegationTokenAuthenticationHandler implements
-    CompositeAuthenticationHandler {
+public class MultiSchemeDelegationTokenAuthenticationHandler extends DelegationTokenAuthenticationHandler implements CompositeAuthenticationHandler {
 
-  public static final String DELEGATION_TOKEN_SCHEMES_PROPERTY =
-      "multi-scheme-auth-handler.delegation.schemes";
-  private static final Splitter STR_SPLITTER = Splitter.on(',').trimResults()
-      .omitEmptyStrings();
+    public static final String DELEGATION_TOKEN_SCHEMES_PROPERTY = "multi-scheme-auth-handler.delegation.schemes";
 
-  private Set<String> delegationAuthSchemes = null;
+    private static final Splitter STR_SPLITTER = Splitter.on(',').trimResults().omitEmptyStrings();
 
-  public MultiSchemeDelegationTokenAuthenticationHandler() {
-    super(new MultiSchemeAuthenticationHandler(
-        MultiSchemeAuthenticationHandler.TYPE + TYPE_POSTFIX));
-  }
+    private Set<String> delegationAuthSchemes = null;
 
-  @Override
-  public Collection<String> getTokenTypes() {
-    return ((CompositeAuthenticationHandler) getAuthHandler()).getTokenTypes();
-  }
-
-  @Override
-  public void init(Properties config) throws ServletException {
-    super.init(config);
-
-    // Figure out the HTTP authentication schemes configured.
-    String schemesProperty =
-        Preconditions.checkNotNull(config
-            .getProperty(MultiSchemeAuthenticationHandler.SCHEMES_PROPERTY));
-
-    // Figure out the HTTP authentication schemes configured for delegation
-    // tokens.
-    String delegationAuthSchemesProp =
-        Preconditions.checkNotNull(config
-            .getProperty(DELEGATION_TOKEN_SCHEMES_PROPERTY));
-
-    Set<String> authSchemes = new HashSet<>();
-    for (String scheme : STR_SPLITTER.split(schemesProperty)) {
-      authSchemes.add(AuthenticationHandlerUtil.checkAuthScheme(scheme));
+    public MultiSchemeDelegationTokenAuthenticationHandler() {
+        super(new MultiSchemeAuthenticationHandler(MultiSchemeAuthenticationHandler.TYPE + TYPE_POSTFIX));
     }
 
-    delegationAuthSchemes = new HashSet<>();
-    for (String scheme : STR_SPLITTER.split(delegationAuthSchemesProp)) {
-      delegationAuthSchemes.add(AuthenticationHandlerUtil
-          .checkAuthScheme(scheme));
+    @Override
+    public Collection<String> getTokenTypes() {
+        return ((CompositeAuthenticationHandler) getAuthHandler()).getTokenTypes();
     }
 
-    Preconditions.checkArgument(authSchemes.containsAll(delegationAuthSchemes));
-  }
-
-  /**
-   * This method is overridden to restrict HTTP authentication schemes
-   * available for delegation token management functionality. The
-   * authentication schemes to be used for delegation token management are
-   * configured using {@link DELEGATION_TOKEN_SCHEMES_PROPERTY}
-   *
-   * The basic logic here is to check if the current request is for delegation
-   * token management. If yes then check if the request contains an
-   * "Authorization" header. If it is missing, then return the HTTP 401
-   * response with WWW-Authenticate header for each scheme configured for
-   * delegation token management.
-   *
-   * It is also possible for a client to preemptively send Authorization header
-   * for a scheme not configured for delegation token management. We detect
-   * this case and return the HTTP 401 response with WWW-Authenticate header
-   * for each scheme configured for delegation token management.
-   *
-   * If a client has sent a request with "Authorization" header for a scheme
-   * configured for delegation token management, then it is forwarded to
-   * underlying {@link MultiSchemeAuthenticationHandler} for actual
-   * authentication.
-   *
-   * Finally all other requests (excluding delegation token management) are
-   * forwarded to underlying {@link MultiSchemeAuthenticationHandler} for
-   * actual authentication.
-   */
-  @Override
-  public AuthenticationToken authenticate(HttpServletRequest request,
-      HttpServletResponse response)
-          throws IOException, AuthenticationException {
-    String authorization =
-        request.getHeader(HttpConstants.AUTHORIZATION_HEADER);
-
-    if (isManagementOperation(request)) {
-      boolean schemeConfigured = false;
-      if (authorization != null) {
-        for (String scheme : delegationAuthSchemes) {
-          if (AuthenticationHandlerUtil.
-              matchAuthScheme(scheme, authorization)) {
-            schemeConfigured = true;
-            break;
-          }
+    @Override
+    public void init(Properties config) throws ServletException {
+        super.init(config);
+        // Figure out the HTTP authentication schemes configured.
+        String schemesProperty = Preconditions.checkNotNull(config.getProperty(MultiSchemeAuthenticationHandler.SCHEMES_PROPERTY));
+        // Figure out the HTTP authentication schemes configured for delegation
+        // tokens.
+        String delegationAuthSchemesProp = Preconditions.checkNotNull(config.getProperty(DELEGATION_TOKEN_SCHEMES_PROPERTY));
+        Set<String> authSchemes = new HashSet<>();
+        for (String scheme : STR_SPLITTER.split(schemesProperty)) {
+            authSchemes.add(AuthenticationHandlerUtil.checkAuthScheme(scheme));
         }
-      }
-      if (!schemeConfigured) {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        for (String scheme : delegationAuthSchemes) {
-          response.addHeader(WWW_AUTHENTICATE, scheme);
+        delegationAuthSchemes = new HashSet<>();
+        for (String scheme : STR_SPLITTER.split(delegationAuthSchemesProp)) {
+            delegationAuthSchemes.add(AuthenticationHandlerUtil.checkAuthScheme(scheme));
         }
-        return null;
-      }
+        Preconditions.checkArgument(authSchemes.containsAll(delegationAuthSchemes));
     }
 
-    return super.authenticate(request, response);
-  }
+    /**
+     * This method is overridden to restrict HTTP authentication schemes
+     * available for delegation token management functionality. The
+     * authentication schemes to be used for delegation token management are
+     * configured using {@link DELEGATION_TOKEN_SCHEMES_PROPERTY}
+     *
+     * The basic logic here is to check if the current request is for delegation
+     * token management. If yes then check if the request contains an
+     * "Authorization" header. If it is missing, then return the HTTP 401
+     * response with WWW-Authenticate header for each scheme configured for
+     * delegation token management.
+     *
+     * It is also possible for a client to preemptively send Authorization header
+     * for a scheme not configured for delegation token management. We detect
+     * this case and return the HTTP 401 response with WWW-Authenticate header
+     * for each scheme configured for delegation token management.
+     *
+     * If a client has sent a request with "Authorization" header for a scheme
+     * configured for delegation token management, then it is forwarded to
+     * underlying {@link MultiSchemeAuthenticationHandler} for actual
+     * authentication.
+     *
+     * Finally all other requests (excluding delegation token management) are
+     * forwarded to underlying {@link MultiSchemeAuthenticationHandler} for
+     * actual authentication.
+     */
+    @Override
+    public AuthenticationToken authenticate(HttpServletRequest request, HttpServletResponse response) throws IOException, AuthenticationException {
+        String authorization = request.getHeader(HttpConstants.AUTHORIZATION_HEADER);
+        if (isManagementOperation(request)) {
+            boolean schemeConfigured = false;
+            if (authorization != null) {
+                for (String scheme : delegationAuthSchemes) {
+                    if (AuthenticationHandlerUtil.matchAuthScheme(scheme, authorization)) {
+                        schemeConfigured = true;
+                        break;
+                    }
+                }
+            }
+            if (!schemeConfigured) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                for (String scheme : delegationAuthSchemes) {
+                    response.addHeader(WWW_AUTHENTICATE, scheme);
+                }
+                return null;
+            }
+        }
+        return super.authenticate(request, response);
+    }
 }

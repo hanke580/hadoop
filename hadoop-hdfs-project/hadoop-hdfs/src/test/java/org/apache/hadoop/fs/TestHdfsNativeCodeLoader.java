@@ -19,34 +19,35 @@ package org.apache.hadoop.fs;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.hadoop.util.NativeCodeLoader;
 
 public class TestHdfsNativeCodeLoader {
-  static final Logger LOG =
-      LoggerFactory.getLogger(TestHdfsNativeCodeLoader.class);
 
-  private static boolean requireTestJni() {
-    String rtj = System.getProperty("require.test.libhadoop");
-    if (rtj == null) return false;
-    if (rtj.compareToIgnoreCase("false") == 0) return false;
-    return true;
-  }
+    static final Logger LOG = LoggerFactory.getLogger(TestHdfsNativeCodeLoader.class);
 
-  @Test
-  public void testNativeCodeLoaded() {
-    if (requireTestJni() == false) {
-      LOG.info("TestNativeCodeLoader: libhadoop.so testing is not required.");
-      return;
+    private static boolean requireTestJni() {
+        String rtj = System.getProperty("require.test.libhadoop");
+        if (rtj == null)
+            return false;
+        if (rtj.compareToIgnoreCase("false") == 0)
+            return false;
+        return true;
     }
-    if (!NativeCodeLoader.isNativeCodeLoaded()) {
-      String LD_LIBRARY_PATH = System.getenv().get("LD_LIBRARY_PATH");
-      if (LD_LIBRARY_PATH == null) LD_LIBRARY_PATH = "";
-      fail("TestNativeCodeLoader: libhadoop.so testing was required, but " +
-          "libhadoop.so was not loaded.  LD_LIBRARY_PATH = " + LD_LIBRARY_PATH);
+
+    @Test
+    public void testNativeCodeLoaded() {
+        if (requireTestJni() == false) {
+            LOG.info("TestNativeCodeLoader: libhadoop.so testing is not required.");
+            return;
+        }
+        if (!NativeCodeLoader.isNativeCodeLoaded()) {
+            String LD_LIBRARY_PATH = System.getenv().get("LD_LIBRARY_PATH");
+            if (LD_LIBRARY_PATH == null)
+                LD_LIBRARY_PATH = "";
+            fail("TestNativeCodeLoader: libhadoop.so testing was required, but " + "libhadoop.so was not loaded.  LD_LIBRARY_PATH = " + LD_LIBRARY_PATH);
+        }
+        LOG.info("TestHdfsNativeCodeLoader: libhadoop.so is loaded.");
     }
-    LOG.info("TestHdfsNativeCodeLoader: libhadoop.so is loaded.");
-  }
 }

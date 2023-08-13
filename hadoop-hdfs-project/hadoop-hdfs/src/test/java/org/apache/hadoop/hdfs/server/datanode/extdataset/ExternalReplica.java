@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.datanode.extdataset;
 
 import org.apache.hadoop.hdfs.server.common.HdfsServerConstants.ReplicaState;
@@ -23,43 +22,43 @@ import org.apache.hadoop.hdfs.server.datanode.Replica;
 
 public class ExternalReplica implements Replica {
 
-  @Override
-  public long getBlockId() {
-    return 0;
-  }
+    @Override
+    public long getBlockId() {
+        return 0;
+    }
 
-  @Override
-  public long getGenerationStamp() {
-    return 0;
-  }
+    @Override
+    public long getGenerationStamp() {
+        return 0;
+    }
 
-  @Override
-  public ReplicaState getState() {
-    return ReplicaState.FINALIZED;
-  }
+    @Override
+    public ReplicaState getState() {
+        return ReplicaState.FINALIZED;
+    }
 
-  @Override
-  public long getNumBytes() {
-    return 0;
-  }
+    @Override
+    public long getNumBytes() {
+        return 0;
+    }
 
-  @Override
-  public long getBytesOnDisk() {
-    return 0;
-  }
+    @Override
+    public long getBytesOnDisk() {
+        return 0;
+    }
 
-  @Override
-  public long getVisibleLength() {
-    return 0;
-  }
+    @Override
+    public long getVisibleLength() {
+        return 0;
+    }
 
-  @Override
-  public String getStorageUuid() {
-    return null;
-  }
+    @Override
+    public String getStorageUuid() {
+        return null;
+    }
 
-  @Override
-  public boolean isOnTransientStorage() {
-    return false;
-  }
+    @Override
+    public boolean isOnTransientStorage() {
+        return false;
+    }
 }

@@ -15,14 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.fs.impl;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
-
 import com.google.common.base.Preconditions;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
@@ -38,19 +35,19 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceStability.Unstable
 public class WrappedIOException extends RuntimeException {
 
-  private static final long serialVersionUID = 2510210974235779294L;
+    private static final long serialVersionUID = 2510210974235779294L;
 
-  /**
-   * Construct from a non-null IOException.
-   * @param cause inner cause
-   * @throws NullPointerException if the cause is null.
-   */
-  public WrappedIOException(final IOException cause) {
-    super(Preconditions.checkNotNull(cause));
-  }
+    /**
+     * Construct from a non-null IOException.
+     * @param cause inner cause
+     * @throws NullPointerException if the cause is null.
+     */
+    public WrappedIOException(final IOException cause) {
+        super(Preconditions.checkNotNull(cause));
+    }
 
-  @Override
-  public synchronized IOException getCause() {
-    return (IOException) super.getCause();
-  }
+    @Override
+    public synchronized IOException getCause() {
+        return (IOException) super.getCause();
+    }
 }

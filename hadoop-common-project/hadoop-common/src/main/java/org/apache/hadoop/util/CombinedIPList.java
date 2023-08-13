@@ -25,35 +25,30 @@ import org.slf4j.LoggerFactory;
  */
 public class CombinedIPList implements IPList {
 
-  public static final Logger LOG =
-      LoggerFactory.getLogger(CombinedIPList.class);
+    public static final Logger LOG = LoggerFactory.getLogger(CombinedIPList.class);
 
-  private final IPList[] networkLists;
+    private final IPList[] networkLists;
 
-  public CombinedIPList(String fixedBlackListFile,
-      String variableBlackListFile, long cacheExpiryInSeconds) {
-
-    IPList fixedNetworkList = new FileBasedIPList(fixedBlackListFile);
-    if (variableBlackListFile != null) {
-      IPList variableNetworkList = new CacheableIPList(
-          new FileBasedIPList(variableBlackListFile), cacheExpiryInSeconds);
-      networkLists = new IPList[]{fixedNetworkList, variableNetworkList};
-    } else {
-      networkLists = new IPList[]{fixedNetworkList};
-    }
-  }
-
-  @Override
-  public boolean isIn(String ipAddress) {
-    if (ipAddress == null) {
-      throw new IllegalArgumentException("ipAddress is null");
+    public CombinedIPList(String fixedBlackListFile, String variableBlackListFile, long cacheExpiryInSeconds) {
+        IPList fixedNetworkList = new FileBasedIPList(fixedBlackListFile);
+        if (variableBlackListFile != null) {
+            IPList variableNetworkList = new CacheableIPList(new FileBasedIPList(variableBlackListFile), cacheExpiryInSeconds);
+            networkLists = new IPList[] { fixedNetworkList, variableNetworkList };
+        } else {
+            networkLists = new IPList[] { fixedNetworkList };
+        }
     }
 
-    for (IPList networkList : networkLists) {
-      if (networkList.isIn(ipAddress)) {
-        return true;
-      }
+    @Override
+    public boolean isIn(String ipAddress) {
+        if (ipAddress == null) {
+            throw new IllegalArgumentException("ipAddress is null");
+        }
+        for (IPList networkList : networkLists) {
+            if (networkList.isIn(ipAddress)) {
+                return true;
+            }
+        }
+        return false;
     }
-    return false;
-  }
 }

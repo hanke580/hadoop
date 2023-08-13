@@ -18,34 +18,29 @@
 package org.apache.hadoop.util;
 
 import static org.junit.Assert.assertTrue;
-
 import org.apache.hadoop.util.DiskChecker.DiskErrorException;
-
 import java.io.File;
 
 /**
  * The class to test BasicDiskValidator.
  */
 public class TestBasicDiskValidator extends TestDiskChecker {
-  @Override
-  protected void checkDirs(boolean isDir, String perm, boolean success)
-      throws Throwable {
-    File localDir = isDir ? createTempDir() : createTempFile();
-    try {
-      Shell.execCommand(Shell.getSetPermissionCommand(perm, false,
-          localDir.getAbsolutePath()));
 
-      DiskValidatorFactory.getInstance(BasicDiskValidator.NAME).
-          checkStatus(localDir);
-      assertTrue("call to checkDir() succeeded.", success);
-    } catch (DiskErrorException e) {
-      // call to checkDir() succeeded even though it was expected to fail
-      // if success is false, otherwise throw the exception
-      if (success) {
-        throw e;
-      }
-    } finally {
-      localDir.delete();
+    @Override
+    protected void checkDirs(boolean isDir, String perm, boolean success) throws Throwable {
+        File localDir = isDir ? createTempDir() : createTempFile();
+        try {
+            Shell.execCommand(Shell.getSetPermissionCommand(perm, false, localDir.getAbsolutePath()));
+            DiskValidatorFactory.getInstance(BasicDiskValidator.NAME).checkStatus(localDir);
+            assertTrue("call to checkDir() succeeded.", success);
+        } catch (DiskErrorException e) {
+            // call to checkDir() succeeded even though it was expected to fail
+            // if success is false, otherwise throw the exception
+            if (success) {
+                throw e;
+            }
+        } finally {
+            localDir.delete();
+        }
     }
-  }
 }

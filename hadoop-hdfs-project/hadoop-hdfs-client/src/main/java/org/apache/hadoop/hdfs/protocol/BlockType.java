@@ -31,27 +31,29 @@ package org.apache.hadoop.hdfs.protocol;
  * 0b11 == possible further extension block type.
  */
 public enum BlockType {
-  //! Replicated block.
-  CONTIGUOUS,
-  //! Erasure Coded Block
-  STRIPED;
 
-  // BLOCK_ID_MASK is the union of all masks.
-  static final long BLOCK_ID_MASK          = 1L << 63;
-  // BLOCK_ID_MASK_STRIPED is the mask for striped blocks.
-  static final long BLOCK_ID_MASK_STRIPED  = 1L << 63;
+    //! Replicated block.
+    CONTIGUOUS,
+    //! Erasure Coded Block
+    STRIPED;
 
-  /**
-   * Parse a BlockId to find the BlockType
-   * Note: the old block id generation algorithm was based on a pseudo random
-   * number generator, so there may be legacy blocks that make this conversion
-   * unreliable.
-   */
-  public static BlockType fromBlockId(long blockId) {
-    long blockType = blockId & BLOCK_ID_MASK;
-    if(blockType == BLOCK_ID_MASK_STRIPED) {
-      return STRIPED;
+    // BLOCK_ID_MASK is the union of all masks.
+    static final long BLOCK_ID_MASK = 1L << 63;
+
+    // BLOCK_ID_MASK_STRIPED is the mask for striped blocks.
+    static final long BLOCK_ID_MASK_STRIPED = 1L << 63;
+
+    /**
+     * Parse a BlockId to find the BlockType
+     * Note: the old block id generation algorithm was based on a pseudo random
+     * number generator, so there may be legacy blocks that make this conversion
+     * unreliable.
+     */
+    public static BlockType fromBlockId(long blockId) {
+        long blockType = blockId & BLOCK_ID_MASK;
+        if (blockType == BLOCK_ID_MASK_STRIPED) {
+            return STRIPED;
+        }
+        return CONTIGUOUS;
     }
-    return CONTIGUOUS;
-  }
 }

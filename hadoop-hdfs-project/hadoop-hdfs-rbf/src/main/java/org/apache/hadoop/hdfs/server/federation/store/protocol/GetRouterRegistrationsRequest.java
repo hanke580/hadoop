@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.server.federation.store.protocol;
 
 import java.io.IOException;
-
 import org.apache.hadoop.hdfs.server.federation.store.driver.StateStoreSerializer;
 
 /**
@@ -27,8 +26,7 @@ import org.apache.hadoop.hdfs.server.federation.store.driver.StateStoreSerialize
  */
 public abstract class GetRouterRegistrationsRequest {
 
-  public static GetRouterRegistrationsRequest newInstance() throws IOException {
-    return StateStoreSerializer.newRecord(GetRouterRegistrationsRequest.class);
-  }
-
+    public static GetRouterRegistrationsRequest newInstance() throws IOException {
+        return StateStoreSerializer.newRecord(GetRouterRegistrationsRequest.class);
+    }
 }

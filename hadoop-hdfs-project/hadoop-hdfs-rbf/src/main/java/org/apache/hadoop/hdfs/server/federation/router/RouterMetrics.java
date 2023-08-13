@@ -19,7 +19,6 @@ package org.apache.hadoop.hdfs.server.federation.router;
 
 import static org.apache.hadoop.metrics2.impl.MsInfo.ProcessName;
 import static org.apache.hadoop.metrics2.impl.MsInfo.SessionId;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.apache.hadoop.metrics2.MetricsSystem;
@@ -34,40 +33,38 @@ import org.apache.hadoop.metrics2.source.JvmMetrics;
  * This class is for maintaining the various Router activity statistics
  * and publishing them through the metrics interfaces.
  */
-@Metrics(name="RouterActivity", about="Router metrics", context="dfs")
+@Metrics(name = "RouterActivity", about = "Router metrics", context = "dfs")
 public class RouterMetrics {
 
-  private final MetricsRegistry registry = new MetricsRegistry("router");
+    private final MetricsRegistry registry = new MetricsRegistry("router");
 
-  @Metric("Duration in SafeMode at startup in msec")
-  private MutableGaugeInt safeModeTime;
+    @Metric("Duration in SafeMode at startup in msec")
+    private MutableGaugeInt safeModeTime;
 
-  private JvmMetrics jvmMetrics = null;
+    private JvmMetrics jvmMetrics = null;
 
-  RouterMetrics(
-      String processName, String sessionId, final JvmMetrics jvmMetrics) {
-    this.jvmMetrics = jvmMetrics;
-    registry.tag(ProcessName, processName).tag(SessionId, sessionId);
-  }
+    RouterMetrics(String processName, String sessionId, final JvmMetrics jvmMetrics) {
+        this.jvmMetrics = jvmMetrics;
+        registry.tag(ProcessName, processName).tag(SessionId, sessionId);
+    }
 
-  public static RouterMetrics create(Configuration conf) {
-    String sessionId = conf.get(DFSConfigKeys.DFS_METRICS_SESSION_ID_KEY);
-    String processName = "Router";
-    MetricsSystem ms = DefaultMetricsSystem.instance();
-    JvmMetrics jm = JvmMetrics.create(processName, sessionId, ms);
+    public static RouterMetrics create(Configuration conf) {
+        String sessionId = conf.get(DFSConfigKeys.DFS_METRICS_SESSION_ID_KEY);
+        String processName = "Router";
+        MetricsSystem ms = DefaultMetricsSystem.instance();
+        JvmMetrics jm = JvmMetrics.create(processName, sessionId, ms);
+        return ms.register(new RouterMetrics(processName, sessionId, jm));
+    }
 
-    return ms.register(new RouterMetrics(processName, sessionId, jm));
-  }
+    public JvmMetrics getJvmMetrics() {
+        return jvmMetrics;
+    }
 
-  public JvmMetrics getJvmMetrics() {
-    return jvmMetrics;
-  }
+    public void shutdown() {
+        DefaultMetricsSystem.shutdown();
+    }
 
-  public void shutdown() {
-    DefaultMetricsSystem.shutdown();
-  }
-
-  public void setSafeModeTime(long elapsed) {
-    safeModeTime.set((int) elapsed);
-  }
+    public void setSafeModeTime(long elapsed) {
+        safeModeTime.set((int) elapsed);
+    }
 }

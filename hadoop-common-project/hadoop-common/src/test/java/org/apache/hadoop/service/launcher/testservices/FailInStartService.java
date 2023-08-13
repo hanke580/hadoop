@@ -15,23 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.service.launcher.testservices;
 
 /**
  * Service which fails in its start() operation.
  */
 public class FailInStartService extends FailureTestService {
-  public static final String NAME =
-      "org.apache.hadoop.service.launcher.testservices.FailInStartService";
-  public static final int EXIT_CODE = -2;
 
-  public FailInStartService() {
-    super(false, true, false, 0);
-  }
+    public static final String NAME = "org.apache.hadoop.service.launcher.testservices.FailInStartService";
 
-  @Override
-  int getExitCode() {
-    return EXIT_CODE;
-  }
+    public static final int EXIT_CODE = -2;
+
+    public FailInStartService() {
+        super(false, true, false, 0);
+    }
+
+    @Override
+    int getExitCode() {
+        return EXIT_CODE;
+    }
 }

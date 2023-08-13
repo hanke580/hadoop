@@ -22,7 +22,6 @@ import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.fs.StorageType;
 import org.apache.hadoop.hdfs.security.token.block.BlockTokenIdentifier;
 import org.apache.hadoop.security.token.Token;
-
 import java.util.Arrays;
 
 /**
@@ -33,60 +32,54 @@ import java.util.Arrays;
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
 public class LocatedStripedBlock extends LocatedBlock {
-  private static final byte[] EMPTY_INDICES = {};
-  private static final Token<BlockTokenIdentifier> EMPTY_TOKEN = new Token<>();
 
-  private final byte[] blockIndices;
-  private Token<BlockTokenIdentifier>[] blockTokens;
+    private static final byte[] EMPTY_INDICES = {};
 
-  @SuppressWarnings({"unchecked"})
-  public LocatedStripedBlock(ExtendedBlock b, DatanodeInfo[] locs,
-      String[] storageIDs, StorageType[] storageTypes, byte[] indices,
-      long startOffset, boolean corrupt, DatanodeInfo[] cachedLocs) {
-    super(b, locs, storageIDs, storageTypes, startOffset, corrupt, cachedLocs);
+    private static final Token<BlockTokenIdentifier> EMPTY_TOKEN = new Token<>();
 
-    if (indices == null) {
-      this.blockIndices = EMPTY_INDICES;
-    } else {
-      this.blockIndices = new byte[indices.length];
-      System.arraycopy(indices, 0, blockIndices, 0, indices.length);
+    private final byte[] blockIndices;
+
+    private Token<BlockTokenIdentifier>[] blockTokens;
+
+    @SuppressWarnings({ "unchecked" })
+    public LocatedStripedBlock(ExtendedBlock b, DatanodeInfo[] locs, String[] storageIDs, StorageType[] storageTypes, byte[] indices, long startOffset, boolean corrupt, DatanodeInfo[] cachedLocs) {
+        super(b, locs, storageIDs, storageTypes, startOffset, corrupt, cachedLocs);
+        if (indices == null) {
+            this.blockIndices = EMPTY_INDICES;
+        } else {
+            this.blockIndices = new byte[indices.length];
+            System.arraycopy(indices, 0, blockIndices, 0, indices.length);
+        }
+        blockTokens = new Token[blockIndices.length];
+        for (int i = 0; i < blockIndices.length; i++) {
+            blockTokens[i] = EMPTY_TOKEN;
+        }
     }
-    blockTokens = new Token[blockIndices.length];
-    for (int i = 0; i < blockIndices.length; i++) {
-      blockTokens[i] = EMPTY_TOKEN;
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{" + getBlock() + "; getBlockSize()=" + getBlockSize() + "; corrupt=" + isCorrupt() + "; offset=" + getStartOffset() + "; locs=" + Arrays.asList(getLocations()) + "; indices=" + Arrays.toString(blockIndices) + "}";
     }
-  }
 
-  @Override
-  public String toString() {
-    return getClass().getSimpleName() + "{" + getBlock()
-        + "; getBlockSize()=" + getBlockSize()
-        + "; corrupt=" + isCorrupt()
-        + "; offset=" + getStartOffset()
-        + "; locs=" + Arrays.asList(getLocations())
-        + "; indices=" + Arrays.toString(blockIndices)
-        + "}";
-  }
+    public byte[] getBlockIndices() {
+        return this.blockIndices;
+    }
 
-  public byte[] getBlockIndices() {
-    return this.blockIndices;
-  }
+    @Override
+    public boolean isStriped() {
+        return true;
+    }
 
-  @Override
-  public boolean isStriped() {
-    return true;
-  }
+    @Override
+    public BlockType getBlockType() {
+        return BlockType.STRIPED;
+    }
 
-  @Override
-  public BlockType getBlockType() {
-    return BlockType.STRIPED;
-  }
+    public Token<BlockTokenIdentifier>[] getBlockTokens() {
+        return blockTokens;
+    }
 
-  public Token<BlockTokenIdentifier>[] getBlockTokens() {
-    return blockTokens;
-  }
-
-  public void setBlockTokens(Token<BlockTokenIdentifier>[] tokens) {
-    this.blockTokens = tokens;
-  }
+    public void setBlockTokens(Token<BlockTokenIdentifier>[] tokens) {
+        this.blockTokens = tokens;
+    }
 }

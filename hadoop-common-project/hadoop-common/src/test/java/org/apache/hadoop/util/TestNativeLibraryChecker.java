@@ -21,63 +21,62 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import org.junit.Test;
 import static org.junit.Assert.*;
-
 import org.apache.hadoop.util.ExitUtil.ExitException;
 
-
 public class TestNativeLibraryChecker {
-  private void expectExit(String [] args) {
-    try {
-      // should throw exit exception
-      NativeLibraryChecker.main(args);
-      fail("should call exit");
-    } catch (ExitException e) {
-      // pass
-      ExitUtil.resetFirstExitException();
-    }
-  }
-  
-  @Test
-  public void testNativeLibraryChecker() {
-    ExitUtil.disableSystemExit();
-    // help should return normally
-    NativeLibraryChecker.main(new String[] {"-h"});
-    // illegal argmuments should exit
-    expectExit(new String[] {"-a", "-h"});
-    expectExit(new String[] {"aaa"});
-    if (NativeCodeLoader.isNativeCodeLoaded()) {
-      // no argument should return normally
-      NativeLibraryChecker.main(new String[0]);
-    } else {
-      // no argument should exit
-      expectExit(new String[0]);
-    }
-  }
 
-  @Test
-  public void testNativeLibraryCheckerOutput(){
-    expectOutput(new String[]{"-a"});
-    // no argument
-    expectOutput(new String[0]);
-  }
-
-  private void expectOutput(String [] args) {
-    ExitUtil.disableSystemExit();
-    ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-    PrintStream originalPs = System.out;
-    System.setOut(new PrintStream(outContent));
-    try {
-      NativeLibraryChecker.main(args);
-    } catch (ExitException e) {
-      ExitUtil.resetFirstExitException();
-    } finally {
-      if (Shell.WINDOWS) {
-        assertEquals(outContent.toString().indexOf("winutils: true") != -1, true);
-      }
-      if (NativeCodeLoader.isNativeCodeLoaded()) {
-        assertEquals(outContent.toString().indexOf("hadoop:  true") != -1, true);
-      }
-      System.setOut(originalPs);
+    private void expectExit(String[] args) {
+        try {
+            // should throw exit exception
+            NativeLibraryChecker.main(args);
+            fail("should call exit");
+        } catch (ExitException e) {
+            // pass
+            ExitUtil.resetFirstExitException();
+        }
     }
-  }
+
+    @Test
+    public void testNativeLibraryChecker() {
+        ExitUtil.disableSystemExit();
+        // help should return normally
+        NativeLibraryChecker.main(new String[] { "-h" });
+        // illegal argmuments should exit
+        expectExit(new String[] { "-a", "-h" });
+        expectExit(new String[] { "aaa" });
+        if (NativeCodeLoader.isNativeCodeLoaded()) {
+            // no argument should return normally
+            NativeLibraryChecker.main(new String[0]);
+        } else {
+            // no argument should exit
+            expectExit(new String[0]);
+        }
+    }
+
+    @Test
+    public void testNativeLibraryCheckerOutput() {
+        expectOutput(new String[] { "-a" });
+        // no argument
+        expectOutput(new String[0]);
+    }
+
+    private void expectOutput(String[] args) {
+        ExitUtil.disableSystemExit();
+        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+        PrintStream originalPs = System.out;
+        System.setOut(new PrintStream(outContent));
+        try {
+            NativeLibraryChecker.main(args);
+        } catch (ExitException e) {
+            ExitUtil.resetFirstExitException();
+        } finally {
+            if (Shell.WINDOWS) {
+                assertEquals(outContent.toString().indexOf("winutils: true") != -1, true);
+            }
+            if (NativeCodeLoader.isNativeCodeLoaded()) {
+                assertEquals(outContent.toString().indexOf("hadoop:  true") != -1, true);
+            }
+            System.setOut(originalPs);
+        }
+    }
 }

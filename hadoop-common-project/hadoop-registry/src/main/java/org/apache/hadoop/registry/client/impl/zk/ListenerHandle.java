@@ -18,8 +18,8 @@
 package org.apache.hadoop.registry.client.impl.zk;
 
 /**
- *
  */
 public interface ListenerHandle {
-  void remove();
+
+    void remove();
 }

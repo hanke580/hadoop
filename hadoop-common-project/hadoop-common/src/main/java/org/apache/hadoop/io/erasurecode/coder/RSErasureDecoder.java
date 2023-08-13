@@ -32,35 +32,32 @@ import org.apache.hadoop.io.erasurecode.rawcoder.RawErasureDecoder;
  */
 @InterfaceAudience.Private
 public class RSErasureDecoder extends ErasureDecoder {
-  private RawErasureDecoder rsRawDecoder;
 
-  public RSErasureDecoder(ErasureCoderOptions options) {
-    super(options);
-  }
+    private RawErasureDecoder rsRawDecoder;
 
-  @Override
-  protected ErasureCodingStep prepareDecodingStep(final ECBlockGroup blockGroup) {
-
-    ECBlock[] inputBlocks = getInputBlocks(blockGroup);
-    ECBlock[] outputBlocks = getOutputBlocks(blockGroup);
-
-    RawErasureDecoder rawDecoder = checkCreateRSRawDecoder();
-    return new ErasureDecodingStep(inputBlocks,
-        getErasedIndexes(inputBlocks), outputBlocks, rawDecoder);
-  }
-
-  private RawErasureDecoder checkCreateRSRawDecoder() {
-    if (rsRawDecoder == null) {
-      rsRawDecoder = CodecUtil.createRawDecoder(getConf(),
-          ErasureCodeConstants.RS_CODEC_NAME, getOptions());
+    public RSErasureDecoder(ErasureCoderOptions options) {
+        super(options);
     }
-    return rsRawDecoder;
-  }
 
-  @Override
-  public void release() {
-    if (rsRawDecoder != null) {
-      rsRawDecoder.release();
+    @Override
+    protected ErasureCodingStep prepareDecodingStep(final ECBlockGroup blockGroup) {
+        ECBlock[] inputBlocks = getInputBlocks(blockGroup);
+        ECBlock[] outputBlocks = getOutputBlocks(blockGroup);
+        RawErasureDecoder rawDecoder = checkCreateRSRawDecoder();
+        return new ErasureDecodingStep(inputBlocks, getErasedIndexes(inputBlocks), outputBlocks, rawDecoder);
     }
-  }
+
+    private RawErasureDecoder checkCreateRSRawDecoder() {
+        if (rsRawDecoder == null) {
+            rsRawDecoder = CodecUtil.createRawDecoder(getConf(), ErasureCodeConstants.RS_CODEC_NAME, getOptions());
+        }
+        return rsRawDecoder;
+    }
+
+    @Override
+    public void release() {
+        if (rsRawDecoder != null) {
+            rsRawDecoder.release();
+        }
+    }
 }

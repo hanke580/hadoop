@@ -15,12 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.lib.wsrs;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.io.IOUtils;
-
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,27 +26,30 @@ import java.io.OutputStream;
 
 @InterfaceAudience.Private
 public class InputStreamEntity implements StreamingOutput {
-  private InputStream is;
-  private long offset;
-  private long len;
 
-  public InputStreamEntity(InputStream is, long offset, long len) {
-    this.is = is;
-    this.offset = offset;
-    this.len = len;
-  }
+    private InputStream is;
 
-  public InputStreamEntity(InputStream is) {
-    this(is, 0, -1);
-  }
+    private long offset;
 
-  @Override
-  public void write(OutputStream os) throws IOException {
-    IOUtils.skipFully(is, offset);
-    if (len == -1) {
-      IOUtils.copyBytes(is, os, 4096, true);
-    } else {
-      IOUtils.copyBytes(is, os, len, true);
+    private long len;
+
+    public InputStreamEntity(InputStream is, long offset, long len) {
+        this.is = is;
+        this.offset = offset;
+        this.len = len;
     }
-  }
+
+    public InputStreamEntity(InputStream is) {
+        this(is, 0, -1);
+    }
+
+    @Override
+    public void write(OutputStream os) throws IOException {
+        IOUtils.skipFully(is, offset);
+        if (len == -1) {
+            IOUtils.copyBytes(is, os, 4096, true);
+        } else {
+            IOUtils.copyBytes(is, os, len, true);
+        }
+    }
 }

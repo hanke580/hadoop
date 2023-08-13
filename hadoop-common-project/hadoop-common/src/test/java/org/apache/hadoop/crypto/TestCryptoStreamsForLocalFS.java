@@ -18,12 +18,10 @@
 package org.apache.hadoop.crypto;
 
 import static org.junit.Assert.assertTrue;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CommonConfigurationKeysPublic;
 import org.apache.hadoop.fs.FileSystem;
@@ -39,97 +37,102 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 public class TestCryptoStreamsForLocalFS extends CryptoStreamsTestBase {
-  private static final String TEST_ROOT_DIR =
-      GenericTestUtils.getTempPath("work-dir/testcryptostreamsforlocalfs");
 
-  private final File base = new File(TEST_ROOT_DIR);
-  private final Path file = new Path(TEST_ROOT_DIR, "test-file");
-  private static LocalFileSystem fileSys;
-  
-  @BeforeClass
-  public static void init() throws Exception {
-    Configuration conf = new Configuration(false);
-    conf.set("fs.file.impl", LocalFileSystem.class.getName());
-    fileSys = FileSystem.getLocal(conf);
-    codec = CryptoCodec.getInstance(conf);
-  }
-  
-  @AfterClass
-  public static void shutdown() throws Exception {
-  }
-  
-  @Before
-  @Override
-  public void setUp() throws IOException {
-    fileSys.delete(new Path(TEST_ROOT_DIR), true);
-    super.setUp();
-  }
-  
-  @After
-  public void cleanUp() throws IOException {
-    FileUtil.setWritable(base, true);
-    FileUtil.fullyDelete(base);
-    assertTrue(!base.exists());
-  }
-  
-  @Override
-  protected OutputStream getOutputStream(int bufferSize, byte[] key, byte[] iv) 
-      throws IOException {
-    return new CryptoOutputStream(fileSys.create(file), codec, bufferSize, 
-        key, iv);
-  }
-  
-  @Override
-  protected InputStream getInputStream(int bufferSize, byte[] key, byte[] iv) 
-      throws IOException {
-    return new CryptoInputStream(fileSys.open(file), codec, bufferSize, 
-        key, iv);
-  }
-  
-  @Ignore("ChecksumFSInputChecker doesn't support ByteBuffer read")
-  @Override
-  @Test(timeout=10000)
-  public void testByteBufferRead() throws Exception {}
+    private static final String TEST_ROOT_DIR = GenericTestUtils.getTempPath("work-dir/testcryptostreamsforlocalfs");
 
-  @Ignore("Wrapped stream doesn't support ByteBufferPositionedReadable")
-  @Override
-  @Test(timeout=10000)
-  public void testPositionedReadWithByteBuffer() throws IOException {}
+    private final File base = new File(TEST_ROOT_DIR);
 
-  @Ignore("Wrapped stream doesn't support ByteBufferPositionedReadable")
-  @Override
-  @Test(timeout=10000)
-  public void testByteBufferReadFully() throws Exception {}
-  
-  @Ignore("ChecksumFSOutputSummer doesn't support Syncable")
-  @Override
-  @Test(timeout=10000)
-  public void testSyncable() throws IOException {}
+    private final Path file = new Path(TEST_ROOT_DIR, "test-file");
 
-  @Ignore("Wrapped stream doesn't support ByteBufferPositionedReadable")
-  @Override
-  @Test(timeout=10000)
-  public void testByteBufferPread() throws IOException {}
-  
-  @Ignore("ChecksumFSInputChecker doesn't support ByteBuffer read")
-  @Override
-  @Test(timeout=10000)
-  public void testCombinedOp() throws Exception {}
-  
-  @Ignore("ChecksumFSInputChecker doesn't support enhanced ByteBuffer access")
-  @Override
-  @Test(timeout=10000)
-  public void testHasEnhancedByteBufferAccess() throws Exception {
-  }
-  
-  @Ignore("ChecksumFSInputChecker doesn't support seekToNewSource")
-  @Override
-  @Test(timeout=10000)
-  public void testSeekToNewSource() throws Exception {
-  }
+    private static LocalFileSystem fileSys;
 
-  @Ignore("Local file input stream does not support unbuffer")
-  @Override
-  @Test
-  public void testUnbuffer() throws Exception {}
+    @BeforeClass
+    public static void init() throws Exception {
+        Configuration conf = new Configuration(false);
+        conf.set("fs.file.impl", LocalFileSystem.class.getName());
+        fileSys = FileSystem.getLocal(conf);
+        codec = CryptoCodec.getInstance(conf);
+    }
+
+    @AfterClass
+    public static void shutdown() throws Exception {
+    }
+
+    @Before
+    @Override
+    public void setUp() throws IOException {
+        fileSys.delete(new Path(TEST_ROOT_DIR), true);
+        super.setUp();
+    }
+
+    @After
+    public void cleanUp() throws IOException {
+        FileUtil.setWritable(base, true);
+        FileUtil.fullyDelete(base);
+        assertTrue(!base.exists());
+    }
+
+    @Override
+    protected OutputStream getOutputStream(int bufferSize, byte[] key, byte[] iv) throws IOException {
+        return new CryptoOutputStream(fileSys.create(file), codec, bufferSize, key, iv);
+    }
+
+    @Override
+    protected InputStream getInputStream(int bufferSize, byte[] key, byte[] iv) throws IOException {
+        return new CryptoInputStream(fileSys.open(file), codec, bufferSize, key, iv);
+    }
+
+    @Ignore("ChecksumFSInputChecker doesn't support ByteBuffer read")
+    @Override
+    @Test(timeout = 10000)
+    public void testByteBufferRead() throws Exception {
+    }
+
+    @Ignore("Wrapped stream doesn't support ByteBufferPositionedReadable")
+    @Override
+    @Test(timeout = 10000)
+    public void testPositionedReadWithByteBuffer() throws IOException {
+    }
+
+    @Ignore("Wrapped stream doesn't support ByteBufferPositionedReadable")
+    @Override
+    @Test(timeout = 10000)
+    public void testByteBufferReadFully() throws Exception {
+    }
+
+    @Ignore("ChecksumFSOutputSummer doesn't support Syncable")
+    @Override
+    @Test(timeout = 10000)
+    public void testSyncable() throws IOException {
+    }
+
+    @Ignore("Wrapped stream doesn't support ByteBufferPositionedReadable")
+    @Override
+    @Test(timeout = 10000)
+    public void testByteBufferPread() throws IOException {
+    }
+
+    @Ignore("ChecksumFSInputChecker doesn't support ByteBuffer read")
+    @Override
+    @Test(timeout = 10000)
+    public void testCombinedOp() throws Exception {
+    }
+
+    @Ignore("ChecksumFSInputChecker doesn't support enhanced ByteBuffer access")
+    @Override
+    @Test(timeout = 10000)
+    public void testHasEnhancedByteBufferAccess() throws Exception {
+    }
+
+    @Ignore("ChecksumFSInputChecker doesn't support seekToNewSource")
+    @Override
+    @Test(timeout = 10000)
+    public void testSeekToNewSource() throws Exception {
+    }
+
+    @Ignore("Local file input stream does not support unbuffer")
+    @Override
+    @Test
+    public void testUnbuffer() throws Exception {
+    }
 }

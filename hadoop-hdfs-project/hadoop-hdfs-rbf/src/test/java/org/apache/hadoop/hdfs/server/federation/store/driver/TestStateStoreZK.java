@@ -22,10 +22,8 @@ import static org.apache.hadoop.hdfs.server.federation.store.driver.impl.StateSt
 import static org.apache.hadoop.hdfs.server.federation.store.driver.impl.StateStoreZooKeeperImpl.FEDERATION_STORE_ZK_PARENT_PATH_DEFAULT;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.RetryNTimes;
@@ -51,108 +49,90 @@ import org.junit.Test;
  */
 public class TestStateStoreZK extends TestStateStoreDriverBase {
 
-  private static TestingServer curatorTestingServer;
-  private static CuratorFramework curatorFramework;
-  private static String baseZNode;
+    private static TestingServer curatorTestingServer;
 
-  @BeforeClass
-  public static void setupCluster() throws Exception {
-    curatorTestingServer = new TestingServer();
-    curatorTestingServer.start();
-    String connectString = curatorTestingServer.getConnectString();
-    curatorFramework = CuratorFrameworkFactory.builder()
-        .connectString(connectString)
-        .retryPolicy(new RetryNTimes(100, 100))
-        .build();
-    curatorFramework.start();
+    private static CuratorFramework curatorFramework;
 
-    // Create the ZK State Store
-    Configuration conf =
-        getStateStoreConfiguration(StateStoreZooKeeperImpl.class);
-    conf.set(CommonConfigurationKeys.ZK_ADDRESS, connectString);
-    // Disable auto-repair of connection
-    conf.setLong(RBFConfigKeys.FEDERATION_STORE_CONNECTION_TEST_MS,
-        TimeUnit.HOURS.toMillis(1));
+    private static String baseZNode;
 
-    baseZNode = conf.get(FEDERATION_STORE_ZK_PARENT_PATH,
-        FEDERATION_STORE_ZK_PARENT_PATH_DEFAULT);
-    getStateStore(conf);
-  }
-
-  @AfterClass
-  public static void tearDownCluster() {
-    curatorFramework.close();
-    try {
-      curatorTestingServer.stop();
-    } catch (IOException e) {
+    @BeforeClass
+    public static void setupCluster() throws Exception {
+        curatorTestingServer = new TestingServer();
+        curatorTestingServer.start();
+        String connectString = curatorTestingServer.getConnectString();
+        curatorFramework = CuratorFrameworkFactory.builder().connectString(connectString).retryPolicy(new RetryNTimes(100, 100)).build();
+        curatorFramework.start();
+        // Create the ZK State Store
+        Configuration conf = getStateStoreConfiguration(StateStoreZooKeeperImpl.class);
+        conf.set(CommonConfigurationKeys.ZK_ADDRESS, connectString);
+        // Disable auto-repair of connection
+        conf.setLong(RBFConfigKeys.FEDERATION_STORE_CONNECTION_TEST_MS, TimeUnit.HOURS.toMillis(1));
+        baseZNode = conf.get(FEDERATION_STORE_ZK_PARENT_PATH, FEDERATION_STORE_ZK_PARENT_PATH_DEFAULT);
+        getStateStore(conf);
     }
-  }
 
-  @Before
-  public void startup() throws IOException {
-    removeAll(getStateStoreDriver());
-  }
-
-  private <T extends BaseRecord> String generateFakeZNode(
-      Class<T> recordClass) throws IOException {
-    String nodeName = StateStoreUtils.getRecordName(recordClass);
-    String primaryKey = "test";
-
-    if (nodeName != null) {
-      return baseZNode + "/" + nodeName + "/" + primaryKey;
+    @AfterClass
+    public static void tearDownCluster() {
+        curatorFramework.close();
+        try {
+            curatorTestingServer.stop();
+        } catch (IOException e) {
+        }
     }
-    return null;
-  }
 
-  private void testGetNullRecord(StateStoreDriver driver) throws Exception {
-    testGetNullRecord(driver, MembershipState.class);
-    testGetNullRecord(driver, MountTable.class);
-    testGetNullRecord(driver, RouterState.class);
-    testGetNullRecord(driver, DisabledNameservice.class);
-  }
+    @Before
+    public void startup() throws IOException {
+        removeAll(getStateStoreDriver());
+    }
 
-  private <T extends BaseRecord> void testGetNullRecord(
-      StateStoreDriver driver, Class<T> recordClass) throws Exception {
-    driver.removeAll(recordClass);
+    private <T extends BaseRecord> String generateFakeZNode(Class<T> recordClass) throws IOException {
+        String nodeName = StateStoreUtils.getRecordName(recordClass);
+        String primaryKey = "test";
+        if (nodeName != null) {
+            return baseZNode + "/" + nodeName + "/" + primaryKey;
+        }
+        return null;
+    }
 
-    String znode = generateFakeZNode(recordClass);
-    assertNull(curatorFramework.checkExists().forPath(znode));
+    private void testGetNullRecord(StateStoreDriver driver) throws Exception {
+        testGetNullRecord(driver, MembershipState.class);
+        testGetNullRecord(driver, MountTable.class);
+        testGetNullRecord(driver, RouterState.class);
+        testGetNullRecord(driver, DisabledNameservice.class);
+    }
 
-    curatorFramework.create().withMode(CreateMode.PERSISTENT)
-        .withACL(null).forPath(znode, null);
-    assertNotNull(curatorFramework.checkExists().forPath(znode));
+    private <T extends BaseRecord> void testGetNullRecord(StateStoreDriver driver, Class<T> recordClass) throws Exception {
+        driver.removeAll(recordClass);
+        String znode = generateFakeZNode(recordClass);
+        assertNull(curatorFramework.checkExists().forPath(znode));
+        curatorFramework.create().withMode(CreateMode.PERSISTENT).withACL(null).forPath(znode, null);
+        assertNotNull(curatorFramework.checkExists().forPath(znode));
+        driver.get(recordClass);
+        assertNull(curatorFramework.checkExists().forPath(znode));
+    }
 
-    driver.get(recordClass);
-    assertNull(curatorFramework.checkExists().forPath(znode));
-  }
+    @Test
+    public void testGetNullRecord() throws Exception {
+        testGetNullRecord(getStateStoreDriver());
+    }
 
-  @Test
-  public void testGetNullRecord() throws Exception {
-    testGetNullRecord(getStateStoreDriver());
-  }
+    @Test
+    public void testInsert() throws IllegalArgumentException, IllegalAccessException, IOException {
+        testInsert(getStateStoreDriver());
+    }
 
-  @Test
-  public void testInsert()
-      throws IllegalArgumentException, IllegalAccessException, IOException {
-    testInsert(getStateStoreDriver());
-  }
+    @Test
+    public void testUpdate() throws IllegalArgumentException, ReflectiveOperationException, IOException, SecurityException {
+        testPut(getStateStoreDriver());
+    }
 
-  @Test
-  public void testUpdate()
-      throws IllegalArgumentException, ReflectiveOperationException,
-      IOException, SecurityException {
-    testPut(getStateStoreDriver());
-  }
+    @Test
+    public void testDelete() throws IllegalArgumentException, IllegalAccessException, IOException {
+        testRemove(getStateStoreDriver());
+    }
 
-  @Test
-  public void testDelete()
-      throws IllegalArgumentException, IllegalAccessException, IOException {
-    testRemove(getStateStoreDriver());
-  }
-
-  @Test
-  public void testFetchErrors()
-      throws IllegalArgumentException, IllegalAccessException, IOException {
-    testFetchErrors(getStateStoreDriver());
-  }
+    @Test
+    public void testFetchErrors() throws IllegalArgumentException, IllegalAccessException, IOException {
+        testFetchErrors(getStateStoreDriver());
+    }
 }

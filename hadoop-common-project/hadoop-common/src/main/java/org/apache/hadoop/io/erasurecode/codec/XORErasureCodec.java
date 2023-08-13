@@ -31,18 +31,18 @@ import org.apache.hadoop.io.erasurecode.coder.XORErasureEncoder;
 @InterfaceAudience.Private
 public class XORErasureCodec extends ErasureCodec {
 
-  public XORErasureCodec(Configuration conf, ErasureCodecOptions options) {
-    super(conf, options);
-    assert(options.getSchema().getNumParityUnits() == 1);
-  }
+    public XORErasureCodec(Configuration conf, ErasureCodecOptions options) {
+        super(conf, options);
+        assert (options.getSchema().getNumParityUnits() == 1);
+    }
 
-  @Override
-  public ErasureEncoder createEncoder() {
-    return new XORErasureEncoder(getCoderOptions());
-  }
+    @Override
+    public ErasureEncoder createEncoder() {
+        return new XORErasureEncoder(getCoderOptions());
+    }
 
-  @Override
-  public ErasureDecoder createDecoder() {
-    return new XORErasureDecoder(getCoderOptions());
-  }
+    @Override
+    public ErasureDecoder createDecoder() {
+        return new XORErasureDecoder(getCoderOptions());
+    }
 }

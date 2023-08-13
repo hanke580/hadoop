@@ -15,12 +15,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.hadoop.service;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.hadoop.service.Service;
 import org.apache.hadoop.service.ServiceStateChangeListener;
 
@@ -30,76 +28,75 @@ import org.apache.hadoop.service.ServiceStateChangeListener;
  *
  * It can be configured to fail during a state change event
  */
-public class BreakableStateChangeListener
-    implements ServiceStateChangeListener {
+public class BreakableStateChangeListener implements ServiceStateChangeListener {
 
-  private final String name;
+    private final String name;
 
-  private int eventCount;
-  private int failureCount;
-  private Service lastService;
-  private Service.STATE lastState = Service.STATE.NOTINITED;
-  //no callbacks are ever received for this event, so it
-  //can be used as an 'undefined'.
-  private Service.STATE failingState = Service.STATE.NOTINITED;
-  private List<Service.STATE> stateEventList = new ArrayList<Service.STATE>(4);
+    private int eventCount;
 
-  public BreakableStateChangeListener() {
-    this( "BreakableStateChangeListener");
-  }
+    private int failureCount;
 
-  public BreakableStateChangeListener(String name) {
-    this.name = name;
-  }
+    private Service lastService;
 
-  @Override
-  public synchronized void stateChanged(Service service) {
-    eventCount++;
-    lastService = service;
-    lastState = service.getServiceState();
-    stateEventList.add(lastState);
-    if (lastState == failingState) {
-      failureCount++;
-      throw new BreakableService.BrokenLifecycleEvent(service,
-                                                      "Failure entering "
-                                                      + lastState
-                                                      + " for "
-                                                      + service.getName());
+    private Service.STATE lastState = Service.STATE.NOTINITED;
+
+    //no callbacks are ever received for this event, so it
+    //can be used as an 'undefined'.
+    private Service.STATE failingState = Service.STATE.NOTINITED;
+
+    private List<Service.STATE> stateEventList = new ArrayList<Service.STATE>(4);
+
+    public BreakableStateChangeListener() {
+        this("BreakableStateChangeListener");
     }
-  }
 
-  public synchronized int getEventCount() {
-    return eventCount;
-  }
-
-  public synchronized Service getLastService() {
-    return lastService;
-  }
-
-  public synchronized Service.STATE getLastState() {
-    return lastState;
-  }
-
-  public synchronized void setFailingState(Service.STATE failingState) {
-    this.failingState = failingState;
-  }
-
-  public synchronized int getFailureCount() {
-    return failureCount;
-  }
-
-  public List<Service.STATE> getStateEventList() {
-    return stateEventList;
-  }
-
-  @Override
-  public synchronized String toString() {
-    String s =
-      name + " - event count = " + eventCount + " last state " + lastState;
-    StringBuilder history = new StringBuilder(stateEventList.size()*10);
-    for (Service.STATE state: stateEventList) {
-      history.append(state).append(" ");
+    public BreakableStateChangeListener(String name) {
+        this.name = name;
     }
-    return s + " [ " + history + "]";
-  }
+
+    @Override
+    public synchronized void stateChanged(Service service) {
+        eventCount++;
+        lastService = service;
+        lastState = service.getServiceState();
+        stateEventList.add(lastState);
+        if (lastState == failingState) {
+            failureCount++;
+            throw new BreakableService.BrokenLifecycleEvent(service, "Failure entering " + lastState + " for " + service.getName());
+        }
+    }
+
+    public synchronized int getEventCount() {
+        return eventCount;
+    }
+
+    public synchronized Service getLastService() {
+        return lastService;
+    }
+
+    public synchronized Service.STATE getLastState() {
+        return lastState;
+    }
+
+    public synchronized void setFailingState(Service.STATE failingState) {
+        this.failingState = failingState;
+    }
+
+    public synchronized int getFailureCount() {
+        return failureCount;
+    }
+
+    public List<Service.STATE> getStateEventList() {
+        return stateEventList;
+    }
+
+    @Override
+    public synchronized String toString() {
+        String s = name + " - event count = " + eventCount + " last state " + lastState;
+        StringBuilder history = new StringBuilder(stateEventList.size() * 10);
+        for (Service.STATE state : stateEventList) {
+            history.append(state).append(" ");
+        }
+        return s + " [ " + history + "]";
+    }
 }

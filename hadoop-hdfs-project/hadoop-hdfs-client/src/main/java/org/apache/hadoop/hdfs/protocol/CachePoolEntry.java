@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.protocol;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -27,19 +26,21 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
 public class CachePoolEntry {
-  private final CachePoolInfo info;
-  private final CachePoolStats stats;
 
-  public CachePoolEntry(CachePoolInfo info, CachePoolStats stats) {
-    this.info = info;
-    this.stats = stats;
-  }
+    private final CachePoolInfo info;
 
-  public CachePoolInfo getInfo() {
-    return info;
-  }
+    private final CachePoolStats stats;
 
-  public CachePoolStats getStats() {
-    return stats;
-  }
+    public CachePoolEntry(CachePoolInfo info, CachePoolStats stats) {
+        this.info = info;
+        this.stats = stats;
+    }
+
+    public CachePoolInfo getInfo() {
+        return info;
+    }
+
+    public CachePoolStats getStats() {
+        return stats;
+    }
 }

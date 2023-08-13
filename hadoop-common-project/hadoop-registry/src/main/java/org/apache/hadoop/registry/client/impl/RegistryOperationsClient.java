@@ -15,14 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.registry.client.impl;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.registry.client.impl.zk.RegistryBindingSource;
 import org.apache.hadoop.registry.client.impl.zk.RegistryOperationsService;
-
 
 /**
  * This is the client service for applications to work with the registry.
@@ -44,12 +42,11 @@ import org.apache.hadoop.registry.client.impl.zk.RegistryOperationsService;
 @InterfaceStability.Evolving
 public class RegistryOperationsClient extends RegistryOperationsService {
 
-  public RegistryOperationsClient(String name) {
-    super(name);
-  }
+    public RegistryOperationsClient(String name) {
+        super(name);
+    }
 
-  public RegistryOperationsClient(String name,
-      RegistryBindingSource bindingSource) {
-    super(name, bindingSource);
-  }
+    public RegistryOperationsClient(String name, RegistryBindingSource bindingSource) {
+        super(name, bindingSource);
+    }
 }

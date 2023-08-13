@@ -21,7 +21,6 @@ import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.crypto.key.KeyProvider;
 import org.apache.hadoop.crypto.key.kms.KMSRESTConstants;
 import org.apache.hadoop.util.KMSUtil;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -33,40 +32,38 @@ import java.util.Map;
 @InterfaceAudience.Private
 public class KMSServerJSONUtils {
 
-  @SuppressWarnings("unchecked")
-  public static List toJSON(List<KeyProvider.KeyVersion> keyVersions) {
-    List json = new ArrayList();
-    if (keyVersions != null) {
-      for (KeyProvider.KeyVersion version : keyVersions) {
-        json.add(KMSUtil.toJSON(version));
-      }
+    @SuppressWarnings("unchecked")
+    public static List toJSON(List<KeyProvider.KeyVersion> keyVersions) {
+        List json = new ArrayList();
+        if (keyVersions != null) {
+            for (KeyProvider.KeyVersion version : keyVersions) {
+                json.add(KMSUtil.toJSON(version));
+            }
+        }
+        return json;
     }
-    return json;
-  }
 
-  @SuppressWarnings("unchecked")
-  public static Map toJSON(String keyName, KeyProvider.Metadata meta) {
-    Map json = new LinkedHashMap();
-    if (meta != null) {
-      json.put(KMSRESTConstants.NAME_FIELD, keyName);
-      json.put(KMSRESTConstants.CIPHER_FIELD, meta.getCipher());
-      json.put(KMSRESTConstants.LENGTH_FIELD, meta.getBitLength());
-      json.put(KMSRESTConstants.DESCRIPTION_FIELD, meta.getDescription());
-      json.put(KMSRESTConstants.ATTRIBUTES_FIELD, meta.getAttributes());
-      json.put(KMSRESTConstants.CREATED_FIELD,
-          meta.getCreated().getTime());
-      json.put(KMSRESTConstants.VERSIONS_FIELD,
-          (long) meta.getVersions());
+    @SuppressWarnings("unchecked")
+    public static Map toJSON(String keyName, KeyProvider.Metadata meta) {
+        Map json = new LinkedHashMap();
+        if (meta != null) {
+            json.put(KMSRESTConstants.NAME_FIELD, keyName);
+            json.put(KMSRESTConstants.CIPHER_FIELD, meta.getCipher());
+            json.put(KMSRESTConstants.LENGTH_FIELD, meta.getBitLength());
+            json.put(KMSRESTConstants.DESCRIPTION_FIELD, meta.getDescription());
+            json.put(KMSRESTConstants.ATTRIBUTES_FIELD, meta.getAttributes());
+            json.put(KMSRESTConstants.CREATED_FIELD, meta.getCreated().getTime());
+            json.put(KMSRESTConstants.VERSIONS_FIELD, (long) meta.getVersions());
+        }
+        return json;
     }
-    return json;
-  }
 
-  @SuppressWarnings("unchecked")
-  public static List toJSON(String[] keyNames, KeyProvider.Metadata[] metas) {
-    List json = new ArrayList();
-    for (int i = 0; i < keyNames.length; i++) {
-      json.add(toJSON(keyNames[i], metas[i]));
+    @SuppressWarnings("unchecked")
+    public static List toJSON(String[] keyNames, KeyProvider.Metadata[] metas) {
+        List json = new ArrayList();
+        for (int i = 0; i < keyNames.length; i++) {
+            json.add(toJSON(keyNames[i], metas[i]));
+        }
+        return json;
     }
-    return json;
-  }
 }

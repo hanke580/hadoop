@@ -26,13 +26,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.hadoop.hdfs.server.federation.store.protocol.AddMountTableEntryRequest;
 import org.apache.hadoop.hdfs.server.federation.store.protocol.AddMountTableEntryResponse;
 import org.apache.hadoop.hdfs.server.federation.store.protocol.GetMountTableEntriesRequest;
@@ -52,201 +50,154 @@ import org.junit.Test;
  */
 public class TestStateStoreMountTable extends TestStateStoreBase {
 
-  private static List<String> nameservices;
-  private static MountTableStore mountStore;
+    private static List<String> nameservices;
 
-  @BeforeClass
-  public static void create() throws IOException {
-    nameservices = new ArrayList<>();
-    nameservices.add(NAMESERVICES[0]);
-    nameservices.add(NAMESERVICES[1]);
-  }
+    private static MountTableStore mountStore;
 
-  @Before
-  public void setup() throws IOException, InterruptedException {
-    mountStore =
-        getStateStore().getRegisteredRecordStore(MountTableStore.class);
-    // Clear Mount table registrations
-    assertTrue(clearRecords(getStateStore(), MountTable.class));
-  }
-
-  @Test
-  public void testStateStoreDisconnected() throws Exception {
-
-    // Close the data store driver
-    getStateStore().closeDriver();
-    assertFalse(getStateStore().isDriverReady());
-
-    // Test APIs that access the store to check they throw the correct exception
-    MountTable entry = MountTable.newInstance(
-        "/mnt", Collections.singletonMap("ns0", "/tmp"));
-    AddMountTableEntryRequest addRequest =
-        AddMountTableEntryRequest.newInstance(entry);
-    verifyException(mountStore, "addMountTableEntry",
-        StateStoreUnavailableException.class,
-        new Class[] {AddMountTableEntryRequest.class},
-        new Object[] {addRequest});
-
-    UpdateMountTableEntryRequest updateRequest =
-        UpdateMountTableEntryRequest.newInstance(entry);
-    verifyException(mountStore, "updateMountTableEntry",
-        StateStoreUnavailableException.class,
-        new Class[] {UpdateMountTableEntryRequest.class},
-        new Object[] {updateRequest});
-
-    RemoveMountTableEntryRequest removeRequest =
-        RemoveMountTableEntryRequest.newInstance();
-    verifyException(mountStore, "removeMountTableEntry",
-        StateStoreUnavailableException.class,
-        new Class[] {RemoveMountTableEntryRequest.class},
-        new Object[] {removeRequest});
-
-    GetMountTableEntriesRequest getRequest =
-        GetMountTableEntriesRequest.newInstance();
-    mountStore.loadCache(true);
-    verifyException(mountStore, "getMountTableEntries",
-        StateStoreUnavailableException.class,
-        new Class[] {GetMountTableEntriesRequest.class},
-        new Object[] {getRequest});
-  }
-
-  @Test
-  public void testSynchronizeMountTable() throws IOException {
-    // Synchronize and get mount table entries
-    List<MountTable> entries = createMockMountTable(nameservices);
-    assertTrue(synchronizeRecords(getStateStore(), entries, MountTable.class));
-    for (MountTable e : entries) {
-      mountStore.loadCache(true);
-      MountTable entry = getMountTableEntry(e.getSourcePath());
-      assertNotNull(entry);
-      assertEquals(e.getDefaultLocation().getDest(),
-          entry.getDefaultLocation().getDest());
+    @BeforeClass
+    public static void create() throws IOException {
+        nameservices = new ArrayList<>();
+        nameservices.add(NAMESERVICES[0]);
+        nameservices.add(NAMESERVICES[1]);
     }
-  }
 
-  @Test
-  public void testAddMountTableEntry() throws IOException {
-
-    // Add 1
-    List<MountTable> entries = createMockMountTable(nameservices);
-    List<MountTable> entries1 = getMountTableEntries("/").getRecords();
-    assertEquals(0, entries1.size());
-    MountTable entry0 = entries.get(0);
-    AddMountTableEntryRequest request =
-        AddMountTableEntryRequest.newInstance(entry0);
-    AddMountTableEntryResponse response =
-        mountStore.addMountTableEntry(request);
-    assertTrue(response.getStatus());
-
-    mountStore.loadCache(true);
-    List<MountTable> entries2 = getMountTableEntries("/").getRecords();
-    assertEquals(1, entries2.size());
-  }
-
-  @Test
-  public void testRemoveMountTableEntry() throws IOException {
-
-    // Add many
-    List<MountTable> entries = createMockMountTable(nameservices);
-    synchronizeRecords(getStateStore(), entries, MountTable.class);
-    mountStore.loadCache(true);
-    List<MountTable> entries1 = getMountTableEntries("/").getRecords();
-    assertEquals(entries.size(), entries1.size());
-
-    // Remove 1
-    RemoveMountTableEntryRequest request =
-        RemoveMountTableEntryRequest.newInstance();
-    request.setSrcPath(entries.get(0).getSourcePath());
-    assertTrue(mountStore.removeMountTableEntry(request).getStatus());
-
-    // Verify remove
-    mountStore.loadCache(true);
-    List<MountTable> entries2 = getMountTableEntries("/").getRecords();
-    assertEquals(entries.size() - 1, entries2.size());
-  }
-
-  @Test
-  public void testUpdateMountTableEntry() throws IOException {
-
-    // Add 1
-    List<MountTable> entries = createMockMountTable(nameservices);
-    MountTable entry0 = entries.get(0);
-    String srcPath = entry0.getSourcePath();
-    String nsId = entry0.getDefaultLocation().getNameserviceId();
-    AddMountTableEntryRequest request =
-        AddMountTableEntryRequest.newInstance(entry0);
-    AddMountTableEntryResponse response =
-        mountStore.addMountTableEntry(request);
-    assertTrue(response.getStatus());
-
-    // Verify
-    mountStore.loadCache(true);
-    MountTable matchingEntry0 = getMountTableEntry(srcPath);
-    assertNotNull(matchingEntry0);
-    assertEquals(nsId, matchingEntry0.getDefaultLocation().getNameserviceId());
-
-    // Edit destination nameservice for source path
-    Map<String, String> destMap =
-        Collections.singletonMap("testnameservice", "/");
-    MountTable replacement =
-        MountTable.newInstance(srcPath, destMap);
-    UpdateMountTableEntryRequest updateRequest =
-        UpdateMountTableEntryRequest.newInstance(replacement);
-    UpdateMountTableEntryResponse updateResponse =
-        mountStore.updateMountTableEntry(updateRequest);
-    assertTrue(updateResponse.getStatus());
-
-    // Verify
-    mountStore.loadCache(true);
-    MountTable matchingEntry1 = getMountTableEntry(srcPath);
-    assertNotNull(matchingEntry1);
-    assertEquals("testnameservice",
-        matchingEntry1.getDefaultLocation().getNameserviceId());
-  }
-
-  /**
-   * Gets an existing mount table record in the state store.
-   *
-   * @param mount The mount point of the record to remove.
-   * @return The matching record if found, null if it is not found.
-   * @throws IOException If the state store could not be accessed.
-   */
-  private MountTable getMountTableEntry(String mount) throws IOException {
-    GetMountTableEntriesRequest request =
-        GetMountTableEntriesRequest.newInstance(mount);
-    GetMountTableEntriesResponse response =
-        mountStore.getMountTableEntries(request);
-    List<MountTable> results = response.getEntries();
-    if (results.size() > 0) {
-      // First result is sorted to have the shortest mount string length
-      return results.get(0);
+    @Before
+    public void setup() throws IOException, InterruptedException {
+        mountStore = getStateStore().getRegisteredRecordStore(MountTableStore.class);
+        // Clear Mount table registrations
+        assertTrue(clearRecords(getStateStore(), MountTable.class));
     }
-    return null;
-  }
 
-  /**
-   * Fetch all mount table records beneath a root path.
-   *
-   * @param store FederationMountTableStore instance to commit the data.
-   * @param mount The root search path, enter "/" to return all mount table
-   *          records.
-   *
-   * @return A list of all mount table records found below the root mount.
-   *
-   * @throws IOException If the state store could not be accessed.
-   */
-  private QueryResult<MountTable> getMountTableEntries(String mount)
-      throws IOException {
-    if (mount == null) {
-      throw new IOException("Please specify a root search path");
+    @Test
+    public void testStateStoreDisconnected() throws Exception {
+        // Close the data store driver
+        getStateStore().closeDriver();
+        assertFalse(getStateStore().isDriverReady());
+        // Test APIs that access the store to check they throw the correct exception
+        MountTable entry = MountTable.newInstance("/mnt", Collections.singletonMap("ns0", "/tmp"));
+        AddMountTableEntryRequest addRequest = AddMountTableEntryRequest.newInstance(entry);
+        verifyException(mountStore, "addMountTableEntry", StateStoreUnavailableException.class, new Class[] { AddMountTableEntryRequest.class }, new Object[] { addRequest });
+        UpdateMountTableEntryRequest updateRequest = UpdateMountTableEntryRequest.newInstance(entry);
+        verifyException(mountStore, "updateMountTableEntry", StateStoreUnavailableException.class, new Class[] { UpdateMountTableEntryRequest.class }, new Object[] { updateRequest });
+        RemoveMountTableEntryRequest removeRequest = RemoveMountTableEntryRequest.newInstance();
+        verifyException(mountStore, "removeMountTableEntry", StateStoreUnavailableException.class, new Class[] { RemoveMountTableEntryRequest.class }, new Object[] { removeRequest });
+        GetMountTableEntriesRequest getRequest = GetMountTableEntriesRequest.newInstance();
+        mountStore.loadCache(true);
+        verifyException(mountStore, "getMountTableEntries", StateStoreUnavailableException.class, new Class[] { GetMountTableEntriesRequest.class }, new Object[] { getRequest });
     }
-    GetMountTableEntriesRequest request =
-        GetMountTableEntriesRequest.newInstance();
-    request.setSrcPath(mount);
-    GetMountTableEntriesResponse response =
-        mountStore.getMountTableEntries(request);
-    List<MountTable> records = response.getEntries();
-    long timestamp = response.getTimestamp();
-    return new QueryResult<MountTable>(records, timestamp);
-  }
+
+    @Test
+    public void testSynchronizeMountTable() throws IOException {
+        // Synchronize and get mount table entries
+        List<MountTable> entries = createMockMountTable(nameservices);
+        assertTrue(synchronizeRecords(getStateStore(), entries, MountTable.class));
+        for (MountTable e : entries) {
+            mountStore.loadCache(true);
+            MountTable entry = getMountTableEntry(e.getSourcePath());
+            assertNotNull(entry);
+            assertEquals(e.getDefaultLocation().getDest(), entry.getDefaultLocation().getDest());
+        }
+    }
+
+    @Test
+    public void testAddMountTableEntry() throws IOException {
+        // Add 1
+        List<MountTable> entries = createMockMountTable(nameservices);
+        List<MountTable> entries1 = getMountTableEntries("/").getRecords();
+        assertEquals(0, entries1.size());
+        MountTable entry0 = entries.get(0);
+        AddMountTableEntryRequest request = AddMountTableEntryRequest.newInstance(entry0);
+        AddMountTableEntryResponse response = mountStore.addMountTableEntry(request);
+        assertTrue(response.getStatus());
+        mountStore.loadCache(true);
+        List<MountTable> entries2 = getMountTableEntries("/").getRecords();
+        assertEquals(1, entries2.size());
+    }
+
+    @Test
+    public void testRemoveMountTableEntry() throws IOException {
+        // Add many
+        List<MountTable> entries = createMockMountTable(nameservices);
+        synchronizeRecords(getStateStore(), entries, MountTable.class);
+        mountStore.loadCache(true);
+        List<MountTable> entries1 = getMountTableEntries("/").getRecords();
+        assertEquals(entries.size(), entries1.size());
+        // Remove 1
+        RemoveMountTableEntryRequest request = RemoveMountTableEntryRequest.newInstance();
+        request.setSrcPath(entries.get(0).getSourcePath());
+        assertTrue(mountStore.removeMountTableEntry(request).getStatus());
+        // Verify remove
+        mountStore.loadCache(true);
+        List<MountTable> entries2 = getMountTableEntries("/").getRecords();
+        assertEquals(entries.size() - 1, entries2.size());
+    }
+
+    @Test
+    public void testUpdateMountTableEntry() throws IOException {
+        // Add 1
+        List<MountTable> entries = createMockMountTable(nameservices);
+        MountTable entry0 = entries.get(0);
+        String srcPath = entry0.getSourcePath();
+        String nsId = entry0.getDefaultLocation().getNameserviceId();
+        AddMountTableEntryRequest request = AddMountTableEntryRequest.newInstance(entry0);
+        AddMountTableEntryResponse response = mountStore.addMountTableEntry(request);
+        assertTrue(response.getStatus());
+        // Verify
+        mountStore.loadCache(true);
+        MountTable matchingEntry0 = getMountTableEntry(srcPath);
+        assertNotNull(matchingEntry0);
+        assertEquals(nsId, matchingEntry0.getDefaultLocation().getNameserviceId());
+        // Edit destination nameservice for source path
+        Map<String, String> destMap = Collections.singletonMap("testnameservice", "/");
+        MountTable replacement = MountTable.newInstance(srcPath, destMap);
+        UpdateMountTableEntryRequest updateRequest = UpdateMountTableEntryRequest.newInstance(replacement);
+        UpdateMountTableEntryResponse updateResponse = mountStore.updateMountTableEntry(updateRequest);
+        assertTrue(updateResponse.getStatus());
+        // Verify
+        mountStore.loadCache(true);
+        MountTable matchingEntry1 = getMountTableEntry(srcPath);
+        assertNotNull(matchingEntry1);
+        assertEquals("testnameservice", matchingEntry1.getDefaultLocation().getNameserviceId());
+    }
+
+    /**
+     * Gets an existing mount table record in the state store.
+     *
+     * @param mount The mount point of the record to remove.
+     * @return The matching record if found, null if it is not found.
+     * @throws IOException If the state store could not be accessed.
+     */
+    private MountTable getMountTableEntry(String mount) throws IOException {
+        GetMountTableEntriesRequest request = GetMountTableEntriesRequest.newInstance(mount);
+        GetMountTableEntriesResponse response = mountStore.getMountTableEntries(request);
+        List<MountTable> results = response.getEntries();
+        if (results.size() > 0) {
+            // First result is sorted to have the shortest mount string length
+            return results.get(0);
+        }
+        return null;
+    }
+
+    /**
+     * Fetch all mount table records beneath a root path.
+     *
+     * @param store FederationMountTableStore instance to commit the data.
+     * @param mount The root search path, enter "/" to return all mount table
+     *          records.
+     *
+     * @return A list of all mount table records found below the root mount.
+     *
+     * @throws IOException If the state store could not be accessed.
+     */
+    private QueryResult<MountTable> getMountTableEntries(String mount) throws IOException {
+        if (mount == null) {
+            throw new IOException("Please specify a root search path");
+        }
+        GetMountTableEntriesRequest request = GetMountTableEntriesRequest.newInstance();
+        request.setSrcPath(mount);
+        GetMountTableEntriesResponse response = mountStore.getMountTableEntries(request);
+        List<MountTable> records = response.getEntries();
+        long timestamp = response.getTimestamp();
+        return new QueryResult<MountTable>(records, timestamp);
+    }
 }

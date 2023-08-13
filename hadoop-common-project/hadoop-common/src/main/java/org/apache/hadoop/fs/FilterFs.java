@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.fs;
 
 import java.io.FileNotFoundException;
@@ -27,7 +26,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.fs.FileSystem.Statistics;
@@ -49,403 +47,356 @@ import org.apache.hadoop.util.Progressable;
  * pass all requests to the contained file system. Subclasses of
  * <code>FilterFs</code> may further override some of these methods and may also
  * provide additional methods and fields.
- * 
  */
 @InterfaceAudience.Private
-@InterfaceStability.Evolving /*Evolving for a release,to be changed to Stable */
-public abstract class FilterFs extends AbstractFileSystem {
-  private final AbstractFileSystem myFs;
-  
-  protected AbstractFileSystem getMyFs() {
-    return myFs;
-  }
-  
-  protected FilterFs(AbstractFileSystem fs) throws URISyntaxException {
-    super(fs.getUri(), fs.getUri().getScheme(), false, fs.getUriDefaultPort());
-    myFs = fs;
-  }
+@InterfaceStability.Evolving
+public abstract class /*Evolving for a release,to be changed to Stable */
+FilterFs extends AbstractFileSystem {
 
-  @Override
-  public Statistics getStatistics() {
-    return myFs.getStatistics();
-  }
-  
-  @Override
-  public Path makeQualified(Path path) {
-    return myFs.makeQualified(path);
-  }
+    private final AbstractFileSystem myFs;
 
-  @Override
-  public Path getInitialWorkingDirectory() {
-    return myFs.getInitialWorkingDirectory();
-  }
-  
-  @Override
-  public Path getHomeDirectory() {
-    return myFs.getHomeDirectory();
-  }
-  
-  @Override
-  public FSDataOutputStream createInternal(Path f,
-    EnumSet<CreateFlag> flag, FsPermission absolutePermission, int bufferSize,
-    short replication, long blockSize, Progressable progress,
-    ChecksumOpt checksumOpt, boolean createParent) 
-      throws IOException, UnresolvedLinkException {
-    checkPath(f);
-    return myFs.createInternal(f, flag, absolutePermission, bufferSize,
-        replication, blockSize, progress, checksumOpt, createParent);
-  }
+    protected AbstractFileSystem getMyFs() {
+        return myFs;
+    }
 
-  @Override
-  public boolean delete(Path f, boolean recursive) 
-      throws IOException, UnresolvedLinkException {
-    checkPath(f);
-    return myFs.delete(f, recursive);
-  }
+    protected FilterFs(AbstractFileSystem fs) throws URISyntaxException {
+        super(fs.getUri(), fs.getUri().getScheme(), false, fs.getUriDefaultPort());
+        myFs = fs;
+    }
 
-  @Override
-  public BlockLocation[] getFileBlockLocations(Path f, long start, long len)
-      throws IOException, UnresolvedLinkException {
-    checkPath(f);
-    return myFs.getFileBlockLocations(f, start, len);
-  }
+    @Override
+    public Statistics getStatistics() {
+        return myFs.getStatistics();
+    }
 
-  @Override
-  public FileChecksum getFileChecksum(Path f) 
-      throws IOException, UnresolvedLinkException {
-    checkPath(f);
-    return myFs.getFileChecksum(f);
-  }
+    @Override
+    public Path makeQualified(Path path) {
+        return myFs.makeQualified(path);
+    }
 
-  @Override
-  public FileStatus getFileStatus(Path f) 
-      throws IOException, UnresolvedLinkException {
-    checkPath(f);
-    return myFs.getFileStatus(f);
-  }
+    @Override
+    public Path getInitialWorkingDirectory() {
+        return myFs.getInitialWorkingDirectory();
+    }
 
-  @Override
-  public void access(Path path, FsAction mode) throws AccessControlException,
-      FileNotFoundException, UnresolvedLinkException, IOException {
-    checkPath(path);
-    myFs.access(path, mode);
-  }
+    @Override
+    public Path getHomeDirectory() {
+        return myFs.getHomeDirectory();
+    }
 
-  @Override
-  public FileStatus getFileLinkStatus(final Path f) 
-    throws IOException, UnresolvedLinkException {
-    checkPath(f);
-    return myFs.getFileLinkStatus(f);
-  }
-  
-  @Override
-  public FsStatus getFsStatus(final Path f) throws AccessControlException,
-    FileNotFoundException, UnresolvedLinkException, IOException {
-    return myFs.getFsStatus(f);
-  }
+    @Override
+    public FSDataOutputStream createInternal(Path f, EnumSet<CreateFlag> flag, FsPermission absolutePermission, int bufferSize, short replication, long blockSize, Progressable progress, ChecksumOpt checksumOpt, boolean createParent) throws IOException, UnresolvedLinkException {
+        checkPath(f);
+        return myFs.createInternal(f, flag, absolutePermission, bufferSize, replication, blockSize, progress, checksumOpt, createParent);
+    }
 
-  @Override
-  public FsStatus getFsStatus() throws IOException {
-    return myFs.getFsStatus();
-  }
+    @Override
+    public boolean delete(Path f, boolean recursive) throws IOException, UnresolvedLinkException {
+        checkPath(f);
+        return myFs.delete(f, recursive);
+    }
 
-  @Override
-  @Deprecated
-  public FsServerDefaults getServerDefaults() throws IOException {
-    return myFs.getServerDefaults();
-  }
-  
-  @Override
-  public FsServerDefaults getServerDefaults(final Path f) throws IOException {
-    return myFs.getServerDefaults(f);
-  }
+    @Override
+    public BlockLocation[] getFileBlockLocations(Path f, long start, long len) throws IOException, UnresolvedLinkException {
+        checkPath(f);
+        return myFs.getFileBlockLocations(f, start, len);
+    }
 
-  @Override
-  public Path resolvePath(final Path p) throws FileNotFoundException,
-        UnresolvedLinkException, AccessControlException, IOException {
-    return myFs.resolvePath(p);
-  }
+    @Override
+    public FileChecksum getFileChecksum(Path f) throws IOException, UnresolvedLinkException {
+        checkPath(f);
+        return myFs.getFileChecksum(f);
+    }
 
-  @Override
-  public int getUriDefaultPort() {
-    return myFs.getUriDefaultPort();
-  }
+    @Override
+    public FileStatus getFileStatus(Path f) throws IOException, UnresolvedLinkException {
+        checkPath(f);
+        return myFs.getFileStatus(f);
+    }
 
-  @Override
-  public URI getUri() {
-    return myFs.getUri();
-  }
-  
-  @Override
-  public void checkPath(Path path) {
-    myFs.checkPath(path);
-  }
-  
-  @Override
-  public String getUriPath(final Path p) {
-    return myFs.getUriPath(p);
-  }
-  
-  @Override
-  public FileStatus[] listStatus(Path f) 
-      throws IOException, UnresolvedLinkException {
-    checkPath(f);
-    return myFs.listStatus(f);
-  }
+    @Override
+    public void access(Path path, FsAction mode) throws AccessControlException, FileNotFoundException, UnresolvedLinkException, IOException {
+        checkPath(path);
+        myFs.access(path, mode);
+    }
 
-  @Override
-  public RemoteIterator<LocatedFileStatus> listLocatedStatus(final Path f)
-      throws AccessControlException, FileNotFoundException,
-             UnresolvedLinkException, IOException {
-    checkPath(f);
-    return myFs.listLocatedStatus(f);
-  }
+    @Override
+    public FileStatus getFileLinkStatus(final Path f) throws IOException, UnresolvedLinkException {
+        checkPath(f);
+        return myFs.getFileLinkStatus(f);
+    }
 
-  @Override
-  public RemoteIterator<Path> listCorruptFileBlocks(Path path)
-    throws IOException {
-    return myFs.listCorruptFileBlocks(path);
-  }
+    @Override
+    public FsStatus getFsStatus(final Path f) throws AccessControlException, FileNotFoundException, UnresolvedLinkException, IOException {
+        return myFs.getFsStatus(f);
+    }
 
-  @Override
-  public void mkdir(Path dir, FsPermission permission, boolean createParent)
-    throws IOException, UnresolvedLinkException {
-    checkPath(dir);
-    myFs.mkdir(dir, permission, createParent);
-    
-  }
+    @Override
+    public FsStatus getFsStatus() throws IOException {
+        return myFs.getFsStatus();
+    }
 
-  @Override
-  public FSDataInputStream open(final Path f) throws AccessControlException,
-    FileNotFoundException, UnresolvedLinkException, IOException {
-    checkPath(f);
-    return myFs.open(f);
-  }
+    @Override
+    @Deprecated
+    public FsServerDefaults getServerDefaults() throws IOException {
+        return myFs.getServerDefaults();
+    }
 
-  @Override
-  public FSDataInputStream open(Path f, int bufferSize) 
-    throws IOException, UnresolvedLinkException {
-    checkPath(f);
-    return myFs.open(f, bufferSize);
-  }
+    @Override
+    public FsServerDefaults getServerDefaults(final Path f) throws IOException {
+        return myFs.getServerDefaults(f);
+    }
 
-  @Override
-  public boolean truncate(Path f, long newLength) 
-      throws AccessControlException, FileNotFoundException,
-      UnresolvedLinkException, IOException {
-    checkPath(f);
-    return myFs.truncate(f, newLength);
-  }
+    @Override
+    public Path resolvePath(final Path p) throws FileNotFoundException, UnresolvedLinkException, AccessControlException, IOException {
+        return myFs.resolvePath(p);
+    }
 
-  @Override
-  public void renameInternal(Path src, Path dst) 
-    throws IOException, UnresolvedLinkException {
-    checkPath(src);
-    checkPath(dst);
-    myFs.rename(src, dst, Options.Rename.NONE);
-  }
+    @Override
+    public int getUriDefaultPort() {
+        return myFs.getUriDefaultPort();
+    }
 
-  @Override
-  public void renameInternal(final Path src, final Path dst,
-      boolean overwrite) throws AccessControlException,
-      FileAlreadyExistsException, FileNotFoundException,
-      ParentNotDirectoryException, UnresolvedLinkException, IOException {
-    myFs.renameInternal(src, dst, overwrite);
-  }
-  
-  @Override
-  public void setOwner(Path f, String username, String groupname)
-    throws IOException, UnresolvedLinkException {
-    checkPath(f);
-    myFs.setOwner(f, username, groupname);
-    
-  }
+    @Override
+    public URI getUri() {
+        return myFs.getUri();
+    }
 
-  @Override
-  public void setPermission(Path f, FsPermission permission)
-    throws IOException, UnresolvedLinkException {
-    checkPath(f);
-    myFs.setPermission(f, permission);
-  }
+    @Override
+    public void checkPath(Path path) {
+        myFs.checkPath(path);
+    }
 
-  @Override
-  public boolean setReplication(Path f, short replication)
-    throws IOException, UnresolvedLinkException {
-    checkPath(f);
-    return myFs.setReplication(f, replication);
-  }
+    @Override
+    public String getUriPath(final Path p) {
+        return myFs.getUriPath(p);
+    }
 
-  @Override
-  public void setTimes(Path f, long mtime, long atime) 
-      throws IOException, UnresolvedLinkException {
-    checkPath(f);
-    myFs.setTimes(f, mtime, atime);
-  }
+    @Override
+    public FileStatus[] listStatus(Path f) throws IOException, UnresolvedLinkException {
+        checkPath(f);
+        return myFs.listStatus(f);
+    }
 
-  @Override
-  public void setVerifyChecksum(boolean verifyChecksum) 
-      throws IOException, UnresolvedLinkException {
-    myFs.setVerifyChecksum(verifyChecksum);
-  }
+    @Override
+    public RemoteIterator<LocatedFileStatus> listLocatedStatus(final Path f) throws AccessControlException, FileNotFoundException, UnresolvedLinkException, IOException {
+        checkPath(f);
+        return myFs.listLocatedStatus(f);
+    }
 
-  @Override
-  public boolean supportsSymlinks() {
-    return myFs.supportsSymlinks();
-  }
+    @Override
+    public RemoteIterator<Path> listCorruptFileBlocks(Path path) throws IOException {
+        return myFs.listCorruptFileBlocks(path);
+    }
 
-  @Override
-  public void createSymlink(Path target, Path link, boolean createParent) 
-    throws IOException, UnresolvedLinkException {
-    myFs.createSymlink(target, link, createParent);
-  }
+    @Override
+    public void mkdir(Path dir, FsPermission permission, boolean createParent) throws IOException, UnresolvedLinkException {
+        checkPath(dir);
+        myFs.mkdir(dir, permission, createParent);
+    }
 
-  @Override
-  public Path getLinkTarget(final Path f) throws IOException {
-    return myFs.getLinkTarget(f);
-  }
-  
-  @Override // AbstractFileSystem
-  public String getCanonicalServiceName() {
-    return myFs.getCanonicalServiceName();
-  }
-  
-  @Override // AbstractFileSystem
-  public List<Token<?>> getDelegationTokens(String renewer) throws IOException {
-    return myFs.getDelegationTokens(renewer);
-  }
+    @Override
+    public FSDataInputStream open(final Path f) throws AccessControlException, FileNotFoundException, UnresolvedLinkException, IOException {
+        checkPath(f);
+        return myFs.open(f);
+    }
 
-  @Override
-  public boolean isValidName(String src) {
-    return myFs.isValidName(src);
-  }
+    @Override
+    public FSDataInputStream open(Path f, int bufferSize) throws IOException, UnresolvedLinkException {
+        checkPath(f);
+        return myFs.open(f, bufferSize);
+    }
 
-  @Override
-  public void modifyAclEntries(Path path, List<AclEntry> aclSpec)
-      throws IOException {
-    myFs.modifyAclEntries(path, aclSpec);
-  }
+    @Override
+    public boolean truncate(Path f, long newLength) throws AccessControlException, FileNotFoundException, UnresolvedLinkException, IOException {
+        checkPath(f);
+        return myFs.truncate(f, newLength);
+    }
 
-  @Override
-  public void removeAclEntries(Path path, List<AclEntry> aclSpec)
-      throws IOException {
-    myFs.removeAclEntries(path, aclSpec);
-  }
+    @Override
+    public void renameInternal(Path src, Path dst) throws IOException, UnresolvedLinkException {
+        checkPath(src);
+        checkPath(dst);
+        myFs.rename(src, dst, Options.Rename.NONE);
+    }
 
-  @Override
-  public void removeDefaultAcl(Path path) throws IOException {
-    myFs.removeDefaultAcl(path);
-  }
+    @Override
+    public void renameInternal(final Path src, final Path dst, boolean overwrite) throws AccessControlException, FileAlreadyExistsException, FileNotFoundException, ParentNotDirectoryException, UnresolvedLinkException, IOException {
+        myFs.renameInternal(src, dst, overwrite);
+    }
 
-  @Override
-  public void removeAcl(Path path) throws IOException {
-    myFs.removeAcl(path);
-  }
+    @Override
+    public void setOwner(Path f, String username, String groupname) throws IOException, UnresolvedLinkException {
+        checkPath(f);
+        myFs.setOwner(f, username, groupname);
+    }
 
-  @Override
-  public void setAcl(Path path, List<AclEntry> aclSpec) throws IOException {
-    myFs.setAcl(path, aclSpec);
-  }
+    @Override
+    public void setPermission(Path f, FsPermission permission) throws IOException, UnresolvedLinkException {
+        checkPath(f);
+        myFs.setPermission(f, permission);
+    }
 
-  @Override
-  public AclStatus getAclStatus(Path path) throws IOException {
-    return myFs.getAclStatus(path);
-  }
+    @Override
+    public boolean setReplication(Path f, short replication) throws IOException, UnresolvedLinkException {
+        checkPath(f);
+        return myFs.setReplication(f, replication);
+    }
 
-  @Override
-  public void setXAttr(Path path, String name, byte[] value)
-      throws IOException {
-    myFs.setXAttr(path, name, value);
-  }
+    @Override
+    public void setTimes(Path f, long mtime, long atime) throws IOException, UnresolvedLinkException {
+        checkPath(f);
+        myFs.setTimes(f, mtime, atime);
+    }
 
-  @Override
-  public void setXAttr(Path path, String name, byte[] value,
-      EnumSet<XAttrSetFlag> flag) throws IOException {
-    myFs.setXAttr(path, name, value, flag);
-  }
+    @Override
+    public void setVerifyChecksum(boolean verifyChecksum) throws IOException, UnresolvedLinkException {
+        myFs.setVerifyChecksum(verifyChecksum);
+    }
 
-  @Override
-  public byte[] getXAttr(Path path, String name) throws IOException {
-    return myFs.getXAttr(path, name);
-  }
+    @Override
+    public boolean supportsSymlinks() {
+        return myFs.supportsSymlinks();
+    }
 
-  @Override
-  public Map<String, byte[]> getXAttrs(Path path) throws IOException {
-    return myFs.getXAttrs(path);
-  }
+    @Override
+    public void createSymlink(Path target, Path link, boolean createParent) throws IOException, UnresolvedLinkException {
+        myFs.createSymlink(target, link, createParent);
+    }
 
-  @Override
-  public Map<String, byte[]> getXAttrs(Path path, List<String> names)
-      throws IOException {
-    return myFs.getXAttrs(path, names);
-  }
+    @Override
+    public Path getLinkTarget(final Path f) throws IOException {
+        return myFs.getLinkTarget(f);
+    }
 
-  @Override
-  public List<String> listXAttrs(Path path) throws IOException {
-    return myFs.listXAttrs(path);
-  }
+    // AbstractFileSystem
+    @Override
+    public String getCanonicalServiceName() {
+        return myFs.getCanonicalServiceName();
+    }
 
-  @Override
-  public void removeXAttr(Path path, String name) throws IOException {
-    myFs.removeXAttr(path, name);
-  }
+    // AbstractFileSystem
+    @Override
+    public List<Token<?>> getDelegationTokens(String renewer) throws IOException {
+        return myFs.getDelegationTokens(renewer);
+    }
 
-  @Override
-  public Path createSnapshot(final Path path, final String snapshotName)
-      throws IOException {
-    return myFs.createSnapshot(path, snapshotName);
-  }
+    @Override
+    public boolean isValidName(String src) {
+        return myFs.isValidName(src);
+    }
 
-  @Override
-  public void renameSnapshot(final Path path, final String snapshotOldName,
-      final String snapshotNewName) throws IOException {
-    myFs.renameSnapshot(path, snapshotOldName, snapshotNewName);
-  }
+    @Override
+    public void modifyAclEntries(Path path, List<AclEntry> aclSpec) throws IOException {
+        myFs.modifyAclEntries(path, aclSpec);
+    }
 
-  @Override
-  public void deleteSnapshot(final Path path, final String snapshotName)
-      throws IOException {
-    myFs.deleteSnapshot(path, snapshotName);
-  }
+    @Override
+    public void removeAclEntries(Path path, List<AclEntry> aclSpec) throws IOException {
+        myFs.removeAclEntries(path, aclSpec);
+    }
 
-  @Override
-  public void satisfyStoragePolicy(final Path path) throws IOException {
-    myFs.satisfyStoragePolicy(path);
-  }
+    @Override
+    public void removeDefaultAcl(Path path) throws IOException {
+        myFs.removeDefaultAcl(path);
+    }
 
-  @Override
-  public void setStoragePolicy(Path path, String policyName)
-      throws IOException {
-    myFs.setStoragePolicy(path, policyName);
-  }
+    @Override
+    public void removeAcl(Path path) throws IOException {
+        myFs.removeAcl(path);
+    }
 
-  @Override
-  public void unsetStoragePolicy(final Path src)
-      throws IOException {
-    myFs.unsetStoragePolicy(src);
-  }
+    @Override
+    public void setAcl(Path path, List<AclEntry> aclSpec) throws IOException {
+        myFs.setAcl(path, aclSpec);
+    }
 
-  @Override
-  public BlockStoragePolicySpi getStoragePolicy(final Path src)
-      throws IOException {
-    return myFs.getStoragePolicy(src);
-  }
+    @Override
+    public AclStatus getAclStatus(Path path) throws IOException {
+        return myFs.getAclStatus(path);
+    }
 
-  @Override
-  public Collection<? extends BlockStoragePolicySpi> getAllStoragePolicies()
-      throws IOException {
-    return myFs.getAllStoragePolicies();
-  }
+    @Override
+    public void setXAttr(Path path, String name, byte[] value) throws IOException {
+        myFs.setXAttr(path, name, value);
+    }
 
-  @Override
-  public CompletableFuture<FSDataInputStream> openFileWithOptions(
-      final Path path,
-      final OpenFileParameters parameters) throws IOException {
-    return myFs.openFileWithOptions(path, parameters);
-  }
+    @Override
+    public void setXAttr(Path path, String name, byte[] value, EnumSet<XAttrSetFlag> flag) throws IOException {
+        myFs.setXAttr(path, name, value, flag);
+    }
 
-  public boolean hasPathCapability(final Path path,
-      final String capability)
-      throws IOException {
-    return myFs.hasPathCapability(path, capability);
-  }
+    @Override
+    public byte[] getXAttr(Path path, String name) throws IOException {
+        return myFs.getXAttr(path, name);
+    }
+
+    @Override
+    public Map<String, byte[]> getXAttrs(Path path) throws IOException {
+        return myFs.getXAttrs(path);
+    }
+
+    @Override
+    public Map<String, byte[]> getXAttrs(Path path, List<String> names) throws IOException {
+        return myFs.getXAttrs(path, names);
+    }
+
+    @Override
+    public List<String> listXAttrs(Path path) throws IOException {
+        return myFs.listXAttrs(path);
+    }
+
+    @Override
+    public void removeXAttr(Path path, String name) throws IOException {
+        myFs.removeXAttr(path, name);
+    }
+
+    @Override
+    public Path createSnapshot(final Path path, final String snapshotName) throws IOException {
+        return myFs.createSnapshot(path, snapshotName);
+    }
+
+    @Override
+    public void renameSnapshot(final Path path, final String snapshotOldName, final String snapshotNewName) throws IOException {
+        myFs.renameSnapshot(path, snapshotOldName, snapshotNewName);
+    }
+
+    @Override
+    public void deleteSnapshot(final Path path, final String snapshotName) throws IOException {
+        myFs.deleteSnapshot(path, snapshotName);
+    }
+
+    @Override
+    public void satisfyStoragePolicy(final Path path) throws IOException {
+        myFs.satisfyStoragePolicy(path);
+    }
+
+    @Override
+    public void setStoragePolicy(Path path, String policyName) throws IOException {
+        myFs.setStoragePolicy(path, policyName);
+    }
+
+    @Override
+    public void unsetStoragePolicy(final Path src) throws IOException {
+        myFs.unsetStoragePolicy(src);
+    }
+
+    @Override
+    public BlockStoragePolicySpi getStoragePolicy(final Path src) throws IOException {
+        return myFs.getStoragePolicy(src);
+    }
+
+    @Override
+    public Collection<? extends BlockStoragePolicySpi> getAllStoragePolicies() throws IOException {
+        return myFs.getAllStoragePolicies();
+    }
+
+    @Override
+    public CompletableFuture<FSDataInputStream> openFileWithOptions(final Path path, final OpenFileParameters parameters) throws IOException {
+        return myFs.openFileWithOptions(path, parameters);
+    }
+
+    public boolean hasPathCapability(final Path path, final String capability) throws IOException {
+        return myFs.hasPathCapability(path, capability);
+    }
 }

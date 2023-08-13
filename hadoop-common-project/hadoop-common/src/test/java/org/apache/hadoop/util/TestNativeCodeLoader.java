@@ -19,7 +19,6 @@ package org.apache.hadoop.util;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
-
 import org.apache.hadoop.crypto.OpensslCipher;
 import org.apache.hadoop.io.compress.Lz4Codec;
 import org.apache.hadoop.io.compress.SnappyCodec;
@@ -29,36 +28,38 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TestNativeCodeLoader {
-  static final Logger LOG = LoggerFactory.getLogger(TestNativeCodeLoader.class);
 
-  private static boolean requireTestJni() {
-    String rtj = System.getProperty("require.test.libhadoop");
-    if (rtj == null) return false;
-    if (rtj.compareToIgnoreCase("false") == 0) return false;
-    return true;
-  }
+    static final Logger LOG = LoggerFactory.getLogger(TestNativeCodeLoader.class);
 
-  @Test
-  public void testNativeCodeLoaded() {
-    if (requireTestJni() == false) {
-      LOG.info("TestNativeCodeLoader: libhadoop.so testing is not required.");
-      return;
+    private static boolean requireTestJni() {
+        String rtj = System.getProperty("require.test.libhadoop");
+        if (rtj == null)
+            return false;
+        if (rtj.compareToIgnoreCase("false") == 0)
+            return false;
+        return true;
     }
-    if (!NativeCodeLoader.isNativeCodeLoaded()) {
-      fail("TestNativeCodeLoader: libhadoop.so testing was required, but " +
-          "libhadoop.so was not loaded.");
+
+    @Test
+    public void testNativeCodeLoaded() {
+        if (requireTestJni() == false) {
+            LOG.info("TestNativeCodeLoader: libhadoop.so testing is not required.");
+            return;
+        }
+        if (!NativeCodeLoader.isNativeCodeLoaded()) {
+            fail("TestNativeCodeLoader: libhadoop.so testing was required, but " + "libhadoop.so was not loaded.");
+        }
+        assertFalse(NativeCodeLoader.getLibraryName().isEmpty());
+        // library names are depended on platform and build envs
+        // so just check names are available
+        assertFalse(ZlibFactory.getLibraryName().isEmpty());
+        if (NativeCodeLoader.buildSupportsSnappy()) {
+            assertFalse(SnappyCodec.getLibraryName().isEmpty());
+        }
+        if (NativeCodeLoader.buildSupportsOpenssl()) {
+            assertFalse(OpensslCipher.getLibraryName().isEmpty());
+        }
+        assertFalse(Lz4Codec.getLibraryName().isEmpty());
+        LOG.info("TestNativeCodeLoader: libhadoop.so is loaded.");
     }
-    assertFalse(NativeCodeLoader.getLibraryName().isEmpty());
-    // library names are depended on platform and build envs
-    // so just check names are available
-    assertFalse(ZlibFactory.getLibraryName().isEmpty());
-    if (NativeCodeLoader.buildSupportsSnappy()) {
-      assertFalse(SnappyCodec.getLibraryName().isEmpty());
-    }
-    if (NativeCodeLoader.buildSupportsOpenssl()) {
-      assertFalse(OpensslCipher.getLibraryName().isEmpty());
-    }
-    assertFalse(Lz4Codec.getLibraryName().isEmpty());
-    LOG.info("TestNativeCodeLoader: libhadoop.so is loaded.");
-  }
 }

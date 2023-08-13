@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * Core Zookeeper support.
  * <p>
@@ -33,7 +32,6 @@
  * To work with ZK, system properties need to be set before invoking
  * some operations/instantiating some objects. The definitions of these
  * are kept in {@link org.apache.hadoop.registry.client.impl.zk.ZookeeperConfigOptions}.
- *
- *
  */
 package org.apache.hadoop.registry.client.impl.zk;
+

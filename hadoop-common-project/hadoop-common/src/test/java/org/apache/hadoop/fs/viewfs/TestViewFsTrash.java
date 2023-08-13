@@ -17,9 +17,7 @@
  */
 package org.apache.hadoop.fs.viewfs;
 
-
 import java.io.IOException;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileSystemTestHelper;
@@ -32,47 +30,52 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class TestViewFsTrash {
-  FileSystem fsTarget;  // the target file system - the mount will point here
-  FileSystem fsView;
-  Configuration conf;
-  FileSystemTestHelper fileSystemTestHelper = new FileSystemTestHelper();
 
-  class TestLFS extends LocalFileSystem {
-    Path home;
-    TestLFS() throws IOException {
-      this(new Path(fileSystemTestHelper.getTestRootDir()));
-    }
-    TestLFS(Path home) throws IOException {
-      super();
-      this.home = home;
-    }
-    @Override
-    public Path getHomeDirectory() {
-      return home;
-    }
-  }
+    // the target file system - the mount will point here
+    FileSystem fsTarget;
 
-  @Before
-  public void setUp() throws Exception {
-    fsTarget = FileSystem.getLocal(new Configuration());
-    fsTarget.mkdirs(new Path(fileSystemTestHelper.
-        getTestRootPath(fsTarget), "dir1"));
-    conf = ViewFileSystemTestSetup.createConfig();
-    fsView = ViewFileSystemTestSetup.setupForViewFileSystem(conf, fileSystemTestHelper, fsTarget);
-    conf.set("fs.defaultFS", FsConstants.VIEWFS_URI.toString());
-  }
- 
-  @After
-  public void tearDown() throws Exception {
-    ViewFileSystemTestSetup.tearDown(fileSystemTestHelper, fsTarget);
-    fsTarget.delete(new Path(fsTarget.getHomeDirectory(), ".Trash/Current"),
-        true);
-  }
-  
-  @Test
-  public void testTrash() throws Exception {
-    TestTrash.trashShell(conf, fileSystemTestHelper.getTestRootPath(fsView),
-        fsTarget, new Path(fsTarget.getHomeDirectory(), ".Trash/Current"));
-  }
-  
+    FileSystem fsView;
+
+    Configuration conf;
+
+    FileSystemTestHelper fileSystemTestHelper = new FileSystemTestHelper();
+
+    class TestLFS extends LocalFileSystem {
+
+        Path home;
+
+        TestLFS() throws IOException {
+            this(new Path(fileSystemTestHelper.getTestRootDir()));
+        }
+
+        TestLFS(Path home) throws IOException {
+            super();
+            this.home = home;
+        }
+
+        @Override
+        public Path getHomeDirectory() {
+            return home;
+        }
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        fsTarget = FileSystem.getLocal(new Configuration());
+        fsTarget.mkdirs(new Path(fileSystemTestHelper.getTestRootPath(fsTarget), "dir1"));
+        conf = ViewFileSystemTestSetup.createConfig();
+        fsView = ViewFileSystemTestSetup.setupForViewFileSystem(conf, fileSystemTestHelper, fsTarget);
+        conf.set("fs.defaultFS", FsConstants.VIEWFS_URI.toString());
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        ViewFileSystemTestSetup.tearDown(fileSystemTestHelper, fsTarget);
+        fsTarget.delete(new Path(fsTarget.getHomeDirectory(), ".Trash/Current"), true);
+    }
+
+    @Test
+    public void testTrash() throws Exception {
+        TestTrash.trashShell(conf, fileSystemTestHelper.getTestRootPath(fsView), fsTarget, new Path(fsTarget.getHomeDirectory(), ".Trash/Current"));
+    }
 }

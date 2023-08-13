@@ -15,19 +15,16 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.hadoop.fs.contract.localfs;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.contract.AbstractContractSetTimesTest;
 import org.apache.hadoop.fs.contract.AbstractFSContract;
 
-public class TestLocalFSContractSetTimes extends
-    AbstractContractSetTimesTest {
+public class TestLocalFSContractSetTimes extends AbstractContractSetTimesTest {
 
-  @Override
-  protected AbstractFSContract createContract(Configuration conf) {
-    return new LocalFSContract(conf);
-  }
-
+    @Override
+    protected AbstractFSContract createContract(Configuration conf) {
+        return new LocalFSContract(conf);
+    }
 }

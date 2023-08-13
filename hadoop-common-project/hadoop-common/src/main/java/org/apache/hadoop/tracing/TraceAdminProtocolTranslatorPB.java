@@ -20,7 +20,6 @@ package org.apache.hadoop.tracing;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.ipc.ProtobufHelper;
 import org.apache.hadoop.ipc.ProtocolTranslator;
@@ -36,70 +35,62 @@ import org.apache.hadoop.tracing.SpanReceiverInfo.ConfigurationPair;
 import org.apache.hadoop.thirdparty.protobuf.ServiceException;
 
 @InterfaceAudience.Private
-public class TraceAdminProtocolTranslatorPB implements
-    TraceAdminProtocol, ProtocolTranslator, Closeable  {
-  private final TraceAdminProtocolPB rpcProxy;
+public class TraceAdminProtocolTranslatorPB implements TraceAdminProtocol, ProtocolTranslator, Closeable {
 
-  public TraceAdminProtocolTranslatorPB(TraceAdminProtocolPB rpcProxy) {
-    this.rpcProxy = rpcProxy;
-  }
+    private final TraceAdminProtocolPB rpcProxy;
 
-  @Override
-  public void close() throws IOException {
-    RPC.stopProxy(rpcProxy);
-  }
-
-  @Override
-  public SpanReceiverInfo[] listSpanReceivers() throws IOException {
-    ArrayList<SpanReceiverInfo> infos = new ArrayList<SpanReceiverInfo>(1);
-    try {
-      ListSpanReceiversRequestProto req =
-          ListSpanReceiversRequestProto.newBuilder().build();
-      ListSpanReceiversResponseProto resp =
-          rpcProxy.listSpanReceivers(null, req);
-      for (SpanReceiverListInfo info : resp.getDescriptionsList()) {
-        infos.add(new SpanReceiverInfo(info.getId(), info.getClassName()));
-      }
-    } catch (ServiceException e) {
-      throw ProtobufHelper.getRemoteException(e);
+    public TraceAdminProtocolTranslatorPB(TraceAdminProtocolPB rpcProxy) {
+        this.rpcProxy = rpcProxy;
     }
-    return infos.toArray(new SpanReceiverInfo[infos.size()]);
-  }
 
-  @Override
-  public long addSpanReceiver(SpanReceiverInfo info) throws IOException {
-    try {
-      AddSpanReceiverRequestProto.Builder bld =
-          AddSpanReceiverRequestProto.newBuilder();
-      bld.setClassName(info.getClassName());
-      for (ConfigurationPair configPair : info.configPairs) {
-        ConfigPair tuple = ConfigPair.newBuilder().
-            setKey(configPair.getKey()).
-            setValue(configPair.getValue()).build();
-        bld.addConfig(tuple);
-      }
-      AddSpanReceiverResponseProto resp =
-          rpcProxy.addSpanReceiver(null, bld.build());
-      return resp.getId();
-    } catch (ServiceException e) {
-      throw ProtobufHelper.getRemoteException(e);
+    @Override
+    public void close() throws IOException {
+        RPC.stopProxy(rpcProxy);
     }
-  }
 
-  @Override
-  public void removeSpanReceiver(long spanReceiverId) throws IOException {
-    try {
-      RemoveSpanReceiverRequestProto req =
-          RemoveSpanReceiverRequestProto.newBuilder()
-            .setId(spanReceiverId).build();
-      rpcProxy.removeSpanReceiver(null, req);
-    } catch (ServiceException e) {
-      throw ProtobufHelper.getRemoteException(e);
+    @Override
+    public SpanReceiverInfo[] listSpanReceivers() throws IOException {
+        ArrayList<SpanReceiverInfo> infos = new ArrayList<SpanReceiverInfo>(1);
+        try {
+            ListSpanReceiversRequestProto req = ListSpanReceiversRequestProto.newBuilder().build();
+            ListSpanReceiversResponseProto resp = rpcProxy.listSpanReceivers(null, req);
+            for (SpanReceiverListInfo info : resp.getDescriptionsList()) {
+                infos.add(new SpanReceiverInfo(info.getId(), info.getClassName()));
+            }
+        } catch (ServiceException e) {
+            throw ProtobufHelper.getRemoteException(e);
+        }
+        return infos.toArray(new SpanReceiverInfo[infos.size()]);
     }
-  }
 
-  @Override
-  public Object getUnderlyingProxyObject() {
-    return rpcProxy;
-  }
+    @Override
+    public long addSpanReceiver(SpanReceiverInfo info) throws IOException {
+        try {
+            AddSpanReceiverRequestProto.Builder bld = AddSpanReceiverRequestProto.newBuilder();
+            bld.setClassName(info.getClassName());
+            for (ConfigurationPair configPair : info.configPairs) {
+                ConfigPair tuple = ConfigPair.newBuilder().setKey(configPair.getKey()).setValue(configPair.getValue()).build();
+                bld.addConfig(tuple);
+            }
+            AddSpanReceiverResponseProto resp = rpcProxy.addSpanReceiver(null, bld.build());
+            return resp.getId();
+        } catch (ServiceException e) {
+            throw ProtobufHelper.getRemoteException(e);
+        }
+    }
+
+    @Override
+    public void removeSpanReceiver(long spanReceiverId) throws IOException {
+        try {
+            RemoveSpanReceiverRequestProto req = RemoveSpanReceiverRequestProto.newBuilder().setId(spanReceiverId).build();
+            rpcProxy.removeSpanReceiver(null, req);
+        } catch (ServiceException e) {
+            throw ProtobufHelper.getRemoteException(e);
+        }
+    }
+
+    @Override
+    public Object getUnderlyingProxyObject() {
+        return rpcProxy;
+    }
 }

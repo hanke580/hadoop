@@ -16,7 +16,6 @@ package org.apache.hadoop.security.authentication.util;
 import java.nio.charset.Charset;
 import java.util.Properties;
 import javax.servlet.ServletContext;
-
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
@@ -29,27 +28,27 @@ import org.apache.hadoop.security.authentication.server.AuthenticationFilter;
 @VisibleForTesting
 class StringSignerSecretProvider extends SignerSecretProvider {
 
-  private byte[] secret;
-  private byte[][] secrets;
+    private byte[] secret;
 
-  public StringSignerSecretProvider() {}
+    private byte[][] secrets;
 
-  @Override
-  public void init(Properties config, ServletContext servletContext,
-          long tokenValidity) throws Exception {
-    String signatureSecret = config.getProperty(
-            AuthenticationFilter.SIGNATURE_SECRET, null);
-    secret = signatureSecret.getBytes(Charset.forName("UTF-8"));
-    secrets = new byte[][]{secret};
-  }
+    public StringSignerSecretProvider() {
+    }
 
-  @Override
-  public byte[] getCurrentSecret() {
-    return secret;
-  }
+    @Override
+    public void init(Properties config, ServletContext servletContext, long tokenValidity) throws Exception {
+        String signatureSecret = config.getProperty(AuthenticationFilter.SIGNATURE_SECRET, null);
+        secret = signatureSecret.getBytes(Charset.forName("UTF-8"));
+        secrets = new byte[][] { secret };
+    }
 
-  @Override
-  public byte[][] getAllSecrets() {
-    return secrets;
-  }
+    @Override
+    public byte[] getCurrentSecret() {
+        return secret;
+    }
+
+    @Override
+    public byte[][] getAllSecrets() {
+        return secrets;
+    }
 }

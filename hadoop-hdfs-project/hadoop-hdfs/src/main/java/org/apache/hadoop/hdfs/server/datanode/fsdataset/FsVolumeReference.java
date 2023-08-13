@@ -36,16 +36,17 @@ import java.io.IOException;
  * </pre>
  */
 public interface FsVolumeReference extends Closeable {
-  /**
-   * Decrease the reference count of the volume.
-   * @throws IOException it never throws IOException.
-   */
-  @Override
-  void close() throws IOException;
 
-  /**
-   * Returns the underlying volume object. Return null if the reference was
-   * released.
-   */
-  FsVolumeSpi getVolume();
+    /**
+     * Decrease the reference count of the volume.
+     * @throws IOException it never throws IOException.
+     */
+    @Override
+    void close() throws IOException;
+
+    /**
+     * Returns the underlying volume object. Return null if the reference was
+     * released.
+     */
+    FsVolumeSpi getVolume();
 }

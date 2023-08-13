@@ -19,87 +19,39 @@ package org.apache.hadoop.hdfs.protocol;
 
 import org.apache.hadoop.hdfs.server.namenode.ha.ReadOnly;
 import org.junit.Test;
-
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
 import static org.junit.Assert.assertEquals;
 
 /**
  * Testing class for {@link ReadOnly} annotation on {@link ClientProtocol}.
  */
 public class TestReadOnly {
-  private static final Method[] ALL_METHODS = ClientProtocol.class.getMethods();
-  private static final Set<String> READONLY_METHOD_NAMES = new HashSet<>(
-      Arrays.asList(
-          "getBlockLocations",
-          "getServerDefaults",
-          "getStoragePolicies",
-          "getStoragePolicy",
-          "getListing",
-          "getBatchedListing",
-          "getSnapshottableDirListing",
-          "getPreferredBlockSize",
-          "listCorruptFileBlocks",
-          "getFileInfo",
-          "isFileClosed",
-          "getFileLinkInfo",
-          "getLocatedFileInfo",
-          "getContentSummary",
-          "getLinkTarget",
-          "getSnapshotDiffReport",
-          "getSnapshotDiffReportListing",
-          "listCacheDirectives",
-          "listCachePools",
-          "getAclStatus",
-          "getEZForPath",
-          "listEncryptionZones",
-          "listReencryptionStatus",
-          "getXAttrs",
-          "listXAttrs",
-          "checkAccess",
-          "getErasureCodingPolicies",
-          "getErasureCodingCodecs",
-          "getErasureCodingPolicy",
-          "listOpenFiles",
-          "getStats",
-          "getReplicatedBlockStats",
-          "getECBlockGroupStats",
-          "getDatanodeReport",
-          "getDatanodeStorageReport",
-          "getDataEncryptionKey",
-          "getCurrentEditLogTxid",
-          "getEditsFromTxid",
-          "getQuotaUsage",
-          "msync",
-          "getHAServiceState",
-          "getECTopologyResultForPolicies"
-      )
-  );
 
-  @Test
-  public void testReadOnly() {
-    for (Method m : ALL_METHODS) {
-      boolean expected = READONLY_METHOD_NAMES.contains(m.getName());
-      checkIsReadOnly(m.getName(), expected);
+    private static final Method[] ALL_METHODS = ClientProtocol.class.getMethods();
+
+    private static final Set<String> READONLY_METHOD_NAMES = new HashSet<>(Arrays.asList("getBlockLocations", "getServerDefaults", "getStoragePolicies", "getStoragePolicy", "getListing", "getBatchedListing", "getSnapshottableDirListing", "getPreferredBlockSize", "listCorruptFileBlocks", "getFileInfo", "isFileClosed", "getFileLinkInfo", "getLocatedFileInfo", "getContentSummary", "getLinkTarget", "getSnapshotDiffReport", "getSnapshotDiffReportListing", "listCacheDirectives", "listCachePools", "getAclStatus", "getEZForPath", "listEncryptionZones", "listReencryptionStatus", "getXAttrs", "listXAttrs", "checkAccess", "getErasureCodingPolicies", "getErasureCodingCodecs", "getErasureCodingPolicy", "listOpenFiles", "getStats", "getReplicatedBlockStats", "getECBlockGroupStats", "getDatanodeReport", "getDatanodeStorageReport", "getDataEncryptionKey", "getCurrentEditLogTxid", "getEditsFromTxid", "getQuotaUsage", "msync", "getHAServiceState", "getECTopologyResultForPolicies"));
+
+    @Test
+    public void testReadOnly() {
+        for (Method m : ALL_METHODS) {
+            boolean expected = READONLY_METHOD_NAMES.contains(m.getName());
+            checkIsReadOnly(m.getName(), expected);
+        }
     }
-  }
 
-  private void checkIsReadOnly(String methodName, boolean expected) {
-    for (Method m : ALL_METHODS) {
-      // Note here we only check the FIRST result of overloaded methods
-      // with the same name. The assumption is that all these methods should
-      // share the same annotation.
-      if (m.getName().equals(methodName)) {
-        assertEquals("Expected ReadOnly for method '" + methodName +
-            "' to be " + expected,
-            m.isAnnotationPresent(ReadOnly.class), expected);
-        return;
-      }
+    private void checkIsReadOnly(String methodName, boolean expected) {
+        for (Method m : ALL_METHODS) {
+            // Note here we only check the FIRST result of overloaded methods
+            // with the same name. The assumption is that all these methods should
+            // share the same annotation.
+            if (m.getName().equals(methodName)) {
+                assertEquals("Expected ReadOnly for method '" + methodName + "' to be " + expected, m.isAnnotationPresent(ReadOnly.class), expected);
+                return;
+            }
+        }
+        throw new IllegalArgumentException("Unknown method name: " + methodName);
     }
-    throw new IllegalArgumentException("Unknown method name: " + methodName);
-  }
-
 }

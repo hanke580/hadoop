@@ -20,7 +20,6 @@ package org.apache.hadoop.hdfs.web.oauth2;
 
 import org.apache.hadoop.util.Timer;
 import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -30,34 +29,25 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class TestAccessTokenTimer {
-  @Test
-  public void expireConversionWorks() {
-    Timer mockTimer = mock(Timer.class);
-    when(mockTimer.now())
-        .thenReturn(5l);
-    
-    AccessTokenTimer timer = new AccessTokenTimer(mockTimer);
-    
-    timer.setExpiresIn("3");
-    assertEquals(3005, timer.getNextRefreshMSSinceEpoch());
-    
-    assertTrue(timer.shouldRefresh());
-  }
-  
-  @Test
-  public void shouldRefreshIsCorrect() {
-    Timer mockTimer = mock(Timer.class);
-    when(mockTimer.now())
-        .thenReturn(500l)
-        .thenReturn(1000000l + 500l);
-    
-    AccessTokenTimer timer = new AccessTokenTimer(mockTimer);
-    
-    timer.setExpiresInMSSinceEpoch("1000000");
-    
-    assertFalse(timer.shouldRefresh());
-    assertTrue(timer.shouldRefresh());
-    
-    verify(mockTimer, times(2)).now();
-  } 
+
+    @Test
+    public void expireConversionWorks() {
+        Timer mockTimer = mock(Timer.class);
+        when(mockTimer.now()).thenReturn(5l);
+        AccessTokenTimer timer = new AccessTokenTimer(mockTimer);
+        timer.setExpiresIn("3");
+        assertEquals(3005, timer.getNextRefreshMSSinceEpoch());
+        assertTrue(timer.shouldRefresh());
+    }
+
+    @Test
+    public void shouldRefreshIsCorrect() {
+        Timer mockTimer = mock(Timer.class);
+        when(mockTimer.now()).thenReturn(500l).thenReturn(1000000l + 500l);
+        AccessTokenTimer timer = new AccessTokenTimer(mockTimer);
+        timer.setExpiresInMSSinceEpoch("1000000");
+        assertFalse(timer.shouldRefresh());
+        assertTrue(timer.shouldRefresh());
+        verify(mockTimer, times(2)).now();
+    }
 }

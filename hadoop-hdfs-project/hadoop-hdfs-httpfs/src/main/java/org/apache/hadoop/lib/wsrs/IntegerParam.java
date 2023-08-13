@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.lib.wsrs;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -23,17 +22,17 @@ import org.apache.hadoop.classification.InterfaceAudience;
 @InterfaceAudience.Private
 public abstract class IntegerParam extends Param<Integer> {
 
-  public IntegerParam(String name, Integer defaultValue) {
-    super(name, defaultValue);
-  }
+    public IntegerParam(String name, Integer defaultValue) {
+        super(name, defaultValue);
+    }
 
-  @Override
-  protected Integer parse(String str) throws Exception {
-    return Integer.parseInt(str);
-  }
+    @Override
+    protected Integer parse(String str) throws Exception {
+        return Integer.parseInt(str);
+    }
 
-  @Override
-  protected String getDomain() {
-    return "an integer";
-  }
+    @Override
+    protected String getDomain() {
+        return "an integer";
+    }
 }

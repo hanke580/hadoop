@@ -15,11 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.protocol;
 
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.fs.BatchedRemoteIterator;
@@ -32,28 +30,27 @@ import org.apache.htrace.core.Tracer;
  */
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
-public class CachePoolIterator
-    extends BatchedRemoteIterator<String, CachePoolEntry> {
+public class CachePoolIterator extends BatchedRemoteIterator<String, CachePoolEntry> {
 
-  private final ClientProtocol namenode;
-  private final Tracer tracer;
+    private final ClientProtocol namenode;
 
-  public CachePoolIterator(ClientProtocol namenode, Tracer tracer) {
-    super("");
-    this.namenode = namenode;
-    this.tracer = tracer;
-  }
+    private final Tracer tracer;
 
-  @Override
-  public BatchedEntries<CachePoolEntry> makeRequest(String prevKey)
-      throws IOException {
-    try (TraceScope ignored = tracer.newScope("listCachePools")) {
-      return namenode.listCachePools(prevKey);
+    public CachePoolIterator(ClientProtocol namenode, Tracer tracer) {
+        super("");
+        this.namenode = namenode;
+        this.tracer = tracer;
     }
-  }
 
-  @Override
-  public String elementToPrevKey(CachePoolEntry entry) {
-    return entry.getInfo().getPoolName();
-  }
+    @Override
+    public BatchedEntries<CachePoolEntry> makeRequest(String prevKey) throws IOException {
+        try (TraceScope ignored = tracer.newScope("listCachePools")) {
+            return namenode.listCachePools(prevKey);
+        }
+    }
+
+    @Override
+    public String elementToPrevKey(CachePoolEntry entry) {
+        return entry.getInfo().getPoolName();
+    }
 }

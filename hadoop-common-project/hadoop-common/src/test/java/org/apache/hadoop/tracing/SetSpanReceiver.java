@@ -42,69 +42,69 @@ import org.junit.Assert;
  */
 public class SetSpanReceiver extends SpanReceiver {
 
-  public SetSpanReceiver(HTraceConfiguration conf) {
-  }
+    public SetSpanReceiver(HTraceConfiguration conf) {
+    }
 
-  public void receiveSpan(Span span) {
-    SetHolder.spans.put(span.getSpanId(), span);
-  }
+    public void receiveSpan(Span span) {
+        SetHolder.spans.put(span.getSpanId(), span);
+    }
 
-  public void close() {
-  }
+    public void close() {
+    }
 
-  public static void clear() {
-    SetHolder.spans.clear();
-  }
+    public static void clear() {
+        SetHolder.spans.clear();
+    }
 
-  public static int size() {
-    return SetHolder.spans.size();
-  }
+    public static int size() {
+        return SetHolder.spans.size();
+    }
 
-  public static Collection<Span> getSpans() {
-    return SetHolder.spans.values();
-  }
-
-  public static Map<String, List<Span>> getMap() {
-    return SetHolder.getMap();
-  }
-
-  public static class SetHolder {
-    public static ConcurrentHashMap<SpanId, Span> spans =
-        new ConcurrentHashMap<SpanId, Span>();
+    public static Collection<Span> getSpans() {
+        return SetHolder.spans.values();
+    }
 
     public static Map<String, List<Span>> getMap() {
-      Map<String, List<Span>> map = new HashMap<String, List<Span>>();
-
-      for (Span s : spans.values()) {
-        List<Span> l = map.get(s.getDescription());
-        if (l == null) {
-          l = new LinkedList<Span>();
-          map.put(s.getDescription(), l);
-        }
-        l.add(s);
-      }
-      return map;
+        return SetHolder.getMap();
     }
-  }
 
-  public static void assertSpanNamesFound(final String[] expectedSpanNames) {
-    try {
-      GenericTestUtils.waitFor(new Supplier<Boolean>() {
-        @Override
-        public Boolean get() {
-          Map<String, List<Span>> map = SetSpanReceiver.SetHolder.getMap();
-          for (String spanName : expectedSpanNames) {
-            if (!map.containsKey(spanName)) {
-              return false;
+    public static class SetHolder {
+
+        public static ConcurrentHashMap<SpanId, Span> spans = new ConcurrentHashMap<SpanId, Span>();
+
+        public static Map<String, List<Span>> getMap() {
+            Map<String, List<Span>> map = new HashMap<String, List<Span>>();
+            for (Span s : spans.values()) {
+                List<Span> l = map.get(s.getDescription());
+                if (l == null) {
+                    l = new LinkedList<Span>();
+                    map.put(s.getDescription(), l);
+                }
+                l.add(s);
             }
-          }
-          return true;
+            return map;
         }
-      }, 100, 1000);
-    } catch (TimeoutException e) {
-      Assert.fail("timed out to get expected spans: " + e.getMessage());
-    } catch (InterruptedException e) {
-      Assert.fail("interrupted while waiting spans: " + e.getMessage());
     }
-  }
+
+    public static void assertSpanNamesFound(final String[] expectedSpanNames) {
+        try {
+            GenericTestUtils.waitFor(new Supplier<Boolean>() {
+
+                @Override
+                public Boolean get() {
+                    Map<String, List<Span>> map = SetSpanReceiver.SetHolder.getMap();
+                    for (String spanName : expectedSpanNames) {
+                        if (!map.containsKey(spanName)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            }, 100, 1000);
+        } catch (TimeoutException e) {
+            Assert.fail("timed out to get expected spans: " + e.getMessage());
+        } catch (InterruptedException e) {
+            Assert.fail("interrupted while waiting spans: " + e.getMessage());
+        }
+    }
 }

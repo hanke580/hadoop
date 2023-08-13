@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.protocol.datatransfer;
 
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
@@ -28,13 +27,14 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
 public class InvalidEncryptionKeyException extends IOException {
-  private static final long serialVersionUID = 0l;
 
-  public InvalidEncryptionKeyException() {
-    super();
-  }
+    private static final long serialVersionUID = 0l;
 
-  public InvalidEncryptionKeyException(String msg) {
-    super(msg);
-  }
+    public InvalidEncryptionKeyException() {
+        super();
+    }
+
+    public InvalidEncryptionKeyException(String msg) {
+        super(msg);
+    }
 }

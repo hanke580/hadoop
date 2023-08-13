@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * It includes the tools to manage the Router-based federation. Includes the
  * utilities to add and remove mount table entries.
@@ -26,3 +25,4 @@ package org.apache.hadoop.hdfs.tools.federation;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

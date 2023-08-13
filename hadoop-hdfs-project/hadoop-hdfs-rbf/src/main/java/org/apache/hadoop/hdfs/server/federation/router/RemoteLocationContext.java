@@ -22,54 +22,49 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 /**
  * Base class for objects that are unique to a namespace.
  */
-public abstract class RemoteLocationContext
-    implements Comparable<RemoteLocationContext> {
+public abstract class RemoteLocationContext implements Comparable<RemoteLocationContext> {
 
-  /**
-   * Returns an identifier for a unique namespace.
-   *
-   * @return Namespace identifier.
-   */
-  public abstract String getNameserviceId();
+    /**
+     * Returns an identifier for a unique namespace.
+     *
+     * @return Namespace identifier.
+     */
+    public abstract String getNameserviceId();
 
-  /**
-   * Destination in this location. For example the path in a remote namespace.
-   *
-   * @return Destination in this location.
-   */
-  public abstract String getDest();
+    /**
+     * Destination in this location. For example the path in a remote namespace.
+     *
+     * @return Destination in this location.
+     */
+    public abstract String getDest();
 
-  /**
-   * Original source location.
-   *
-   * @return Source path.
-   */
-  public abstract String getSrc();
+    /**
+     * Original source location.
+     *
+     * @return Source path.
+     */
+    public abstract String getSrc();
 
-  @Override
-  public int hashCode() {
-    return new HashCodeBuilder(17, 31)
-        .append(getNameserviceId())
-        .append(getDest())
-        .toHashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj instanceof RemoteLocationContext) {
-      RemoteLocationContext other = (RemoteLocationContext) obj;
-      return this.getNameserviceId().equals(other.getNameserviceId()) &&
-          this.getDest().equals(other.getDest());
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 31).append(getNameserviceId()).append(getDest()).toHashCode();
     }
-    return false;
-  }
 
-  @Override
-  public int compareTo(RemoteLocationContext info) {
-    int ret = this.getNameserviceId().compareTo(info.getNameserviceId());
-    if (ret == 0) {
-      ret = this.getDest().compareTo(info.getDest());
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof RemoteLocationContext) {
+            RemoteLocationContext other = (RemoteLocationContext) obj;
+            return this.getNameserviceId().equals(other.getNameserviceId()) && this.getDest().equals(other.getDest());
+        }
+        return false;
     }
-    return ret;
-  }
+
+    @Override
+    public int compareTo(RemoteLocationContext info) {
+        int ret = this.getNameserviceId().compareTo(info.getNameserviceId());
+        if (ret == 0) {
+            ret = this.getDest().compareTo(info.getDest());
+        }
+        return ret;
+    }
 }

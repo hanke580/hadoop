@@ -19,9 +19,7 @@ package org.apache.hadoop.hdfs.server.namenode.ha;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
-
 import java.util.Collections;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.conf.Configuration;
@@ -79,64 +77,51 @@ import org.slf4j.LoggerFactory;
  */
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
-public class ObserverReadProxyProviderWithIPFailover<T extends ClientProtocol>
-    extends ObserverReadProxyProvider<T> {
-  private static final Logger LOG = LoggerFactory.getLogger(
-      ObserverReadProxyProviderWithIPFailover.class);
+public class ObserverReadProxyProviderWithIPFailover<T extends ClientProtocol> extends ObserverReadProxyProvider<T> {
 
-  private static final String IPFAILOVER_CONFIG_PREFIX =
-      HdfsClientConfigKeys.Failover.PREFIX + "ipfailover.virtual-address";
+    private static final Logger LOG = LoggerFactory.getLogger(ObserverReadProxyProviderWithIPFailover.class);
 
-  /**
-   * By default ObserverReadProxyProviderWithIPFailover
-   * uses {@link IPFailoverProxyProvider} for failover.
-   */
-  public ObserverReadProxyProviderWithIPFailover(
-      Configuration conf, URI uri, Class<T> xface, HAProxyFactory<T> factory) {
-    this(conf, uri, xface, factory,
-        new IPFailoverProxyProvider<>(conf,
-            getFailoverVirtualIP(conf, uri.getHost()), xface, factory));
-  }
+    private static final String IPFAILOVER_CONFIG_PREFIX = HdfsClientConfigKeys.Failover.PREFIX + "ipfailover.virtual-address";
 
-  @Override
-  public boolean useLogicalURI() {
-    return true;
-  }
-
-  public ObserverReadProxyProviderWithIPFailover(
-      Configuration conf, URI uri, Class<T> xface, HAProxyFactory<T> factory,
-      AbstractNNFailoverProxyProvider<T> failoverProxy) {
-    super(conf, uri, xface, factory, failoverProxy);
-    cloneDelegationTokenForVirtualIP(conf, uri);
-  }
-
-  /**
-   * Clone delegation token for the virtual IP. Specifically
-   * clone the dt that corresponds to the name service uri,
-   * to the configured corresponding virtual IP.
-   *
-   * @param conf configuration
-   * @param haURI the ha uri, a name service id in this case.
-   */
-  private void cloneDelegationTokenForVirtualIP(
-      Configuration conf, URI haURI) {
-    URI virtualIPURI = getFailoverVirtualIP(conf, haURI.getHost());
-    InetSocketAddress vipAddress = new InetSocketAddress(
-        virtualIPURI.getHost(), virtualIPURI.getPort());
-    HAUtilClient.cloneDelegationTokenForLogicalUri(
-        ugi, haURI, Collections.singleton(vipAddress));
-  }
-
-  private static URI getFailoverVirtualIP(
-      Configuration conf, String nameServiceID) {
-    String configKey = IPFAILOVER_CONFIG_PREFIX + "." + nameServiceID;
-    String virtualIP = conf.get(configKey);
-    LOG.info("Name service ID {} will use virtual IP {} for failover",
-        nameServiceID, virtualIP);
-    if (virtualIP == null) {
-      throw new IllegalArgumentException("Virtual IP for failover not found,"
-          + "misconfigured " + configKey + "?");
+    /**
+     * By default ObserverReadProxyProviderWithIPFailover
+     * uses {@link IPFailoverProxyProvider} for failover.
+     */
+    public ObserverReadProxyProviderWithIPFailover(Configuration conf, URI uri, Class<T> xface, HAProxyFactory<T> factory) {
+        this(conf, uri, xface, factory, new IPFailoverProxyProvider<>(conf, getFailoverVirtualIP(conf, uri.getHost()), xface, factory));
     }
-    return URI.create(virtualIP);
-  }
+
+    @Override
+    public boolean useLogicalURI() {
+        return true;
+    }
+
+    public ObserverReadProxyProviderWithIPFailover(Configuration conf, URI uri, Class<T> xface, HAProxyFactory<T> factory, AbstractNNFailoverProxyProvider<T> failoverProxy) {
+        super(conf, uri, xface, factory, failoverProxy);
+        cloneDelegationTokenForVirtualIP(conf, uri);
+    }
+
+    /**
+     * Clone delegation token for the virtual IP. Specifically
+     * clone the dt that corresponds to the name service uri,
+     * to the configured corresponding virtual IP.
+     *
+     * @param conf configuration
+     * @param haURI the ha uri, a name service id in this case.
+     */
+    private void cloneDelegationTokenForVirtualIP(Configuration conf, URI haURI) {
+        URI virtualIPURI = getFailoverVirtualIP(conf, haURI.getHost());
+        InetSocketAddress vipAddress = new InetSocketAddress(virtualIPURI.getHost(), virtualIPURI.getPort());
+        HAUtilClient.cloneDelegationTokenForLogicalUri(ugi, haURI, Collections.singleton(vipAddress));
+    }
+
+    private static URI getFailoverVirtualIP(Configuration conf, String nameServiceID) {
+        String configKey = IPFAILOVER_CONFIG_PREFIX + "." + nameServiceID;
+        String virtualIP = conf.get(configKey);
+        LOG.info("Name service ID {} will use virtual IP {} for failover", nameServiceID, virtualIP);
+        if (virtualIP == null) {
+            throw new IllegalArgumentException("Virtual IP for failover not found," + "misconfigured " + configKey + "?");
+        }
+        return URI.create(virtualIP);
+    }
 }

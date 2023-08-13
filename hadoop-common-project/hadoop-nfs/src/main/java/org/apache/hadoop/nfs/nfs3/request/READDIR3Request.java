@@ -18,7 +18,6 @@
 package org.apache.hadoop.nfs.nfs3.request;
 
 import java.io.IOException;
-
 import org.apache.hadoop.nfs.nfs3.FileHandle;
 import org.apache.hadoop.oncrpc.XDR;
 
@@ -26,43 +25,45 @@ import org.apache.hadoop.oncrpc.XDR;
  * READDIR3 Request
  */
 public class READDIR3Request extends RequestWithHandle {
-  private final long cookie;
-  private final long cookieVerf;
-  private final int count;
 
-  public static READDIR3Request deserialize(XDR xdr) throws IOException {
-    FileHandle handle = readHandle(xdr);
-    long cookie = xdr.readHyper();
-    long cookieVerf = xdr.readHyper();
-    int count = xdr.readInt();
-    return new READDIR3Request(handle, cookie, cookieVerf, count);
-  }
-  
-  public READDIR3Request(FileHandle handle, long cookie, long cookieVerf,
-      int count) {
-    super(handle);
-    this.cookie = cookie;
-    this.cookieVerf = cookieVerf;
-    this.count = count;
-  }
-  
-  public long getCookie() {
-    return this.cookie;
-  }
+    private final long cookie;
 
-  public long getCookieVerf() {
-    return this.cookieVerf;
-  }
+    private final long cookieVerf;
 
-  public long getCount() {
-    return this.count;
-  }
+    private final int count;
 
-  @Override
-  public void serialize(XDR xdr) {
-    handle.serialize(xdr);
-    xdr.writeLongAsHyper(cookie);
-    xdr.writeLongAsHyper(cookieVerf);
-    xdr.writeInt(count);
-  }
+    public static READDIR3Request deserialize(XDR xdr) throws IOException {
+        FileHandle handle = readHandle(xdr);
+        long cookie = xdr.readHyper();
+        long cookieVerf = xdr.readHyper();
+        int count = xdr.readInt();
+        return new READDIR3Request(handle, cookie, cookieVerf, count);
+    }
+
+    public READDIR3Request(FileHandle handle, long cookie, long cookieVerf, int count) {
+        super(handle);
+        this.cookie = cookie;
+        this.cookieVerf = cookieVerf;
+        this.count = count;
+    }
+
+    public long getCookie() {
+        return this.cookie;
+    }
+
+    public long getCookieVerf() {
+        return this.cookieVerf;
+    }
+
+    public long getCount() {
+        return this.count;
+    }
+
+    @Override
+    public void serialize(XDR xdr) {
+        handle.serialize(xdr);
+        xdr.writeLongAsHyper(cookie);
+        xdr.writeLongAsHyper(cookieVerf);
+        xdr.writeInt(count);
+    }
 }

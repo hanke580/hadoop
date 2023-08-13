@@ -38,51 +38,44 @@ import org.apache.hadoop.io.erasurecode.rawcoder.RawErasureEncoder;
  */
 @InterfaceAudience.Private
 public class HHXORErasureEncoder extends ErasureEncoder {
-  private RawErasureEncoder rsRawEncoder;
-  private RawErasureEncoder xorRawEncoder;
 
-  public HHXORErasureEncoder(ErasureCoderOptions options) {
-    super(options);
-  }
+    private RawErasureEncoder rsRawEncoder;
 
-  @Override
-  protected ErasureCodingStep prepareEncodingStep(
-          final ECBlockGroup blockGroup) {
+    private RawErasureEncoder xorRawEncoder;
 
-    RawErasureEncoder rsRawEncoderTmp = checkCreateRSRawEncoder();
-    RawErasureEncoder xorRawEncoderTmp = checkCreateXorRawEncoder();
-
-    ECBlock[] inputBlocks = getInputBlocks(blockGroup);
-
-    return new HHXORErasureEncodingStep(inputBlocks,
-            getOutputBlocks(blockGroup), rsRawEncoderTmp, xorRawEncoderTmp);
-  }
-
-  private RawErasureEncoder checkCreateRSRawEncoder() {
-    if (rsRawEncoder == null) {
-      rsRawEncoder = CodecUtil.createRawEncoder(getConf(),
-          ErasureCodeConstants.RS_CODEC_NAME, getOptions());
+    public HHXORErasureEncoder(ErasureCoderOptions options) {
+        super(options);
     }
-    return rsRawEncoder;
-  }
 
-  private RawErasureEncoder checkCreateXorRawEncoder() {
-    if (xorRawEncoder == null) {
-      xorRawEncoder = CodecUtil.createRawEncoder(getConf(),
-          ErasureCodeConstants.XOR_CODEC_NAME,
-          getOptions());
+    @Override
+    protected ErasureCodingStep prepareEncodingStep(final ECBlockGroup blockGroup) {
+        RawErasureEncoder rsRawEncoderTmp = checkCreateRSRawEncoder();
+        RawErasureEncoder xorRawEncoderTmp = checkCreateXorRawEncoder();
+        ECBlock[] inputBlocks = getInputBlocks(blockGroup);
+        return new HHXORErasureEncodingStep(inputBlocks, getOutputBlocks(blockGroup), rsRawEncoderTmp, xorRawEncoderTmp);
     }
-    return xorRawEncoder;
-  }
 
-  @Override
-  public void release() {
-    if (rsRawEncoder != null) {
-      rsRawEncoder.release();
+    private RawErasureEncoder checkCreateRSRawEncoder() {
+        if (rsRawEncoder == null) {
+            rsRawEncoder = CodecUtil.createRawEncoder(getConf(), ErasureCodeConstants.RS_CODEC_NAME, getOptions());
+        }
+        return rsRawEncoder;
     }
-    if (xorRawEncoder != null) {
-      xorRawEncoder.release();
-    }
-  }
 
+    private RawErasureEncoder checkCreateXorRawEncoder() {
+        if (xorRawEncoder == null) {
+            xorRawEncoder = CodecUtil.createRawEncoder(getConf(), ErasureCodeConstants.XOR_CODEC_NAME, getOptions());
+        }
+        return xorRawEncoder;
+    }
+
+    @Override
+    public void release() {
+        if (rsRawEncoder != null) {
+            rsRawEncoder.release();
+        }
+        if (xorRawEncoder != null) {
+            xorRawEncoder.release();
+        }
+    }
 }

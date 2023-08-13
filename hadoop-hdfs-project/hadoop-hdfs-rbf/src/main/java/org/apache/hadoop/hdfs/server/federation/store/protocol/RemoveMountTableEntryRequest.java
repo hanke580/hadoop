@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.server.federation.store.protocol;
 
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience.Public;
 import org.apache.hadoop.classification.InterfaceStability.Unstable;
 import org.apache.hadoop.hdfs.server.federation.store.driver.StateStoreSerializer;
@@ -28,22 +27,21 @@ import org.apache.hadoop.hdfs.server.federation.store.driver.StateStoreSerialize
  */
 public abstract class RemoveMountTableEntryRequest {
 
-  public static RemoveMountTableEntryRequest newInstance() throws IOException {
-    return StateStoreSerializer.newRecord(RemoveMountTableEntryRequest.class);
-  }
+    public static RemoveMountTableEntryRequest newInstance() throws IOException {
+        return StateStoreSerializer.newRecord(RemoveMountTableEntryRequest.class);
+    }
 
-  public static RemoveMountTableEntryRequest newInstance(String path)
-      throws IOException {
-    RemoveMountTableEntryRequest request = newInstance();
-    request.setSrcPath(path);
-    return request;
-  }
+    public static RemoveMountTableEntryRequest newInstance(String path) throws IOException {
+        RemoveMountTableEntryRequest request = newInstance();
+        request.setSrcPath(path);
+        return request;
+    }
 
-  @Public
-  @Unstable
-  public abstract String getSrcPath();
+    @Public
+    @Unstable
+    public abstract String getSrcPath();
 
-  @Public
-  @Unstable
-  public abstract void setSrcPath(String path);
+    @Public
+    @Unstable
+    public abstract void setSrcPath(String path);
 }

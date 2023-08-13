@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.ipc;
 
 import com.google.protobuf.Message;
@@ -27,8 +26,7 @@ import com.google.protobuf.Message;
 @Deprecated
 public interface ProtobufRpcEngineCallback {
 
-  void setResponse(Message message);
+    void setResponse(Message message);
 
-  void error(Throwable t);
-
+    void error(Throwable t);
 }

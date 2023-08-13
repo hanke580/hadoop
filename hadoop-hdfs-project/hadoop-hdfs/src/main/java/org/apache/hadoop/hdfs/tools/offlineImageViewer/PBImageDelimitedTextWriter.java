@@ -24,7 +24,6 @@ import org.apache.hadoop.hdfs.server.namenode.FsImageProto.INodeSection.INode;
 import org.apache.hadoop.hdfs.server.namenode.FsImageProto.INodeSection.INodeDirectory;
 import org.apache.hadoop.hdfs.server.namenode.FsImageProto.INodeSection.INodeFile;
 import org.apache.hadoop.hdfs.server.namenode.FsImageProto.INodeSection.INodeSymlink;
-
 import java.io.IOException;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
@@ -44,148 +43,153 @@ import java.text.SimpleDateFormat;
  * constructor.
  */
 public class PBImageDelimitedTextWriter extends PBImageTextWriter {
-  private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm";
-  private boolean printStoragePolicy;
 
-  static class OutputEntryBuilder {
-    private final SimpleDateFormat dateFormatter =
-        new SimpleDateFormat(DATE_FORMAT);
+    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm";
 
-    private PBImageDelimitedTextWriter writer;
-    private Path path;
-    private int replication = 0;
-    private long modificationTime;
-    private long accessTime = 0;
-    private long preferredBlockSize = 0;
-    private int blocksCount = 0;
-    private long fileSize = 0;
-    private long nsQuota = 0;
-    private long dsQuota = 0;
-    private int storagePolicy = 0;
+    private boolean printStoragePolicy;
 
-    private String dirPermission = "-";
-    private PermissionStatus permissionStatus;
-    private String aclPermission = "";
+    static class OutputEntryBuilder {
 
-    OutputEntryBuilder(PBImageDelimitedTextWriter writer, INode inode) {
-      this.writer = writer;
-      switch (inode.getType()) {
-      case FILE:
-        INodeFile file = inode.getFile();
-        replication = file.getReplication();
-        modificationTime = file.getModificationTime();
-        accessTime = file.getAccessTime();
-        preferredBlockSize = file.getPreferredBlockSize();
-        blocksCount = file.getBlocksCount();
-        fileSize = FSImageLoader.getFileSize(file);
-        permissionStatus = writer.getPermission(file.getPermission());
-        if (file.hasAcl() && file.getAcl().getEntriesCount() > 0){
-          aclPermission = "+";
+        private final SimpleDateFormat dateFormatter = new SimpleDateFormat(DATE_FORMAT);
+
+        private PBImageDelimitedTextWriter writer;
+
+        private Path path;
+
+        private int replication = 0;
+
+        private long modificationTime;
+
+        private long accessTime = 0;
+
+        private long preferredBlockSize = 0;
+
+        private int blocksCount = 0;
+
+        private long fileSize = 0;
+
+        private long nsQuota = 0;
+
+        private long dsQuota = 0;
+
+        private int storagePolicy = 0;
+
+        private String dirPermission = "-";
+
+        private PermissionStatus permissionStatus;
+
+        private String aclPermission = "";
+
+        OutputEntryBuilder(PBImageDelimitedTextWriter writer, INode inode) {
+            this.writer = writer;
+            switch(inode.getType()) {
+                case FILE:
+                    INodeFile file = inode.getFile();
+                    replication = file.getReplication();
+                    modificationTime = file.getModificationTime();
+                    accessTime = file.getAccessTime();
+                    preferredBlockSize = file.getPreferredBlockSize();
+                    blocksCount = file.getBlocksCount();
+                    fileSize = FSImageLoader.getFileSize(file);
+                    permissionStatus = writer.getPermission(file.getPermission());
+                    if (file.hasAcl() && file.getAcl().getEntriesCount() > 0) {
+                        aclPermission = "+";
+                    }
+                    storagePolicy = file.getStoragePolicyID();
+                    break;
+                case DIRECTORY:
+                    INodeDirectory dir = inode.getDirectory();
+                    modificationTime = dir.getModificationTime();
+                    nsQuota = dir.getNsQuota();
+                    dsQuota = dir.getDsQuota();
+                    dirPermission = "d";
+                    permissionStatus = writer.getPermission(dir.getPermission());
+                    if (dir.hasAcl() && dir.getAcl().getEntriesCount() > 0) {
+                        aclPermission = "+";
+                    }
+                    storagePolicy = writer.getStoragePolicy(dir.getXAttrs());
+                    break;
+                case SYMLINK:
+                    INodeSymlink s = inode.getSymlink();
+                    modificationTime = s.getModificationTime();
+                    accessTime = s.getAccessTime();
+                    permissionStatus = writer.getPermission(s.getPermission());
+                    storagePolicy = HdfsConstants.BLOCK_STORAGE_POLICY_ID_UNSPECIFIED;
+                    break;
+                default:
+                    break;
+            }
         }
-        storagePolicy = file.getStoragePolicyID();
-        break;
-      case DIRECTORY:
-        INodeDirectory dir = inode.getDirectory();
-        modificationTime = dir.getModificationTime();
-        nsQuota = dir.getNsQuota();
-        dsQuota = dir.getDsQuota();
-        dirPermission = "d";
-        permissionStatus = writer.getPermission(dir.getPermission());
-        if (dir.hasAcl() && dir.getAcl().getEntriesCount() > 0) {
-          aclPermission = "+";
+
+        void setPath(Path path) {
+            this.path = path;
         }
-        storagePolicy = writer.getStoragePolicy(dir.getXAttrs());
-        break;
-      case SYMLINK:
-        INodeSymlink s = inode.getSymlink();
-        modificationTime = s.getModificationTime();
-        accessTime = s.getAccessTime();
-        permissionStatus = writer.getPermission(s.getPermission());
-        storagePolicy = HdfsConstants.BLOCK_STORAGE_POLICY_ID_UNSPECIFIED;
-        break;
-      default:
-        break;
-      }
+
+        public String build() {
+            assert permissionStatus != null : "The PermissionStatus is null!";
+            assert permissionStatus.getUserName() != null : "User name is null!";
+            assert permissionStatus.getGroupName() != null : "Group name is null!";
+            StringBuffer buffer = new StringBuffer();
+            writer.append(buffer, path.toString());
+            writer.append(buffer, replication);
+            writer.append(buffer, dateFormatter.format(modificationTime));
+            writer.append(buffer, dateFormatter.format(accessTime));
+            writer.append(buffer, preferredBlockSize);
+            writer.append(buffer, blocksCount);
+            writer.append(buffer, fileSize);
+            writer.append(buffer, nsQuota);
+            writer.append(buffer, dsQuota);
+            writer.append(buffer, dirPermission + permissionStatus.getPermission().toString() + aclPermission);
+            writer.append(buffer, permissionStatus.getUserName());
+            writer.append(buffer, permissionStatus.getGroupName());
+            if (writer.printStoragePolicy) {
+                writer.append(buffer, storagePolicy);
+            }
+            return buffer.substring(1);
+        }
     }
 
-    void setPath(Path path) {
-      this.path = path;
+    PBImageDelimitedTextWriter(PrintStream out, String delimiter, String tempPath) throws IOException {
+        this(out, delimiter, tempPath, false);
     }
 
-    public String build() {
-      assert permissionStatus != null : "The PermissionStatus is null!";
-      assert permissionStatus.getUserName() != null : "User name is null!";
-      assert permissionStatus.getGroupName() != null : "Group name is null!";
-
-      StringBuffer buffer = new StringBuffer();
-      writer.append(buffer, path.toString());
-      writer.append(buffer, replication);
-      writer.append(buffer, dateFormatter.format(modificationTime));
-      writer.append(buffer, dateFormatter.format(accessTime));
-      writer.append(buffer, preferredBlockSize);
-      writer.append(buffer, blocksCount);
-      writer.append(buffer, fileSize);
-      writer.append(buffer, nsQuota);
-      writer.append(buffer, dsQuota);
-      writer.append(buffer, dirPermission +
-          permissionStatus.getPermission().toString() + aclPermission);
-      writer.append(buffer, permissionStatus.getUserName());
-      writer.append(buffer, permissionStatus.getGroupName());
-      if (writer.printStoragePolicy) {
-        writer.append(buffer, storagePolicy);
-      }
-      return buffer.substring(1);
+    PBImageDelimitedTextWriter(PrintStream out, String delimiter, String tempPath, boolean printStoragePolicy) throws IOException {
+        super(out, delimiter, tempPath);
+        this.printStoragePolicy = printStoragePolicy;
     }
-  }
 
-  PBImageDelimitedTextWriter(PrintStream out, String delimiter, String tempPath)
-      throws IOException {
-    this(out, delimiter, tempPath, false);
-  }
-
-  PBImageDelimitedTextWriter(PrintStream out, String delimiter,
-                             String tempPath, boolean printStoragePolicy)
-      throws IOException {
-    super(out, delimiter, tempPath);
-    this.printStoragePolicy = printStoragePolicy;
-  }
-
-  @Override
-  public String getEntry(String parent, INode inode) {
-    OutputEntryBuilder entryBuilder =
-        new OutputEntryBuilder(this, inode);
-
-    String inodeName = inode.getName().toStringUtf8();
-    Path path = new Path(parent.isEmpty() ? "/" : parent,
-      inodeName.isEmpty() ? "/" : inodeName);
-    entryBuilder.setPath(path);
-
-    return entryBuilder.build();
-  }
-
-  @Override
-  public String getHeader() {
-    StringBuffer buffer = new StringBuffer();
-    buffer.append("Path");
-    append(buffer, "Replication");
-    append(buffer, "ModificationTime");
-    append(buffer, "AccessTime");
-    append(buffer, "PreferredBlockSize");
-    append(buffer, "BlocksCount");
-    append(buffer, "FileSize");
-    append(buffer, "NSQUOTA");
-    append(buffer, "DSQUOTA");
-    append(buffer, "Permission");
-    append(buffer, "UserName");
-    append(buffer, "GroupName");
-    if (printStoragePolicy) {
-      append(buffer, "StoragePolicyId");
+    @Override
+    public String getEntry(String parent, INode inode) {
+        OutputEntryBuilder entryBuilder = new OutputEntryBuilder(this, inode);
+        String inodeName = inode.getName().toStringUtf8();
+        Path path = new Path(parent.isEmpty() ? "/" : parent, inodeName.isEmpty() ? "/" : inodeName);
+        entryBuilder.setPath(path);
+        return entryBuilder.build();
     }
-    return buffer.toString();
-  }
 
-  @Override
-  public void afterOutput() {
-    // do nothing
-  }
+    @Override
+    public String getHeader() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("Path");
+        append(buffer, "Replication");
+        append(buffer, "ModificationTime");
+        append(buffer, "AccessTime");
+        append(buffer, "PreferredBlockSize");
+        append(buffer, "BlocksCount");
+        append(buffer, "FileSize");
+        append(buffer, "NSQUOTA");
+        append(buffer, "DSQUOTA");
+        append(buffer, "Permission");
+        append(buffer, "UserName");
+        append(buffer, "GroupName");
+        if (printStoragePolicy) {
+            append(buffer, "StoragePolicyId");
+        }
+        return buffer.toString();
+    }
+
+    @Override
+    public void afterOutput() {
+        // do nothing
+    }
 }

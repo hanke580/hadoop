@@ -15,32 +15,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.lib.wsrs;
 
 import org.apache.hadoop.classification.InterfaceAudience;
-
 import java.text.MessageFormat;
 
 @InterfaceAudience.Private
 public abstract class BooleanParam extends Param<Boolean> {
 
-  public BooleanParam(String name, Boolean defaultValue) {
-    super(name, defaultValue);
-  }
-
-  @Override
-  protected Boolean parse(String str) throws Exception {
-    if (str.equalsIgnoreCase("true")) {
-      return true;
-    } else if (str.equalsIgnoreCase("false")) {
-      return false;
+    public BooleanParam(String name, Boolean defaultValue) {
+        super(name, defaultValue);
     }
-    throw new IllegalArgumentException(MessageFormat.format("Invalid value [{0}], must be a boolean", str));
-  }
 
-  @Override
-  protected String getDomain() {
-    return "a boolean";
-  }
+    @Override
+    protected Boolean parse(String str) throws Exception {
+        if (str.equalsIgnoreCase("true")) {
+            return true;
+        } else if (str.equalsIgnoreCase("false")) {
+            return false;
+        }
+        throw new IllegalArgumentException(MessageFormat.format("Invalid value [{0}], must be a boolean", str));
+    }
+
+    @Override
+    protected String getDomain() {
+        return "a boolean";
+    }
 }

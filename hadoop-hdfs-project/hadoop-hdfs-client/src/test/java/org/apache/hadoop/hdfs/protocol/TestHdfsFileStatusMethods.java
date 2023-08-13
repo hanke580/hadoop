@@ -26,9 +26,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
-
 import org.apache.hadoop.fs.FileStatus;
-
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -39,68 +37,62 @@ import static org.junit.Assert.assertTrue;
  */
 public class TestHdfsFileStatusMethods {
 
-  @Test
-  public void testInterfaceSuperset() {
-    Set<MethodSignature>  fsM = signatures(FileStatus.class);
-    Set<MethodSignature> hfsM = signatures(HdfsFileStatus.class);
-    hfsM.addAll(Stream.of(HdfsFileStatus.class.getInterfaces())
-        .flatMap(i -> Stream.of(i.getDeclaredMethods()))
-        .map(MethodSignature::new)
-        .collect(toSet()));
-    // HdfsFileStatus is not a concrete type
-    hfsM.addAll(signatures(Object.class));
-    assertTrue(fsM.removeAll(hfsM));
-    // verify that FileStatus is a subset of HdfsFileStatus
-    assertEquals(fsM.stream()
-            .map(MethodSignature::toString)
-            .collect(joining("\n")),
-        Collections.emptySet(), fsM);
-  }
-
-  /** Map non-static, declared methods for this class to signatures. */
-  private static Set<MethodSignature> signatures(Class<?> c) {
-    return Stream.of(c.getDeclaredMethods())
-        .filter(m -> !Modifier.isStatic(m.getModifiers()))
-        .map(MethodSignature::new)
-        .collect(toSet());
-  }
-
-  private static class MethodSignature {
-    private final String name;
-    private final Type rval;
-    private final Type[] param;
-    MethodSignature(Method m) {
-      name = m.getName();
-      rval = m.getGenericReturnType();
-      param = m.getParameterTypes();
+    @Test
+    public void testInterfaceSuperset() {
+        Set<MethodSignature> fsM = signatures(FileStatus.class);
+        Set<MethodSignature> hfsM = signatures(HdfsFileStatus.class);
+        hfsM.addAll(Stream.of(HdfsFileStatus.class.getInterfaces()).flatMap(i -> Stream.of(i.getDeclaredMethods())).map(MethodSignature::new).collect(toSet()));
+        // HdfsFileStatus is not a concrete type
+        hfsM.addAll(signatures(Object.class));
+        assertTrue(fsM.removeAll(hfsM));
+        // verify that FileStatus is a subset of HdfsFileStatus
+        assertEquals(fsM.stream().map(MethodSignature::toString).collect(joining("\n")), Collections.emptySet(), fsM);
     }
-    @Override
-    public int hashCode() {
-      return name.hashCode();
-    }
+
     /**
-     * Methods are equal iff they have the same name, return type, and params
-     * (non-generic).
+     * Map non-static, declared methods for this class to signatures.
      */
-    @Override
-    public boolean equals(Object o) {
-      if (!(o instanceof MethodSignature)) {
-        return false;
-      }
-      MethodSignature s = (MethodSignature) o;
-      return name.equals(s.name) &&
-          rval.equals(s.rval) &&
-          Arrays.equals(param, s.param);
+    private static Set<MethodSignature> signatures(Class<?> c) {
+        return Stream.of(c.getDeclaredMethods()).filter(m -> !Modifier.isStatic(m.getModifiers())).map(MethodSignature::new).collect(toSet());
     }
-    @Override
-    public String toString() {
-      StringBuilder sb = new StringBuilder();
-      sb.append(rval).append(" ").append(name).append("(")
-        .append(Stream.of(param)
-            .map(Type::toString).collect(joining(",")))
-        .append(")");
-      return sb.toString();
-    }
-  }
 
+    private static class MethodSignature {
+
+        private final String name;
+
+        private final Type rval;
+
+        private final Type[] param;
+
+        MethodSignature(Method m) {
+            name = m.getName();
+            rval = m.getGenericReturnType();
+            param = m.getParameterTypes();
+        }
+
+        @Override
+        public int hashCode() {
+            return name.hashCode();
+        }
+
+        /**
+         * Methods are equal iff they have the same name, return type, and params
+         * (non-generic).
+         */
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof MethodSignature)) {
+                return false;
+            }
+            MethodSignature s = (MethodSignature) o;
+            return name.equals(s.name) && rval.equals(s.rval) && Arrays.equals(param, s.param);
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append(rval).append(" ").append(name).append("(").append(Stream.of(param).map(Type::toString).collect(joining(","))).append(")");
+            return sb.toString();
+        }
+    }
 }

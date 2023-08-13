@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.fs.shell;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -40,33 +39,38 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
 class PrintableString {
-  private static final char REPLACEMENT_CHAR = '?';
 
-  private final String printableString;
+    private static final char REPLACEMENT_CHAR = '?';
 
-  PrintableString(String rawString) {
-    StringBuilder stringBuilder = new StringBuilder(rawString.length());
-    for (int offset = 0; offset < rawString.length();) {
-      int codePoint = rawString.codePointAt(offset);
-      offset += Character.charCount(codePoint);
+    private final String printableString;
 
-      switch (Character.getType(codePoint)) {
-      case Character.CONTROL:     // Cc
-      case Character.FORMAT:      // Cf
-      case Character.PRIVATE_USE: // Co
-      case Character.SURROGATE:   // Cs
-      case Character.UNASSIGNED:  // Cn
-        stringBuilder.append(REPLACEMENT_CHAR);
-        break;
-      default:
-        stringBuilder.append(Character.toChars(codePoint));
-        break;
-      }
+    PrintableString(String rawString) {
+        StringBuilder stringBuilder = new StringBuilder(rawString.length());
+        for (int offset = 0; offset < rawString.length(); ) {
+            int codePoint = rawString.codePointAt(offset);
+            offset += Character.charCount(codePoint);
+            switch(Character.getType(codePoint)) {
+                // Cc
+                case Character.CONTROL:
+                // Cf
+                case Character.FORMAT:
+                // Co
+                case Character.PRIVATE_USE:
+                // Cs
+                case Character.SURROGATE:
+                case // Cn
+                Character.UNASSIGNED:
+                    stringBuilder.append(REPLACEMENT_CHAR);
+                    break;
+                default:
+                    stringBuilder.append(Character.toChars(codePoint));
+                    break;
+            }
+        }
+        printableString = stringBuilder.toString();
     }
-    printableString = stringBuilder.toString();
-  }
 
-  public String toString() {
-    return printableString;
-  }
+    public String toString() {
+        return printableString;
+    }
 }

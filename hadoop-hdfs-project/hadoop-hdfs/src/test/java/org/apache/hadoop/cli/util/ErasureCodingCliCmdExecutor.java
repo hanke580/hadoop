@@ -21,17 +21,19 @@ import org.apache.hadoop.hdfs.tools.ECAdmin;
 import org.apache.hadoop.util.ToolRunner;
 
 public class ErasureCodingCliCmdExecutor extends CommandExecutor {
-  protected String namenode = null;
-  protected ECAdmin admin = null;
 
-  public ErasureCodingCliCmdExecutor(String namenode, ECAdmin admin) {
-    this.namenode = namenode;
-    this.admin = admin;
-  }
+    protected String namenode = null;
 
-  @Override
-  protected int execute(final String cmd) throws Exception {
-    String[] args = getCommandAsArgs(cmd, "NAMENODE", this.namenode);
-    return ToolRunner.run(admin, args);
-  }
+    protected ECAdmin admin = null;
+
+    public ErasureCodingCliCmdExecutor(String namenode, ECAdmin admin) {
+        this.namenode = namenode;
+        this.admin = admin;
+    }
+
+    @Override
+    protected int execute(final String cmd) throws Exception {
+        String[] args = getCommandAsArgs(cmd, "NAMENODE", this.namenode);
+        return ToolRunner.run(admin, args);
+    }
 }

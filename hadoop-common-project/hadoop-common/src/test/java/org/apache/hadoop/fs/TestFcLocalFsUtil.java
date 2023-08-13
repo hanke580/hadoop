@@ -22,13 +22,12 @@ import org.junit.Before;
 /**
  * Test Util for localFs using FileContext API.
  */
-public class TestFcLocalFsUtil extends
-  FileContextUtilBase {
+public class TestFcLocalFsUtil extends FileContextUtilBase {
 
-  @Override
-  @Before
-  public void setUp() throws Exception {
-    fc = FileContext.getLocalFSFileContext();
-    super.setUp();
-  }
+    @Override
+    @Before
+    public void setUp() throws Exception {
+        fc = FileContext.getLocalFSFileContext();
+        super.setUp();
+    }
 }

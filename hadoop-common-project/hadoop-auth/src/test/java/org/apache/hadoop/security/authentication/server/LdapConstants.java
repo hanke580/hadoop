@@ -18,14 +18,14 @@ package org.apache.hadoop.security.authentication.server;
  */
 public final class LdapConstants {
 
-  /**
-   * This class defines constants to be used for LDAP integration testing.
-   * Hence this class is not expected to be instantiated.
-   */
-  private LdapConstants() {
-  }
+    /**
+     * This class defines constants to be used for LDAP integration testing.
+     * Hence this class is not expected to be instantiated.
+     */
+    private LdapConstants() {
+    }
 
-  public static final String LDAP_BASE_DN = "dc=example,dc=com";
-  public static final String LDAP_SERVER_ADDR = "localhost";
+    public static final String LDAP_BASE_DN = "dc=example,dc=com";
 
+    public static final String LDAP_SERVER_ADDR = "localhost";
 }

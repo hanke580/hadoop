@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.registry.client.impl.zk;
 
 import org.apache.curator.ensemble.EnsembleProvider;
@@ -29,13 +28,13 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceStability.Evolving
 public class BindingInformation {
 
-  /**
-   * The Curator Ensemble Provider
-   */
-  public EnsembleProvider ensembleProvider;
+    /**
+     * The Curator Ensemble Provider
+     */
+    public EnsembleProvider ensembleProvider;
 
-  /**
-   * Any information that may be useful for diagnostics
-   */
-  public String description;
+    /**
+     * Any information that may be useful for diagnostics
+     */
+    public String description;
 }

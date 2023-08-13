@@ -19,16 +19,13 @@ package org.apache.hadoop.hdfs.server.federation.router;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.server.federation.RouterConfigBuilder;
-
 import java.io.IOException;
-
 import org.apache.hadoop.test.GenericTestUtils;
 import org.apache.hadoop.test.LambdaTestUtils;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
@@ -37,69 +34,62 @@ import static org.junit.Assert.fail;
  */
 public class TestDisableRouterQuota {
 
-  private static Router router;
+    private static Router router;
 
-  @BeforeClass
-  public static void setUp() throws Exception {
-    // Build and start a router
-    router = new Router();
-    Configuration routerConf = new RouterConfigBuilder()
-        .quota(false) //set false to verify the quota disabled in Router
-        .rpc()
-        .build();
-    routerConf.set(RBFConfigKeys.DFS_ROUTER_RPC_ADDRESS_KEY, "0.0.0.0:0");
-    router.init(routerConf);
-    router.setRouterId("TestRouterId");
-    router.start();
-  }
-
-  @AfterClass
-  public static void tearDown() throws IOException {
-    if (router != null) {
-      router.stop();
-      router.close();
+    @BeforeClass
+    public static void setUp() throws Exception {
+        // Build and start a router
+        router = new Router();
+        Configuration routerConf = new RouterConfigBuilder().quota(//set false to verify the quota disabled in Router
+        false).rpc().build();
+        routerConf.set(RBFConfigKeys.DFS_ROUTER_RPC_ADDRESS_KEY, "0.0.0.0:0");
+        router.init(routerConf);
+        router.setRouterId("TestRouterId");
+        router.start();
     }
-  }
 
-  @Before
-  public void checkDisableQuota() {
-    assertFalse(router.isQuotaEnabled());
-  }
-
-  @Test
-  public void testSetQuota() throws Exception {
-    long nsQuota = 1024;
-    long ssQuota = 1024;
-
-    try {
-      Quota quotaModule = router.getRpcServer().getQuotaModule();
-      quotaModule.setQuota("/test", nsQuota, ssQuota, null, false);
-      fail("The setQuota call should fail.");
-    } catch (IOException ioe) {
-      GenericTestUtils.assertExceptionContains(
-          "The quota system is disabled in Router.", ioe);
+    @AfterClass
+    public static void tearDown() throws IOException {
+        if (router != null) {
+            router.stop();
+            router.close();
+        }
     }
-  }
 
-  @Test
-  public void testGetQuotaUsage() throws Exception {
-    try {
-      Quota quotaModule = router.getRpcServer().getQuotaModule();
-      quotaModule.getQuotaUsage("/test");
-      fail("The getQuotaUsage call should fail.");
-    } catch (IOException ioe) {
-      GenericTestUtils.assertExceptionContains(
-          "The quota system is disabled in Router.", ioe);
+    @Before
+    public void checkDisableQuota() {
+        assertFalse(router.isQuotaEnabled());
     }
-  }
 
-  @Test
-  public void testGetGlobalQuota() throws Exception {
-    LambdaTestUtils.intercept(IOException.class,
-        "The quota system is disabled in Router.",
-        "The getGlobalQuota call should fail.", () -> {
-          Quota quotaModule = router.getRpcServer().getQuotaModule();
-          quotaModule.getGlobalQuota("/test");
+    @Test
+    public void testSetQuota() throws Exception {
+        long nsQuota = 1024;
+        long ssQuota = 1024;
+        try {
+            Quota quotaModule = router.getRpcServer().getQuotaModule();
+            quotaModule.setQuota("/test", nsQuota, ssQuota, null, false);
+            fail("The setQuota call should fail.");
+        } catch (IOException ioe) {
+            GenericTestUtils.assertExceptionContains("The quota system is disabled in Router.", ioe);
+        }
+    }
+
+    @Test
+    public void testGetQuotaUsage() throws Exception {
+        try {
+            Quota quotaModule = router.getRpcServer().getQuotaModule();
+            quotaModule.getQuotaUsage("/test");
+            fail("The getQuotaUsage call should fail.");
+        } catch (IOException ioe) {
+            GenericTestUtils.assertExceptionContains("The quota system is disabled in Router.", ioe);
+        }
+    }
+
+    @Test
+    public void testGetGlobalQuota() throws Exception {
+        LambdaTestUtils.intercept(IOException.class, "The quota system is disabled in Router.", "The getGlobalQuota call should fail.", () -> {
+            Quota quotaModule = router.getRpcServer().getQuotaModule();
+            quotaModule.getGlobalQuota("/test");
         });
-  }
+    }
 }

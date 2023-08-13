@@ -15,7 +15,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.hadoop.fs.contract.hdfs;
 
 import org.apache.hadoop.conf.Configuration;
@@ -23,7 +22,6 @@ import org.apache.hadoop.fs.contract.AbstractContractMkdirTest;
 import org.apache.hadoop.fs.contract.AbstractFSContract;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-
 import java.io.IOException;
 
 /**
@@ -31,18 +29,18 @@ import java.io.IOException;
  */
 public class TestHDFSContractMkdir extends AbstractContractMkdirTest {
 
-  @BeforeClass
-  public static void createCluster() throws IOException {
-    HDFSContract.createCluster();
-  }
+    @BeforeClass
+    public static void createCluster() throws IOException {
+        HDFSContract.createCluster();
+    }
 
-  @AfterClass
-  public static void teardownCluster() throws IOException {
-    HDFSContract.destroyCluster();
-  }
+    @AfterClass
+    public static void teardownCluster() throws IOException {
+        HDFSContract.destroyCluster();
+    }
 
-  @Override
-  protected AbstractFSContract createContract(Configuration conf) {
-    return new HDFSContract(conf);
-  }
+    @Override
+    protected AbstractFSContract createContract(Configuration conf) {
+        return new HDFSContract(conf);
+    }
 }

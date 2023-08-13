@@ -24,31 +24,32 @@ import org.apache.hadoop.oncrpc.security.Verifier;
  * RMDIR3 Response
  */
 public class RMDIR3Response extends NFS3Response {
-  private final WccData dirWcc;
 
-  public RMDIR3Response(int status) {
-    this(status, new WccData(null, null));
-  }
+    private final WccData dirWcc;
 
-  public RMDIR3Response(int status, WccData wccData) {
-    super(status);
-    this.dirWcc = wccData;
-  }
-  
-  public WccData getDirWcc() {
-    return dirWcc;
-  }
+    public RMDIR3Response(int status) {
+        this(status, new WccData(null, null));
+    }
 
-  public static RMDIR3Response deserialize(XDR xdr) {
-    int status = xdr.readInt();
-    WccData dirWcc = WccData.deserialize(xdr);
-    return new RMDIR3Response(status, dirWcc);
-  }
+    public RMDIR3Response(int status, WccData wccData) {
+        super(status);
+        this.dirWcc = wccData;
+    }
 
-  @Override
-  public XDR serialize(XDR out, int xid, Verifier verifier) {
-    super.serialize(out, xid, verifier);
-    dirWcc.serialize(out);
-    return out;
-  }
+    public WccData getDirWcc() {
+        return dirWcc;
+    }
+
+    public static RMDIR3Response deserialize(XDR xdr) {
+        int status = xdr.readInt();
+        WccData dirWcc = WccData.deserialize(xdr);
+        return new RMDIR3Response(status, dirWcc);
+    }
+
+    @Override
+    public XDR serialize(XDR out, int xid, Verifier verifier) {
+        super.serialize(out, xid, verifier);
+        dirWcc.serialize(out);
+        return out;
+    }
 }

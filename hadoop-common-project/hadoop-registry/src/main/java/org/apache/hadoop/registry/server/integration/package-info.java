@@ -15,9 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * This package contains the classes which integrate with the YARN resource
  * manager.
  */
 package org.apache.hadoop.registry.server.integration;
+

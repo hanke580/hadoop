@@ -15,11 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.inotify;
 
 import org.apache.hadoop.classification.InterfaceAudience;
-
 import java.util.List;
 
 /**
@@ -32,32 +30,35 @@ import java.util.List;
  */
 @InterfaceAudience.Private
 public class EventBatchList {
-  private List<EventBatch> batches;
-  private long firstTxid;
-  private long lastTxid;
-  private long syncTxid;
 
-  public EventBatchList(List<EventBatch> batches, long firstTxid,
-                         long lastTxid, long syncTxid) {
-    this.batches = batches;
-    this.firstTxid = firstTxid;
-    this.lastTxid = lastTxid;
-    this.syncTxid = syncTxid;
-  }
+    private List<EventBatch> batches;
 
-  public List<EventBatch> getBatches() {
-    return batches;
-  }
+    private long firstTxid;
 
-  public long getFirstTxid() {
-    return firstTxid;
-  }
+    private long lastTxid;
 
-  public long getLastTxid() {
-    return lastTxid;
-  }
+    private long syncTxid;
 
-  public long getSyncTxid() {
-    return syncTxid;
-  }
+    public EventBatchList(List<EventBatch> batches, long firstTxid, long lastTxid, long syncTxid) {
+        this.batches = batches;
+        this.firstTxid = firstTxid;
+        this.lastTxid = lastTxid;
+        this.syncTxid = syncTxid;
+    }
+
+    public List<EventBatch> getBatches() {
+        return batches;
+    }
+
+    public long getFirstTxid() {
+        return firstTxid;
+    }
+
+    public long getLastTxid() {
+        return lastTxid;
+    }
+
+    public long getSyncTxid() {
+        return syncTxid;
+    }
 }

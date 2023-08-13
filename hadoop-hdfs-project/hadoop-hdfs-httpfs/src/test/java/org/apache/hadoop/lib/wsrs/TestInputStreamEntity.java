@@ -15,34 +15,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.lib.wsrs;
 
 import static org.junit.Assert.assertEquals;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-
 import org.junit.Test;
 
 public class TestInputStreamEntity {
 
-  @Test
-  public void test() throws Exception {
-    InputStream is = new ByteArrayInputStream("abc".getBytes());
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    InputStreamEntity i = new InputStreamEntity(is);
-    i.write(baos);
-    baos.close();
-    assertEquals(new String(baos.toByteArray()), "abc");
-
-    is = new ByteArrayInputStream("abc".getBytes());
-    baos = new ByteArrayOutputStream();
-    i = new InputStreamEntity(is, 1, 1);
-    i.write(baos);
-    baos.close();
-    assertEquals(baos.toByteArray()[0], 'b');
-  }
-
+    @Test
+    public void test() throws Exception {
+        InputStream is = new ByteArrayInputStream("abc".getBytes());
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        InputStreamEntity i = new InputStreamEntity(is);
+        i.write(baos);
+        baos.close();
+        assertEquals(new String(baos.toByteArray()), "abc");
+        is = new ByteArrayInputStream("abc".getBytes());
+        baos = new ByteArrayOutputStream();
+        i = new InputStreamEntity(is, 1, 1);
+        i.write(baos);
+        baos.close();
+        assertEquals(baos.toByteArray()[0], 'b');
+    }
 }

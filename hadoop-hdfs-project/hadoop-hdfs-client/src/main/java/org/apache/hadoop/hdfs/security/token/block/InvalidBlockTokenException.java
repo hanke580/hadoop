@@ -15,11 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.security.token.block;
 
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
@@ -29,13 +27,14 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
 public class InvalidBlockTokenException extends IOException {
-  private static final long serialVersionUID = 168L;
 
-  public InvalidBlockTokenException() {
-    super();
-  }
+    private static final long serialVersionUID = 168L;
 
-  public InvalidBlockTokenException(String msg) {
-    super(msg);
-  }
+    public InvalidBlockTokenException() {
+        super();
+    }
+
+    public InvalidBlockTokenException(String msg) {
+        super(msg);
+    }
 }

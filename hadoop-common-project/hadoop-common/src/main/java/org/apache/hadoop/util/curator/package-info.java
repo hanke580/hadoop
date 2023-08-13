@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * This package provides utilities to interact with Curator ZooKeeper.
  */
@@ -25,3 +24,4 @@ package org.apache.hadoop.util.curator;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

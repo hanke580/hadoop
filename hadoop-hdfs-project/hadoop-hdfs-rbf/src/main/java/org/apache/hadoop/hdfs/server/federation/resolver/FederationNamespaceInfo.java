@@ -25,54 +25,62 @@ import org.apache.hadoop.hdfs.server.federation.router.RemoteLocationContext;
  */
 public class FederationNamespaceInfo extends RemoteLocationContext {
 
-  /** Block pool identifier. */
-  private final String blockPoolId;
-  /** Cluster identifier. */
-  private final String clusterId;
-  /** Nameservice identifier. */
-  private final String nameserviceId;
+    /**
+     * Block pool identifier.
+     */
+    private final String blockPoolId;
 
-  public FederationNamespaceInfo(String bpId, String clId, String nsId) {
-    this.blockPoolId = bpId;
-    this.clusterId = clId;
-    this.nameserviceId = nsId;
-  }
+    /**
+     * Cluster identifier.
+     */
+    private final String clusterId;
 
-  @Override
-  public String getNameserviceId() {
-    return this.nameserviceId;
-  }
+    /**
+     * Nameservice identifier.
+     */
+    private final String nameserviceId;
 
-  @Override
-  public String getDest() {
-    return this.nameserviceId;
-  }
+    public FederationNamespaceInfo(String bpId, String clId, String nsId) {
+        this.blockPoolId = bpId;
+        this.clusterId = clId;
+        this.nameserviceId = nsId;
+    }
 
-  @Override
-  public String getSrc() {
-    return null;
-  }
+    @Override
+    public String getNameserviceId() {
+        return this.nameserviceId;
+    }
 
-  /**
-   * The HDFS cluster id for this namespace.
-   *
-   * @return Cluster identifier.
-   */
-  public String getClusterId() {
-    return this.clusterId;
-  }
+    @Override
+    public String getDest() {
+        return this.nameserviceId;
+    }
 
-  /**
-   * The HDFS block pool id for this namespace.
-   *
-   * @return Block pool identifier.
-   */
-  public String getBlockPoolId() {
-    return this.blockPoolId;
-  }
+    @Override
+    public String getSrc() {
+        return null;
+    }
 
-  @Override
-  public String toString() {
-    return this.nameserviceId + "->" + this.blockPoolId + ":" + this.clusterId;
-  }
+    /**
+     * The HDFS cluster id for this namespace.
+     *
+     * @return Cluster identifier.
+     */
+    public String getClusterId() {
+        return this.clusterId;
+    }
+
+    /**
+     * The HDFS block pool id for this namespace.
+     *
+     * @return Block pool identifier.
+     */
+    public String getBlockPoolId() {
+        return this.blockPoolId;
+    }
+
+    @Override
+    public String toString() {
+        return this.nameserviceId + "->" + this.blockPoolId + ":" + this.clusterId;
+    }
 }

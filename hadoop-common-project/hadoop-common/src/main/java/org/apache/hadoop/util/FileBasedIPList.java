@@ -19,7 +19,6 @@ package org.apache.hadoop.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -43,74 +42,71 @@ import java.util.List;
  */
 public class FileBasedIPList implements IPList {
 
-  private static final Logger LOG =
-      LoggerFactory.getLogger(FileBasedIPList.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FileBasedIPList.class);
 
-  private final String fileName;
-  private final MachineList addressList;
+    private final String fileName;
 
-  public FileBasedIPList(String fileName) {
-    this.fileName = fileName;
-    String[] lines;
-    try {
-      lines = readLines(fileName);
-    } catch (IOException e) {
-      lines = null;
-    }
-    if (lines != null) {
-      addressList = new MachineList(new HashSet<String>(Arrays.asList(lines)));
-    } else {
-      addressList = null;
-    }
-  }
+    private final MachineList addressList;
 
-  public FileBasedIPList reload() {
-    return new FileBasedIPList(fileName);
-  }
-
-  @Override
-  public  boolean isIn(String ipAddress) {
-    if (ipAddress == null || addressList == null) {
-      return false;
-    }
-    return addressList.includes(ipAddress);
-  }
-
-  /**
-   * Reads the lines in a file.
-   * @param fileName
-   * @return lines in a String array; null if the file does not exist or if the
-   * file name is null
-   * @throws IOException
-   */
-  private static String[] readLines(String fileName) throws IOException {
-    try {
-      if (fileName != null) {
-        File file = new File (fileName);
-        if (file.exists()) {
-          try (
-              Reader fileReader = new InputStreamReader(
-                  Files.newInputStream(file.toPath()), StandardCharsets.UTF_8);
-              BufferedReader bufferedReader = new BufferedReader(fileReader)) {
-            List<String> lines = new ArrayList<String>();
-            String line = null;
-            while ((line = bufferedReader.readLine()) != null) {
-              lines.add(line);
-            }
-            if (LOG.isDebugEnabled()) {
-              LOG.debug("Loaded IP list of size = " + lines.size() +
-                  " from file = " + fileName);
-            }
-            return (lines.toArray(new String[lines.size()]));
-          }
-        } else {
-          LOG.debug("Missing ip list file : "+ fileName);
+    public FileBasedIPList(String fileName) {
+        this.fileName = fileName;
+        String[] lines;
+        try {
+            lines = readLines(fileName);
+        } catch (IOException e) {
+            lines = null;
         }
-      }
-    } catch (IOException ioe) {
-      LOG.error(ioe.toString());
-      throw ioe;
+        if (lines != null) {
+            addressList = new MachineList(new HashSet<String>(Arrays.asList(lines)));
+        } else {
+            addressList = null;
+        }
     }
-    return null;
-  }
+
+    public FileBasedIPList reload() {
+        return new FileBasedIPList(fileName);
+    }
+
+    @Override
+    public boolean isIn(String ipAddress) {
+        if (ipAddress == null || addressList == null) {
+            return false;
+        }
+        return addressList.includes(ipAddress);
+    }
+
+    /**
+     * Reads the lines in a file.
+     * @param fileName
+     * @return lines in a String array; null if the file does not exist or if the
+     * file name is null
+     * @throws IOException
+     */
+    private static String[] readLines(String fileName) throws IOException {
+        try {
+            if (fileName != null) {
+                File file = new File(fileName);
+                if (file.exists()) {
+                    try (Reader fileReader = new InputStreamReader(Files.newInputStream(file.toPath()), StandardCharsets.UTF_8);
+                        BufferedReader bufferedReader = new BufferedReader(fileReader)) {
+                        List<String> lines = new ArrayList<String>();
+                        String line = null;
+                        while ((line = bufferedReader.readLine()) != null) {
+                            lines.add(line);
+                        }
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Loaded IP list of size = " + lines.size() + " from file = " + fileName);
+                        }
+                        return (lines.toArray(new String[lines.size()]));
+                    }
+                } else {
+                    LOG.debug("Missing ip list file : " + fileName);
+                }
+            }
+        } catch (IOException ioe) {
+            LOG.error(ioe.toString());
+            throw ioe;
+        }
+        return null;
+    }
 }

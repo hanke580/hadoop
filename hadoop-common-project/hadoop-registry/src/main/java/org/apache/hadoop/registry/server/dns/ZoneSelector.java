@@ -24,10 +24,11 @@ import org.xbill.DNS.Zone;
  * A selector that returns the zone associated with a provided name.
  */
 public interface ZoneSelector {
-  /**
-   * Finds the best matching zone given the provided name.
-   * @param name the record name for which a zone is requested.
-   * @return the matching zone.
-   */
-  Zone findBestZone(Name name);
+
+    /**
+     * Finds the best matching zone given the provided name.
+     * @param name the record name for which a zone is requested.
+     * @return the matching zone.
+     */
+    Zone findBestZone(Name name);
 }

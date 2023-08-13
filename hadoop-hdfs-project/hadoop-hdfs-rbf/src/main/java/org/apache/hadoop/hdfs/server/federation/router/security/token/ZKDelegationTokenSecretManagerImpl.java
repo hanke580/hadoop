@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.federation.router.security.token;
 
 import org.apache.hadoop.hdfs.security.token.delegation.DelegationTokenIdentifier;
@@ -24,33 +23,30 @@ import org.apache.hadoop.security.token.delegation.ZKDelegationTokenSecretManage
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
-
 import java.io.IOException;
 
 /**
  * Zookeeper based router delegation token store implementation.
  */
-public class ZKDelegationTokenSecretManagerImpl extends
-    ZKDelegationTokenSecretManager<AbstractDelegationTokenIdentifier> {
+public class ZKDelegationTokenSecretManagerImpl extends ZKDelegationTokenSecretManager<AbstractDelegationTokenIdentifier> {
 
-  private static final Logger LOG =
-      LoggerFactory.getLogger(ZKDelegationTokenSecretManagerImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ZKDelegationTokenSecretManagerImpl.class);
 
-  private Configuration conf = null;
+    private Configuration conf = null;
 
-  public ZKDelegationTokenSecretManagerImpl(Configuration conf) {
-    super(conf);
-    this.conf = conf;
-    try {
-      super.startThreads();
-    } catch (IOException e) {
-      LOG.error("Error starting threads for zkDelegationTokens", e);
+    public ZKDelegationTokenSecretManagerImpl(Configuration conf) {
+        super(conf);
+        this.conf = conf;
+        try {
+            super.startThreads();
+        } catch (IOException e) {
+            LOG.error("Error starting threads for zkDelegationTokens", e);
+        }
+        LOG.info("Zookeeper delegation token secret manager instantiated");
     }
-    LOG.info("Zookeeper delegation token secret manager instantiated");
-  }
 
-  @Override
-  public DelegationTokenIdentifier createIdentifier() {
-    return new DelegationTokenIdentifier();
-  }
+    @Override
+    public DelegationTokenIdentifier createIdentifier() {
+        return new DelegationTokenIdentifier();
+    }
 }

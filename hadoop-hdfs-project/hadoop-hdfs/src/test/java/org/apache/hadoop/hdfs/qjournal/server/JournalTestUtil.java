@@ -22,27 +22,26 @@ package org.apache.hadoop.hdfs.qjournal.server;
  */
 public class JournalTestUtil {
 
-  /**
-   * Corrupt the cache of a {@link Journal} to simulate some corrupt entries
-   * being present.
-   *
-   * @param txid The transaction ID whose containing buffer in the cache
-   *             should be corrupted.
-   * @param journal The journal whose cache should be corrupted.
-   */
-  public static void corruptJournaledEditsCache(long txid, Journal journal) {
-    JournaledEditsCache cache = journal.getJournaledEditsCache();
-    byte[] buf = cache.getRawDataForTests(txid);
-    // Change a few arbitrary bytes in the buffer
-    for (int i = 0; i < buf.length; i += 9) {
-      buf[i] = 0;
+    /**
+     * Corrupt the cache of a {@link Journal} to simulate some corrupt entries
+     * being present.
+     *
+     * @param txid The transaction ID whose containing buffer in the cache
+     *             should be corrupted.
+     * @param journal The journal whose cache should be corrupted.
+     */
+    public static void corruptJournaledEditsCache(long txid, Journal journal) {
+        JournaledEditsCache cache = journal.getJournaledEditsCache();
+        byte[] buf = cache.getRawDataForTests(txid);
+        // Change a few arbitrary bytes in the buffer
+        for (int i = 0; i < buf.length; i += 9) {
+            buf[i] = 0;
+        }
+        for (int i = 3; i < buf.length; i += 9) {
+            buf[i] += 10;
+        }
+        for (int i = 6; i < buf.length; i += 9) {
+            buf[i] -= 10;
+        }
     }
-    for (int i = 3; i < buf.length; i += 9) {
-      buf[i] += 10;
-    }
-    for (int i = 6; i < buf.length; i += 9) {
-      buf[i] -= 10;
-    }
-  }
-
 }

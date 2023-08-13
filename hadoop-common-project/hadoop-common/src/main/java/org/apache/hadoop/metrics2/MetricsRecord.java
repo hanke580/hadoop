@@ -15,11 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.metrics2;
 
 import java.util.Collection;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
@@ -29,38 +27,39 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
 public interface MetricsRecord {
-  /**
-   * Get the timestamp of the metrics
-   * @return  the timestamp
-   */
-  long timestamp();
 
-  /**
-   * @return the metrics record name
-   */
-  String name();
+    /**
+     * Get the timestamp of the metrics
+     * @return  the timestamp
+     */
+    long timestamp();
 
-  /**
-   * @return the description of the metrics record
-   */
-  String description();
+    /**
+     * @return the metrics record name
+     */
+    String name();
 
-  /**
-   * @return the context name of the metrics record
-   */
-  String context();
+    /**
+     * @return the description of the metrics record
+     */
+    String description();
 
-  /**
-   * Get the tags of the record
-   * Note: returning a collection instead of iterable as we
-   * need to use tags as keys (hence Collection#hashCode etc.) in maps
-   * @return an unmodifiable collection of tags
-   */
-  Collection<MetricsTag> tags();
+    /**
+     * @return the context name of the metrics record
+     */
+    String context();
 
-  /**
-   * Get the metrics of the record
-   * @return an immutable iterable interface for metrics
-   */
-  Iterable<AbstractMetric> metrics();
+    /**
+     * Get the tags of the record
+     * Note: returning a collection instead of iterable as we
+     * need to use tags as keys (hence Collection#hashCode etc.) in maps
+     * @return an unmodifiable collection of tags
+     */
+    Collection<MetricsTag> tags();
+
+    /**
+     * Get the metrics of the record
+     * @return an immutable iterable interface for metrics
+     */
+    Iterable<AbstractMetric> metrics();
 }

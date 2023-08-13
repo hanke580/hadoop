@@ -21,38 +21,35 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.test.GenericTestUtils;
 import org.apache.hadoop.util.Shell;
 import org.junit.BeforeClass;
-
 import java.io.File;
 
 /**
  * Unlike {@link TestHttpFSServerWebServer}, httpfs-signature.secret doesn't
  * exist. In this case, a random secret is used.
  */
-public class TestHttpFSServerWebServerWithRandomSecret extends
-    TestHttpFSServerWebServer {
-  @BeforeClass
-  public static void beforeClass() throws Exception {
-    File homeDir = GenericTestUtils.getTestDir();
-    File confDir = new File(homeDir, "etc/hadoop");
-    File logsDir = new File(homeDir, "logs");
-    File tempDir = new File(homeDir, "temp");
-    confDir.mkdirs();
-    logsDir.mkdirs();
-    tempDir.mkdirs();
+public class TestHttpFSServerWebServerWithRandomSecret extends TestHttpFSServerWebServer {
 
-    if (Shell.WINDOWS) {
-      File binDir = new File(homeDir, "bin");
-      binDir.mkdirs();
-      File winutils = Shell.getWinUtilsFile();
-      if (winutils.exists()) {
-        FileUtils.copyFileToDirectory(winutils, binDir);
-      }
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        File homeDir = GenericTestUtils.getTestDir();
+        File confDir = new File(homeDir, "etc/hadoop");
+        File logsDir = new File(homeDir, "logs");
+        File tempDir = new File(homeDir, "temp");
+        confDir.mkdirs();
+        logsDir.mkdirs();
+        tempDir.mkdirs();
+        if (Shell.WINDOWS) {
+            File binDir = new File(homeDir, "bin");
+            binDir.mkdirs();
+            File winutils = Shell.getWinUtilsFile();
+            if (winutils.exists()) {
+                FileUtils.copyFileToDirectory(winutils, binDir);
+            }
+        }
+        System.setProperty("hadoop.home.dir", homeDir.getAbsolutePath());
+        System.setProperty("hadoop.log.dir", logsDir.getAbsolutePath());
+        System.setProperty("httpfs.home.dir", homeDir.getAbsolutePath());
+        System.setProperty("httpfs.log.dir", logsDir.getAbsolutePath());
+        System.setProperty("httpfs.config.dir", confDir.getAbsolutePath());
     }
-
-    System.setProperty("hadoop.home.dir", homeDir.getAbsolutePath());
-    System.setProperty("hadoop.log.dir", logsDir.getAbsolutePath());
-    System.setProperty("httpfs.home.dir", homeDir.getAbsolutePath());
-    System.setProperty("httpfs.log.dir", logsDir.getAbsolutePath());
-    System.setProperty("httpfs.config.dir", confDir.getAbsolutePath());
-  }
 }

@@ -19,7 +19,6 @@ package org.apache.hadoop.crypto.key;
 
 import java.io.IOException;
 import java.net.URI;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.security.token.DelegationTokenIssuer;
@@ -31,8 +30,7 @@ import org.apache.hadoop.security.token.DelegationTokenIssuer;
 @InterfaceStability.Unstable
 public interface KeyProviderTokenIssuer extends DelegationTokenIssuer {
 
-  KeyProvider getKeyProvider() throws IOException;
+    KeyProvider getKeyProvider() throws IOException;
 
-  URI getKeyProviderUri() throws IOException;
-
+    URI getKeyProviderUri() throws IOException;
 }

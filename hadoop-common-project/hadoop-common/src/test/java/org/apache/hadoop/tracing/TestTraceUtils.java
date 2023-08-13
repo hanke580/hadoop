@@ -18,7 +18,6 @@
 package org.apache.hadoop.tracing;
 
 import static org.junit.Assert.assertEquals;
-
 import java.net.URI;
 import java.util.LinkedList;
 import org.apache.hadoop.conf.Configuration;
@@ -30,42 +29,42 @@ import org.apache.htrace.core.HTraceConfiguration;
 import org.junit.Test;
 
 public class TestTraceUtils {
-  private static String TEST_PREFIX = "test.prefix.htrace.";
 
-  @Test
-  public void testWrappedHadoopConf() {
-    String key = "sampler";
-    String value = "ProbabilitySampler";
-    Configuration conf = new Configuration();
-    conf.set(TEST_PREFIX + key, value);
-    HTraceConfiguration wrapped = TraceUtils.wrapHadoopConf(TEST_PREFIX, conf);
-    assertEquals(value, wrapped.get(key));
-  }
+    private static String TEST_PREFIX = "test.prefix.htrace.";
 
-  @Test
-  public void testExtraConfig() {
-    String key = "test.extra.config";
-    String oldValue = "old value";
-    String newValue = "new value";
-    Configuration conf = new Configuration();
-    conf.set(TEST_PREFIX + key, oldValue);
-    LinkedList<ConfigurationPair> extraConfig =
-        new LinkedList<ConfigurationPair>();
-    extraConfig.add(new ConfigurationPair(TEST_PREFIX + key, newValue));
-    HTraceConfiguration wrapped = TraceUtils.wrapHadoopConf(TEST_PREFIX, conf, extraConfig);
-    assertEquals(newValue, wrapped.get(key));
-  }
+    @Test
+    public void testWrappedHadoopConf() {
+        String key = "sampler";
+        String value = "ProbabilitySampler";
+        Configuration conf = new Configuration();
+        conf.set(TEST_PREFIX + key, value);
+        HTraceConfiguration wrapped = TraceUtils.wrapHadoopConf(TEST_PREFIX, conf);
+        assertEquals(value, wrapped.get(key));
+    }
 
-  /**
-   * Test tracing the globber.  This is a regression test for HDFS-9187.
-   */
-  @Test
-  public void testTracingGlobber() throws Exception {
-    // Bypass the normal FileSystem object creation path by just creating an
-    // instance of a subclass.
-    FileSystem fs = new LocalFileSystem();
-    fs.initialize(new URI("file:///"), new Configuration());
-    fs.globStatus(new Path("/"));
-    fs.close();
-  }
+    @Test
+    public void testExtraConfig() {
+        String key = "test.extra.config";
+        String oldValue = "old value";
+        String newValue = "new value";
+        Configuration conf = new Configuration();
+        conf.set(TEST_PREFIX + key, oldValue);
+        LinkedList<ConfigurationPair> extraConfig = new LinkedList<ConfigurationPair>();
+        extraConfig.add(new ConfigurationPair(TEST_PREFIX + key, newValue));
+        HTraceConfiguration wrapped = TraceUtils.wrapHadoopConf(TEST_PREFIX, conf, extraConfig);
+        assertEquals(newValue, wrapped.get(key));
+    }
+
+    /**
+     * Test tracing the globber.  This is a regression test for HDFS-9187.
+     */
+    @Test
+    public void testTracingGlobber() throws Exception {
+        // Bypass the normal FileSystem object creation path by just creating an
+        // instance of a subclass.
+        FileSystem fs = new LocalFileSystem();
+        fs.initialize(new URI("file:///"), new Configuration());
+        fs.globStatus(new Path("/"));
+        fs.close();
+    }
 }

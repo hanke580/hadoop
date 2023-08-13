@@ -16,5 +16,7 @@
  * limitations under the License.
  */
 public class Null {
-  public Null() { }
+
+    public Null() {
+    }
 }

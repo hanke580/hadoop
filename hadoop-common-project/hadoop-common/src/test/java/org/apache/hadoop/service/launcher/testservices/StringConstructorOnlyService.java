@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.service.launcher.testservices;
 
 import org.apache.hadoop.service.launcher.AbstractLaunchableService;
@@ -26,14 +25,10 @@ import org.apache.hadoop.service.launcher.AbstractLaunchableService;
  * in the launch
  */
 public class StringConstructorOnlyService extends AbstractLaunchableService {
-  
 
-  public StringConstructorOnlyService(String name) {
-    super(name);
-  }
+    public StringConstructorOnlyService(String name) {
+        super(name);
+    }
 
-  public static final String NAME =
-      "org.apache.hadoop.service.launcher.testservices.StringConstructorOnlyService";
-  
-
+    public static final String NAME = "org.apache.hadoop.service.launcher.testservices.StringConstructorOnlyService";
 }

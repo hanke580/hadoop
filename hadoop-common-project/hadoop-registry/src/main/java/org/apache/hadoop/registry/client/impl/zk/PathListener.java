@@ -20,11 +20,10 @@ package org.apache.hadoop.registry.client.impl.zk;
 import java.io.IOException;
 
 /**
- *
  */
 public interface PathListener {
 
-  void nodeAdded(String path) throws IOException;
+    void nodeAdded(String path) throws IOException;
 
-  void nodeRemoved(String path) throws IOException;
+    void nodeRemoved(String path) throws IOException;
 }

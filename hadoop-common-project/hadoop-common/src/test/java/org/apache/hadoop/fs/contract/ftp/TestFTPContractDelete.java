@@ -15,7 +15,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.hadoop.fs.contract.ftp;
 
 import org.apache.hadoop.conf.Configuration;
@@ -24,9 +23,8 @@ import org.apache.hadoop.fs.contract.AbstractFSContract;
 
 public class TestFTPContractDelete extends AbstractContractDeleteTest {
 
-  @Override
-  protected AbstractFSContract createContract(Configuration conf) {
-    return new FTPContract(conf);
-  }
-
+    @Override
+    protected AbstractFSContract createContract(Configuration conf) {
+        return new FTPContract(conf);
+    }
 }

@@ -22,54 +22,47 @@ import org.apache.hadoop.test.GenericTestUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-
-
 import static org.junit.Assert.assertTrue;
 
 /**
  * Test to make sure df can run and work.
  */
 public class TestDFCachingGetSpaceUsed {
-  final static private File DF_DIR = GenericTestUtils.getTestDir("testdfspace");
-  public static final int FILE_SIZE = 1024;
 
-  @Before
-  public void setUp() {
-    FileUtil.fullyDelete(DF_DIR);
-    assertTrue(DF_DIR.mkdirs());
-  }
+    final static private File DF_DIR = GenericTestUtils.getTestDir("testdfspace");
 
-  @After
-  public void tearDown() throws IOException {
-    FileUtil.fullyDelete(DF_DIR);
-  }
+    public static final int FILE_SIZE = 1024;
 
-  @Test
-  public void testCanBuildRun() throws Exception {
-    File file = writeFile("testCanBuild");
+    @Before
+    public void setUp() {
+        FileUtil.fullyDelete(DF_DIR);
+        assertTrue(DF_DIR.mkdirs());
+    }
 
-    GetSpaceUsed instance = new CachingGetSpaceUsed.Builder()
-        .setPath(file)
-        .setInterval(50060)
-        .setKlass(DFCachingGetSpaceUsed.class)
-        .build();
-    assertTrue(instance instanceof DFCachingGetSpaceUsed);
-    assertTrue(instance.getUsed() >= FILE_SIZE - 20);
-    ((DFCachingGetSpaceUsed) instance).close();
-  }
+    @After
+    public void tearDown() throws IOException {
+        FileUtil.fullyDelete(DF_DIR);
+    }
 
-  private File writeFile(String fileName) throws IOException {
-    File f = new File(DF_DIR, fileName);
-    assertTrue(f.createNewFile());
-    RandomAccessFile randomAccessFile = new RandomAccessFile(f, "rws");
-    randomAccessFile.writeUTF(RandomStringUtils.randomAlphabetic(FILE_SIZE));
-    randomAccessFile.getFD().sync();
-    randomAccessFile.close();
-    return f;
-  }
+    @Test
+    public void testCanBuildRun() throws Exception {
+        File file = writeFile("testCanBuild");
+        GetSpaceUsed instance = new CachingGetSpaceUsed.Builder().setPath(file).setInterval(50060).setKlass(DFCachingGetSpaceUsed.class).build();
+        assertTrue(instance instanceof DFCachingGetSpaceUsed);
+        assertTrue(instance.getUsed() >= FILE_SIZE - 20);
+        ((DFCachingGetSpaceUsed) instance).close();
+    }
 
+    private File writeFile(String fileName) throws IOException {
+        File f = new File(DF_DIR, fileName);
+        assertTrue(f.createNewFile());
+        RandomAccessFile randomAccessFile = new RandomAccessFile(f, "rws");
+        randomAccessFile.writeUTF(RandomStringUtils.randomAlphabetic(FILE_SIZE));
+        randomAccessFile.getFD().sync();
+        randomAccessFile.close();
+        return f;
+    }
 }

@@ -15,11 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.fs;
 
 import java.net.URI;
-
 import org.apache.hadoop.fs.FileSystem.Statistics;
 import org.junit.After;
 import org.junit.Assert;
@@ -31,35 +29,34 @@ import org.junit.Before;
  * </p>
  */
 public class TestLocalFsFCStatistics extends FCStatisticsBaseTest {
-  
-  static final String LOCAL_FS_ROOT_URI =  "file:///tmp/test";
 
-  @Before
-  public void setUp() throws Exception {
-    fc = FileContext.getLocalFSFileContext();
-    fc.mkdir(fileContextTestHelper.getTestRootPath(fc, "test"), FileContext.DEFAULT_PERM, true);
-  }
+    static final String LOCAL_FS_ROOT_URI = "file:///tmp/test";
 
-  @After
-  public void tearDown() throws Exception {
-    fc.delete(fileContextTestHelper.getTestRootPath(fc, "test"), true);
-  }
+    @Before
+    public void setUp() throws Exception {
+        fc = FileContext.getLocalFSFileContext();
+        fc.mkdir(fileContextTestHelper.getTestRootPath(fc, "test"), FileContext.DEFAULT_PERM, true);
+    }
 
-  @Override
-  protected void verifyReadBytes(Statistics stats) {
-    // one blockSize for read, one for pread
-    Assert.assertEquals(2*blockSize, stats.getBytesRead());
-  }
+    @After
+    public void tearDown() throws Exception {
+        fc.delete(fileContextTestHelper.getTestRootPath(fc, "test"), true);
+    }
 
-  @Override
-  protected void verifyWrittenBytes(Statistics stats) {
-    //Extra 12 bytes are written apart from the block.
-    Assert.assertEquals(blockSize + 12, stats.getBytesWritten());
-  }
-  
-  @Override
-  protected URI getFsUri() {
-    return URI.create(LOCAL_FS_ROOT_URI);
-  }
+    @Override
+    protected void verifyReadBytes(Statistics stats) {
+        // one blockSize for read, one for pread
+        Assert.assertEquals(2 * blockSize, stats.getBytesRead());
+    }
 
+    @Override
+    protected void verifyWrittenBytes(Statistics stats) {
+        //Extra 12 bytes are written apart from the block.
+        Assert.assertEquals(blockSize + 12, stats.getBytesWritten());
+    }
+
+    @Override
+    protected URI getFsUri() {
+        return URI.create(LOCAL_FS_ROOT_URI);
+    }
 }

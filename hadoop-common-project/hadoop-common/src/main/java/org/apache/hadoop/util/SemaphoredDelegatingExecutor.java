@@ -15,16 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.util;
 
 import com.google.common.util.concurrent.ForwardingListeningExecutorService;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
-
 import org.apache.hadoop.classification.InterfaceAudience;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -48,180 +45,165 @@ import java.util.concurrent.TimeoutException;
  */
 @SuppressWarnings("NullableProblems")
 @InterfaceAudience.Private
-public class SemaphoredDelegatingExecutor extends
-    ForwardingListeningExecutorService {
+public class SemaphoredDelegatingExecutor extends ForwardingListeningExecutorService {
 
-  private final Semaphore queueingPermits;
-  private final ListeningExecutorService executorDelegatee;
-  private final int permitCount;
+    private final Semaphore queueingPermits;
 
-  /**
-   * Instantiate.
-   * @param executorDelegatee Executor to delegate to
-   * @param permitCount number of permits into the queue permitted
-   * @param fair should the semaphore be "fair"
-   */
-  public SemaphoredDelegatingExecutor(
-      ListeningExecutorService executorDelegatee,
-      int permitCount,
-      boolean fair) {
-    this.permitCount = permitCount;
-    queueingPermits = new Semaphore(permitCount, fair);
-    this.executorDelegatee = executorDelegatee;
-  }
+    private final ListeningExecutorService executorDelegatee;
 
-  @Override
-  protected ListeningExecutorService delegate() {
-    return executorDelegatee;
-  }
+    private final int permitCount;
 
-
-  @Override
-  public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks)
-      throws InterruptedException {
-    throw new RuntimeException("Not implemented");
-  }
-
-  @Override
-  public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks,
-      long timeout, TimeUnit unit) throws InterruptedException {
-    throw new RuntimeException("Not implemented");
-  }
-
-  @Override
-  public <T> T invokeAny(Collection<? extends Callable<T>> tasks)
-      throws InterruptedException, ExecutionException {
-    throw new RuntimeException("Not implemented");
-  }
-
-  @Override
-  public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout,
-      TimeUnit unit)
-      throws InterruptedException, ExecutionException, TimeoutException {
-    throw new RuntimeException("Not implemented");
-  }
-
-  @Override
-  public <T> ListenableFuture<T> submit(Callable<T> task) {
-    try {
-      queueingPermits.acquire();
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      return Futures.immediateFailedFuture(e);
-    }
-    return super.submit(new CallableWithPermitRelease<>(task));
-  }
-
-  @Override
-  public <T> ListenableFuture<T> submit(Runnable task, T result) {
-    try {
-      queueingPermits.acquire();
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      return Futures.immediateFailedFuture(e);
-    }
-    return super.submit(new RunnableWithPermitRelease(task), result);
-  }
-
-  @Override
-  public ListenableFuture<?> submit(Runnable task) {
-    try {
-      queueingPermits.acquire();
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      return Futures.immediateFailedFuture(e);
-    }
-    return super.submit(new RunnableWithPermitRelease(task));
-  }
-
-  @Override
-  public void execute(Runnable command) {
-    try {
-      queueingPermits.acquire();
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-    }
-    super.execute(new RunnableWithPermitRelease(command));
-  }
-
-  /**
-   * Get the number of permits available; guaranteed to be
-   * {@code 0 <= availablePermits <= size}.
-   * @return the number of permits available at the time of invocation.
-   */
-  public int getAvailablePermits() {
-    return queueingPermits.availablePermits();
-  }
-
-  /**
-   * Get the number of threads waiting to acquire a permit.
-   * @return snapshot of the length of the queue of blocked threads.
-   */
-  public int getWaitingCount() {
-    return queueingPermits.getQueueLength();
-  }
-
-  /**
-   * Total number of permits.
-   * @return the number of permits as set in the constructor
-   */
-  public int getPermitCount() {
-    return permitCount;
-  }
-
-  @Override
-  public String toString() {
-    final StringBuilder sb = new StringBuilder(
-        "SemaphoredDelegatingExecutor{");
-    sb.append("permitCount=").append(getPermitCount())
-        .append(", available=").append(getAvailablePermits())
-        .append(", waiting=").append(getWaitingCount())
-        .append('}');
-    return sb.toString();
-  }
-
-  /**
-   * Releases a permit after the task is executed.
-   */
-  class RunnableWithPermitRelease implements Runnable {
-
-    private Runnable delegatee;
-
-    RunnableWithPermitRelease(Runnable delegatee) {
-      this.delegatee = delegatee;
+    /**
+     * Instantiate.
+     * @param executorDelegatee Executor to delegate to
+     * @param permitCount number of permits into the queue permitted
+     * @param fair should the semaphore be "fair"
+     */
+    public SemaphoredDelegatingExecutor(ListeningExecutorService executorDelegatee, int permitCount, boolean fair) {
+        this.permitCount = permitCount;
+        queueingPermits = new Semaphore(permitCount, fair);
+        this.executorDelegatee = executorDelegatee;
     }
 
     @Override
-    public void run() {
-      try {
-        delegatee.run();
-      } finally {
-        queueingPermits.release();
-      }
-
-    }
-  }
-
-  /**
-   * Releases a permit after the task is completed.
-   */
-  class CallableWithPermitRelease<T> implements Callable<T> {
-
-    private Callable<T> delegatee;
-
-    CallableWithPermitRelease(Callable<T> delegatee) {
-      this.delegatee = delegatee;
+    protected ListeningExecutorService delegate() {
+        return executorDelegatee;
     }
 
     @Override
-    public T call() throws Exception {
-      try {
-        return delegatee.call();
-      } finally {
-        queueingPermits.release();
-      }
+    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
+        throw new RuntimeException("Not implemented");
     }
 
-  }
+    @Override
+    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException {
+        throw new RuntimeException("Not implemented");
+    }
 
+    @Override
+    public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
+        throw new RuntimeException("Not implemented");
+    }
+
+    @Override
+    public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+        throw new RuntimeException("Not implemented");
+    }
+
+    @Override
+    public <T> ListenableFuture<T> submit(Callable<T> task) {
+        try {
+            queueingPermits.acquire();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return Futures.immediateFailedFuture(e);
+        }
+        return super.submit(new CallableWithPermitRelease<>(task));
+    }
+
+    @Override
+    public <T> ListenableFuture<T> submit(Runnable task, T result) {
+        try {
+            queueingPermits.acquire();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return Futures.immediateFailedFuture(e);
+        }
+        return super.submit(new RunnableWithPermitRelease(task), result);
+    }
+
+    @Override
+    public ListenableFuture<?> submit(Runnable task) {
+        try {
+            queueingPermits.acquire();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return Futures.immediateFailedFuture(e);
+        }
+        return super.submit(new RunnableWithPermitRelease(task));
+    }
+
+    @Override
+    public void execute(Runnable command) {
+        try {
+            queueingPermits.acquire();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        super.execute(new RunnableWithPermitRelease(command));
+    }
+
+    /**
+     * Get the number of permits available; guaranteed to be
+     * {@code 0 <= availablePermits <= size}.
+     * @return the number of permits available at the time of invocation.
+     */
+    public int getAvailablePermits() {
+        return queueingPermits.availablePermits();
+    }
+
+    /**
+     * Get the number of threads waiting to acquire a permit.
+     * @return snapshot of the length of the queue of blocked threads.
+     */
+    public int getWaitingCount() {
+        return queueingPermits.getQueueLength();
+    }
+
+    /**
+     * Total number of permits.
+     * @return the number of permits as set in the constructor
+     */
+    public int getPermitCount() {
+        return permitCount;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("SemaphoredDelegatingExecutor{");
+        sb.append("permitCount=").append(getPermitCount()).append(", available=").append(getAvailablePermits()).append(", waiting=").append(getWaitingCount()).append('}');
+        return sb.toString();
+    }
+
+    /**
+     * Releases a permit after the task is executed.
+     */
+    class RunnableWithPermitRelease implements Runnable {
+
+        private Runnable delegatee;
+
+        RunnableWithPermitRelease(Runnable delegatee) {
+            this.delegatee = delegatee;
+        }
+
+        @Override
+        public void run() {
+            try {
+                delegatee.run();
+            } finally {
+                queueingPermits.release();
+            }
+        }
+    }
+
+    /**
+     * Releases a permit after the task is completed.
+     */
+    class CallableWithPermitRelease<T> implements Callable<T> {
+
+        private Callable<T> delegatee;
+
+        CallableWithPermitRelease(Callable<T> delegatee) {
+            this.delegatee = delegatee;
+        }
+
+        @Override
+        public T call() throws Exception {
+            try {
+                return delegatee.call();
+            } finally {
+                queueingPermits.release();
+            }
+        }
+    }
 }

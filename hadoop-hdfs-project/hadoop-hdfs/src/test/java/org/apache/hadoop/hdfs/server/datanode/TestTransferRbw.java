@@ -19,7 +19,6 @@ package org.apache.hadoop.hdfs.server.datanode;
 
 import java.util.Collection;
 import java.util.Random;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -41,116 +40,103 @@ import org.apache.hadoop.test.GenericTestUtils;
 import org.apache.log4j.Level;
 import org.junit.Assert;
 import org.junit.Test;
-
 import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_DATANODE_DATA_WRITE_BANDWIDTHPERSEC_KEY;
 
-/** Test transferring RBW between datanodes */
+/**
+ * Test transferring RBW between datanodes
+ */
 public class TestTransferRbw {
-  private static final Logger LOG =
-      LoggerFactory.getLogger(TestTransferRbw.class);
-  
-  {
-    GenericTestUtils.setLogLevel(DataNode.LOG, Level.ALL);
-  }
 
-  private static final Random RAN = new Random();
-  private static final short REPLICATION = (short)1;
+    private static final Logger LOG = LoggerFactory.getLogger(TestTransferRbw.class);
 
-  private static ReplicaBeingWritten getRbw(final DataNode datanode,
-      String bpid) throws InterruptedException {
-    return (ReplicaBeingWritten)getReplica(datanode, bpid, ReplicaState.RBW);
-  }
-  private static LocalReplicaInPipeline getReplica(final DataNode datanode,
-      final String bpid, final ReplicaState expectedState) throws InterruptedException {
-    final Collection<ReplicaInfo> replicas = FsDatasetTestUtil.getReplicas(
-        datanode.getFSDataset(), bpid);
-    for(int i = 0; i < 5 && replicas.size() == 0; i++) {
-      LOG.info("wait since replicas.size() == 0; i=" + i);
-      Thread.sleep(1000);
+    {
+        GenericTestUtils.setLogLevel(DataNode.LOG, Level.ALL);
     }
-    Assert.assertEquals(1, replicas.size());
-    final ReplicaInfo r = replicas.iterator().next();
-    Assert.assertEquals(expectedState, r.getState());
-    return (LocalReplicaInPipeline)r;
-  }
 
-  @Test
-  public void testTransferRbw() throws Exception {
-    final HdfsConfiguration conf = new HdfsConfiguration();
-    final MiniDFSCluster cluster = new MiniDFSCluster.Builder(conf
-        ).numDataNodes(REPLICATION).build();
-    try {
-      cluster.waitActive();
-      final DistributedFileSystem fs = cluster.getFileSystem();
+    private static final Random RAN = new Random();
 
-      //create a file, write some data and leave it open. 
-      final Path p = new Path("/foo");
-      final int size = (1 << 16) + RAN.nextInt(1 << 16);
-      LOG.info("size = " + size);
-      final FSDataOutputStream out = fs.create(p, REPLICATION);
-      final byte[] bytes = new byte[1024];
-      for(int remaining = size; remaining > 0; ) {
-        RAN.nextBytes(bytes);
-        final int len = bytes.length < remaining? bytes.length: remaining;
-        out.write(bytes, 0, len);
-        out.hflush();
-        remaining -= len;
-      }
+    private static final short REPLICATION = (short) 1;
 
-      //get the RBW
-      final ReplicaBeingWritten oldrbw;
-      final DataNode newnode;
-      final DatanodeInfo newnodeinfo;
-      final String bpid = cluster.getNamesystem().getBlockPoolId();
-      {
-        final DataNode oldnode = cluster.getDataNodes().get(0);
-        // DataXceiverServer#writeThrottler is null if
-        // dfs.datanode.data.write.bandwidthPerSec default value is 0.
-        Assert.assertNull(oldnode.xserver.getWriteThrottler());
-        oldrbw = getRbw(oldnode, bpid);
-        LOG.info("oldrbw = " + oldrbw);
-        
-        //add a datanode
-        conf.setLong(DFS_DATANODE_DATA_WRITE_BANDWIDTHPERSEC_KEY,
-            1024 * 1024 * 8);
-        cluster.startDataNodes(conf, 1, true, null, null);
-        newnode = cluster.getDataNodes().get(REPLICATION);
-        // DataXceiverServer#writeThrottler#balancer is equal to
-        // dfs.datanode.data.write.bandwidthPerSec value if
-        // dfs.datanode.data.write.bandwidthPerSec value is not zero.
-        Assert.assertEquals(1024 * 1024 * 8,
-            newnode.xserver.getWriteThrottler().getBandwidth());
-        final DatanodeInfo oldnodeinfo;
-        {
-          final DatanodeInfo[] datatnodeinfos = cluster.getNameNodeRpc(
-              ).getDatanodeReport(DatanodeReportType.LIVE);
-          Assert.assertEquals(2, datatnodeinfos.length);
-          int i = 0;
-          for(DatanodeRegistration dnReg = newnode.getDNRegistrationForBP(bpid);
-              i < datatnodeinfos.length && !datatnodeinfos[i].equals(dnReg); i++);
-          Assert.assertTrue(i < datatnodeinfos.length);
-          newnodeinfo = datatnodeinfos[i];
-          oldnodeinfo = datatnodeinfos[1 - i];
+    private static ReplicaBeingWritten getRbw(final DataNode datanode, String bpid) throws InterruptedException {
+        return (ReplicaBeingWritten) getReplica(datanode, bpid, ReplicaState.RBW);
+    }
+
+    private static LocalReplicaInPipeline getReplica(final DataNode datanode, final String bpid, final ReplicaState expectedState) throws InterruptedException {
+        final Collection<ReplicaInfo> replicas = FsDatasetTestUtil.getReplicas(datanode.getFSDataset(), bpid);
+        for (int i = 0; i < 5 && replicas.size() == 0; i++) {
+            LOG.info("wait since replicas.size() == 0; i=" + i);
+            Thread.sleep(1000);
         }
-        
-        //transfer RBW
-        final ExtendedBlock b = new ExtendedBlock(bpid, oldrbw.getBlockId(), oldrbw.getBytesAcked(),
-            oldrbw.getGenerationStamp());
-        final BlockOpResponseProto s = DFSTestUtil.transferRbw(
-            b, DFSClientAdapter.getDFSClient(fs), oldnodeinfo, newnodeinfo);
-        Assert.assertEquals(Status.SUCCESS, s.getStatus());
-      }
-
-      //check new rbw
-      final ReplicaBeingWritten newrbw = getRbw(newnode, bpid);
-      LOG.info("newrbw = " + newrbw);
-      Assert.assertEquals(oldrbw.getBlockId(), newrbw.getBlockId());
-      Assert.assertEquals(oldrbw.getGenerationStamp(), newrbw.getGenerationStamp());
-      Assert.assertEquals(oldrbw.getVisibleLength(), newrbw.getVisibleLength());
-
-      LOG.info("DONE");
-    } finally {
-      cluster.shutdown();
+        Assert.assertEquals(1, replicas.size());
+        final ReplicaInfo r = replicas.iterator().next();
+        Assert.assertEquals(expectedState, r.getState());
+        return (LocalReplicaInPipeline) r;
     }
-  }
+
+    @Test
+    public void testTransferRbw() throws Exception {
+        final HdfsConfiguration conf = new HdfsConfiguration();
+        final MiniDFSCluster cluster = new MiniDFSCluster.Builder(conf).numDataNodes(REPLICATION).build();
+        try {
+            cluster.waitActive();
+            final DistributedFileSystem fs = cluster.getFileSystem();
+            //create a file, write some data and leave it open.
+            final Path p = new Path("/foo");
+            final int size = (1 << 16) + RAN.nextInt(1 << 16);
+            LOG.info("size = " + size);
+            final FSDataOutputStream out = fs.create(p, REPLICATION);
+            final byte[] bytes = new byte[1024];
+            for (int remaining = size; remaining > 0; ) {
+                RAN.nextBytes(bytes);
+                final int len = bytes.length < remaining ? bytes.length : remaining;
+                out.write(bytes, 0, len);
+                out.hflush();
+                remaining -= len;
+            }
+            //get the RBW
+            final ReplicaBeingWritten oldrbw;
+            final DataNode newnode;
+            final DatanodeInfo newnodeinfo;
+            final String bpid = cluster.getNamesystem().getBlockPoolId();
+            {
+                final DataNode oldnode = cluster.getDataNodes().get(0);
+                // DataXceiverServer#writeThrottler is null if
+                // dfs.datanode.data.write.bandwidthPerSec default value is 0.
+                Assert.assertNull(oldnode.xserver.getWriteThrottler());
+                oldrbw = getRbw(oldnode, bpid);
+                LOG.info("oldrbw = " + oldrbw);
+                //add a datanode
+                conf.setLong(DFS_DATANODE_DATA_WRITE_BANDWIDTHPERSEC_KEY, 1024 * 1024 * 8);
+                cluster.startDataNodes(conf, 1, true, null, null);
+                newnode = cluster.getDataNodes().get(REPLICATION);
+                // DataXceiverServer#writeThrottler#balancer is equal to
+                // dfs.datanode.data.write.bandwidthPerSec value if
+                // dfs.datanode.data.write.bandwidthPerSec value is not zero.
+                Assert.assertEquals(1024 * 1024 * 8, newnode.xserver.getWriteThrottler().getBandwidth());
+                final DatanodeInfo oldnodeinfo;
+                {
+                    final DatanodeInfo[] datatnodeinfos = cluster.getNameNodeRpc().getDatanodeReport(DatanodeReportType.LIVE);
+                    Assert.assertEquals(2, datatnodeinfos.length);
+                    int i = 0;
+                    for (DatanodeRegistration dnReg = newnode.getDNRegistrationForBP(bpid); i < datatnodeinfos.length && !datatnodeinfos[i].equals(dnReg); i++) ;
+                    Assert.assertTrue(i < datatnodeinfos.length);
+                    newnodeinfo = datatnodeinfos[i];
+                    oldnodeinfo = datatnodeinfos[1 - i];
+                }
+                //transfer RBW
+                final ExtendedBlock b = new ExtendedBlock(bpid, oldrbw.getBlockId(), oldrbw.getBytesAcked(), oldrbw.getGenerationStamp());
+                final BlockOpResponseProto s = DFSTestUtil.transferRbw(b, DFSClientAdapter.getDFSClient(fs), oldnodeinfo, newnodeinfo);
+                Assert.assertEquals(Status.SUCCESS, s.getStatus());
+            }
+            //check new rbw
+            final ReplicaBeingWritten newrbw = getRbw(newnode, bpid);
+            LOG.info("newrbw = " + newrbw);
+            Assert.assertEquals(oldrbw.getBlockId(), newrbw.getBlockId());
+            Assert.assertEquals(oldrbw.getGenerationStamp(), newrbw.getGenerationStamp());
+            Assert.assertEquals(oldrbw.getVisibleLength(), newrbw.getVisibleLength());
+            LOG.info("DONE");
+        } finally {
+            cluster.shutdown();
+        }
+    }
 }

@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 import org.junit.rules.Timeout;
 import org.slf4j.LoggerFactory;
-
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -36,7 +35,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -46,171 +44,135 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 public class TestThrottledAsyncCheckerTimeout {
-  public static final org.slf4j.Logger LOG =
-      LoggerFactory.getLogger(TestThrottledAsyncCheckerTimeout.class);
 
-  @Rule
-  public TestName testName = new TestName();
-  @Rule
-  public Timeout testTimeout = new Timeout(300_000);
+    public static final org.slf4j.Logger LOG = LoggerFactory.getLogger(TestThrottledAsyncCheckerTimeout.class);
 
-  private static final long DISK_CHECK_TIMEOUT = 10;
-  private ReentrantLock lock;
+    @Rule
+    public TestName testName = new TestName();
 
-  private ExecutorService getExecutorService() {
-    return new ScheduledThreadPoolExecutor(1);
-  }
+    @Rule
+    public Timeout testTimeout = new Timeout(300_000);
 
-  @Before
-  public void initializeLock() {
-    lock = new ReentrantLock();
-  }
+    private static final long DISK_CHECK_TIMEOUT = 10;
 
-  @Test
-  public void testDiskCheckTimeout() throws Exception {
-    LOG.info("Executing {}", testName.getMethodName());
+    private ReentrantLock lock;
 
-    final DummyCheckable target = new DummyCheckable();
-    final FakeTimer timer = new FakeTimer();
-    ThrottledAsyncChecker<Boolean, Boolean> checker =
-        new ThrottledAsyncChecker<>(timer, 0, DISK_CHECK_TIMEOUT,
-            getExecutorService());
-
-    // Acquire lock to halt checker. Release after timeout occurs.
-    lock.lock();
-
-    final Optional<ListenableFuture<Boolean>> olf = checker
-        .schedule(target, true);
-
-    final AtomicLong numCallbackInvocationsSuccess = new AtomicLong(0);
-    final AtomicLong numCallbackInvocationsFailure = new AtomicLong(0);
-
-    AtomicBoolean callbackResult = new AtomicBoolean(false);
-    final Throwable[] throwable = new Throwable[1];
-
-    assertTrue(olf.isPresent());
-    Futures.addCallback(olf.get(), new FutureCallback<Boolean>() {
-      @Override
-      public void onSuccess(Boolean result) {
-        numCallbackInvocationsSuccess.incrementAndGet();
-        callbackResult.set(true);
-      }
-
-      @Override
-      public void onFailure(Throwable t) {
-        throwable[0] = t;
-        numCallbackInvocationsFailure.incrementAndGet();
-        callbackResult.set(true);
-      }
-    }, MoreExecutors.directExecutor());
-
-    while (!callbackResult.get()) {
-      // Wait for the callback
-      Thread.sleep(DISK_CHECK_TIMEOUT);
+    private ExecutorService getExecutorService() {
+        return new ScheduledThreadPoolExecutor(1);
     }
 
-    lock.unlock();
-
-    assertThat(numCallbackInvocationsFailure.get(), is(1L));
-    assertThat(numCallbackInvocationsSuccess.get(), is(0L));
-    assertTrue(throwable[0] instanceof TimeoutException);
-  }
-
-  @Test
-  public void testDiskCheckTimeoutInvokesOneCallbackOnly() throws Exception {
-    LOG.info("Executing {}", testName.getMethodName());
-
-    final DummyCheckable target = new DummyCheckable();
-    final FakeTimer timer = new FakeTimer();
-    ThrottledAsyncChecker<Boolean, Boolean> checker =
-        new ThrottledAsyncChecker<>(timer, 0, DISK_CHECK_TIMEOUT,
-            getExecutorService());
-    FutureCallback<Boolean> futureCallback = mock(FutureCallback.class);
-
-    // Acquire lock to halt disk checker. Release after timeout occurs.
-    lock.lock();
-
-    final Optional<ListenableFuture<Boolean>> olf1 = checker
-        .schedule(target, true);
-
-    assertTrue(olf1.isPresent());
-    Futures.addCallback(olf1.get(), futureCallback,
-        MoreExecutors.directExecutor());
-
-    // Verify that timeout results in only 1 onFailure call and 0 onSuccess
-    // calls.
-    verify(futureCallback, timeout((int) DISK_CHECK_TIMEOUT*10).times(1))
-        .onFailure(any());
-    verify(futureCallback, timeout((int) DISK_CHECK_TIMEOUT*10).times(0))
-        .onSuccess(any());
-
-    // Release lock so that target can acquire it.
-    lock.unlock();
-
-    final Optional<ListenableFuture<Boolean>> olf2 = checker
-        .schedule(target, true);
-
-    assertTrue(olf2.isPresent());
-    Futures.addCallback(olf2.get(), futureCallback,
-        MoreExecutors.directExecutor());
-
-    // Verify that normal check (dummy) results in only 1 onSuccess call.
-    // Number of times onFailure is invoked should remain the same i.e. 1.
-    verify(futureCallback, timeout((int) DISK_CHECK_TIMEOUT*10).times(1))
-        .onFailure(any());
-    verify(futureCallback, timeout((int) DISK_CHECK_TIMEOUT*10).times(1))
-        .onSuccess(any());
-  }
-
-  @Test
-  public void testTimeoutExceptionIsNotThrownForGoodDisk() throws Exception {
-    LOG.info("Executing {}", testName.getMethodName());
-
-    final DummyCheckable target = new DummyCheckable();
-    final FakeTimer timer = new FakeTimer();
-    ThrottledAsyncChecker<Boolean, Boolean> checker =
-        new ThrottledAsyncChecker<>(timer, 0, DISK_CHECK_TIMEOUT,
-            getExecutorService());
-
-    final Optional<ListenableFuture<Boolean>> olf = checker
-        .schedule(target, true);
-
-    AtomicBoolean callbackResult = new AtomicBoolean(false);
-    final Throwable[] throwable = new Throwable[1];
-
-    assertTrue(olf.isPresent());
-    Futures.addCallback(olf.get(), new FutureCallback<Boolean>() {
-      @Override
-      public void onSuccess(Boolean result) {
-        callbackResult.set(true);
-      }
-
-      @Override
-      public void onFailure(Throwable t) {
-        throwable[0] = t;
-        callbackResult.set(true);
-      }
-    }, MoreExecutors.directExecutor());
-
-    while (!callbackResult.get()) {
-      // Wait for the callback
-      Thread.sleep(DISK_CHECK_TIMEOUT);
+    @Before
+    public void initializeLock() {
+        lock = new ReentrantLock();
     }
 
-    assertTrue(throwable[0] == null);
-  }
+    @Test
+    public void testDiskCheckTimeout() throws Exception {
+        LOG.info("Executing {}", testName.getMethodName());
+        final DummyCheckable target = new DummyCheckable();
+        final FakeTimer timer = new FakeTimer();
+        ThrottledAsyncChecker<Boolean, Boolean> checker = new ThrottledAsyncChecker<>(timer, 0, DISK_CHECK_TIMEOUT, getExecutorService());
+        // Acquire lock to halt checker. Release after timeout occurs.
+        lock.lock();
+        final Optional<ListenableFuture<Boolean>> olf = checker.schedule(target, true);
+        final AtomicLong numCallbackInvocationsSuccess = new AtomicLong(0);
+        final AtomicLong numCallbackInvocationsFailure = new AtomicLong(0);
+        AtomicBoolean callbackResult = new AtomicBoolean(false);
+        final Throwable[] throwable = new Throwable[1];
+        assertTrue(olf.isPresent());
+        Futures.addCallback(olf.get(), new FutureCallback<Boolean>() {
 
-  /**
-   * A dummy Checkable that just returns true after acquiring lock.
-   */
-  protected class DummyCheckable implements Checkable<Boolean,Boolean> {
+            @Override
+            public void onSuccess(Boolean result) {
+                numCallbackInvocationsSuccess.incrementAndGet();
+                callbackResult.set(true);
+            }
 
-    @Override
-    public Boolean check(Boolean context) throws Exception {
-      // Wait to acquire lock
-      lock.lock();
-      lock.unlock();
-      return true;
+            @Override
+            public void onFailure(Throwable t) {
+                throwable[0] = t;
+                numCallbackInvocationsFailure.incrementAndGet();
+                callbackResult.set(true);
+            }
+        }, MoreExecutors.directExecutor());
+        while (!callbackResult.get()) {
+            // Wait for the callback
+            Thread.sleep(DISK_CHECK_TIMEOUT);
+        }
+        lock.unlock();
+        assertThat(numCallbackInvocationsFailure.get(), is(1L));
+        assertThat(numCallbackInvocationsSuccess.get(), is(0L));
+        assertTrue(throwable[0] instanceof TimeoutException);
     }
-  }
+
+    @Test
+    public void testDiskCheckTimeoutInvokesOneCallbackOnly() throws Exception {
+        LOG.info("Executing {}", testName.getMethodName());
+        final DummyCheckable target = new DummyCheckable();
+        final FakeTimer timer = new FakeTimer();
+        ThrottledAsyncChecker<Boolean, Boolean> checker = new ThrottledAsyncChecker<>(timer, 0, DISK_CHECK_TIMEOUT, getExecutorService());
+        FutureCallback<Boolean> futureCallback = mock(FutureCallback.class);
+        // Acquire lock to halt disk checker. Release after timeout occurs.
+        lock.lock();
+        final Optional<ListenableFuture<Boolean>> olf1 = checker.schedule(target, true);
+        assertTrue(olf1.isPresent());
+        Futures.addCallback(olf1.get(), futureCallback, MoreExecutors.directExecutor());
+        // Verify that timeout results in only 1 onFailure call and 0 onSuccess
+        // calls.
+        verify(futureCallback, timeout((int) DISK_CHECK_TIMEOUT * 10).times(1)).onFailure(any());
+        verify(futureCallback, timeout((int) DISK_CHECK_TIMEOUT * 10).times(0)).onSuccess(any());
+        // Release lock so that target can acquire it.
+        lock.unlock();
+        final Optional<ListenableFuture<Boolean>> olf2 = checker.schedule(target, true);
+        assertTrue(olf2.isPresent());
+        Futures.addCallback(olf2.get(), futureCallback, MoreExecutors.directExecutor());
+        // Verify that normal check (dummy) results in only 1 onSuccess call.
+        // Number of times onFailure is invoked should remain the same i.e. 1.
+        verify(futureCallback, timeout((int) DISK_CHECK_TIMEOUT * 10).times(1)).onFailure(any());
+        verify(futureCallback, timeout((int) DISK_CHECK_TIMEOUT * 10).times(1)).onSuccess(any());
+    }
+
+    @Test
+    public void testTimeoutExceptionIsNotThrownForGoodDisk() throws Exception {
+        LOG.info("Executing {}", testName.getMethodName());
+        final DummyCheckable target = new DummyCheckable();
+        final FakeTimer timer = new FakeTimer();
+        ThrottledAsyncChecker<Boolean, Boolean> checker = new ThrottledAsyncChecker<>(timer, 0, DISK_CHECK_TIMEOUT, getExecutorService());
+        final Optional<ListenableFuture<Boolean>> olf = checker.schedule(target, true);
+        AtomicBoolean callbackResult = new AtomicBoolean(false);
+        final Throwable[] throwable = new Throwable[1];
+        assertTrue(olf.isPresent());
+        Futures.addCallback(olf.get(), new FutureCallback<Boolean>() {
+
+            @Override
+            public void onSuccess(Boolean result) {
+                callbackResult.set(true);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                throwable[0] = t;
+                callbackResult.set(true);
+            }
+        }, MoreExecutors.directExecutor());
+        while (!callbackResult.get()) {
+            // Wait for the callback
+            Thread.sleep(DISK_CHECK_TIMEOUT);
+        }
+        assertTrue(throwable[0] == null);
+    }
+
+    /**
+     * A dummy Checkable that just returns true after acquiring lock.
+     */
+    protected class DummyCheckable implements Checkable<Boolean, Boolean> {
+
+        @Override
+        public Boolean check(Boolean context) throws Exception {
+            // Wait to acquire lock
+            lock.lock();
+            lock.unlock();
+            return true;
+        }
+    }
 }

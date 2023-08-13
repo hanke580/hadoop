@@ -30,10 +30,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-
 import java.io.IOException;
 import java.util.EnumSet;
-
 import org.apache.hadoop.hdfs.AddBlockFlag;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockManager;
 import org.apache.hadoop.hdfs.server.namenode.FSDirWriteFileOp.ValidateAddBlockResult;
@@ -43,37 +41,20 @@ import org.mockito.ArgumentCaptor;
 
 public class TestFSDirWriteFileOp {
 
-  @Test
-  @SuppressWarnings("unchecked")
-  public void testIgnoreClientLocality() throws IOException {
-    ValidateAddBlockResult addBlockResult =
-        new ValidateAddBlockResult(1024L, 3, (byte) 0x01, null, null, null);
-
-    EnumSet<AddBlockFlag> addBlockFlags =
-        EnumSet.of(AddBlockFlag.IGNORE_CLIENT_LOCALITY);
-
-    BlockManager bmMock = mock(BlockManager.class);
-
-    ArgumentCaptor<Node> nodeCaptor = ArgumentCaptor.forClass(Node.class);
-
-    when(bmMock.chooseTarget4NewBlock(anyString(), anyInt(), any(), anySet(),
-        anyLong(), anyList(), anyByte(), any(), any(), any())).thenReturn(null);
-
-    FSDirWriteFileOp.chooseTargetForNewBlock(bmMock, "localhost", null, null,
-        addBlockFlags, addBlockResult);
-
-    // There should be no other interactions with the block manager when the
-    // IGNORE_CLIENT_LOCALITY is passed in because there is no need to discover
-    // the local node requesting the new block
-    verify(bmMock, times(1)).chooseTarget4NewBlock(anyString(), anyInt(),
-        nodeCaptor.capture(), anySet(), anyLong(), anyList(), anyByte(), any(),
-        any(), any());
-
-    verifyNoMoreInteractions(bmMock);
-
-    assertNull(
-        "Source node was assigned a value. Expected 'null' value because "
-            + "chooseTarget was flagged to ignore source node locality",
-        nodeCaptor.getValue());
-  }
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testIgnoreClientLocality() throws IOException {
+        ValidateAddBlockResult addBlockResult = new ValidateAddBlockResult(1024L, 3, (byte) 0x01, null, null, null);
+        EnumSet<AddBlockFlag> addBlockFlags = EnumSet.of(AddBlockFlag.IGNORE_CLIENT_LOCALITY);
+        BlockManager bmMock = mock(BlockManager.class);
+        ArgumentCaptor<Node> nodeCaptor = ArgumentCaptor.forClass(Node.class);
+        when(bmMock.chooseTarget4NewBlock(anyString(), anyInt(), any(), anySet(), anyLong(), anyList(), anyByte(), any(), any(), any())).thenReturn(null);
+        FSDirWriteFileOp.chooseTargetForNewBlock(bmMock, "localhost", null, null, addBlockFlags, addBlockResult);
+        // There should be no other interactions with the block manager when the
+        // IGNORE_CLIENT_LOCALITY is passed in because there is no need to discover
+        // the local node requesting the new block
+        verify(bmMock, times(1)).chooseTarget4NewBlock(anyString(), anyInt(), nodeCaptor.capture(), anySet(), anyLong(), anyList(), anyByte(), any(), any(), any());
+        verifyNoMoreInteractions(bmMock);
+        assertNull("Source node was assigned a value. Expected 'null' value because " + "chooseTarget was flagged to ignore source node locality", nodeCaptor.getValue());
+    }
 }

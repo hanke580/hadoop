@@ -19,7 +19,6 @@ package org.apache.hadoop.oncrpc;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
-
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFactory;
@@ -35,76 +34,75 @@ import org.slf4j.LoggerFactory;
  * Simple UDP server implemented using netty.
  */
 public class SimpleTcpServer {
-  public static final Logger LOG =
-      LoggerFactory.getLogger(SimpleTcpServer.class);
-  protected final int port;
-  protected int boundPort = -1; // Will be set after server starts
-  protected final SimpleChannelUpstreamHandler rpcProgram;
-  private ServerBootstrap server;
-  private Channel ch;
 
-  /** The maximum number of I/O worker threads */
-  protected final int workerCount;
+    public static final Logger LOG = LoggerFactory.getLogger(SimpleTcpServer.class);
 
-  /**
-   * @param port TCP port where to start the server at
-   * @param program RPC program corresponding to the server
-   * @param workercount Number of worker threads
-   */
-  public SimpleTcpServer(int port, RpcProgram program, int workercount) {
-    this.port = port;
-    this.rpcProgram = program;
-    this.workerCount = workercount;
-  }
+    protected final int port;
 
-  public void run() {
-    // Configure the Server.
-    ChannelFactory factory;
-    if (workerCount == 0) {
-      // Use default workers: 2 * the number of available processors
-      factory = new NioServerSocketChannelFactory(
-          Executors.newCachedThreadPool(), Executors.newCachedThreadPool());
-    } else {
-      factory = new NioServerSocketChannelFactory(
-          Executors.newCachedThreadPool(), Executors.newCachedThreadPool(),
-          workerCount);
+    // Will be set after server starts
+    protected int boundPort = -1;
+
+    protected final SimpleChannelUpstreamHandler rpcProgram;
+
+    private ServerBootstrap server;
+
+    private Channel ch;
+
+    /**
+     * The maximum number of I/O worker threads
+     */
+    protected final int workerCount;
+
+    /**
+     * @param port TCP port where to start the server at
+     * @param program RPC program corresponding to the server
+     * @param workercount Number of worker threads
+     */
+    public SimpleTcpServer(int port, RpcProgram program, int workercount) {
+        this.port = port;
+        this.rpcProgram = program;
+        this.workerCount = workercount;
     }
 
-    server = new ServerBootstrap(factory);
-    server.setPipelineFactory(new ChannelPipelineFactory() {
+    public void run() {
+        // Configure the Server.
+        ChannelFactory factory;
+        if (workerCount == 0) {
+            // Use default workers: 2 * the number of available processors
+            factory = new NioServerSocketChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool());
+        } else {
+            factory = new NioServerSocketChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool(), workerCount);
+        }
+        server = new ServerBootstrap(factory);
+        server.setPipelineFactory(new ChannelPipelineFactory() {
 
-      @Override
-      public ChannelPipeline getPipeline() throws Exception {
-        return Channels.pipeline(RpcUtil.constructRpcFrameDecoder(),
-            RpcUtil.STAGE_RPC_MESSAGE_PARSER, rpcProgram,
-            RpcUtil.STAGE_RPC_TCP_RESPONSE);
-      }
-    });
-    server.setOption("child.tcpNoDelay", true);
-    server.setOption("child.keepAlive", true);
-    server.setOption("child.reuseAddress", true);
-    server.setOption("reuseAddress", true);
-
-    // Listen to TCP port
-    ch = server.bind(new InetSocketAddress(port));
-    InetSocketAddress socketAddr = (InetSocketAddress) ch.getLocalAddress();
-    boundPort = socketAddr.getPort();
-
-    LOG.info("Started listening to TCP requests at port " + boundPort + " for "
-        + rpcProgram + " with workerCount " + workerCount);
-  }
-  
-  // boundPort will be set only after server starts
-  public int getBoundPort() {
-    return this.boundPort;
-  }
-
-  public void shutdown() {
-    if (ch != null) {
-      ch.close().awaitUninterruptibly();
+            @Override
+            public ChannelPipeline getPipeline() throws Exception {
+                return Channels.pipeline(RpcUtil.constructRpcFrameDecoder(), RpcUtil.STAGE_RPC_MESSAGE_PARSER, rpcProgram, RpcUtil.STAGE_RPC_TCP_RESPONSE);
+            }
+        });
+        server.setOption("child.tcpNoDelay", true);
+        server.setOption("child.keepAlive", true);
+        server.setOption("child.reuseAddress", true);
+        server.setOption("reuseAddress", true);
+        // Listen to TCP port
+        ch = server.bind(new InetSocketAddress(port));
+        InetSocketAddress socketAddr = (InetSocketAddress) ch.getLocalAddress();
+        boundPort = socketAddr.getPort();
+        LOG.info("Started listening to TCP requests at port " + boundPort + " for " + rpcProgram + " with workerCount " + workerCount);
     }
-    if (server != null) {
-      server.releaseExternalResources();
+
+    // boundPort will be set only after server starts
+    public int getBoundPort() {
+        return this.boundPort;
     }
-  }
+
+    public void shutdown() {
+        if (ch != null) {
+            ch.close().awaitUninterruptibly();
+        }
+        if (server != null) {
+            server.releaseExternalResources();
+        }
+    }
 }

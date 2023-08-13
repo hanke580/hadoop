@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.ha;
 
 import java.io.BufferedReader;
@@ -30,7 +29,6 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import org.apache.hadoop.net.ServerSocketUtil;
 import org.apache.hadoop.test.GenericTestUtils;
 import org.apache.hadoop.util.Time;
@@ -50,7 +48,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.google.common.annotations.VisibleForTesting;
 
 /**
@@ -60,42 +57,52 @@ import com.google.common.annotations.VisibleForTesting;
  * we run these tests with the upstream ClientBase.
  */
 public abstract class ClientBaseWithFixes extends ZKTestCase {
+
     protected static final Logger LOG = LoggerFactory.getLogger(ClientBaseWithFixes.class);
 
     public static int CONNECTION_TIMEOUT = 30000;
+
     static final File BASETEST = GenericTestUtils.getTestDir();
 
-  static {
-    // The 4-letter-words commands are simple diagnostics telnet commands in
-    // ZooKeeper. Since ZooKeeper 3.5, these are disabled by default due to
-    // security concerns: https://issues.apache.org/jira/browse/ZOOKEEPER-2693
-    // We are enabling them for the tests here, as some tests in hadoop or in
-    // other projects might still use them
-    System.setProperty("zookeeper.4lw.commands.whitelist", "*");
-  }
+    static {
+        // The 4-letter-words commands are simple diagnostics telnet commands in
+        // ZooKeeper. Since ZooKeeper 3.5, these are disabled by default due to
+        // security concerns: https://issues.apache.org/jira/browse/ZOOKEEPER-2693
+        // We are enabling them for the tests here, as some tests in hadoop or in
+        // other projects might still use them
+        System.setProperty("zookeeper.4lw.commands.whitelist", "*");
+    }
 
     protected final String hostPort = initHostPort();
+
     protected int maxCnxns = 0;
+
     protected ServerCnxnFactory serverFactory = null;
+
     protected File tmpDir = null;
-    
+
     long initialFdCount;
-    
+
     /**
      * In general don't use this. Only use in the special case that you
      * want to ignore results (for whatever reason) in your test. Don't
      * use empty watchers in real code!
-     *
      */
     protected class NullWatcher implements Watcher {
+
         @Override
-        public void process(WatchedEvent event) { /* nada */ }
+        public void process(WatchedEvent event) {
+            /* nada */
+        }
     }
 
     protected static class CountdownWatcher implements Watcher {
+
         // XXX this doesn't need to be volatile! (Should probably be final)
         volatile CountDownLatch clientConnected;
+
         volatile boolean connected;
+
         protected ZooKeeper client;
 
         public void initializeWatchedClient(ZooKeeper zk) {
@@ -108,14 +115,15 @@ public abstract class ClientBaseWithFixes extends ZKTestCase {
         public CountdownWatcher() {
             reset();
         }
+
         synchronized public void reset() {
             clientConnected = new CountDownLatch(1);
             connected = false;
         }
+
         @Override
         synchronized public void process(WatchedEvent event) {
-            if (event.getState() == KeeperState.SyncConnected ||
-                event.getState() == KeeperState.ConnectedReadOnly) {
+            if (event.getState() == KeeperState.SyncConnected || event.getState() == KeeperState.ConnectedReadOnly) {
                 connected = true;
                 notifyAll();
                 clientConnected.countDown();
@@ -124,72 +132,62 @@ public abstract class ClientBaseWithFixes extends ZKTestCase {
                 notifyAll();
             }
         }
+
         synchronized boolean isConnected() {
             return connected;
         }
+
         @VisibleForTesting
-        public synchronized void waitForConnected(long timeout)
-            throws InterruptedException, TimeoutException {
+        public synchronized void waitForConnected(long timeout) throws InterruptedException, TimeoutException {
             long expire = Time.now() + timeout;
             long left = timeout;
-            while(!connected && left > 0) {
+            while (!connected && left > 0) {
                 wait(left);
                 left = expire - Time.now();
             }
             if (!connected) {
                 throw new TimeoutException("Did not connect");
-
             }
         }
+
         @VisibleForTesting
-        public synchronized void waitForDisconnected(long timeout)
-            throws InterruptedException, TimeoutException {
+        public synchronized void waitForDisconnected(long timeout) throws InterruptedException, TimeoutException {
             long expire = Time.now() + timeout;
             long left = timeout;
-            while(connected && left > 0) {
+            while (connected && left > 0) {
                 wait(left);
                 left = expire - Time.now();
             }
             if (connected) {
                 throw new TimeoutException("Did not disconnect");
-
             }
         }
     }
 
-    protected TestableZooKeeper createClient()
-        throws IOException, InterruptedException
-    {
+    protected TestableZooKeeper createClient() throws IOException, InterruptedException {
         return createClient(hostPort);
     }
 
-    protected TestableZooKeeper createClient(String hp)
-        throws IOException, InterruptedException
-    {
+    protected TestableZooKeeper createClient(String hp) throws IOException, InterruptedException {
         CountdownWatcher watcher = new CountdownWatcher();
         return createClient(watcher, hp);
     }
 
     private LinkedList<ZooKeeper> allClients;
+
     private boolean allClientsSetup = false;
 
-    protected TestableZooKeeper createClient(CountdownWatcher watcher, String hp)
-        throws IOException, InterruptedException
-    {
+    protected TestableZooKeeper createClient(CountdownWatcher watcher, String hp) throws IOException, InterruptedException {
         return createClient(watcher, hp, CONNECTION_TIMEOUT);
     }
 
-    protected TestableZooKeeper createClient(CountdownWatcher watcher,
-            String hp, int timeout)
-        throws IOException, InterruptedException
-    {
+    protected TestableZooKeeper createClient(CountdownWatcher watcher, String hp, int timeout) throws IOException, InterruptedException {
         watcher.reset();
         TestableZooKeeper zk = new TestableZooKeeper(hp, timeout, watcher);
-        if (!watcher.clientConnected.await(timeout, TimeUnit.MILLISECONDS))
-        {
+        if (!watcher.clientConnected.await(timeout, TimeUnit.MILLISECONDS)) {
             Assert.fail("Unable to connect to server");
         }
-        synchronized(this) {
+        synchronized (this) {
             if (!allClientsSetup) {
                 LOG.error("allClients never setup");
                 Assert.fail("allClients never setup");
@@ -206,25 +204,29 @@ public abstract class ClientBaseWithFixes extends ZKTestCase {
     }
 
     public static class HostPort {
+
         String host;
+
         int port;
+
         public HostPort(String host, int port) {
             this.host = host;
             this.port = port;
         }
     }
+
     public static List<HostPort> parseHostPortList(String hplist) {
         ArrayList<HostPort> alist = new ArrayList<HostPort>();
-        for (String hp: hplist.split(",")) {
+        for (String hp : hplist.split(",")) {
             int idx = hp.lastIndexOf(':');
             String host = hp.substring(0, idx);
             int port;
             try {
                 port = Integer.parseInt(hp.substring(idx + 1));
-            } catch(RuntimeException e) {
+            } catch (RuntimeException e) {
                 throw new RuntimeException("Problem parsing " + hp + e.toString());
             }
-            alist.add(new HostPort(host,port));
+            alist.add(new HostPort(host, port));
         }
         return alist;
     }
@@ -237,9 +239,7 @@ public abstract class ClientBaseWithFixes extends ZKTestCase {
      * @return
      * @throws IOException
      */
-    public static String send4LetterWord(String host, int port, String cmd)
-        throws IOException
-    {
+    public static String send4LetterWord(String host, int port, String cmd) throws IOException {
         LOG.info("connecting to " + host + " " + port);
         Socket sock = new Socket(host, port);
         BufferedReader reader = null;
@@ -249,13 +249,10 @@ public abstract class ClientBaseWithFixes extends ZKTestCase {
             outstream.flush();
             // this replicates NC - close the output stream before reading
             sock.shutdownOutput();
-
-            reader =
-                new BufferedReader(
-                        new InputStreamReader(sock.getInputStream()));
+            reader = new BufferedReader(new InputStreamReader(sock.getInputStream()));
             StringBuilder sb = new StringBuilder();
             String line;
-            while((line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 sb.append(line + "\n");
             }
             return sb.toString();
@@ -274,15 +271,13 @@ public abstract class ClientBaseWithFixes extends ZKTestCase {
                 // if there are multiple hostports, just take the first one
                 HostPort hpobj = parseHostPortList(hp).get(0);
                 String result = send4LetterWord(hpobj.host, hpobj.port, "stat");
-                if (result.startsWith("Zookeeper version:") &&
-                        !result.contains("READ-ONLY")) {
+                if (result.startsWith("Zookeeper version:") && !result.contains("READ-ONLY")) {
                     return true;
                 }
             } catch (IOException e) {
                 // ignore as this is expected
                 LOG.info("server " + hp + " not up " + e);
             }
-
             if (Time.now() > start + timeout) {
                 break;
             }
@@ -294,6 +289,7 @@ public abstract class ClientBaseWithFixes extends ZKTestCase {
         }
         return false;
     }
+
     public static boolean waitForServerDown(String hp, long timeout) {
         long start = Time.now();
         while (true) {
@@ -303,7 +299,6 @@ public abstract class ClientBaseWithFixes extends ZKTestCase {
             } catch (IOException e) {
                 return true;
             }
-
             if (Time.now() > start + timeout) {
                 break;
             }
@@ -319,20 +314,21 @@ public abstract class ClientBaseWithFixes extends ZKTestCase {
     public static File createTmpDir() throws IOException {
         return createTmpDir(BASETEST);
     }
+
     static File createTmpDir(File parentDir) throws IOException {
         File tmpFile = File.createTempFile("test", ".junit", parentDir);
         // don't delete tmpFile - this ensures we don't attempt to create
         // a tmpDir with a duplicate name
         File tmpDir = new File(tmpFile + ".dir");
-        Assert.assertFalse(tmpDir.exists()); // never true if tmpfile does it's job
+        // never true if tmpfile does it's job
+        Assert.assertFalse(tmpDir.exists());
         Assert.assertTrue(tmpDir.mkdirs());
-
         return tmpDir;
     }
 
     private static int getPort(String hostPort) {
         String[] split = hostPort.split(":");
-        String portstr = split[split.length-1];
+        String portstr = split[split.length - 1];
         String[] pc = portstr.split("/");
         if (pc.length > 1) {
             portstr = pc[0];
@@ -340,31 +336,22 @@ public abstract class ClientBaseWithFixes extends ZKTestCase {
         return Integer.parseInt(portstr);
     }
 
-    static ServerCnxnFactory createNewServerInstance(File dataDir,
-            ServerCnxnFactory factory, String hostPort, int maxCnxns)
-        throws IOException, InterruptedException
-    {
+    static ServerCnxnFactory createNewServerInstance(File dataDir, ServerCnxnFactory factory, String hostPort, int maxCnxns) throws IOException, InterruptedException {
         ZooKeeperServer zks = new ZooKeeperServer(dataDir, dataDir, 3000);
         final int PORT = getPort(hostPort);
         if (factory == null) {
             factory = ServerCnxnFactory.createFactory(PORT, maxCnxns);
         }
         factory.startup(zks);
-        Assert.assertTrue("waiting for server up",
-                   ClientBaseWithFixes.waitForServerUp("127.0.0.1:" + PORT,
-                                              CONNECTION_TIMEOUT));
-
+        Assert.assertTrue("waiting for server up", ClientBaseWithFixes.waitForServerUp("127.0.0.1:" + PORT, CONNECTION_TIMEOUT));
         return factory;
     }
 
-    static void shutdownServerInstance(ServerCnxnFactory factory,
-            String hostPort)
-    {
+    static void shutdownServerInstance(ServerCnxnFactory factory, String hostPort) {
         if (factory != null) {
             ZKDatabase zkDb;
             {
                 ZooKeeperServer zs = getServer(factory);
-        
                 zkDb = zs.getZKDatabase();
             }
             factory.shutdown();
@@ -374,10 +361,7 @@ public abstract class ClientBaseWithFixes extends ZKTestCase {
                 LOG.warn("Error closing logs ", ie);
             }
             final int PORT = getPort(hostPort);
-
-            Assert.assertTrue("waiting for server down",
-                       ClientBaseWithFixes.waitForServerDown("127.0.0.1:" + PORT,
-                                                    CONNECTION_TIMEOUT));
+            Assert.assertTrue("waiting for server down", ClientBaseWithFixes.waitForServerDown("127.0.0.1:" + PORT, CONNECTION_TIMEOUT));
         }
     }
 
@@ -401,15 +385,10 @@ public abstract class ClientBaseWithFixes extends ZKTestCase {
     @Before
     public void setUp() throws Exception {
         BASETEST.mkdirs();
-
         setupTestEnv();
-
         setUpAll();
-
         tmpDir = createTmpDir(BASETEST);
-
         startServer();
-
         LOG.info("Client test setup finished");
     }
 
@@ -417,9 +396,9 @@ public abstract class ClientBaseWithFixes extends ZKTestCase {
         BASETEST.mkdirs();
         int port = 0;
         try {
-           port = ServerSocketUtil.getPort(port, 100);
+            port = ServerSocketUtil.getPort(port, 100);
         } catch (IOException e) {
-           throw new RuntimeException(e);
+            throw new RuntimeException(e);
         }
         return "127.0.0.1:" + port;
     }
@@ -435,23 +414,22 @@ public abstract class ClientBaseWithFixes extends ZKTestCase {
         serverFactory = null;
     }
 
-
     protected static ZooKeeperServer getServer(ServerCnxnFactory fac) {
         ZooKeeperServer zs = ServerCnxnFactoryAccessor.getZkServer(fac);
-
         return zs;
     }
 
     protected void tearDownAll() throws Exception {
         synchronized (this) {
-            if (allClients != null) for (ZooKeeper zk : allClients) {
-                try {
-                    if (zk != null)
-                        zk.close();
-                } catch (InterruptedException e) {
-                    LOG.warn("ignoring interrupt", e);
+            if (allClients != null)
+                for (ZooKeeper zk : allClients) {
+                    try {
+                        if (zk != null)
+                            zk.close();
+                    } catch (InterruptedException e) {
+                        LOG.warn("ignoring interrupt", e);
+                    }
                 }
-            }
             allClients = null;
         }
     }
@@ -459,22 +437,18 @@ public abstract class ClientBaseWithFixes extends ZKTestCase {
     @After
     public void tearDown() throws Exception {
         LOG.info("tearDown starting");
-
         tearDownAll();
-
         stopServer();
-
         if (tmpDir != null) {
             Assert.assertTrue("delete " + tmpDir.toString(), recursiveDelete(tmpDir));
         }
-
         // This has to be set to null when the same instance of this class is reused between test cases
         serverFactory = null;
     }
 
     public static boolean recursiveDelete(File d) {
         if (d.isDirectory()) {
-            File children[] = d.listFiles();
+            File[] children = d.listFiles();
             for (File f : children) {
                 Assert.assertTrue("delete " + f.toString(), recursiveDelete(f));
             }

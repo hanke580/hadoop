@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.server.federation.store;
 
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.hdfs.server.federation.store.driver.StateStoreDriver;
@@ -52,77 +51,70 @@ import org.apache.hadoop.hdfs.server.federation.store.records.MembershipState;
  */
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
-public abstract class MembershipStore
-    extends CachedRecordStore<MembershipState> {
+public abstract class MembershipStore extends CachedRecordStore<MembershipState> {
 
-  protected MembershipStore(StateStoreDriver driver) {
-    super(MembershipState.class, driver, true);
-  }
+    protected MembershipStore(StateStoreDriver driver) {
+        super(MembershipState.class, driver, true);
+    }
 
-  /**
-   * Inserts or updates a namenode membership entry into the table.
-   *
-   * @param request Fully populated NamenodeHeartbeatRequest request.
-   * @return True if successful, false otherwise.
-   * @throws StateStoreUnavailableException Throws exception if the data store
-   *           is not initialized.
-   * @throws IOException if the data store could not be queried or the query is
-   *           invalid.
-   */
-  public abstract NamenodeHeartbeatResponse namenodeHeartbeat(
-      NamenodeHeartbeatRequest request) throws IOException;
+    /**
+     * Inserts or updates a namenode membership entry into the table.
+     *
+     * @param request Fully populated NamenodeHeartbeatRequest request.
+     * @return True if successful, false otherwise.
+     * @throws StateStoreUnavailableException Throws exception if the data store
+     *           is not initialized.
+     * @throws IOException if the data store could not be queried or the query is
+     *           invalid.
+     */
+    public abstract NamenodeHeartbeatResponse namenodeHeartbeat(NamenodeHeartbeatRequest request) throws IOException;
 
-  /**
-   * Queries for a single cached registration entry matching the given
-   * parameters. Possible keys are the names of data structure elements Possible
-   * values are matching SQL "LIKE" targets.
-   *
-   * @param request Fully populated GetNamenodeRegistrationsRequest request.
-   * @return Single matching FederationMembershipStateEntry or null if not found
-   *         or more than one entry matches.
-   * @throws StateStoreUnavailableException Throws exception if the data store
-   *           is not initialized.
-   * @throws IOException if the data store could not be queried or the query is
-   *           invalid.
-   */
-  public abstract GetNamenodeRegistrationsResponse getNamenodeRegistrations(
-      GetNamenodeRegistrationsRequest request) throws IOException;
+    /**
+     * Queries for a single cached registration entry matching the given
+     * parameters. Possible keys are the names of data structure elements Possible
+     * values are matching SQL "LIKE" targets.
+     *
+     * @param request Fully populated GetNamenodeRegistrationsRequest request.
+     * @return Single matching FederationMembershipStateEntry or null if not found
+     *         or more than one entry matches.
+     * @throws StateStoreUnavailableException Throws exception if the data store
+     *           is not initialized.
+     * @throws IOException if the data store could not be queried or the query is
+     *           invalid.
+     */
+    public abstract GetNamenodeRegistrationsResponse getNamenodeRegistrations(GetNamenodeRegistrationsRequest request) throws IOException;
 
-  /**
-   * Get the expired registrations from the registration cache.
-   *
-   * @param request Request to get the expired registrations.
-   * @return Expired registrations or zero-length list if none are found.
-   * @throws StateStoreUnavailableException Throws exception if the data store
-   *           is not initialized.
-   * @throws IOException if the data store could not be queried or the query is
-   *           invalid.
-   */
-  public abstract GetNamenodeRegistrationsResponse
-      getExpiredNamenodeRegistrations(GetNamenodeRegistrationsRequest request)
-          throws IOException;
+    /**
+     * Get the expired registrations from the registration cache.
+     *
+     * @param request Request to get the expired registrations.
+     * @return Expired registrations or zero-length list if none are found.
+     * @throws StateStoreUnavailableException Throws exception if the data store
+     *           is not initialized.
+     * @throws IOException if the data store could not be queried or the query is
+     *           invalid.
+     */
+    public abstract GetNamenodeRegistrationsResponse getExpiredNamenodeRegistrations(GetNamenodeRegistrationsRequest request) throws IOException;
 
-  /**
-   * Retrieves a list of registered nameservices and their associated info.
-   *
-   * @param request Request to get the name spaces.
-   * @return Collection of information for each registered nameservice.
-   * @throws IOException if the data store could not be queried or the query is
-   *           invalid.
-   */
-  public abstract GetNamespaceInfoResponse getNamespaceInfo(
-      GetNamespaceInfoRequest request) throws IOException;
+    /**
+     * Retrieves a list of registered nameservices and their associated info.
+     *
+     * @param request Request to get the name spaces.
+     * @return Collection of information for each registered nameservice.
+     * @throws IOException if the data store could not be queried or the query is
+     *           invalid.
+     */
+    public abstract GetNamespaceInfoResponse getNamespaceInfo(GetNamespaceInfoRequest request) throws IOException;
 
-  /**
-   * Overrides a cached namenode state with an updated state.
-   *
-   * @param request Fully populated OverrideNamenodeRegistrationRequest request.
-   * @return OverrideNamenodeRegistrationResponse
-   * @throws StateStoreUnavailableException if the data store is not
-   *           initialized.
-   * @throws IOException if the data store could not be queried or the query is
-   *           invalid.
-   */
-  public abstract UpdateNamenodeRegistrationResponse updateNamenodeRegistration(
-      UpdateNamenodeRegistrationRequest request) throws IOException;
+    /**
+     * Overrides a cached namenode state with an updated state.
+     *
+     * @param request Fully populated OverrideNamenodeRegistrationRequest request.
+     * @return OverrideNamenodeRegistrationResponse
+     * @throws StateStoreUnavailableException if the data store is not
+     *           initialized.
+     * @throws IOException if the data store could not be queried or the query is
+     *           invalid.
+     */
+    public abstract UpdateNamenodeRegistrationResponse updateNamenodeRegistration(UpdateNamenodeRegistrationRequest request) throws IOException;
 }

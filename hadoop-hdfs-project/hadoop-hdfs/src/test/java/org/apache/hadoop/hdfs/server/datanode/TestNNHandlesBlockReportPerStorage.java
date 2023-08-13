@@ -15,15 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.datanode;
 
 import java.io.IOException;
-
 import org.apache.hadoop.hdfs.server.protocol.BlockReportContext;
 import org.apache.hadoop.hdfs.server.protocol.DatanodeRegistration;
 import org.apache.hadoop.hdfs.server.protocol.StorageBlockReport;
-
 
 /**
  * Runs all tests in BlockReportTestBase, sending one block per storage.
@@ -31,16 +28,14 @@ import org.apache.hadoop.hdfs.server.protocol.StorageBlockReport;
  */
 public class TestNNHandlesBlockReportPerStorage extends BlockReportTestBase {
 
-  @Override
-  protected void sendBlockReports(DatanodeRegistration dnR, String poolId,
-      StorageBlockReport[] reports) throws IOException {
-    int i = 0;
-    for (StorageBlockReport report : reports) {
-      LOG.info("Sending block report for storage " + report.getStorage().getStorageID());
-      StorageBlockReport[] singletonReport = { report };
-      cluster.getNameNodeRpc().blockReport(dnR, poolId, singletonReport,
-          new BlockReportContext(reports.length, i, System.nanoTime(), 0L, true));
-      i++;
+    @Override
+    protected void sendBlockReports(DatanodeRegistration dnR, String poolId, StorageBlockReport[] reports) throws IOException {
+        int i = 0;
+        for (StorageBlockReport report : reports) {
+            LOG.info("Sending block report for storage " + report.getStorage().getStorageID());
+            StorageBlockReport[] singletonReport = { report };
+            cluster.getNameNodeRpc().blockReport(dnR, poolId, singletonReport, new BlockReportContext(reports.length, i, System.nanoTime(), 0L, true));
+            i++;
+        }
     }
-  }
 }

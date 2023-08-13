@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.registry.client.exceptions;
 
 /**
@@ -23,17 +22,16 @@ package org.apache.hadoop.registry.client.exceptions;
  * That is: the credentials provided were incomplete or invalid.
  */
 public class AuthenticationFailedException extends RegistryIOException {
-  public AuthenticationFailedException(String path, Throwable cause) {
-    super(path, cause);
-  }
 
-  public AuthenticationFailedException(String path, String error) {
-    super(path, error);
-  }
+    public AuthenticationFailedException(String path, Throwable cause) {
+        super(path, cause);
+    }
 
-  public AuthenticationFailedException(String path,
-      String error,
-      Throwable cause) {
-    super(path, error, cause);
-  }
+    public AuthenticationFailedException(String path, String error) {
+        super(path, error);
+    }
+
+    public AuthenticationFailedException(String path, String error, Throwable cause) {
+        super(path, error, cause);
+    }
 }

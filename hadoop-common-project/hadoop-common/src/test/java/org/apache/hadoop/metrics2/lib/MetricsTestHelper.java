@@ -15,12 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.metrics2.lib;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -28,22 +26,18 @@ import java.util.concurrent.TimeUnit;
  * methods.
  */
 public final class MetricsTestHelper {
-  public static final Logger LOG =
-      LoggerFactory.getLogger(MetricsTestHelper.class);
 
-  private MetricsTestHelper() {
-    //not called
-  }
+    public static final Logger LOG = LoggerFactory.getLogger(MetricsTestHelper.class);
 
-  /**
-   * Replace the rolling averages windows for a
-   * {@link MutableRollingAverages} metric.
-   *
-   */
-  public static void replaceRollingAveragesScheduler(
-      MutableRollingAverages mutableRollingAverages,
-      int numWindows, long interval, TimeUnit timeUnit) {
-    mutableRollingAverages.replaceScheduledTask(
-        numWindows, interval, timeUnit);
-  }
+    private MetricsTestHelper() {
+        //not called
+    }
+
+    /**
+     * Replace the rolling averages windows for a
+     * {@link MutableRollingAverages} metric.
+     */
+    public static void replaceRollingAveragesScheduler(MutableRollingAverages mutableRollingAverages, int numWindows, long interval, TimeUnit timeUnit) {
+        mutableRollingAverages.replaceScheduledTask(numWindows, interval, timeUnit);
+    }
 }

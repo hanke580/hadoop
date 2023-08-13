@@ -15,12 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.security.protocolPB;
 
 import java.io.Closeable;
 import java.io.IOException;
-
 import org.apache.hadoop.ipc.ProtobufHelper;
 import org.apache.hadoop.ipc.ProtocolMetaInterface;
 import org.apache.hadoop.ipc.RPC;
@@ -28,47 +26,40 @@ import org.apache.hadoop.ipc.RpcClientUtil;
 import org.apache.hadoop.security.authorize.RefreshAuthorizationPolicyProtocol;
 import org.apache.hadoop.security.proto.RefreshAuthorizationPolicyProtocolProtos.RefreshServiceAclRequestProto;
 import org.apache.hadoop.security.protocolPB.RefreshAuthorizationPolicyProtocolPB;
-
 import org.apache.hadoop.thirdparty.protobuf.RpcController;
 import org.apache.hadoop.thirdparty.protobuf.ServiceException;
 
-public class RefreshAuthorizationPolicyProtocolClientSideTranslatorPB implements
-    ProtocolMetaInterface, RefreshAuthorizationPolicyProtocol, Closeable {
+public class RefreshAuthorizationPolicyProtocolClientSideTranslatorPB implements ProtocolMetaInterface, RefreshAuthorizationPolicyProtocol, Closeable {
 
-  /** RpcController is not used and hence is set to null */
-  private final static RpcController NULL_CONTROLLER = null;
-  private final RefreshAuthorizationPolicyProtocolPB rpcProxy;
-  
-  private final static RefreshServiceAclRequestProto
-  VOID_REFRESH_SERVICE_ACL_REQUEST =
-      RefreshServiceAclRequestProto.newBuilder().build();
+    /**
+     * RpcController is not used and hence is set to null
+     */
+    private final static RpcController NULL_CONTROLLER = null;
 
-  public RefreshAuthorizationPolicyProtocolClientSideTranslatorPB(
-      RefreshAuthorizationPolicyProtocolPB rpcProxy) {
-    this.rpcProxy = rpcProxy;
-  }
+    private final RefreshAuthorizationPolicyProtocolPB rpcProxy;
 
-  @Override
-  public void close() throws IOException {
-    RPC.stopProxy(rpcProxy);
-  }
+    private final static RefreshServiceAclRequestProto VOID_REFRESH_SERVICE_ACL_REQUEST = RefreshServiceAclRequestProto.newBuilder().build();
 
-  @Override
-  public void refreshServiceAcl() throws IOException {
-    try {
-      rpcProxy.refreshServiceAcl(NULL_CONTROLLER,
-          VOID_REFRESH_SERVICE_ACL_REQUEST);
-    } catch (ServiceException se) {
-      throw ProtobufHelper.getRemoteException(se);
+    public RefreshAuthorizationPolicyProtocolClientSideTranslatorPB(RefreshAuthorizationPolicyProtocolPB rpcProxy) {
+        this.rpcProxy = rpcProxy;
     }
-  }
 
-  @Override
-  public boolean isMethodSupported(String methodName) throws IOException {
-    return RpcClientUtil.isMethodSupported(rpcProxy,
-        RefreshAuthorizationPolicyProtocolPB.class,
-        RPC.RpcKind.RPC_PROTOCOL_BUFFER,
-        RPC.getProtocolVersion(RefreshAuthorizationPolicyProtocolPB.class),
-        methodName);
-  }
+    @Override
+    public void close() throws IOException {
+        RPC.stopProxy(rpcProxy);
+    }
+
+    @Override
+    public void refreshServiceAcl() throws IOException {
+        try {
+            rpcProxy.refreshServiceAcl(NULL_CONTROLLER, VOID_REFRESH_SERVICE_ACL_REQUEST);
+        } catch (ServiceException se) {
+            throw ProtobufHelper.getRemoteException(se);
+        }
+    }
+
+    @Override
+    public boolean isMethodSupported(String methodName) throws IOException {
+        return RpcClientUtil.isMethodSupported(rpcProxy, RefreshAuthorizationPolicyProtocolPB.class, RPC.RpcKind.RPC_PROTOCOL_BUFFER, RPC.getProtocolVersion(RefreshAuthorizationPolicyProtocolPB.class), methodName);
+    }
 }

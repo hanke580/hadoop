@@ -20,7 +20,6 @@ package org.apache.hadoop.hdfs.server.datanode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.timeout;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.apache.hadoop.hdfs.HdfsConfiguration;
@@ -44,103 +43,61 @@ import org.mockito.Mockito;
  */
 public class TestBlockCountersInPendingIBR {
 
-  @Test
-  public void testBlockCounters() throws Exception {
-    final Configuration conf = new HdfsConfiguration();
-
-    /*
+    @Test
+    public void testBlockCounters() throws Exception {
+        final Configuration conf = new HdfsConfiguration();
+        /*
      * Set a really long value for dfs.blockreport.intervalMsec and
      * dfs.heartbeat.interval, so that incremental block reports and heartbeats
      * won't be sent during this test unless they're triggered manually.
      */
-    conf.setLong(DFSConfigKeys.DFS_BLOCKREPORT_INTERVAL_MSEC_KEY, 10800000L);
-    conf.setLong(DFSConfigKeys.DFS_HEARTBEAT_INTERVAL_KEY, 1080L);
-
-    final MiniDFSCluster cluster =
-        new MiniDFSCluster.Builder(conf).numDataNodes(1).build();
-    cluster.waitActive();
-    final DatanodeProtocolClientSideTranslatorPB spy =
-        InternalDataNodeTestUtils.spyOnBposToNN(
-            cluster.getDataNodes().get(0), cluster.getNameNode());
-    final DataNode datanode = cluster.getDataNodes().get(0);
-
-    /* We should get 0 incremental block report. */
-    Mockito.verify(spy, timeout(60000).times(0)).blockReceivedAndDeleted(
-        any(DatanodeRegistration.class),
-        anyString(),
-        any(StorageReceivedDeletedBlocks[].class));
-
-    /*
+        conf.setLong(DFSConfigKeys.DFS_BLOCKREPORT_INTERVAL_MSEC_KEY, 10800000L);
+        conf.setLong(DFSConfigKeys.DFS_HEARTBEAT_INTERVAL_KEY, 1080L);
+        final MiniDFSCluster cluster = new MiniDFSCluster.Builder(conf).numDataNodes(1).build();
+        cluster.waitActive();
+        final DatanodeProtocolClientSideTranslatorPB spy = InternalDataNodeTestUtils.spyOnBposToNN(cluster.getDataNodes().get(0), cluster.getNameNode());
+        final DataNode datanode = cluster.getDataNodes().get(0);
+        /* We should get 0 incremental block report. */
+        Mockito.verify(spy, timeout(60000).times(0)).blockReceivedAndDeleted(any(DatanodeRegistration.class), anyString(), any(StorageReceivedDeletedBlocks[].class));
+        /*
      * Create fake blocks notification on the DataNode. This will be sent with
      * the next incremental block report.
      */
-    final BPServiceActor actor =
-        datanode.getAllBpOs().get(0).getBPServiceActors().get(0);
-    final FsDatasetSpi<?> dataset = datanode.getFSDataset();
-    final DatanodeStorage storage;
-    try (FsDatasetSpi.FsVolumeReferences volumes =
-        dataset.getFsVolumeReferences()) {
-      storage = dataset.getStorage(volumes.get(0).getStorageID());
-    }
-
-    ReceivedDeletedBlockInfo rdbi = null;
-    /* block at status of RECEIVING_BLOCK */
-    rdbi = new ReceivedDeletedBlockInfo(
-        new Block(5678, 512, 1000),  BlockStatus.RECEIVING_BLOCK, null);
-    actor.getIbrManager().addRDBI(rdbi, storage);
-
-    /* block at status of RECEIVED_BLOCK */
-    rdbi = new ReceivedDeletedBlockInfo(
-        new Block(5679, 512, 1000),  BlockStatus.RECEIVED_BLOCK, null);
-    actor.getIbrManager().addRDBI(rdbi, storage);
-
-    /* block at status of DELETED_BLOCK */
-    rdbi = new ReceivedDeletedBlockInfo(
-        new Block(5680, 512, 1000),  BlockStatus.DELETED_BLOCK, null);
-    actor.getIbrManager().addRDBI(rdbi, storage);
-
-    /* verify counters before sending IBR */
-    verifyBlockCounters(datanode, 3, 1, 1, 1);
-
-    /* Manually trigger a block report. */
-    datanode.triggerBlockReport(
-        new BlockReportOptions.Factory().
-            setIncremental(true).
-            build()
-    );
-
-    /*
+        final BPServiceActor actor = datanode.getAllBpOs().get(0).getBPServiceActors().get(0);
+        final FsDatasetSpi<?> dataset = datanode.getFSDataset();
+        final DatanodeStorage storage;
+        try (FsDatasetSpi.FsVolumeReferences volumes = dataset.getFsVolumeReferences()) {
+            storage = dataset.getStorage(volumes.get(0).getStorageID());
+        }
+        ReceivedDeletedBlockInfo rdbi = null;
+        /* block at status of RECEIVING_BLOCK */
+        rdbi = new ReceivedDeletedBlockInfo(new Block(5678, 512, 1000), BlockStatus.RECEIVING_BLOCK, null);
+        actor.getIbrManager().addRDBI(rdbi, storage);
+        /* block at status of RECEIVED_BLOCK */
+        rdbi = new ReceivedDeletedBlockInfo(new Block(5679, 512, 1000), BlockStatus.RECEIVED_BLOCK, null);
+        actor.getIbrManager().addRDBI(rdbi, storage);
+        /* block at status of DELETED_BLOCK */
+        rdbi = new ReceivedDeletedBlockInfo(new Block(5680, 512, 1000), BlockStatus.DELETED_BLOCK, null);
+        actor.getIbrManager().addRDBI(rdbi, storage);
+        /* verify counters before sending IBR */
+        verifyBlockCounters(datanode, 3, 1, 1, 1);
+        /* Manually trigger a block report. */
+        datanode.triggerBlockReport(new BlockReportOptions.Factory().setIncremental(true).build());
+        /*
      * triggerBlockReport returns before the block report is actually sent. Wait
      * for it to be sent here.
      */
-    Mockito.verify(spy, timeout(60000).times(1)).
-        blockReceivedAndDeleted(
-            any(DatanodeRegistration.class),
-            anyString(),
-            any(StorageReceivedDeletedBlocks[].class));
+        Mockito.verify(spy, timeout(60000).times(1)).blockReceivedAndDeleted(any(DatanodeRegistration.class), anyString(), any(StorageReceivedDeletedBlocks[].class));
+        /* verify counters after sending IBR */
+        verifyBlockCounters(datanode, 0, 0, 0, 0);
+        cluster.shutdown();
+    }
 
-    /* verify counters after sending IBR */
-    verifyBlockCounters(datanode, 0, 0, 0, 0);
-
-    cluster.shutdown();
-  }
-
-
-  private void verifyBlockCounters(final DataNode datanode,
-      final long blocksInPendingIBR, final long blocksReceivingInPendingIBR,
-      final long blocksReceivedInPendingIBR,
-      final long blocksDeletedInPendingIBR) {
-
-    final MetricsRecordBuilder m = MetricsAsserts
-        .getMetrics(datanode.getMetrics().name());
-
-    MetricsAsserts.assertGauge("BlocksInPendingIBR",
-        blocksInPendingIBR, m);
-    MetricsAsserts.assertGauge("BlocksReceivingInPendingIBR",
-        blocksReceivingInPendingIBR, m);
-    MetricsAsserts.assertGauge("BlocksReceivedInPendingIBR",
-        blocksReceivedInPendingIBR, m);
-    MetricsAsserts.assertGauge("BlocksDeletedInPendingIBR",
-        blocksDeletedInPendingIBR, m);
-  }
+    private void verifyBlockCounters(final DataNode datanode, final long blocksInPendingIBR, final long blocksReceivingInPendingIBR, final long blocksReceivedInPendingIBR, final long blocksDeletedInPendingIBR) {
+        final MetricsRecordBuilder m = MetricsAsserts.getMetrics(datanode.getMetrics().name());
+        MetricsAsserts.assertGauge("BlocksInPendingIBR", blocksInPendingIBR, m);
+        MetricsAsserts.assertGauge("BlocksReceivingInPendingIBR", blocksReceivingInPendingIBR, m);
+        MetricsAsserts.assertGauge("BlocksReceivedInPendingIBR", blocksReceivedInPendingIBR, m);
+        MetricsAsserts.assertGauge("BlocksDeletedInPendingIBR", blocksDeletedInPendingIBR, m);
+    }
 }

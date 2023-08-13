@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.protocol;
 
 import java.lang.reflect.Method;
-
 import org.apache.hadoop.hdfs.server.protocol.NamenodeProtocols;
 import org.apache.hadoop.io.retry.AtMostOnce;
 import org.apache.hadoop.io.retry.Idempotent;
@@ -30,14 +29,12 @@ import org.junit.Test;
  * either {@link Idempotent} or {@link AtMostOnce} once annotations.
  */
 public class TestAnnotations {
-  @Test
-  public void checkAnnotations() {
-    Method[] methods = NamenodeProtocols.class.getMethods();
-    for (Method m : methods) {
-      Assert.assertTrue(
-          "Idempotent or AtMostOnce annotation is not present " + m,
-          m.isAnnotationPresent(Idempotent.class)
-              || m.isAnnotationPresent(AtMostOnce.class));
+
+    @Test
+    public void checkAnnotations() {
+        Method[] methods = NamenodeProtocols.class.getMethods();
+        for (Method m : methods) {
+            Assert.assertTrue("Idempotent or AtMostOnce annotation is not present " + m, m.isAnnotationPresent(Idempotent.class) || m.isAnnotationPresent(AtMostOnce.class));
+        }
     }
-  }
 }

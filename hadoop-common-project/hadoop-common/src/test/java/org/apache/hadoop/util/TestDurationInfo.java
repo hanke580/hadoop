@@ -26,37 +26,34 @@ import org.slf4j.LoggerFactory;
  * The class to test DurationInfo.
  */
 public class TestDurationInfo {
-  private final Logger log = LoggerFactory.getLogger(TestDurationInfo.class);
 
-  @Test
-  public void testDurationInfoCreation() throws Exception {
-    DurationInfo info = new DurationInfo(log, "test");
-    Assert.assertTrue(info.value() >= 0);
-    Thread.sleep(1000);
-    info.finished();
-    Assert.assertTrue(info.value() > 0);
+    private final Logger log = LoggerFactory.getLogger(TestDurationInfo.class);
 
-    info = new DurationInfo(log, true, "test format %s", "value");
-    Assert.assertEquals("test format value: duration 0:00.000s",
-        info.toString());
+    @Test
+    public void testDurationInfoCreation() throws Exception {
+        DurationInfo info = new DurationInfo(log, "test");
+        Assert.assertTrue(info.value() >= 0);
+        Thread.sleep(1000);
+        info.finished();
+        Assert.assertTrue(info.value() > 0);
+        info = new DurationInfo(log, true, "test format %s", "value");
+        Assert.assertEquals("test format value: duration 0:00.000s", info.toString());
+        info = new DurationInfo(log, false, "test format %s", "value");
+        Assert.assertEquals("test format value: duration 0:00.000s", info.toString());
+    }
 
-    info = new DurationInfo(log, false, "test format %s", "value");
-    Assert.assertEquals("test format value: duration 0:00.000s",
-        info.toString());
-  }
+    @Test
+    public void testDurationInfoWithMultipleClose() throws Exception {
+        DurationInfo info = new DurationInfo(log, "test");
+        Thread.sleep(1000);
+        info.close();
+        info.close();
+        Assert.assertTrue(info.value() > 0);
+    }
 
-  @Test
-  public void testDurationInfoWithMultipleClose() throws Exception {
-    DurationInfo info = new DurationInfo(log, "test");
-    Thread.sleep(1000);
-    info.close();
-    info.close();
-    Assert.assertTrue(info.value() > 0);
-  }
-
-  @Test(expected = NullPointerException.class)
-  public void testDurationInfoCreationWithNullMsg() {
-    DurationInfo info = new DurationInfo(log, null);
-    info.close();
-  }
+    @Test(expected = NullPointerException.class)
+    public void testDurationInfoCreationWithNullMsg() {
+        DurationInfo info = new DurationInfo(log, null);
+        info.close();
+    }
 }

@@ -19,26 +19,33 @@ package org.apache.hadoop.hdfs.web.resources;
 
 import org.apache.hadoop.hdfs.protocol.HdfsConstants;
 
-/** The name space quota parameter for directory. */
+/**
+ * The name space quota parameter for directory.
+ */
 public class NameSpaceQuotaParam extends LongParam {
-  /** Parameter name. */
-  public static final String NAME = "namespacequota";
-  /** Default parameter value ({@link Long#MAX_VALUE}). */
-  public static final String DEFAULT = "9223372036854775807";
 
-  private static final Domain DOMAIN = new Domain(NAME);
+    /**
+     * Parameter name.
+     */
+    public static final String NAME = "namespacequota";
 
-  public NameSpaceQuotaParam(final Long value) {
-    super(DOMAIN, value, HdfsConstants.QUOTA_RESET,
-        HdfsConstants.QUOTA_DONT_SET);
-  }
+    /**
+     * Default parameter value ({@link Long#MAX_VALUE}).
+     */
+    public static final String DEFAULT = "9223372036854775807";
 
-  public NameSpaceQuotaParam(final String str) {
-    this(DOMAIN.parse(str));
-  }
+    private static final Domain DOMAIN = new Domain(NAME);
 
-  @Override
-  public String getName() {
-    return NAME;
-  }
+    public NameSpaceQuotaParam(final Long value) {
+        super(DOMAIN, value, HdfsConstants.QUOTA_RESET, HdfsConstants.QUOTA_DONT_SET);
+    }
+
+    public NameSpaceQuotaParam(final String str) {
+        this(DOMAIN.parse(str));
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
+    }
 }

@@ -20,7 +20,6 @@ package org.apache.hadoop.hdfs.server.blockmanagement;
 import org.apache.hadoop.net.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -33,117 +32,119 @@ import java.util.Set;
  */
 abstract class BlockReconstructionWork {
 
-  public static final Logger LOG =
-      LoggerFactory.getLogger(BlockReconstructionWork.class);
+    public static final Logger LOG = LoggerFactory.getLogger(BlockReconstructionWork.class);
 
-  private final BlockInfo block;
+    private final BlockInfo block;
 
-  private final String srcPath;
-  private final long blockSize;
-  private final byte storagePolicyID;
+    private final String srcPath;
 
-  /**
-   * An erasure coding reconstruction task has multiple source nodes.
-   * A replication task only has 1 source node, stored on top of the array
-   */
-  private final DatanodeDescriptor[] srcNodes;
-  /** Nodes containing the block; avoid them in choosing new targets */
-  private final List<DatanodeDescriptor> containingNodes;
-  /** Required by {@link BlockPlacementPolicy#chooseTarget} */
-  private  final List<DatanodeStorageInfo> liveReplicaStorages;
-  private final int additionalReplRequired;
+    private final long blockSize;
 
-  private DatanodeStorageInfo[] targets;
-  private final int priority;
-  private boolean notEnoughRack = false;
+    private final byte storagePolicyID;
 
-  public BlockReconstructionWork(BlockInfo block,
-      BlockCollection bc,
-      DatanodeDescriptor[] srcNodes,
-      List<DatanodeDescriptor> containingNodes,
-      List<DatanodeStorageInfo> liveReplicaStorages,
-      int additionalReplRequired,
-      int priority) {
-    this.block = block;
-    this.srcPath = bc.getName();
-    this.blockSize = block.getNumBytes();
-    this.storagePolicyID = bc.getStoragePolicyID();
-    this.srcNodes = srcNodes;
-    this.containingNodes = containingNodes;
-    this.liveReplicaStorages = liveReplicaStorages;
-    this.additionalReplRequired = additionalReplRequired;
-    this.priority = priority;
-    this.targets = null;
-  }
+    /**
+     * An erasure coding reconstruction task has multiple source nodes.
+     * A replication task only has 1 source node, stored on top of the array
+     */
+    private final DatanodeDescriptor[] srcNodes;
 
-  DatanodeStorageInfo[] getTargets() {
-    return targets;
-  }
+    /**
+     * Nodes containing the block; avoid them in choosing new targets
+     */
+    private final List<DatanodeDescriptor> containingNodes;
 
-  void resetTargets() {
-    this.targets = null;
-  }
+    /**
+     * Required by {@link BlockPlacementPolicy#chooseTarget}
+     */
+    private final List<DatanodeStorageInfo> liveReplicaStorages;
 
-  void setTargets(DatanodeStorageInfo[] targets) {
-    this.targets = targets;
-  }
+    private final int additionalReplRequired;
 
-  List<DatanodeDescriptor> getContainingNodes() {
-    return Collections.unmodifiableList(containingNodes);
-  }
+    private DatanodeStorageInfo[] targets;
 
-  public int getPriority() {
-    return priority;
-  }
+    private final int priority;
 
-  public BlockInfo getBlock() {
-    return block;
-  }
+    private boolean notEnoughRack = false;
 
-  public DatanodeDescriptor[] getSrcNodes() {
-    return srcNodes;
-  }
+    public BlockReconstructionWork(BlockInfo block, BlockCollection bc, DatanodeDescriptor[] srcNodes, List<DatanodeDescriptor> containingNodes, List<DatanodeStorageInfo> liveReplicaStorages, int additionalReplRequired, int priority) {
+        this.block = block;
+        this.srcPath = bc.getName();
+        this.blockSize = block.getNumBytes();
+        this.storagePolicyID = bc.getStoragePolicyID();
+        this.srcNodes = srcNodes;
+        this.containingNodes = containingNodes;
+        this.liveReplicaStorages = liveReplicaStorages;
+        this.additionalReplRequired = additionalReplRequired;
+        this.priority = priority;
+        this.targets = null;
+    }
 
-  public String getSrcPath() {
-    return srcPath;
-  }
+    DatanodeStorageInfo[] getTargets() {
+        return targets;
+    }
 
-  public long getBlockSize() {
-    return blockSize;
-  }
+    void resetTargets() {
+        this.targets = null;
+    }
 
-  public byte getStoragePolicyID() {
-    return storagePolicyID;
-  }
+    void setTargets(DatanodeStorageInfo[] targets) {
+        this.targets = targets;
+    }
 
-  List<DatanodeStorageInfo> getLiveReplicaStorages() {
-    return liveReplicaStorages;
-  }
+    List<DatanodeDescriptor> getContainingNodes() {
+        return Collections.unmodifiableList(containingNodes);
+    }
 
-  public int getAdditionalReplRequired() {
-    return additionalReplRequired;
-  }
+    public int getPriority() {
+        return priority;
+    }
 
-  /**
-   * Mark that the reconstruction work is to replicate internal block to a new
-   * rack.
-   */
-  void setNotEnoughRack() {
-    notEnoughRack = true;
-  }
+    public BlockInfo getBlock() {
+        return block;
+    }
 
-  boolean hasNotEnoughRack() {
-    return notEnoughRack;
-  }
+    public DatanodeDescriptor[] getSrcNodes() {
+        return srcNodes;
+    }
 
-  abstract void chooseTargets(BlockPlacementPolicy blockplacement,
-      BlockStoragePolicySuite storagePolicySuite,
-      Set<Node> excludedNodes);
+    public String getSrcPath() {
+        return srcPath;
+    }
 
-  /**
-   * Add reconstruction task into a source datanode.
-   *
-   * @param numberReplicas replica details
-   */
-  abstract void addTaskToDatanode(NumberReplicas numberReplicas);
+    public long getBlockSize() {
+        return blockSize;
+    }
+
+    public byte getStoragePolicyID() {
+        return storagePolicyID;
+    }
+
+    List<DatanodeStorageInfo> getLiveReplicaStorages() {
+        return liveReplicaStorages;
+    }
+
+    public int getAdditionalReplRequired() {
+        return additionalReplRequired;
+    }
+
+    /**
+     * Mark that the reconstruction work is to replicate internal block to a new
+     * rack.
+     */
+    void setNotEnoughRack() {
+        notEnoughRack = true;
+    }
+
+    boolean hasNotEnoughRack() {
+        return notEnoughRack;
+    }
+
+    abstract void chooseTargets(BlockPlacementPolicy blockplacement, BlockStoragePolicySuite storagePolicySuite, Set<Node> excludedNodes);
+
+    /**
+     * Add reconstruction task into a source datanode.
+     *
+     * @param numberReplicas replica details
+     */
+    abstract void addTaskToDatanode(NumberReplicas numberReplicas);
 }

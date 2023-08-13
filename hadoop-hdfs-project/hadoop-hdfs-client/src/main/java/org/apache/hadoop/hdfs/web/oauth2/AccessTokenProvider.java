@@ -22,7 +22,6 @@ import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
-
 import java.io.IOException;
 
 /**
@@ -32,35 +31,36 @@ import java.io.IOException;
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
 public abstract class AccessTokenProvider implements Configurable {
-  private Configuration conf;
 
-  /**
-   * Obtain the access token that should be added to http connection's header.
-   * Will be called for each connection, so implementations should be
-   * performant. Implementations are responsible for any refreshing of
-   * the token.
-   *
-   * @return Access token to be added to connection header.
-   */
-  public abstract String getAccessToken() throws IOException;
+    private Configuration conf;
 
-  /**
-   * Return the conf.
-   *
-   * @return the conf.
-   */
-  @Override
-  public Configuration getConf() {
-    return conf;
-  }
+    /**
+     * Obtain the access token that should be added to http connection's header.
+     * Will be called for each connection, so implementations should be
+     * performant. Implementations are responsible for any refreshing of
+     * the token.
+     *
+     * @return Access token to be added to connection header.
+     */
+    public abstract String getAccessToken() throws IOException;
 
-  /**
-   * Set the conf.
-   *
-   * @param configuration  New configuration.
-   */
-  @Override
-  public void setConf(Configuration configuration) {
-    this.conf = configuration;
-  }
+    /**
+     * Return the conf.
+     *
+     * @return the conf.
+     */
+    @Override
+    public Configuration getConf() {
+        return conf;
+    }
+
+    /**
+     * Set the conf.
+     *
+     * @param configuration  New configuration.
+     */
+    @Override
+    public void setConf(Configuration configuration) {
+        this.conf = configuration;
+    }
 }

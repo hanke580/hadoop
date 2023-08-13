@@ -19,7 +19,6 @@ package org.apache.hadoop.hdfs.server.federation.store.records;
 
 import java.util.SortedMap;
 import java.util.TreeMap;
-
 import org.apache.hadoop.hdfs.server.federation.store.driver.StateStoreSerializer;
 
 /**
@@ -28,64 +27,62 @@ import org.apache.hadoop.hdfs.server.federation.store.driver.StateStoreSerialize
  */
 public abstract class StateStoreVersion extends BaseRecord {
 
-  public static StateStoreVersion newInstance() {
-    return StateStoreSerializer.newRecord(StateStoreVersion.class);
-  }
+    public static StateStoreVersion newInstance() {
+        return StateStoreSerializer.newRecord(StateStoreVersion.class);
+    }
 
-  public static StateStoreVersion newInstance(long membershipVersion,
-      long mountTableVersion) {
-    StateStoreVersion record = newInstance();
-    record.setMembershipVersion(membershipVersion);
-    record.setMountTableVersion(mountTableVersion);
-    return record;
-  }
+    public static StateStoreVersion newInstance(long membershipVersion, long mountTableVersion) {
+        StateStoreVersion record = newInstance();
+        record.setMembershipVersion(membershipVersion);
+        record.setMountTableVersion(mountTableVersion);
+        return record;
+    }
 
-  public abstract long getMembershipVersion();
+    public abstract long getMembershipVersion();
 
-  public abstract void setMembershipVersion(long version);
+    public abstract void setMembershipVersion(long version);
 
-  public abstract long getMountTableVersion();
+    public abstract long getMountTableVersion();
 
-  public abstract void setMountTableVersion(long version);
+    public abstract void setMountTableVersion(long version);
 
-  @Override
-  public SortedMap<String, String> getPrimaryKeys() {
-    // This record is not stored directly, no key needed
-    SortedMap<String, String> map = new TreeMap<String, String>();
-    return map;
-  }
+    @Override
+    public SortedMap<String, String> getPrimaryKeys() {
+        // This record is not stored directly, no key needed
+        SortedMap<String, String> map = new TreeMap<String, String>();
+        return map;
+    }
 
-  @Override
-  public long getExpirationMs() {
-    // This record is not stored directly, no expiration needed
-    return -1;
-  }
+    @Override
+    public long getExpirationMs() {
+        // This record is not stored directly, no expiration needed
+        return -1;
+    }
 
-  @Override
-  public void setDateModified(long time) {
-    // We don't store this record directly
-  }
+    @Override
+    public void setDateModified(long time) {
+        // We don't store this record directly
+    }
 
-  @Override
-  public long getDateModified() {
-    // We don't store this record directly
-    return 0;
-  }
+    @Override
+    public long getDateModified() {
+        // We don't store this record directly
+        return 0;
+    }
 
-  @Override
-  public void setDateCreated(long time) {
-    // We don't store this record directly
-  }
+    @Override
+    public void setDateCreated(long time) {
+        // We don't store this record directly
+    }
 
-  @Override
-  public long getDateCreated() {
-    // We don't store this record directly
-    return 0;
-  }
+    @Override
+    public long getDateCreated() {
+        // We don't store this record directly
+        return 0;
+    }
 
-  @Override
-  public String toString() {
-    return "Membership: " + getMembershipVersion() +
-        " Mount Table: " + getMountTableVersion();
-  }
+    @Override
+    public String toString() {
+        return "Membership: " + getMembershipVersion() + " Mount Table: " + getMountTableVersion();
+    }
 }

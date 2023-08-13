@@ -18,13 +18,13 @@ import org.junit.Test;
 
 public class TestAuthenticationToken {
 
-  @Test
-  public void testAnonymous() {
-    Assert.assertNotNull(AuthenticationToken.ANONYMOUS);
-    Assert.assertEquals(null, AuthenticationToken.ANONYMOUS.getUserName());
-    Assert.assertEquals(null, AuthenticationToken.ANONYMOUS.getName());
-    Assert.assertEquals(null, AuthenticationToken.ANONYMOUS.getType());
-    Assert.assertEquals(-1, AuthenticationToken.ANONYMOUS.getExpires());
-    Assert.assertFalse(AuthenticationToken.ANONYMOUS.isExpired());
-  }
+    @Test
+    public void testAnonymous() {
+        Assert.assertNotNull(AuthenticationToken.ANONYMOUS);
+        Assert.assertEquals(null, AuthenticationToken.ANONYMOUS.getUserName());
+        Assert.assertEquals(null, AuthenticationToken.ANONYMOUS.getName());
+        Assert.assertEquals(null, AuthenticationToken.ANONYMOUS.getType());
+        Assert.assertEquals(-1, AuthenticationToken.ANONYMOUS.getExpires());
+        Assert.assertFalse(AuthenticationToken.ANONYMOUS.isExpired());
+    }
 }

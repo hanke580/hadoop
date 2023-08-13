@@ -23,33 +23,30 @@ import org.apache.hadoop.fs.contract.AbstractContractPathHandleTest;
 import org.apache.hadoop.fs.contract.AbstractFSContract;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-
 import java.io.IOException;
 
 /**
  * Verify HDFS compliance with {@link org.apache.hadoop.fs.PathHandle}
  * semantics.
  */
-public class TestHDFSContractPathHandle
-    extends AbstractContractPathHandleTest {
+public class TestHDFSContractPathHandle extends AbstractContractPathHandleTest {
 
-  public TestHDFSContractPathHandle(String testname, Options.HandleOpt[] opts,
-      boolean serialized) {
-    super(testname, opts, serialized);
-  }
+    public TestHDFSContractPathHandle(String testname, Options.HandleOpt[] opts, boolean serialized) {
+        super(testname, opts, serialized);
+    }
 
-  @BeforeClass
-  public static void createCluster() throws IOException {
-    HDFSContract.createCluster();
-  }
+    @BeforeClass
+    public static void createCluster() throws IOException {
+        HDFSContract.createCluster();
+    }
 
-  @AfterClass
-  public static void teardownCluster() throws IOException {
-    HDFSContract.destroyCluster();
-  }
+    @AfterClass
+    public static void teardownCluster() throws IOException {
+        HDFSContract.destroyCluster();
+    }
 
-  @Override
-  protected AbstractFSContract createContract(Configuration conf) {
-    return new HDFSContract(conf);
-  }
+    @Override
+    protected AbstractFSContract createContract(Configuration conf) {
+        return new HDFSContract(conf);
+    }
 }

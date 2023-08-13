@@ -22,41 +22,38 @@ import org.junit.Test;
 
 public class TestStopWatch {
 
-  @Test
-  public void testStartAndStop() throws Exception {
-    try (StopWatch sw = new StopWatch()) {
-      Assert.assertFalse(sw.isRunning());
-      sw.start();
-      Assert.assertTrue(sw.isRunning());
-      sw.stop();
-      Assert.assertFalse(sw.isRunning());
+    @Test
+    public void testStartAndStop() throws Exception {
+        try (StopWatch sw = new StopWatch()) {
+            Assert.assertFalse(sw.isRunning());
+            sw.start();
+            Assert.assertTrue(sw.isRunning());
+            sw.stop();
+            Assert.assertFalse(sw.isRunning());
+        }
     }
-  }
 
-  @Test
-  public void testStopInTryWithResource() throws Exception {
-    try (StopWatch sw = new StopWatch()) {
-      // make sure that no exception is thrown.
+    @Test
+    public void testStopInTryWithResource() throws Exception {
+        try (StopWatch sw = new StopWatch()) {
+            // make sure that no exception is thrown.
+        }
     }
-  }
 
-  @Test
-  public void testExceptions() throws Exception {
-    StopWatch sw = new StopWatch();
-    try {
-      sw.stop();
-    } catch (Exception e) {
-      Assert.assertTrue("IllegalStateException is expected",
-          e instanceof IllegalStateException);
+    @Test
+    public void testExceptions() throws Exception {
+        StopWatch sw = new StopWatch();
+        try {
+            sw.stop();
+        } catch (Exception e) {
+            Assert.assertTrue("IllegalStateException is expected", e instanceof IllegalStateException);
+        }
+        sw.reset();
+        sw.start();
+        try {
+            sw.start();
+        } catch (Exception e) {
+            Assert.assertTrue("IllegalStateException is expected", e instanceof IllegalStateException);
+        }
     }
-    sw.reset();
-    sw.start();
-    try {
-      sw.start();
-    } catch (Exception e) {
-      Assert.assertTrue("IllegalStateException is expected",
-          e instanceof IllegalStateException);
-    }
-  }
-
 }

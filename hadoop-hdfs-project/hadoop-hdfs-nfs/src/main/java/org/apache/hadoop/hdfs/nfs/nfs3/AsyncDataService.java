@@ -21,7 +21,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,110 +30,107 @@ import org.slf4j.LoggerFactory;
  * for readahead operations too.
  */
 public class AsyncDataService {
-  static final Logger LOG = LoggerFactory.getLogger(AsyncDataService.class);
 
-  // ThreadPool core pool size
-  private static final int CORE_THREADS_PER_VOLUME = 1;
-  // ThreadPool maximum pool size
-  private static final int MAXIMUM_THREADS_PER_VOLUME = 4;
-  // ThreadPool keep-alive time for threads over core pool size
-  private static final long THREADS_KEEP_ALIVE_SECONDS = 60;
-  private final ThreadGroup threadGroup = new ThreadGroup("async data service");
-  private ThreadFactory threadFactory = null;
-  private ThreadPoolExecutor executor = null;
+    static final Logger LOG = LoggerFactory.getLogger(AsyncDataService.class);
 
-  public AsyncDataService() {
-    threadFactory = new ThreadFactory() {
-      @Override
-      public Thread newThread(Runnable r) {
-        return new Thread(threadGroup, r);
-      }
-    };
+    // ThreadPool core pool size
+    private static final int CORE_THREADS_PER_VOLUME = 1;
 
-    executor = new ThreadPoolExecutor(CORE_THREADS_PER_VOLUME,
-        MAXIMUM_THREADS_PER_VOLUME, THREADS_KEEP_ALIVE_SECONDS,
-        TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), threadFactory);
+    // ThreadPool maximum pool size
+    private static final int MAXIMUM_THREADS_PER_VOLUME = 4;
 
-    // This can reduce the number of running threads
-    executor.allowCoreThreadTimeOut(true);
-  }
+    // ThreadPool keep-alive time for threads over core pool size
+    private static final long THREADS_KEEP_ALIVE_SECONDS = 60;
 
-  /**
-   * Execute the task sometime in the future.
-   */
-  synchronized void execute(Runnable task) {
-    if (executor == null) {
-      throw new RuntimeException("AsyncDataService is already shutdown");
-    }
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("Current active thread number: " + executor.getActiveCount()
-          + " queue size: " + executor.getQueue().size()
-          + " scheduled task number: " + executor.getTaskCount());
-    }
-    executor.execute(task);
-  }
+    private final ThreadGroup threadGroup = new ThreadGroup("async data service");
 
-  /**
-   * Gracefully shut down the ThreadPool. Will wait for all data tasks to
-   * finish.
-   */
-  synchronized void shutdown() {
-    if (executor == null) {
-      LOG.warn("AsyncDataService has already shut down.");
-    } else {
-      LOG.info("Shutting down all async data service threads...");
-      executor.shutdown();
+    private ThreadFactory threadFactory = null;
 
-      // clear the executor so that calling execute again will fail.
-      executor = null;
-      LOG.info("All async data service threads have been shut down");
-    }
-  }
+    private ThreadPoolExecutor executor = null;
 
-  /**
-   * Write the data to HDFS asynchronously
-   */
-  void writeAsync(OpenFileCtx openFileCtx) {
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("Scheduling write back task for fileId: "
-          + openFileCtx.getLatestAttr().getFileId());
-    }
-    WriteBackTask wbTask = new WriteBackTask(openFileCtx);
-    execute(wbTask);
-  }
+    public AsyncDataService() {
+        threadFactory = new ThreadFactory() {
 
-  /**
-   * A task to write data back to HDFS for a file. Since only one thread can
-   * write to a file, there should only be one task at any time for a file
-   * (in queue or executing), and this should be guaranteed by the caller.
-   */
-  static class WriteBackTask implements Runnable {
-
-    OpenFileCtx openFileCtx;
-
-    WriteBackTask(OpenFileCtx openFileCtx) {
-      this.openFileCtx = openFileCtx;
+            @Override
+            public Thread newThread(Runnable r) {
+                return new Thread(threadGroup, r);
+            }
+        };
+        executor = new ThreadPoolExecutor(CORE_THREADS_PER_VOLUME, MAXIMUM_THREADS_PER_VOLUME, THREADS_KEEP_ALIVE_SECONDS, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), threadFactory);
+        // This can reduce the number of running threads
+        executor.allowCoreThreadTimeOut(true);
     }
 
-    OpenFileCtx getOpenFileCtx() {
-      return openFileCtx;
+    /**
+     * Execute the task sometime in the future.
+     */
+    synchronized void execute(Runnable task) {
+        if (executor == null) {
+            throw new RuntimeException("AsyncDataService is already shutdown");
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Current active thread number: " + executor.getActiveCount() + " queue size: " + executor.getQueue().size() + " scheduled task number: " + executor.getTaskCount());
+        }
+        executor.execute(task);
     }
 
-    @Override
-    public String toString() {
-      // Called in AsyncDataService.execute for displaying error messages.
-      return "write back data for fileId"
-          + openFileCtx.getLatestAttr().getFileId() + " with nextOffset "
-          + openFileCtx.getNextOffset();
+    /**
+     * Gracefully shut down the ThreadPool. Will wait for all data tasks to
+     * finish.
+     */
+    synchronized void shutdown() {
+        if (executor == null) {
+            LOG.warn("AsyncDataService has already shut down.");
+        } else {
+            LOG.info("Shutting down all async data service threads...");
+            executor.shutdown();
+            // clear the executor so that calling execute again will fail.
+            executor = null;
+            LOG.info("All async data service threads have been shut down");
+        }
     }
 
-    @Override
-    public void run() {
-      try {
-        openFileCtx.executeWriteBack();
-      } catch (Throwable t) {
-        LOG.error("Async data service got error: ", t);
-      }
+    /**
+     * Write the data to HDFS asynchronously
+     */
+    void writeAsync(OpenFileCtx openFileCtx) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Scheduling write back task for fileId: " + openFileCtx.getLatestAttr().getFileId());
+        }
+        WriteBackTask wbTask = new WriteBackTask(openFileCtx);
+        execute(wbTask);
     }
-  }
+
+    /**
+     * A task to write data back to HDFS for a file. Since only one thread can
+     * write to a file, there should only be one task at any time for a file
+     * (in queue or executing), and this should be guaranteed by the caller.
+     */
+    static class WriteBackTask implements Runnable {
+
+        OpenFileCtx openFileCtx;
+
+        WriteBackTask(OpenFileCtx openFileCtx) {
+            this.openFileCtx = openFileCtx;
+        }
+
+        OpenFileCtx getOpenFileCtx() {
+            return openFileCtx;
+        }
+
+        @Override
+        public String toString() {
+            // Called in AsyncDataService.execute for displaying error messages.
+            return "write back data for fileId" + openFileCtx.getLatestAttr().getFileId() + " with nextOffset " + openFileCtx.getNextOffset();
+        }
+
+        @Override
+        public void run() {
+            try {
+                openFileCtx.executeWriteBack();
+            } catch (Throwable t) {
+                LOG.error("Async data service got error: ", t);
+            }
+        }
+    }
 }

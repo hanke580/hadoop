@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.server.federation.store;
 
 import java.util.concurrent.TimeUnit;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.server.federation.router.PeriodicService;
 import org.apache.hadoop.hdfs.server.federation.router.RBFConfigKeys;
@@ -34,37 +33,32 @@ import org.slf4j.LoggerFactory;
  */
 public class StateStoreCacheUpdateService extends PeriodicService {
 
-  private static final Logger LOG =
-      LoggerFactory.getLogger(StateStoreCacheUpdateService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StateStoreCacheUpdateService.class);
 
-  /** The service that manages the State Store connection. */
-  private final StateStoreService stateStore;
+    /**
+     * The service that manages the State Store connection.
+     */
+    private final StateStoreService stateStore;
 
+    /**
+     * Create a new Cache update service.
+     *
+     * @param stateStore Implementation of the state store
+     */
+    public StateStoreCacheUpdateService(StateStoreService stateStore) {
+        super(StateStoreCacheUpdateService.class.getSimpleName());
+        this.stateStore = stateStore;
+    }
 
-  /**
-   * Create a new Cache update service.
-   *
-   * @param stateStore Implementation of the state store
-   */
-  public StateStoreCacheUpdateService(StateStoreService stateStore) {
-    super(StateStoreCacheUpdateService.class.getSimpleName());
-    this.stateStore = stateStore;
-  }
+    @Override
+    protected void serviceInit(Configuration conf) throws Exception {
+        this.setIntervalMs(conf.getTimeDuration(RBFConfigKeys.DFS_ROUTER_CACHE_TIME_TO_LIVE_MS, RBFConfigKeys.DFS_ROUTER_CACHE_TIME_TO_LIVE_MS_DEFAULT, TimeUnit.MILLISECONDS));
+        super.serviceInit(conf);
+    }
 
-  @Override
-  protected void serviceInit(Configuration conf) throws Exception {
-
-    this.setIntervalMs(conf.getTimeDuration(
-        RBFConfigKeys.DFS_ROUTER_CACHE_TIME_TO_LIVE_MS,
-        RBFConfigKeys.DFS_ROUTER_CACHE_TIME_TO_LIVE_MS_DEFAULT,
-        TimeUnit.MILLISECONDS));
-
-    super.serviceInit(conf);
-  }
-
-  @Override
-  public void periodicInvoke() {
-    LOG.debug("Updating State Store cache");
-    stateStore.refreshCaches();
-  }
+    @Override
+    public void periodicInvoke() {
+        LOG.debug("Updating State Store cache");
+        stateStore.refreshCaches();
+    }
 }

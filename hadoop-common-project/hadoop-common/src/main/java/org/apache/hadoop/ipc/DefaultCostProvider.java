@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.ipc;
 
 import org.apache.hadoop.conf.Configuration;
@@ -25,19 +24,19 @@ import org.apache.hadoop.conf.Configuration;
  */
 public class DefaultCostProvider implements CostProvider {
 
-  @Override
-  public void init(String namespace, Configuration conf) {
-    // No-op
-  }
+    @Override
+    public void init(String namespace, Configuration conf) {
+        // No-op
+    }
 
-  /**
-   * Returns 1, regardless of the processing details.
-   *
-   * @param details Process details (ignored)
-   * @return 1
-   */
-  @Override
-  public long getCost(ProcessingDetails details) {
-    return 1;
-  }
+    /**
+     * Returns 1, regardless of the processing details.
+     *
+     * @param details Process details (ignored)
+     * @return 1
+     */
+    @Override
+    public long getCost(ProcessingDetails details) {
+        return 1;
+    }
 }

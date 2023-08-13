@@ -31,50 +31,45 @@ import java.util.Map;
  */
 public class RemoteParam {
 
-  private final Map<? extends Object, ? extends Object> paramMap;
+    private final Map<? extends Object, ? extends Object> paramMap;
 
-  /**
-   * Constructs a default remote parameter. Always maps the value to the
-   * destination of the provided RemoveLocationContext.
-   */
-  public RemoteParam() {
-    this.paramMap = null;
-  }
-
-  /**
-   * Constructs a map based remote parameter. Determines the value using the
-   * provided RemoteLocationContext as a key into the map.
-   *
-   * @param map Map with RemoteLocationContext keys.
-   */
-  public RemoteParam(
-      Map<? extends RemoteLocationContext, ? extends Object> map) {
-    this.paramMap = map;
-  }
-
-  /**
-   * Determine the appropriate value for this parameter based on the location.
-   *
-   * @param context Context identifying the location.
-   * @return A parameter specific to this location.
-   */
-  public Object getParameterForContext(RemoteLocationContext context) {
-    if (context == null) {
-      return null;
-    } else if (this.paramMap != null) {
-      return this.paramMap.get(context);
-    } else {
-      // Default case
-      return context.getDest();
+    /**
+     * Constructs a default remote parameter. Always maps the value to the
+     * destination of the provided RemoveLocationContext.
+     */
+    public RemoteParam() {
+        this.paramMap = null;
     }
-  }
 
-  @Override
-  public String toString() {
-    return new StringBuilder()
-        .append("RemoteParam(")
-        .append(this.paramMap)
-        .append(")")
-        .toString();
-  }
+    /**
+     * Constructs a map based remote parameter. Determines the value using the
+     * provided RemoteLocationContext as a key into the map.
+     *
+     * @param map Map with RemoteLocationContext keys.
+     */
+    public RemoteParam(Map<? extends RemoteLocationContext, ? extends Object> map) {
+        this.paramMap = map;
+    }
+
+    /**
+     * Determine the appropriate value for this parameter based on the location.
+     *
+     * @param context Context identifying the location.
+     * @return A parameter specific to this location.
+     */
+    public Object getParameterForContext(RemoteLocationContext context) {
+        if (context == null) {
+            return null;
+        } else if (this.paramMap != null) {
+            return this.paramMap.get(context);
+        } else {
+            // Default case
+            return context.getDest();
+        }
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder().append("RemoteParam(").append(this.paramMap).append(")").toString();
+    }
 }

@@ -31,17 +31,17 @@ import org.apache.hadoop.io.erasurecode.coder.RSErasureEncoder;
 @InterfaceAudience.Private
 public class RSErasureCodec extends ErasureCodec {
 
-  public RSErasureCodec(Configuration conf, ErasureCodecOptions options) {
-    super(conf, options);
-  }
+    public RSErasureCodec(Configuration conf, ErasureCodecOptions options) {
+        super(conf, options);
+    }
 
-  @Override
-  public ErasureEncoder createEncoder() {
-    return new RSErasureEncoder(getCoderOptions());
-  }
+    @Override
+    public ErasureEncoder createEncoder() {
+        return new RSErasureEncoder(getCoderOptions());
+    }
 
-  @Override
-  public ErasureDecoder createDecoder() {
-    return new RSErasureDecoder(getCoderOptions());
-  }
+    @Override
+    public ErasureDecoder createDecoder() {
+        return new RSErasureDecoder(getCoderOptions());
+    }
 }

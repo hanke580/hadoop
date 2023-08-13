@@ -15,11 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.security.token;
 
 import java.lang.annotation.*;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
@@ -31,6 +29,9 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
 public @interface TokenInfo {
-  /** The type of TokenSelector to be used */
-  Class<? extends TokenSelector<? extends TokenIdentifier>> value();
+
+    /**
+     * The type of TokenSelector to be used
+     */
+    Class<? extends TokenSelector<? extends TokenIdentifier>> value();
 }

@@ -32,63 +32,71 @@ import org.slf4j.LoggerFactory;
  * and publishing them through the metrics interfaces.
  */
 @InterfaceAudience.Private
-@Metrics(about="Aggregate RetryCache metrics", context="rpc")
+@Metrics(about = "Aggregate RetryCache metrics", context = "rpc")
 public class RetryCacheMetrics {
 
-  static final Logger LOG = LoggerFactory.getLogger(RetryCacheMetrics.class);
-  final MetricsRegistry registry;
-  final String name;
+    static final Logger LOG = LoggerFactory.getLogger(RetryCacheMetrics.class);
 
-  RetryCacheMetrics(RetryCache retryCache) {
-    name = "RetryCache."+ retryCache.getCacheName();
-    registry = new MetricsRegistry(name);
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("Initialized "+ registry);
+    final MetricsRegistry registry;
+
+    final String name;
+
+    RetryCacheMetrics(RetryCache retryCache) {
+        name = "RetryCache." + retryCache.getCacheName();
+        registry = new MetricsRegistry(name);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Initialized " + registry);
+        }
     }
-  }
 
-  public String getName() { return name; }
+    public String getName() {
+        return name;
+    }
 
-  public static RetryCacheMetrics create(RetryCache cache) {
-    RetryCacheMetrics m = new RetryCacheMetrics(cache);
-    return DefaultMetricsSystem.instance().register(m.name, null, m);
-  }
+    public static RetryCacheMetrics create(RetryCache cache) {
+        RetryCacheMetrics m = new RetryCacheMetrics(cache);
+        return DefaultMetricsSystem.instance().register(m.name, null, m);
+    }
 
-  @Metric("Number of RetryCache hit") MutableCounterLong cacheHit;
-  @Metric("Number of RetryCache cleared") MutableCounterLong cacheCleared;
-  @Metric("Number of RetryCache updated") MutableCounterLong cacheUpdated;
+    @Metric("Number of RetryCache hit")
+    MutableCounterLong cacheHit;
 
-  /**
-   * One cache hit event
-   */
-  public void incrCacheHit() {
-    cacheHit.incr();
-  }
+    @Metric("Number of RetryCache cleared")
+    MutableCounterLong cacheCleared;
 
-  /**
-   * One cache cleared
-   */
-  public void incrCacheCleared() {
-    cacheCleared.incr();
-  }
+    @Metric("Number of RetryCache updated")
+    MutableCounterLong cacheUpdated;
 
-  /**
-   * One cache updated
-   */
-  public void incrCacheUpdated() {
-    cacheUpdated.incr();
-  }
+    /**
+     * One cache hit event
+     */
+    public void incrCacheHit() {
+        cacheHit.incr();
+    }
 
-  public long getCacheHit() {
-    return cacheHit.value();
-  }
+    /**
+     * One cache cleared
+     */
+    public void incrCacheCleared() {
+        cacheCleared.incr();
+    }
 
-  public long getCacheCleared() {
-    return cacheCleared.value();
-  }
+    /**
+     * One cache updated
+     */
+    public void incrCacheUpdated() {
+        cacheUpdated.incr();
+    }
 
-  public long getCacheUpdated() {
-    return cacheUpdated.value();
-  }
+    public long getCacheHit() {
+        return cacheHit.value();
+    }
 
+    public long getCacheCleared() {
+        return cacheCleared.value();
+    }
+
+    public long getCacheUpdated() {
+        return cacheUpdated.value();
+    }
 }

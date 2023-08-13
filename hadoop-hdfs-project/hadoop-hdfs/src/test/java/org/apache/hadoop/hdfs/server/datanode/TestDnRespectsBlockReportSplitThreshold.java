@@ -15,12 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.datanode;
 
 import java.io.IOException;
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -33,12 +31,10 @@ import org.apache.hadoop.hdfs.server.protocol.DatanodeRegistration;
 import org.apache.hadoop.hdfs.server.protocol.StorageBlockReport;
 import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_BLOCKREPORT_SPLIT_THRESHOLD_KEY;
 import org.apache.hadoop.test.GenericTestUtils;
-
 import org.junit.After;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -50,158 +46,120 @@ import static org.mockito.Mockito.times;
  * {@link DFSConfigKeys#DFS_BLOCKREPORT_SPLIT_THRESHOLD_KEY}
  */
 public class TestDnRespectsBlockReportSplitThreshold {
-  public static final Logger LOG =
-      LoggerFactory.getLogger(TestStorageReport.class);
 
-  private static final int BLOCK_SIZE = 1024;
-  private static final short REPL_FACTOR = 1;
-  private static final long seed = 0xFEEDFACE;
-  private static final int BLOCKS_IN_FILE = 5;
+    public static final Logger LOG = LoggerFactory.getLogger(TestStorageReport.class);
 
-  private static Configuration conf;
-  private MiniDFSCluster cluster;
-  private DistributedFileSystem fs;
-  static String bpid;
+    private static final int BLOCK_SIZE = 1024;
 
-  public void startUpCluster(long splitThreshold) throws IOException {
-    conf = new HdfsConfiguration();
-    conf.setLong(DFS_BLOCKREPORT_SPLIT_THRESHOLD_KEY, splitThreshold);
-    cluster = new MiniDFSCluster.Builder(conf)
-        .numDataNodes(REPL_FACTOR)
-        .build();
-    fs = cluster.getFileSystem();
-    bpid = cluster.getNamesystem().getBlockPoolId();
-  }
+    private static final short REPL_FACTOR = 1;
 
-  @After
-  public void shutDownCluster() throws IOException {
-    if (cluster != null) {
-      fs.close();
-      cluster.shutdown();
-      cluster = null;
-    }
-  }
+    private static final long seed = 0xFEEDFACE;
 
-  private void createFile(String filenamePrefix, int blockCount)
-      throws IOException {
-    Path path = new Path("/" + filenamePrefix + ".dat");
-    DFSTestUtil.createFile(fs, path, BLOCK_SIZE,
-        blockCount * BLOCK_SIZE, BLOCK_SIZE, REPL_FACTOR, seed);
-  }
+    private static final int BLOCKS_IN_FILE = 5;
 
-  private void verifyCapturedArguments(
-      ArgumentCaptor<StorageBlockReport[]> captor,
-      int expectedReportsPerCall,
-      int expectedTotalBlockCount) {
+    private static Configuration conf;
 
-    List<StorageBlockReport[]> listOfReports = captor.getAllValues();
-    int numBlocksReported = 0;
-    for (StorageBlockReport[] reports : listOfReports) {
-      assertThat(reports.length, is(expectedReportsPerCall));
+    private MiniDFSCluster cluster;
 
-      for (StorageBlockReport report : reports) {
-        BlockListAsLongs blockList = report.getBlocks();
-        numBlocksReported += blockList.getNumberOfBlocks();
-      }
+    private DistributedFileSystem fs;
+
+    static String bpid;
+
+    public void startUpCluster(long splitThreshold) throws IOException {
+        conf = new HdfsConfiguration();
+        conf.setLong(DFS_BLOCKREPORT_SPLIT_THRESHOLD_KEY, splitThreshold);
+        cluster = new MiniDFSCluster.Builder(conf).numDataNodes(REPL_FACTOR).build();
+        fs = cluster.getFileSystem();
+        bpid = cluster.getNamesystem().getBlockPoolId();
     }
 
-    assert(numBlocksReported >= expectedTotalBlockCount);
-  }
+    @After
+    public void shutDownCluster() throws IOException {
+        if (cluster != null) {
+            fs.close();
+            cluster.shutdown();
+            cluster = null;
+        }
+    }
 
-  /**
-   * Test that if splitThreshold is zero, then we always get a separate
-   * call per storage.
-   */
-  @Test(timeout=300000)
-  public void testAlwaysSplit() throws IOException, InterruptedException {
-    startUpCluster(0);
-    NameNode nn = cluster.getNameNode();
-    DataNode dn = cluster.getDataNodes().get(0);
+    private void createFile(String filenamePrefix, int blockCount) throws IOException {
+        Path path = new Path("/" + filenamePrefix + ".dat");
+        DFSTestUtil.createFile(fs, path, BLOCK_SIZE, blockCount * BLOCK_SIZE, BLOCK_SIZE, REPL_FACTOR, seed);
+    }
 
-    // Create a file with a few blocks.
-    createFile(GenericTestUtils.getMethodName(), BLOCKS_IN_FILE);
+    private void verifyCapturedArguments(ArgumentCaptor<StorageBlockReport[]> captor, int expectedReportsPerCall, int expectedTotalBlockCount) {
+        List<StorageBlockReport[]> listOfReports = captor.getAllValues();
+        int numBlocksReported = 0;
+        for (StorageBlockReport[] reports : listOfReports) {
+            assertThat(reports.length, is(expectedReportsPerCall));
+            for (StorageBlockReport report : reports) {
+                BlockListAsLongs blockList = report.getBlocks();
+                numBlocksReported += blockList.getNumberOfBlocks();
+            }
+        }
+        assert (numBlocksReported >= expectedTotalBlockCount);
+    }
 
-    // Insert a spy object for the NN RPC.
-    DatanodeProtocolClientSideTranslatorPB nnSpy =
-        InternalDataNodeTestUtils.spyOnBposToNN(dn, nn);
+    /**
+     * Test that if splitThreshold is zero, then we always get a separate
+     * call per storage.
+     */
+    @Test(timeout = 300000)
+    public void testAlwaysSplit() throws IOException, InterruptedException {
+        startUpCluster(0);
+        NameNode nn = cluster.getNameNode();
+        DataNode dn = cluster.getDataNodes().get(0);
+        // Create a file with a few blocks.
+        createFile(GenericTestUtils.getMethodName(), BLOCKS_IN_FILE);
+        // Insert a spy object for the NN RPC.
+        DatanodeProtocolClientSideTranslatorPB nnSpy = InternalDataNodeTestUtils.spyOnBposToNN(dn, nn);
+        // Trigger a block report so there is an interaction with the spy
+        // object.
+        DataNodeTestUtils.triggerBlockReport(dn);
+        ArgumentCaptor<StorageBlockReport[]> captor = ArgumentCaptor.forClass(StorageBlockReport[].class);
+        Mockito.verify(nnSpy, times(cluster.getStoragesPerDatanode())).blockReport(any(DatanodeRegistration.class), anyString(), captor.capture(), any());
+        verifyCapturedArguments(captor, 1, BLOCKS_IN_FILE);
+    }
 
-    // Trigger a block report so there is an interaction with the spy
-    // object.
-    DataNodeTestUtils.triggerBlockReport(dn);
+    /**
+     * Tests the behavior when the count of blocks is exactly one less than
+     * the threshold.
+     */
+    @Test(timeout = 300000)
+    public void testCornerCaseUnderThreshold() throws IOException, InterruptedException {
+        startUpCluster(BLOCKS_IN_FILE + 1);
+        NameNode nn = cluster.getNameNode();
+        DataNode dn = cluster.getDataNodes().get(0);
+        // Create a file with a few blocks.
+        createFile(GenericTestUtils.getMethodName(), BLOCKS_IN_FILE);
+        // Insert a spy object for the NN RPC.
+        DatanodeProtocolClientSideTranslatorPB nnSpy = InternalDataNodeTestUtils.spyOnBposToNN(dn, nn);
+        // Trigger a block report so there is an interaction with the spy
+        // object.
+        DataNodeTestUtils.triggerBlockReport(dn);
+        ArgumentCaptor<StorageBlockReport[]> captor = ArgumentCaptor.forClass(StorageBlockReport[].class);
+        Mockito.verify(nnSpy, times(1)).blockReport(any(DatanodeRegistration.class), anyString(), captor.capture(), any());
+        verifyCapturedArguments(captor, cluster.getStoragesPerDatanode(), BLOCKS_IN_FILE);
+    }
 
-    ArgumentCaptor<StorageBlockReport[]> captor =
-        ArgumentCaptor.forClass(StorageBlockReport[].class);
-
-    Mockito.verify(nnSpy, times(cluster.getStoragesPerDatanode())).blockReport(
-        any(DatanodeRegistration.class),
-        anyString(),
-        captor.capture(), any());
-
-    verifyCapturedArguments(captor, 1, BLOCKS_IN_FILE);
-  }
-
-  /**
-   * Tests the behavior when the count of blocks is exactly one less than
-   * the threshold.
-   */
-  @Test(timeout=300000)
-  public void testCornerCaseUnderThreshold() throws IOException, InterruptedException {
-    startUpCluster(BLOCKS_IN_FILE + 1);
-    NameNode nn = cluster.getNameNode();
-    DataNode dn = cluster.getDataNodes().get(0);
-
-    // Create a file with a few blocks.
-    createFile(GenericTestUtils.getMethodName(), BLOCKS_IN_FILE);
-
-    // Insert a spy object for the NN RPC.
-    DatanodeProtocolClientSideTranslatorPB nnSpy =
-        InternalDataNodeTestUtils.spyOnBposToNN(dn, nn);
-
-    // Trigger a block report so there is an interaction with the spy
-    // object.
-    DataNodeTestUtils.triggerBlockReport(dn);
-
-    ArgumentCaptor<StorageBlockReport[]> captor =
-        ArgumentCaptor.forClass(StorageBlockReport[].class);
-
-    Mockito.verify(nnSpy, times(1)).blockReport(
-        any(DatanodeRegistration.class),
-        anyString(),
-        captor.capture(), any());
-
-    verifyCapturedArguments(captor, cluster.getStoragesPerDatanode(), BLOCKS_IN_FILE);
-  }
-
-  /**
-   * Tests the behavior when the count of blocks is exactly equal to the
-   * threshold.
-   */
-  @Test(timeout=300000)
-  public void testCornerCaseAtThreshold() throws IOException, InterruptedException {
-    startUpCluster(BLOCKS_IN_FILE);
-    NameNode nn = cluster.getNameNode();
-    DataNode dn = cluster.getDataNodes().get(0);
-
-    // Create a file with a few blocks.
-    createFile(GenericTestUtils.getMethodName(), BLOCKS_IN_FILE);
-
-    // Insert a spy object for the NN RPC.
-    DatanodeProtocolClientSideTranslatorPB nnSpy =
-        InternalDataNodeTestUtils.spyOnBposToNN(dn, nn);
-
-    // Trigger a block report so there is an interaction with the spy
-    // object.
-    DataNodeTestUtils.triggerBlockReport(dn);
-
-    ArgumentCaptor<StorageBlockReport[]> captor =
-        ArgumentCaptor.forClass(StorageBlockReport[].class);
-
-    Mockito.verify(nnSpy, times(cluster.getStoragesPerDatanode())).blockReport(
-        any(DatanodeRegistration.class),
-        anyString(),
-        captor.capture(), any());
-
-    verifyCapturedArguments(captor, 1, BLOCKS_IN_FILE);
-  }
-
+    /**
+     * Tests the behavior when the count of blocks is exactly equal to the
+     * threshold.
+     */
+    @Test(timeout = 300000)
+    public void testCornerCaseAtThreshold() throws IOException, InterruptedException {
+        startUpCluster(BLOCKS_IN_FILE);
+        NameNode nn = cluster.getNameNode();
+        DataNode dn = cluster.getDataNodes().get(0);
+        // Create a file with a few blocks.
+        createFile(GenericTestUtils.getMethodName(), BLOCKS_IN_FILE);
+        // Insert a spy object for the NN RPC.
+        DatanodeProtocolClientSideTranslatorPB nnSpy = InternalDataNodeTestUtils.spyOnBposToNN(dn, nn);
+        // Trigger a block report so there is an interaction with the spy
+        // object.
+        DataNodeTestUtils.triggerBlockReport(dn);
+        ArgumentCaptor<StorageBlockReport[]> captor = ArgumentCaptor.forClass(StorageBlockReport[].class);
+        Mockito.verify(nnSpy, times(cluster.getStoragesPerDatanode())).blockReport(any(DatanodeRegistration.class), anyString(), captor.capture(), any());
+        verifyCapturedArguments(captor, 1, BLOCKS_IN_FILE);
+    }
 }

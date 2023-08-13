@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.server.namenode.ha;
 
 import java.io.IOException;
-
 import org.apache.hadoop.io.retry.FailoverProxyProvider;
 
 /**
@@ -27,45 +26,45 @@ import org.apache.hadoop.io.retry.FailoverProxyProvider;
  *
  * It is assumed that the old impelmentation is using logical URI.
  */
-public class WrappedFailoverProxyProvider<T> extends
-    AbstractNNFailoverProxyProvider<T> {
-  private final FailoverProxyProvider<T> proxyProvider;
+public class WrappedFailoverProxyProvider<T> extends AbstractNNFailoverProxyProvider<T> {
 
-  /**
-   * Wrap the given instance of an old FailoverProxyProvider.
-   */
-  public WrappedFailoverProxyProvider(FailoverProxyProvider<T> provider) {
-    proxyProvider = provider;
-  }
+    private final FailoverProxyProvider<T> proxyProvider;
 
-  @Override
-  public Class<T> getInterface() {
-    return proxyProvider.getInterface();
-  }
+    /**
+     * Wrap the given instance of an old FailoverProxyProvider.
+     */
+    public WrappedFailoverProxyProvider(FailoverProxyProvider<T> provider) {
+        proxyProvider = provider;
+    }
 
-  @Override
-  public synchronized ProxyInfo<T> getProxy() {
-    return proxyProvider.getProxy();
-  }
+    @Override
+    public Class<T> getInterface() {
+        return proxyProvider.getInterface();
+    }
 
-  @Override
-  public void performFailover(T currentProxy) {
-    proxyProvider.performFailover(currentProxy);
-  }
+    @Override
+    public synchronized ProxyInfo<T> getProxy() {
+        return proxyProvider.getProxy();
+    }
 
-  /**
-   * Close the proxy,
-   */
-  @Override
-  public synchronized void close() throws IOException {
-    proxyProvider.close();
-  }
+    @Override
+    public void performFailover(T currentProxy) {
+        proxyProvider.performFailover(currentProxy);
+    }
 
-  /**
-   * Assume logical URI is used for old proxy provider implementations.
-   */
-  @Override
-  public boolean useLogicalURI() {
-    return true;
-  }
+    /**
+     * Close the proxy,
+     */
+    @Override
+    public synchronized void close() throws IOException {
+        proxyProvider.close();
+    }
+
+    /**
+     * Assume logical URI is used for old proxy provider implementations.
+     */
+    @Override
+    public boolean useLogicalURI() {
+        return true;
+    }
 }

@@ -24,67 +24,65 @@ import org.apache.hadoop.classification.InterfaceAudience;
  */
 @InterfaceAudience.Private
 public enum CryptoProtocolVersion {
-  UNKNOWN("Unknown", 1),
-  ENCRYPTION_ZONES("Encryption zones", 2);
 
-  private final String description;
-  private final int version;
-  private Integer unknownValue = null;
+    UNKNOWN("Unknown", 1), ENCRYPTION_ZONES("Encryption zones", 2);
 
-  private static CryptoProtocolVersion[] supported = {ENCRYPTION_ZONES};
+    private final String description;
 
-  /**
-   * @return Array of supported protocol versions.
-   */
-  public static CryptoProtocolVersion[] supported() {
-    return supported;
-  }
+    private final int version;
 
-  CryptoProtocolVersion(String description, int version) {
-    this.description = description;
-    this.version = version;
-  }
+    private Integer unknownValue = null;
 
-  /**
-   * Returns if a given protocol version is supported.
-   *
-   * @param version version number
-   * @return true if the version is supported, else false
-   */
-  public static boolean supports(CryptoProtocolVersion version) {
-    if (version.getVersion() == UNKNOWN.getVersion()) {
-      return false;
+    private static CryptoProtocolVersion[] supported = { ENCRYPTION_ZONES };
+
+    /**
+     * @return Array of supported protocol versions.
+     */
+    public static CryptoProtocolVersion[] supported() {
+        return supported;
     }
-    for (CryptoProtocolVersion v : CryptoProtocolVersion.values()) {
-      if (v.getVersion() == version.getVersion()) {
-        return true;
-      }
+
+    CryptoProtocolVersion(String description, int version) {
+        this.description = description;
+        this.version = version;
     }
-    return false;
-  }
 
-  public void setUnknownValue(int unknown) {
-    this.unknownValue = unknown;
-  }
+    /**
+     * Returns if a given protocol version is supported.
+     *
+     * @param version version number
+     * @return true if the version is supported, else false
+     */
+    public static boolean supports(CryptoProtocolVersion version) {
+        if (version.getVersion() == UNKNOWN.getVersion()) {
+            return false;
+        }
+        for (CryptoProtocolVersion v : CryptoProtocolVersion.values()) {
+            if (v.getVersion() == version.getVersion()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-  public int getUnknownValue() {
-    return unknownValue;
-  }
+    public void setUnknownValue(int unknown) {
+        this.unknownValue = unknown;
+    }
 
-  public String getDescription() {
-    return description;
-  }
+    public int getUnknownValue() {
+        return unknownValue;
+    }
 
-  public int getVersion() {
-    return version;
-  }
+    public String getDescription() {
+        return description;
+    }
 
-  @Override
-  public String toString() {
-    return "CryptoProtocolVersion{" +
-        "description='" + description + '\'' +
-        ", version=" + version +
-        ", unknownValue=" + unknownValue +
-        '}';
-  }
+    public int getVersion() {
+        return version;
+    }
+
+    @Override
+    public String toString() {
+        return "CryptoProtocolVersion{" + "description='" + description + '\'' + ", version=" + version + ", unknownValue=" + unknownValue + '}';
+    }
 }

@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * This package contains implementation classes for use inside
  * filesystems.
@@ -40,10 +39,10 @@
  * codebase MAY use these, with the caveat that these classes
  * are highly unstable.
  */
-
 @InterfaceAudience.LimitedPrivate("Filesystems")
 @InterfaceStability.Unstable
 package org.apache.hadoop.fs.impl;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

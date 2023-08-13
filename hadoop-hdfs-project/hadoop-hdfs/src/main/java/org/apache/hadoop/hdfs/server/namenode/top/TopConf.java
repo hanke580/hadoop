@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.server.namenode.top;
 
 import java.util.concurrent.TimeUnit;
-
 import com.google.common.primitives.Ints;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.conf.Configuration;
@@ -30,35 +29,31 @@ import com.google.common.base.Preconditions;
  */
 @InterfaceAudience.Private
 public final class TopConf {
-  /**
-   * Whether TopMetrics are enabled
-   */
-  public final boolean isEnabled;
 
-  /**
-   * A meta command representing the total number of calls to all commands
-   */
-  public static final String ALL_CMDS = "*";
+    /**
+     * Whether TopMetrics are enabled
+     */
+    public final boolean isEnabled;
 
-  /**
-   * nntop reporting periods in milliseconds
-   */
-  public final int[] nntopReportingPeriodsMs;
+    /**
+     * A meta command representing the total number of calls to all commands
+     */
+    public static final String ALL_CMDS = "*";
 
-  public TopConf(Configuration conf) {
-    isEnabled = conf.getBoolean(DFSConfigKeys.NNTOP_ENABLED_KEY,
-        DFSConfigKeys.NNTOP_ENABLED_DEFAULT);
-    String[] periodsStr = conf.getTrimmedStrings(
-        DFSConfigKeys.NNTOP_WINDOWS_MINUTES_KEY,
-        DFSConfigKeys.NNTOP_WINDOWS_MINUTES_DEFAULT);
-    nntopReportingPeriodsMs = new int[periodsStr.length];
-    for (int i = 0; i < periodsStr.length; i++) {
-      nntopReportingPeriodsMs[i] = Ints.checkedCast(
-          TimeUnit.MINUTES.toMillis(Integer.parseInt(periodsStr[i])));
+    /**
+     * nntop reporting periods in milliseconds
+     */
+    public final int[] nntopReportingPeriodsMs;
+
+    public TopConf(Configuration conf) {
+        isEnabled = conf.getBoolean(DFSConfigKeys.NNTOP_ENABLED_KEY, DFSConfigKeys.NNTOP_ENABLED_DEFAULT);
+        String[] periodsStr = conf.getTrimmedStrings(DFSConfigKeys.NNTOP_WINDOWS_MINUTES_KEY, DFSConfigKeys.NNTOP_WINDOWS_MINUTES_DEFAULT);
+        nntopReportingPeriodsMs = new int[periodsStr.length];
+        for (int i = 0; i < periodsStr.length; i++) {
+            nntopReportingPeriodsMs[i] = Ints.checkedCast(TimeUnit.MINUTES.toMillis(Integer.parseInt(periodsStr[i])));
+        }
+        for (int aPeriodMs : nntopReportingPeriodsMs) {
+            Preconditions.checkArgument(aPeriodMs >= TimeUnit.MINUTES.toMillis(1), "minimum reporting period is 1 min!");
+        }
     }
-    for (int aPeriodMs: nntopReportingPeriodsMs) {
-      Preconditions.checkArgument(aPeriodMs >= TimeUnit.MINUTES.toMillis(1),
-          "minimum reporting period is 1 min!");
-    }
-  }
 }

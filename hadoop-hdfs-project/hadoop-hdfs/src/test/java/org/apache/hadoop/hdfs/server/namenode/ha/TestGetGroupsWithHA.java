@@ -19,7 +19,6 @@ package org.apache.hadoop.hdfs.server.namenode.ha;
 
 import java.io.IOException;
 import java.io.PrintStream;
-
 import org.apache.hadoop.hdfs.HdfsConfiguration;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.hadoop.hdfs.MiniDFSNNTopology;
@@ -30,29 +29,26 @@ import org.junit.After;
 import org.junit.Before;
 
 public class TestGetGroupsWithHA extends GetGroupsTestBase {
-  
-  private MiniDFSCluster cluster;
-  
-  @Before
-  public void setUpNameNode() throws IOException {
-    conf = new HdfsConfiguration();
-    cluster = new MiniDFSCluster.Builder(conf)
-        .nnTopology(MiniDFSNNTopology.simpleHATopology())
-        .numDataNodes(0).build();
-    HATestUtil.setFailoverConfigurations(cluster, conf);
-  }
-  
-  @After
-  public void tearDownNameNode() {
-    if (cluster != null) {
-      cluster.shutdown();
-      cluster = null;
+
+    private MiniDFSCluster cluster;
+
+    @Before
+    public void setUpNameNode() throws IOException {
+        conf = new HdfsConfiguration();
+        cluster = new MiniDFSCluster.Builder(conf).nnTopology(MiniDFSNNTopology.simpleHATopology()).numDataNodes(0).build();
+        HATestUtil.setFailoverConfigurations(cluster, conf);
     }
-  }
 
-  @Override
-  protected Tool getTool(PrintStream o) {
-    return new GetGroups(conf, o);
-  }
+    @After
+    public void tearDownNameNode() {
+        if (cluster != null) {
+            cluster.shutdown();
+            cluster = null;
+        }
+    }
 
+    @Override
+    protected Tool getTool(PrintStream o) {
+        return new GetGroups(conf, o);
+    }
 }

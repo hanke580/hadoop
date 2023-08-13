@@ -28,90 +28,96 @@ import org.apache.hadoop.service.AbstractService;
  */
 public class RouterMetricsService extends AbstractService {
 
-  /** Router for this metrics. */
-  private final Router router;
+    /**
+     * Router for this metrics.
+     */
+    private final Router router;
 
-  /** Router metrics. */
-  private RouterMetrics routerMetrics;
-  /** Federation metrics. */
-  private RBFMetrics rbfMetrics;
-  /** Namenode mock metrics. */
-  private NamenodeBeanMetrics nnMetrics;
+    /**
+     * Router metrics.
+     */
+    private RouterMetrics routerMetrics;
 
+    /**
+     * Federation metrics.
+     */
+    private RBFMetrics rbfMetrics;
 
-  public RouterMetricsService(final Router router) {
-    super(RouterMetricsService.class.getName());
-    this.router = router;
-  }
+    /**
+     * Namenode mock metrics.
+     */
+    private NamenodeBeanMetrics nnMetrics;
 
-  @Override
-  protected void serviceInit(Configuration configuration) throws Exception {
-    this.routerMetrics = RouterMetrics.create(configuration);
-  }
-
-  @Override
-  protected void serviceStart() throws Exception {
-    // Wrapper for all the FSNamesystem JMX interfaces
-    this.nnMetrics = new NamenodeBeanMetrics(this.router);
-
-    // Federation MBean JMX interface
-    this.rbfMetrics = new RBFMetrics(this.router);
-  }
-
-  @Override
-  protected void serviceStop() throws Exception {
-    // Remove JMX interfaces
-    if (this.rbfMetrics != null) {
-      this.rbfMetrics.close();
+    public RouterMetricsService(final Router router) {
+        super(RouterMetricsService.class.getName());
+        this.router = router;
     }
 
-    // Remove Namenode JMX interfaces
-    if (this.nnMetrics != null) {
-      this.nnMetrics.close();
+    @Override
+    protected void serviceInit(Configuration configuration) throws Exception {
+        this.routerMetrics = RouterMetrics.create(configuration);
     }
 
-    // Shutdown metrics
-    if (this.routerMetrics != null) {
-      this.routerMetrics.shutdown();
+    @Override
+    protected void serviceStart() throws Exception {
+        // Wrapper for all the FSNamesystem JMX interfaces
+        this.nnMetrics = new NamenodeBeanMetrics(this.router);
+        // Federation MBean JMX interface
+        this.rbfMetrics = new RBFMetrics(this.router);
     }
-  }
 
-  /**
-   * Get the metrics system for the Router.
-   *
-   * @return Router metrics.
-   */
-  public RouterMetrics getRouterMetrics() {
-    return this.routerMetrics;
-  }
-
-  /**
-   * Get the federation metrics.
-   *
-   * @return Federation metrics.
-   */
-  public RBFMetrics getRBFMetrics() {
-    return this.rbfMetrics;
-  }
-
-  /**
-   * Get the Namenode metrics.
-   *
-   * @return Namenode metrics.
-   */
-  public NamenodeBeanMetrics getNamenodeMetrics() {
-    return this.nnMetrics;
-  }
-
-  /**
-   * Get the JVM metrics for the Router.
-   *
-   * @return JVM metrics.
-   */
-  public JvmMetrics getJvmMetrics() {
-    if (this.routerMetrics == null) {
-      return null;
+    @Override
+    protected void serviceStop() throws Exception {
+        // Remove JMX interfaces
+        if (this.rbfMetrics != null) {
+            this.rbfMetrics.close();
+        }
+        // Remove Namenode JMX interfaces
+        if (this.nnMetrics != null) {
+            this.nnMetrics.close();
+        }
+        // Shutdown metrics
+        if (this.routerMetrics != null) {
+            this.routerMetrics.shutdown();
+        }
     }
-    return this.routerMetrics.getJvmMetrics();
-  }
+
+    /**
+     * Get the metrics system for the Router.
+     *
+     * @return Router metrics.
+     */
+    public RouterMetrics getRouterMetrics() {
+        return this.routerMetrics;
+    }
+
+    /**
+     * Get the federation metrics.
+     *
+     * @return Federation metrics.
+     */
+    public RBFMetrics getRBFMetrics() {
+        return this.rbfMetrics;
+    }
+
+    /**
+     * Get the Namenode metrics.
+     *
+     * @return Namenode metrics.
+     */
+    public NamenodeBeanMetrics getNamenodeMetrics() {
+        return this.nnMetrics;
+    }
+
+    /**
+     * Get the JVM metrics for the Router.
+     *
+     * @return JVM metrics.
+     */
+    public JvmMetrics getJvmMetrics() {
+        if (this.routerMetrics == null) {
+            return null;
+        }
+        return this.routerMetrics.getJvmMetrics();
+    }
 }

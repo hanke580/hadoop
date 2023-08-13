@@ -26,64 +26,57 @@ import org.junit.rules.ExpectedException;
  * Tests for the reverse zone utilities.
  */
 public class TestReverseZoneUtils {
-  private static final String NET = "172.17.4.0";
-  private static final int RANGE = 256;
-  private static final int INDEX = 0;
 
-  @Rule public ExpectedException exception = ExpectedException.none();
+    private static final String NET = "172.17.4.0";
 
-  @Test
-  public void testGetReverseZoneNetworkAddress() throws Exception {
-    assertEquals("172.17.4.0",
-        ReverseZoneUtils.getReverseZoneNetworkAddress(NET, RANGE, INDEX));
-  }
+    private static final int RANGE = 256;
 
-  @Test
-  public void testSplitIp() throws Exception {
-    long[] splitIp = ReverseZoneUtils.splitIp(NET);
-    assertEquals(172, splitIp[0]);
-    assertEquals(17, splitIp[1]);
-    assertEquals(4, splitIp[2]);
-    assertEquals(0, splitIp[3]);
-  }
+    private static final int INDEX = 0;
 
-  @Test
-  public void testThrowIllegalArgumentExceptionIfIndexIsNegative()
-      throws Exception {
-    exception.expect(IllegalArgumentException.class);
-    ReverseZoneUtils.getReverseZoneNetworkAddress(NET, RANGE, -1);
-  }
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
 
-  @Test
-  public void testThrowUnknownHostExceptionIfIpIsInvalid() throws Exception {
-    exception.expect(UnknownHostException.class);
-    ReverseZoneUtils
-        .getReverseZoneNetworkAddress("213124.21231.14123.13", RANGE, INDEX);
-  }
+    @Test
+    public void testGetReverseZoneNetworkAddress() throws Exception {
+        assertEquals("172.17.4.0", ReverseZoneUtils.getReverseZoneNetworkAddress(NET, RANGE, INDEX));
+    }
 
-  @Test
-  public void testThrowIllegalArgumentExceptionIfRangeIsNegative()
-      throws Exception {
-    exception.expect(IllegalArgumentException.class);
-    ReverseZoneUtils.getReverseZoneNetworkAddress(NET, -1, INDEX);
-  }
+    @Test
+    public void testSplitIp() throws Exception {
+        long[] splitIp = ReverseZoneUtils.splitIp(NET);
+        assertEquals(172, splitIp[0]);
+        assertEquals(17, splitIp[1]);
+        assertEquals(4, splitIp[2]);
+        assertEquals(0, splitIp[3]);
+    }
 
-  @Test
-  public void testVariousRangeAndIndexValues() throws Exception {
-    // Given the base address of 172.17.4.0, step 256 IP addresses, 5 times.
-    assertEquals("172.17.9.0",
-        ReverseZoneUtils.getReverseZoneNetworkAddress(NET, 256, 5));
-    assertEquals("172.17.4.128",
-        ReverseZoneUtils.getReverseZoneNetworkAddress(NET, 128, 1));
-    assertEquals("172.18.0.0",
-        ReverseZoneUtils.getReverseZoneNetworkAddress(NET, 256, 252));
-    assertEquals("172.17.12.0",
-        ReverseZoneUtils.getReverseZoneNetworkAddress(NET, 1024, 2));
-    assertEquals("172.17.4.0",
-        ReverseZoneUtils.getReverseZoneNetworkAddress(NET, 0, 1));
-    assertEquals("172.17.4.0",
-        ReverseZoneUtils.getReverseZoneNetworkAddress(NET, 1, 0));
-    assertEquals("172.17.4.1",
-        ReverseZoneUtils.getReverseZoneNetworkAddress(NET, 1, 1));
-  }
+    @Test
+    public void testThrowIllegalArgumentExceptionIfIndexIsNegative() throws Exception {
+        exception.expect(IllegalArgumentException.class);
+        ReverseZoneUtils.getReverseZoneNetworkAddress(NET, RANGE, -1);
+    }
+
+    @Test
+    public void testThrowUnknownHostExceptionIfIpIsInvalid() throws Exception {
+        exception.expect(UnknownHostException.class);
+        ReverseZoneUtils.getReverseZoneNetworkAddress("213124.21231.14123.13", RANGE, INDEX);
+    }
+
+    @Test
+    public void testThrowIllegalArgumentExceptionIfRangeIsNegative() throws Exception {
+        exception.expect(IllegalArgumentException.class);
+        ReverseZoneUtils.getReverseZoneNetworkAddress(NET, -1, INDEX);
+    }
+
+    @Test
+    public void testVariousRangeAndIndexValues() throws Exception {
+        // Given the base address of 172.17.4.0, step 256 IP addresses, 5 times.
+        assertEquals("172.17.9.0", ReverseZoneUtils.getReverseZoneNetworkAddress(NET, 256, 5));
+        assertEquals("172.17.4.128", ReverseZoneUtils.getReverseZoneNetworkAddress(NET, 128, 1));
+        assertEquals("172.18.0.0", ReverseZoneUtils.getReverseZoneNetworkAddress(NET, 256, 252));
+        assertEquals("172.17.12.0", ReverseZoneUtils.getReverseZoneNetworkAddress(NET, 1024, 2));
+        assertEquals("172.17.4.0", ReverseZoneUtils.getReverseZoneNetworkAddress(NET, 0, 1));
+        assertEquals("172.17.4.0", ReverseZoneUtils.getReverseZoneNetworkAddress(NET, 1, 0));
+        assertEquals("172.17.4.1", ReverseZoneUtils.getReverseZoneNetworkAddress(NET, 1, 1));
+    }
 }

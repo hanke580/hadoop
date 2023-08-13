@@ -23,7 +23,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.http.FilterContainer;
 import org.apache.hadoop.http.FilterInitializer;
 import org.apache.hadoop.security.authentication.server.KerberosAuthenticationHandler;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,51 +42,42 @@ import java.util.Map;
  */
 public class AuthenticationFilterInitializer extends FilterInitializer {
 
-  static final String PREFIX = "hadoop.http.authentication.";
+    static final String PREFIX = "hadoop.http.authentication.";
 
-  /**
-   * Initializes hadoop-auth AuthenticationFilter.
-   * <p>
-   * Propagates to hadoop-auth AuthenticationFilter configuration all Hadoop
-   * configuration properties prefixed with "hadoop.http.authentication."
-   *
-   * @param container The filter container
-   * @param conf Configuration for run-time parameters
-   */
-  @Override
-  public void initFilter(FilterContainer container, Configuration conf) {
-    Map<String, String> filterConfig = getFilterConfigMap(conf, PREFIX);
-
-    container.addFilter("authentication",
-                        AuthenticationFilter.class.getName(),
-                        filterConfig);
-  }
-
-  public static Map<String, String> getFilterConfigMap(Configuration conf,
-      String prefix) {
-    Map<String, String> filterConfig = new HashMap<String, String>();
-
-    //setting the cookie path to root '/' so it is used for all resources.
-    filterConfig.put(AuthenticationFilter.COOKIE_PATH, "/");
-    Map<String, String> propsWithPrefix = conf.getPropsWithPrefix(prefix);
-
-    for (Map.Entry<String, String> entry : propsWithPrefix.entrySet()) {
-      filterConfig.put(entry.getKey(), entry.getValue());
+    /**
+     * Initializes hadoop-auth AuthenticationFilter.
+     * <p>
+     * Propagates to hadoop-auth AuthenticationFilter configuration all Hadoop
+     * configuration properties prefixed with "hadoop.http.authentication."
+     *
+     * @param container The filter container
+     * @param conf Configuration for run-time parameters
+     */
+    @Override
+    public void initFilter(FilterContainer container, Configuration conf) {
+        Map<String, String> filterConfig = getFilterConfigMap(conf, PREFIX);
+        container.addFilter("authentication", AuthenticationFilter.class.getName(), filterConfig);
     }
 
-    //Resolve _HOST into bind address
-    String bindAddress = conf.get(HttpServer2.BIND_ADDRESS);
-    String principal = filterConfig.get(KerberosAuthenticationHandler.PRINCIPAL);
-    if (principal != null) {
-      try {
-        principal = SecurityUtil.getServerPrincipal(principal, bindAddress);
-      }
-      catch (IOException ex) {
-        throw new RuntimeException("Could not resolve Kerberos principal name: " + ex.toString(), ex);
-      }
-      filterConfig.put(KerberosAuthenticationHandler.PRINCIPAL, principal);
+    public static Map<String, String> getFilterConfigMap(Configuration conf, String prefix) {
+        Map<String, String> filterConfig = new HashMap<String, String>();
+        //setting the cookie path to root '/' so it is used for all resources.
+        filterConfig.put(AuthenticationFilter.COOKIE_PATH, "/");
+        Map<String, String> propsWithPrefix = conf.getPropsWithPrefix(prefix);
+        for (Map.Entry<String, String> entry : propsWithPrefix.entrySet()) {
+            filterConfig.put(entry.getKey(), entry.getValue());
+        }
+        //Resolve _HOST into bind address
+        String bindAddress = conf.get(HttpServer2.BIND_ADDRESS);
+        String principal = filterConfig.get(KerberosAuthenticationHandler.PRINCIPAL);
+        if (principal != null) {
+            try {
+                principal = SecurityUtil.getServerPrincipal(principal, bindAddress);
+            } catch (IOException ex) {
+                throw new RuntimeException("Could not resolve Kerberos principal name: " + ex.toString(), ex);
+            }
+            filterConfig.put(KerberosAuthenticationHandler.PRINCIPAL, principal);
+        }
+        return filterConfig;
     }
-    return filterConfig;
-  }
-
 }

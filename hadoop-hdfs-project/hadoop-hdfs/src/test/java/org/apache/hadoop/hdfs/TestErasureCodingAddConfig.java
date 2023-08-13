@@ -21,9 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.protocol.AddErasureCodingPolicyResponse;
 import org.apache.hadoop.hdfs.protocol.ErasureCodingPolicy;
@@ -36,44 +34,30 @@ import org.junit.Test;
  */
 public class TestErasureCodingAddConfig {
 
-  @Test
-  public void testECAddPolicyConfigDisable() throws IOException {
-    Configuration conf = new HdfsConfiguration();
-    conf.setBoolean(
-        DFSConfigKeys.DFS_NAMENODE_EC_POLICIES_USERPOLICIES_ALLOWED_KEY,
-        false);
-    try (MiniDFSCluster cluster =
-        new MiniDFSCluster.Builder(conf).numDataNodes(0).build()) {
-      cluster.waitActive();
-      DistributedFileSystem fs = cluster.getFileSystem();
-
-      ErasureCodingPolicy newPolicy1 =
-          new ErasureCodingPolicy(new ECSchema("rs", 5, 3), 1024 * 1024);
-
-      AddErasureCodingPolicyResponse[] response =
-          fs.addErasureCodingPolicies(new ErasureCodingPolicy[] {newPolicy1});
-
-      assertFalse(response[0].isSucceed());
-      assertEquals(
-          "Addition of user defined erasure coding policy is disabled.",
-          response[0].getErrorMsg());
+    @Test
+    public void testECAddPolicyConfigDisable() throws IOException {
+        Configuration conf = new HdfsConfiguration();
+        conf.setBoolean(DFSConfigKeys.DFS_NAMENODE_EC_POLICIES_USERPOLICIES_ALLOWED_KEY, false);
+        try (MiniDFSCluster cluster = new MiniDFSCluster.Builder(conf).numDataNodes(0).build()) {
+            cluster.waitActive();
+            DistributedFileSystem fs = cluster.getFileSystem();
+            ErasureCodingPolicy newPolicy1 = new ErasureCodingPolicy(new ECSchema("rs", 5, 3), 1024 * 1024);
+            AddErasureCodingPolicyResponse[] response = fs.addErasureCodingPolicies(new ErasureCodingPolicy[] { newPolicy1 });
+            assertFalse(response[0].isSucceed());
+            assertEquals("Addition of user defined erasure coding policy is disabled.", response[0].getErrorMsg());
+        }
     }
-  }
 
-  @Test
-  public void testECAddPolicyConfigEnable() throws IOException {
-    Configuration conf = new HdfsConfiguration();
-    conf.setBoolean(
-        DFSConfigKeys.DFS_NAMENODE_EC_POLICIES_USERPOLICIES_ALLOWED_KEY, true);
-    try (MiniDFSCluster cluster =
-        new MiniDFSCluster.Builder(conf).numDataNodes(0).build()) {
-      DistributedFileSystem fs = cluster.getFileSystem();
-      ErasureCodingPolicy newPolicy1 =
-          new ErasureCodingPolicy(new ECSchema("rs", 5, 3), 1024 * 1024);
-      AddErasureCodingPolicyResponse[] response =
-          fs.addErasureCodingPolicies(new ErasureCodingPolicy[] {newPolicy1});
-      assertTrue(response[0].isSucceed());
-      assertNull(response[0].getErrorMsg());
+    @Test
+    public void testECAddPolicyConfigEnable() throws IOException {
+        Configuration conf = new HdfsConfiguration();
+        conf.setBoolean(DFSConfigKeys.DFS_NAMENODE_EC_POLICIES_USERPOLICIES_ALLOWED_KEY, true);
+        try (MiniDFSCluster cluster = new MiniDFSCluster.Builder(conf).numDataNodes(0).build()) {
+            DistributedFileSystem fs = cluster.getFileSystem();
+            ErasureCodingPolicy newPolicy1 = new ErasureCodingPolicy(new ECSchema("rs", 5, 3), 1024 * 1024);
+            AddErasureCodingPolicyResponse[] response = fs.addErasureCodingPolicies(new ErasureCodingPolicy[] { newPolicy1 });
+            assertTrue(response[0].isSucceed());
+            assertNull(response[0].getErrorMsg());
+        }
     }
-  }
 }

@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.tools.protocolPB;
 
 import java.io.Closeable;
@@ -27,44 +26,41 @@ import org.apache.hadoop.ipc.RpcClientUtil;
 import org.apache.hadoop.tools.GetUserMappingsProtocol;
 import org.apache.hadoop.tools.proto.GetUserMappingsProtocolProtos.GetGroupsForUserRequestProto;
 import org.apache.hadoop.tools.proto.GetUserMappingsProtocolProtos.GetGroupsForUserResponseProto;
-
 import org.apache.hadoop.thirdparty.protobuf.RpcController;
 import org.apache.hadoop.thirdparty.protobuf.ServiceException;
 
-public class GetUserMappingsProtocolClientSideTranslatorPB implements
-    ProtocolMetaInterface, GetUserMappingsProtocol, Closeable {
+public class GetUserMappingsProtocolClientSideTranslatorPB implements ProtocolMetaInterface, GetUserMappingsProtocol, Closeable {
 
-  /** RpcController is not used and hence is set to null */
-  private final static RpcController NULL_CONTROLLER = null;
-  private final GetUserMappingsProtocolPB rpcProxy;
-  
-  public GetUserMappingsProtocolClientSideTranslatorPB(
-      GetUserMappingsProtocolPB rpcProxy) {
-    this.rpcProxy = rpcProxy;
-  }
+    /**
+     * RpcController is not used and hence is set to null
+     */
+    private final static RpcController NULL_CONTROLLER = null;
 
-  @Override
-  public void close() throws IOException {
-    RPC.stopProxy(rpcProxy);
-  }
+    private final GetUserMappingsProtocolPB rpcProxy;
 
-  @Override
-  public String[] getGroupsForUser(String user) throws IOException {
-    GetGroupsForUserRequestProto request = GetGroupsForUserRequestProto
-        .newBuilder().setUser(user).build();
-    GetGroupsForUserResponseProto resp;
-    try {
-      resp = rpcProxy.getGroupsForUser(NULL_CONTROLLER, request);
-    } catch (ServiceException se) {
-      throw ProtobufHelper.getRemoteException(se);
+    public GetUserMappingsProtocolClientSideTranslatorPB(GetUserMappingsProtocolPB rpcProxy) {
+        this.rpcProxy = rpcProxy;
     }
-    return resp.getGroupsList().toArray(new String[resp.getGroupsCount()]);
-  }
 
-  @Override
-  public boolean isMethodSupported(String methodName) throws IOException {
-    return RpcClientUtil.isMethodSupported(rpcProxy,
-        GetUserMappingsProtocolPB.class, RPC.RpcKind.RPC_PROTOCOL_BUFFER,
-        RPC.getProtocolVersion(GetUserMappingsProtocolPB.class), methodName);
-  }
+    @Override
+    public void close() throws IOException {
+        RPC.stopProxy(rpcProxy);
+    }
+
+    @Override
+    public String[] getGroupsForUser(String user) throws IOException {
+        GetGroupsForUserRequestProto request = GetGroupsForUserRequestProto.newBuilder().setUser(user).build();
+        GetGroupsForUserResponseProto resp;
+        try {
+            resp = rpcProxy.getGroupsForUser(NULL_CONTROLLER, request);
+        } catch (ServiceException se) {
+            throw ProtobufHelper.getRemoteException(se);
+        }
+        return resp.getGroupsList().toArray(new String[resp.getGroupsCount()]);
+    }
+
+    @Override
+    public boolean isMethodSupported(String methodName) throws IOException {
+        return RpcClientUtil.isMethodSupported(rpcProxy, GetUserMappingsProtocolPB.class, RPC.RpcKind.RPC_PROTOCOL_BUFFER, RPC.getProtocolVersion(GetUserMappingsProtocolPB.class), methodName);
+    }
 }

@@ -22,7 +22,6 @@ import org.apache.hadoop.hdfs.protocol.ECTopologyVerifierResult;
 import org.apache.hadoop.hdfs.protocol.ErasureCodingPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,97 +38,76 @@ import java.util.stream.Collectors;
 @InterfaceAudience.Private
 public final class ECTopologyVerifier {
 
-  public static final Logger LOG =
-      LoggerFactory.getLogger(ECTopologyVerifier.class);
+    public static final Logger LOG = LoggerFactory.getLogger(ECTopologyVerifier.class);
 
-  private ECTopologyVerifier() {}
-
-  /**
-   * Verifies whether the cluster setup can support the given EC policies.
-   *
-   * @param report list of data node descriptors for all data nodes
-   * @param policies erasure coding policies to verify
-   * @return the status of the verification
-   */
-  public static ECTopologyVerifierResult getECTopologyVerifierResult(
-      final DatanodeInfo[] report,
-      final Collection<ErasureCodingPolicy> policies) {
-    final int numOfRacks = getNumberOfRacks(report);
-    return getECTopologyVerifierResult(numOfRacks, report.length, policies);
-  }
-
-  /**
-   * Verifies whether the cluster setup can support all enabled EC policies.
-   *
-   * @param numOfRacks number of racks
-   * @param numOfDataNodes number of data nodes
-   * @param policies erasure coding policies to verify
-   * @return the status of the verification
-   */
-  public static ECTopologyVerifierResult getECTopologyVerifierResult(
-      final int numOfRacks, final int numOfDataNodes,
-      final Collection<ErasureCodingPolicy> policies) {
-    int minDN = 0;
-    int minRack = 0;
-    for (ErasureCodingPolicy policy: policies) {
-      final int policyDN =
-          policy.getNumDataUnits() + policy
-              .getNumParityUnits();
-      minDN = Math.max(minDN, policyDN);
-      final int policyRack = (int) Math.ceil(
-          policyDN / (double) policy.getNumParityUnits());
-      minRack = Math.max(minRack, policyRack);
-    }
-    if (minDN == 0 || minRack == 0) {
-      String resultMessage = "No erasure coding policy is given.";
-      LOG.trace(resultMessage);
-      return new ECTopologyVerifierResult(true, resultMessage);
-    }
-    return verifyECWithTopology(minDN, minRack, numOfRacks, numOfDataNodes,
-        getReadablePolicies(policies));
-  }
-
-  private static ECTopologyVerifierResult verifyECWithTopology(
-      final int minDN, final int minRack,
-      final int numOfRacks, final int numOfDataNodes, String readablePolicies) {
-    String resultMessage;
-    if (numOfDataNodes < minDN) {
-      resultMessage = String.format("%d DataNodes are required for " +
-              "the erasure coding policies: %s. " +
-              "The number of DataNodes is only %d.",
-          minDN, readablePolicies, numOfDataNodes);
-      LOG.debug(resultMessage);
-      return new ECTopologyVerifierResult(false, resultMessage);
+    private ECTopologyVerifier() {
     }
 
-    if (numOfRacks < minRack) {
-      resultMessage = String.format("%d racks are required for " +
-          "the erasure coding policies: %s. " +
-              "The number of racks is only %d.",
-          minRack, readablePolicies, numOfRacks);
-      LOG.debug(resultMessage);
-      return new ECTopologyVerifierResult(false, resultMessage);
+    /**
+     * Verifies whether the cluster setup can support the given EC policies.
+     *
+     * @param report list of data node descriptors for all data nodes
+     * @param policies erasure coding policies to verify
+     * @return the status of the verification
+     */
+    public static ECTopologyVerifierResult getECTopologyVerifierResult(final DatanodeInfo[] report, final Collection<ErasureCodingPolicy> policies) {
+        final int numOfRacks = getNumberOfRacks(report);
+        return getECTopologyVerifierResult(numOfRacks, report.length, policies);
     }
-    return new ECTopologyVerifierResult(true,
-        String.format("The cluster setup can support EC policies: %s",
-            readablePolicies));
-  }
 
-  private static int getNumberOfRacks(DatanodeInfo[] report) {
-    final Map<String, Integer> racks = new HashMap<>();
-    for (DatanodeInfo dni : report) {
-      Integer count = racks.get(dni.getNetworkLocation());
-      if (count == null) {
-        count = 0;
-      }
-      racks.put(dni.getNetworkLocation(), count + 1);
+    /**
+     * Verifies whether the cluster setup can support all enabled EC policies.
+     *
+     * @param numOfRacks number of racks
+     * @param numOfDataNodes number of data nodes
+     * @param policies erasure coding policies to verify
+     * @return the status of the verification
+     */
+    public static ECTopologyVerifierResult getECTopologyVerifierResult(final int numOfRacks, final int numOfDataNodes, final Collection<ErasureCodingPolicy> policies) {
+        int minDN = 0;
+        int minRack = 0;
+        for (ErasureCodingPolicy policy : policies) {
+            final int policyDN = policy.getNumDataUnits() + policy.getNumParityUnits();
+            minDN = Math.max(minDN, policyDN);
+            final int policyRack = (int) Math.ceil(policyDN / (double) policy.getNumParityUnits());
+            minRack = Math.max(minRack, policyRack);
+        }
+        if (minDN == 0 || minRack == 0) {
+            String resultMessage = "No erasure coding policy is given.";
+            LOG.trace(resultMessage);
+            return new ECTopologyVerifierResult(true, resultMessage);
+        }
+        return verifyECWithTopology(minDN, minRack, numOfRacks, numOfDataNodes, getReadablePolicies(policies));
     }
-    return racks.size();
-  }
 
-  private static String getReadablePolicies(
-      final Collection<ErasureCodingPolicy> policies) {
-    return policies.stream().map(policyInfo -> policyInfo.getName())
-        .collect(Collectors.joining(", "));
-  }
+    private static ECTopologyVerifierResult verifyECWithTopology(final int minDN, final int minRack, final int numOfRacks, final int numOfDataNodes, String readablePolicies) {
+        String resultMessage;
+        if (numOfDataNodes < minDN) {
+            resultMessage = String.format("%d DataNodes are required for " + "the erasure coding policies: %s. " + "The number of DataNodes is only %d.", minDN, readablePolicies, numOfDataNodes);
+            LOG.debug(resultMessage);
+            return new ECTopologyVerifierResult(false, resultMessage);
+        }
+        if (numOfRacks < minRack) {
+            resultMessage = String.format("%d racks are required for " + "the erasure coding policies: %s. " + "The number of racks is only %d.", minRack, readablePolicies, numOfRacks);
+            LOG.debug(resultMessage);
+            return new ECTopologyVerifierResult(false, resultMessage);
+        }
+        return new ECTopologyVerifierResult(true, String.format("The cluster setup can support EC policies: %s", readablePolicies));
+    }
+
+    private static int getNumberOfRacks(DatanodeInfo[] report) {
+        final Map<String, Integer> racks = new HashMap<>();
+        for (DatanodeInfo dni : report) {
+            Integer count = racks.get(dni.getNetworkLocation());
+            if (count == null) {
+                count = 0;
+            }
+            racks.put(dni.getNetworkLocation(), count + 1);
+        }
+        return racks.size();
+    }
+
+    private static String getReadablePolicies(final Collection<ErasureCodingPolicy> policies) {
+        return policies.stream().map(policyInfo -> policyInfo.getName()).collect(Collectors.joining(", "));
+    }
 }

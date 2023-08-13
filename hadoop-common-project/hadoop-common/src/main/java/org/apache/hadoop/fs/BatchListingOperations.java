@@ -15,12 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.fs;
 
 import java.io.IOException;
 import java.util.List;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
@@ -34,28 +32,24 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceStability.Unstable
 public interface BatchListingOperations {
 
-  /**
-   * Batched listing API that returns {@link PartialListing}s for the
-   * passed Paths.
-   *
-   * @param paths List of paths to list.
-   * @return RemoteIterator that returns corresponding PartialListings.
-   * @throws IOException failure
-   */
-  RemoteIterator<PartialListing<FileStatus>> batchedListStatusIterator(
-      List<Path> paths) throws IOException;
+    /**
+     * Batched listing API that returns {@link PartialListing}s for the
+     * passed Paths.
+     *
+     * @param paths List of paths to list.
+     * @return RemoteIterator that returns corresponding PartialListings.
+     * @throws IOException failure
+     */
+    RemoteIterator<PartialListing<FileStatus>> batchedListStatusIterator(List<Path> paths) throws IOException;
 
-  /**
-   * Batched listing API that returns {@link PartialListing}s for the passed
-   * Paths. The PartialListing will contain {@link LocatedFileStatus} entries
-   * with locations.
-   *
-   * @param paths List of paths to list.
-   * @return RemoteIterator that returns corresponding PartialListings.
-   * @throws IOException failure
-   */
-  RemoteIterator<PartialListing<LocatedFileStatus>>
-      batchedListLocatedStatusIterator(
-          List<Path> paths) throws IOException;
-
+    /**
+     * Batched listing API that returns {@link PartialListing}s for the passed
+     * Paths. The PartialListing will contain {@link LocatedFileStatus} entries
+     * with locations.
+     *
+     * @param paths List of paths to list.
+     * @return RemoteIterator that returns corresponding PartialListings.
+     * @throws IOException failure
+     */
+    RemoteIterator<PartialListing<LocatedFileStatus>> batchedListLocatedStatusIterator(List<Path> paths) throws IOException;
 }

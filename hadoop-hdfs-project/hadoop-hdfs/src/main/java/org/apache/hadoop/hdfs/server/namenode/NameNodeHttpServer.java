@@ -19,14 +19,11 @@ package org.apache.hadoop.hdfs.server.namenode;
 
 import static org.apache.hadoop.hdfs.client.HdfsClientConfigKeys.DFS_WEBHDFS_REST_CSRF_ENABLED_DEFAULT;
 import static org.apache.hadoop.hdfs.client.HdfsClientConfigKeys.DFS_WEBHDFS_REST_CSRF_ENABLED_KEY;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.HashMap;
-
 import javax.servlet.ServletContext;
-
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.conf.Configuration;
@@ -47,262 +44,215 @@ import org.apache.hadoop.http.HttpConfig;
 import org.apache.hadoop.http.HttpServer2;
 import org.apache.hadoop.net.NetUtils;
 import org.apache.hadoop.security.http.RestCsrfPreventionFilter;
-
 import com.sun.jersey.api.core.ResourceConfig;
 
 /**
- * Encapsulates the HTTP server started by the NameNode. 
+ * Encapsulates the HTTP server started by the NameNode.
  */
 @InterfaceAudience.Private
 public class NameNodeHttpServer {
-  private HttpServer2 httpServer;
-  private final Configuration conf;
-  private final NameNode nn;
-  
-  private InetSocketAddress httpAddress;
-  private InetSocketAddress httpsAddress;
-  private final InetSocketAddress bindAddress;
-  
-  public static final String NAMENODE_ADDRESS_ATTRIBUTE_KEY = "name.node.address";
-  public static final String FSIMAGE_ATTRIBUTE_KEY = "name.system.image";
-  protected static final String NAMENODE_ATTRIBUTE_KEY = "name.node";
-  public static final String STARTUP_PROGRESS_ATTRIBUTE_KEY = "startup.progress";
-  public static final String ALIASMAP_ATTRIBUTE_KEY = "name.system.aliasmap";
 
-  NameNodeHttpServer(Configuration conf, NameNode nn,
-      InetSocketAddress bindAddress) {
-    this.conf = conf;
-    this.nn = nn;
-    this.bindAddress = bindAddress;
-  }
+    private HttpServer2 httpServer;
 
-  public static void initWebHdfs(Configuration conf, String hostname,
-      String httpKeytab,
-      HttpServer2 httpServer2, String jerseyResourcePackage)
-      throws IOException {
-    // set user pattern based on configuration file
-    UserParam.setUserPattern(conf.get(
-        HdfsClientConfigKeys.DFS_WEBHDFS_USER_PATTERN_KEY,
-        HdfsClientConfigKeys.DFS_WEBHDFS_USER_PATTERN_DEFAULT));
-    AclPermissionParam.setAclPermissionPattern(conf.get(
-        HdfsClientConfigKeys.DFS_WEBHDFS_ACL_PERMISSION_PATTERN_KEY,
-        HdfsClientConfigKeys.DFS_WEBHDFS_ACL_PERMISSION_PATTERN_DEFAULT));
+    private final Configuration conf;
 
-    final String pathSpec = WebHdfsFileSystem.PATH_PREFIX + "/*";
+    private final NameNode nn;
 
-    // add REST CSRF prevention filter
-    if (conf.getBoolean(DFS_WEBHDFS_REST_CSRF_ENABLED_KEY,
-        DFS_WEBHDFS_REST_CSRF_ENABLED_DEFAULT)) {
-      Map<String, String> restCsrfParams = RestCsrfPreventionFilter
-          .getFilterParams(conf, "dfs.webhdfs.rest-csrf.");
-      String restCsrfClassName = RestCsrfPreventionFilter.class.getName();
-      HttpServer2.defineFilter(httpServer2.getWebAppContext(),
-          restCsrfClassName, restCsrfClassName, restCsrfParams,
-          new String[] {pathSpec});
+    private InetSocketAddress httpAddress;
+
+    private InetSocketAddress httpsAddress;
+
+    private final InetSocketAddress bindAddress;
+
+    public static final String NAMENODE_ADDRESS_ATTRIBUTE_KEY = "name.node.address";
+
+    public static final String FSIMAGE_ATTRIBUTE_KEY = "name.system.image";
+
+    protected static final String NAMENODE_ATTRIBUTE_KEY = "name.node";
+
+    public static final String STARTUP_PROGRESS_ATTRIBUTE_KEY = "startup.progress";
+
+    public static final String ALIASMAP_ATTRIBUTE_KEY = "name.system.aliasmap";
+
+    NameNodeHttpServer(Configuration conf, NameNode nn, InetSocketAddress bindAddress) {
+        this.conf = conf;
+        this.nn = nn;
+        this.bindAddress = bindAddress;
     }
 
-    // add webhdfs packages
-    final Map<String, String> params = new HashMap<>();
-    params.put(ResourceConfig.FEATURE_MATCH_MATRIX_PARAMS, "true");
-    httpServer2.addJerseyResourcePackage(
-        jerseyResourcePackage + ";" + Param.class.getPackage().getName(),
-        pathSpec, params);
-  }
-
-  /**
-   * @see DFSUtil#getHttpPolicy(org.apache.hadoop.conf.Configuration)
-   * for information related to the different configuration options and
-   * Http Policy is decided.
-   */
-  void start() throws IOException {
-    HttpConfig.Policy policy = DFSUtil.getHttpPolicy(conf);
-    final String infoHost = bindAddress.getHostName();
-
-    final InetSocketAddress httpAddr = bindAddress;
-    final String httpsAddrString = conf.getTrimmed(
-        DFSConfigKeys.DFS_NAMENODE_HTTPS_ADDRESS_KEY,
-        DFSConfigKeys.DFS_NAMENODE_HTTPS_ADDRESS_DEFAULT);
-    InetSocketAddress httpsAddr = NetUtils.createSocketAddr(httpsAddrString);
-
-    if (httpsAddr != null) {
-      // If DFS_NAMENODE_HTTPS_BIND_HOST_KEY exists then it overrides the
-      // host name portion of DFS_NAMENODE_HTTPS_ADDRESS_KEY.
-      final String bindHost =
-          conf.getTrimmed(DFSConfigKeys.DFS_NAMENODE_HTTPS_BIND_HOST_KEY);
-      if (bindHost != null && !bindHost.isEmpty()) {
-        httpsAddr = new InetSocketAddress(bindHost, httpsAddr.getPort());
-      }
+    public static void initWebHdfs(Configuration conf, String hostname, String httpKeytab, HttpServer2 httpServer2, String jerseyResourcePackage) throws IOException {
+        // set user pattern based on configuration file
+        UserParam.setUserPattern(conf.get(HdfsClientConfigKeys.DFS_WEBHDFS_USER_PATTERN_KEY, HdfsClientConfigKeys.DFS_WEBHDFS_USER_PATTERN_DEFAULT));
+        AclPermissionParam.setAclPermissionPattern(conf.get(HdfsClientConfigKeys.DFS_WEBHDFS_ACL_PERMISSION_PATTERN_KEY, HdfsClientConfigKeys.DFS_WEBHDFS_ACL_PERMISSION_PATTERN_DEFAULT));
+        final String pathSpec = WebHdfsFileSystem.PATH_PREFIX + "/*";
+        // add REST CSRF prevention filter
+        if (conf.getBoolean(DFS_WEBHDFS_REST_CSRF_ENABLED_KEY, DFS_WEBHDFS_REST_CSRF_ENABLED_DEFAULT)) {
+            Map<String, String> restCsrfParams = RestCsrfPreventionFilter.getFilterParams(conf, "dfs.webhdfs.rest-csrf.");
+            String restCsrfClassName = RestCsrfPreventionFilter.class.getName();
+            HttpServer2.defineFilter(httpServer2.getWebAppContext(), restCsrfClassName, restCsrfClassName, restCsrfParams, new String[] { pathSpec });
+        }
+        // add webhdfs packages
+        final Map<String, String> params = new HashMap<>();
+        params.put(ResourceConfig.FEATURE_MATCH_MATRIX_PARAMS, "true");
+        httpServer2.addJerseyResourcePackage(jerseyResourcePackage + ";" + Param.class.getPackage().getName(), pathSpec, params);
     }
 
-    HttpServer2.Builder builder = DFSUtil.httpServerTemplateForNNAndJN(conf,
-        httpAddr, httpsAddr, "hdfs",
-        DFSConfigKeys.DFS_NAMENODE_KERBEROS_INTERNAL_SPNEGO_PRINCIPAL_KEY,
-        DFSConfigKeys.DFS_NAMENODE_KEYTAB_FILE_KEY);
-
-    final boolean xFrameEnabled = conf.getBoolean(
-        DFSConfigKeys.DFS_XFRAME_OPTION_ENABLED,
-        DFSConfigKeys.DFS_XFRAME_OPTION_ENABLED_DEFAULT);
-
-    final String xFrameOptionValue = conf.getTrimmed(
-        DFSConfigKeys.DFS_XFRAME_OPTION_VALUE,
-        DFSConfigKeys.DFS_XFRAME_OPTION_VALUE_DEFAULT);
-
-    builder.configureXFrame(xFrameEnabled).setXFrameOption(xFrameOptionValue);
-
-    httpServer = builder.build();
-
-    if (policy.isHttpsEnabled()) {
-      // assume same ssl port for all datanodes
-      InetSocketAddress datanodeSslPort = NetUtils.createSocketAddr(conf.getTrimmed(
-          DFSConfigKeys.DFS_DATANODE_HTTPS_ADDRESS_KEY, infoHost + ":"
-              + DFSConfigKeys.DFS_DATANODE_HTTPS_DEFAULT_PORT));
-      httpServer.setAttribute(DFSConfigKeys.DFS_DATANODE_HTTPS_PORT_KEY,
-          datanodeSslPort.getPort());
+    /**
+     * @see DFSUtil#getHttpPolicy(org.apache.hadoop.conf.Configuration)
+     * for information related to the different configuration options and
+     * Http Policy is decided.
+     */
+    void start() throws IOException {
+        HttpConfig.Policy policy = DFSUtil.getHttpPolicy(conf);
+        final String infoHost = bindAddress.getHostName();
+        final InetSocketAddress httpAddr = bindAddress;
+        final String httpsAddrString = conf.getTrimmed(DFSConfigKeys.DFS_NAMENODE_HTTPS_ADDRESS_KEY, DFSConfigKeys.DFS_NAMENODE_HTTPS_ADDRESS_DEFAULT);
+        InetSocketAddress httpsAddr = NetUtils.createSocketAddr(httpsAddrString);
+        if (httpsAddr != null) {
+            // If DFS_NAMENODE_HTTPS_BIND_HOST_KEY exists then it overrides the
+            // host name portion of DFS_NAMENODE_HTTPS_ADDRESS_KEY.
+            final String bindHost = conf.getTrimmed(DFSConfigKeys.DFS_NAMENODE_HTTPS_BIND_HOST_KEY);
+            if (bindHost != null && !bindHost.isEmpty()) {
+                httpsAddr = new InetSocketAddress(bindHost, httpsAddr.getPort());
+            }
+        }
+        HttpServer2.Builder builder = DFSUtil.httpServerTemplateForNNAndJN(conf, httpAddr, httpsAddr, "hdfs", DFSConfigKeys.DFS_NAMENODE_KERBEROS_INTERNAL_SPNEGO_PRINCIPAL_KEY, DFSConfigKeys.DFS_NAMENODE_KEYTAB_FILE_KEY);
+        final boolean xFrameEnabled = conf.getBoolean(DFSConfigKeys.DFS_XFRAME_OPTION_ENABLED, DFSConfigKeys.DFS_XFRAME_OPTION_ENABLED_DEFAULT);
+        final String xFrameOptionValue = conf.getTrimmed(DFSConfigKeys.DFS_XFRAME_OPTION_VALUE, DFSConfigKeys.DFS_XFRAME_OPTION_VALUE_DEFAULT);
+        builder.configureXFrame(xFrameEnabled).setXFrameOption(xFrameOptionValue);
+        httpServer = builder.build();
+        if (policy.isHttpsEnabled()) {
+            // assume same ssl port for all datanodes
+            InetSocketAddress datanodeSslPort = NetUtils.createSocketAddr(conf.getTrimmed(DFSConfigKeys.DFS_DATANODE_HTTPS_ADDRESS_KEY, infoHost + ":" + DFSConfigKeys.DFS_DATANODE_HTTPS_DEFAULT_PORT));
+            httpServer.setAttribute(DFSConfigKeys.DFS_DATANODE_HTTPS_PORT_KEY, datanodeSslPort.getPort());
+        }
+        String httpKeytab = conf.get(DFSUtil.getSpnegoKeytabKey(conf, DFSConfigKeys.DFS_NAMENODE_KEYTAB_FILE_KEY));
+        initWebHdfs(conf, bindAddress.getHostName(), httpKeytab, httpServer, NamenodeWebHdfsMethods.class.getPackage().getName());
+        httpServer.setAttribute(NAMENODE_ATTRIBUTE_KEY, nn);
+        httpServer.setAttribute(JspHelper.CURRENT_CONF, conf);
+        setupServlets(httpServer, conf);
+        httpServer.start();
+        int connIdx = 0;
+        if (policy.isHttpEnabled()) {
+            httpAddress = httpServer.getConnectorAddress(connIdx++);
+            conf.set(DFSConfigKeys.DFS_NAMENODE_HTTP_ADDRESS_KEY, NetUtils.getHostPortString(httpAddress));
+        }
+        if (policy.isHttpsEnabled()) {
+            httpsAddress = httpServer.getConnectorAddress(connIdx);
+            conf.set(DFSConfigKeys.DFS_NAMENODE_HTTPS_ADDRESS_KEY, NetUtils.getHostPortString(httpsAddress));
+        }
     }
-    String httpKeytab = conf.get(DFSUtil.getSpnegoKeytabKey(conf,
-        DFSConfigKeys.DFS_NAMENODE_KEYTAB_FILE_KEY));
-    initWebHdfs(conf, bindAddress.getHostName(), httpKeytab, httpServer,
-        NamenodeWebHdfsMethods.class.getPackage().getName());
 
-    httpServer.setAttribute(NAMENODE_ATTRIBUTE_KEY, nn);
-    httpServer.setAttribute(JspHelper.CURRENT_CONF, conf);
-    setupServlets(httpServer, conf);
-    httpServer.start();
-
-    int connIdx = 0;
-    if (policy.isHttpEnabled()) {
-      httpAddress = httpServer.getConnectorAddress(connIdx++);
-      conf.set(DFSConfigKeys.DFS_NAMENODE_HTTP_ADDRESS_KEY,
-          NetUtils.getHostPortString(httpAddress));
+    /**
+     * Joins the httpserver.
+     */
+    public void join() throws InterruptedException {
+        if (httpServer != null) {
+            httpServer.join();
+        }
     }
 
-    if (policy.isHttpsEnabled()) {
-      httpsAddress = httpServer.getConnectorAddress(connIdx);
-      conf.set(DFSConfigKeys.DFS_NAMENODE_HTTPS_ADDRESS_KEY,
-          NetUtils.getHostPortString(httpsAddress));
+    void stop() throws Exception {
+        if (httpServer != null) {
+            httpServer.stop();
+        }
     }
-  }
 
-  /**
-   * Joins the httpserver.
-   */
-  public void join() throws InterruptedException {
-    if (httpServer != null) {
-      httpServer.join();
+    InetSocketAddress getHttpAddress() {
+        return httpAddress;
     }
-  }
 
-  void stop() throws Exception {
-    if (httpServer != null) {
-      httpServer.stop();
+    InetSocketAddress getHttpsAddress() {
+        return httpsAddress;
     }
-  }
 
-  InetSocketAddress getHttpAddress() {
-    return httpAddress;
-  }
+    /**
+     * Sets fsimage for use by servlets.
+     *
+     * @param fsImage FSImage to set
+     */
+    void setFSImage(FSImage fsImage) {
+        httpServer.setAttribute(FSIMAGE_ATTRIBUTE_KEY, fsImage);
+    }
 
-  InetSocketAddress getHttpsAddress() {
-    return httpsAddress;
-  }
+    /**
+     * Sets address of namenode for use by servlets.
+     *
+     * @param nameNodeAddress InetSocketAddress to set
+     */
+    void setNameNodeAddress(InetSocketAddress nameNodeAddress) {
+        httpServer.setAttribute(NAMENODE_ADDRESS_ATTRIBUTE_KEY, NetUtils.getConnectAddress(nameNodeAddress));
+    }
 
-  /**
-   * Sets fsimage for use by servlets.
-   * 
-   * @param fsImage FSImage to set
-   */
-  void setFSImage(FSImage fsImage) {
-    httpServer.setAttribute(FSIMAGE_ATTRIBUTE_KEY, fsImage);
-  }
+    /**
+     * Sets startup progress of namenode for use by servlets.
+     *
+     * @param prog StartupProgress to set
+     */
+    void setStartupProgress(StartupProgress prog) {
+        httpServer.setAttribute(STARTUP_PROGRESS_ATTRIBUTE_KEY, prog);
+    }
 
-  /**
-   * Sets address of namenode for use by servlets.
-   * 
-   * @param nameNodeAddress InetSocketAddress to set
-   */
-  void setNameNodeAddress(InetSocketAddress nameNodeAddress) {
-    httpServer.setAttribute(NAMENODE_ADDRESS_ATTRIBUTE_KEY,
-        NetUtils.getConnectAddress(nameNodeAddress));
-  }
+    /**
+     * Sets the aliasmap URI.
+     *
+     * @param aliasMap the alias map used.
+     */
+    void setAliasMap(InMemoryAliasMap aliasMap) {
+        httpServer.setAttribute(ALIASMAP_ATTRIBUTE_KEY, aliasMap);
+    }
 
-  /**
-   * Sets startup progress of namenode for use by servlets.
-   * 
-   * @param prog StartupProgress to set
-   */
-  void setStartupProgress(StartupProgress prog) {
-    httpServer.setAttribute(STARTUP_PROGRESS_ATTRIBUTE_KEY, prog);
-  }
+    private static void setupServlets(HttpServer2 httpServer, Configuration conf) {
+        httpServer.addInternalServlet("startupProgress", StartupProgressServlet.PATH_SPEC, StartupProgressServlet.class);
+        httpServer.addInternalServlet("fsck", "/fsck", FsckServlet.class, true);
+        httpServer.addInternalServlet("imagetransfer", ImageServlet.PATH_SPEC, ImageServlet.class, true);
+        httpServer.addInternalServlet(IsNameNodeActiveServlet.SERVLET_NAME, IsNameNodeActiveServlet.PATH_SPEC, IsNameNodeActiveServlet.class);
+    }
 
-  /**
-   * Sets the aliasmap URI.
-   *
-   * @param aliasMap the alias map used.
-   */
-  void setAliasMap(InMemoryAliasMap aliasMap) {
-    httpServer.setAttribute(ALIASMAP_ATTRIBUTE_KEY, aliasMap);
-  }
+    static FSImage getFsImageFromContext(ServletContext context) {
+        return (FSImage) context.getAttribute(FSIMAGE_ATTRIBUTE_KEY);
+    }
 
-  private static void setupServlets(HttpServer2 httpServer, Configuration conf) {
-    httpServer.addInternalServlet("startupProgress",
-        StartupProgressServlet.PATH_SPEC, StartupProgressServlet.class);
-    httpServer.addInternalServlet("fsck", "/fsck", FsckServlet.class,
-        true);
-    httpServer.addInternalServlet("imagetransfer", ImageServlet.PATH_SPEC,
-        ImageServlet.class, true);
-    httpServer.addInternalServlet(IsNameNodeActiveServlet.SERVLET_NAME,
-        IsNameNodeActiveServlet.PATH_SPEC,
-        IsNameNodeActiveServlet.class);
-  }
+    public static NameNode getNameNodeFromContext(ServletContext context) {
+        return (NameNode) context.getAttribute(NAMENODE_ATTRIBUTE_KEY);
+    }
 
-  static FSImage getFsImageFromContext(ServletContext context) {
-    return (FSImage)context.getAttribute(FSIMAGE_ATTRIBUTE_KEY);
-  }
+    public static TokenVerifier getTokenVerifierFromContext(ServletContext context) {
+        return (TokenVerifier) context.getAttribute(NAMENODE_ATTRIBUTE_KEY);
+    }
 
-  public static NameNode getNameNodeFromContext(ServletContext context) {
-    return (NameNode)context.getAttribute(NAMENODE_ATTRIBUTE_KEY);
-  }
+    static Configuration getConfFromContext(ServletContext context) {
+        return (Configuration) context.getAttribute(JspHelper.CURRENT_CONF);
+    }
 
-  public static TokenVerifier
-      getTokenVerifierFromContext(ServletContext context) {
-    return (TokenVerifier) context.getAttribute(NAMENODE_ATTRIBUTE_KEY);
-  }
+    static InMemoryAliasMap getAliasMapFromContext(ServletContext context) {
+        return (InMemoryAliasMap) context.getAttribute(ALIASMAP_ATTRIBUTE_KEY);
+    }
 
-  static Configuration getConfFromContext(ServletContext context) {
-    return (Configuration)context.getAttribute(JspHelper.CURRENT_CONF);
-  }
+    public static InetSocketAddress getNameNodeAddressFromContext(ServletContext context) {
+        return (InetSocketAddress) context.getAttribute(NAMENODE_ADDRESS_ATTRIBUTE_KEY);
+    }
 
-  static InMemoryAliasMap getAliasMapFromContext(ServletContext context) {
-    return (InMemoryAliasMap) context.getAttribute(ALIASMAP_ATTRIBUTE_KEY);
-  }
+    /**
+     * Returns StartupProgress associated with ServletContext.
+     *
+     * @param context ServletContext to get
+     * @return StartupProgress associated with context
+     */
+    static StartupProgress getStartupProgressFromContext(ServletContext context) {
+        return (StartupProgress) context.getAttribute(STARTUP_PROGRESS_ATTRIBUTE_KEY);
+    }
 
-  public static InetSocketAddress getNameNodeAddressFromContext(
-      ServletContext context) {
-    return (InetSocketAddress)context.getAttribute(
-        NAMENODE_ADDRESS_ATTRIBUTE_KEY);
-  }
+    public static HAServiceProtocol.HAServiceState getNameNodeStateFromContext(ServletContext context) {
+        return getNameNodeFromContext(context).getServiceState();
+    }
 
-  /**
-   * Returns StartupProgress associated with ServletContext.
-   * 
-   * @param context ServletContext to get
-   * @return StartupProgress associated with context
-   */
-  static StartupProgress getStartupProgressFromContext(
-      ServletContext context) {
-    return (StartupProgress)context.getAttribute(STARTUP_PROGRESS_ATTRIBUTE_KEY);
-  }
-
-  public static HAServiceProtocol.HAServiceState getNameNodeStateFromContext(ServletContext context) {
-    return getNameNodeFromContext(context).getServiceState();
-  }
-
-  /**
-   * Returns the httpServer.
-   * @return HttpServer2
-   */
-  @VisibleForTesting
-  public HttpServer2 getHttpServer() {
-    return httpServer;
-  }
+    /**
+     * Returns the httpServer.
+     * @return HttpServer2
+     */
+    @VisibleForTesting
+    public HttpServer2 getHttpServer() {
+        return httpServer;
+    }
 }

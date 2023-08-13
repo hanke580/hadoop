@@ -17,75 +17,70 @@
  */
 package org.apache.hadoop.io.erasurecode;
 
-
 import java.nio.ByteBuffer;
 
 /**
  * An abstract buffer allocator used for test.
  */
 public abstract class BufferAllocator {
-  private boolean usingDirect = false;
 
-  public BufferAllocator(boolean usingDirect) {
-    this.usingDirect = usingDirect;
-  }
+    private boolean usingDirect = false;
 
-  protected boolean isUsingDirect() {
-    return usingDirect;
-  }
-
-  /**
-   * Allocate and return a ByteBuffer of specified length.
-   * @param bufferLen
-   * @return
-   */
-  public abstract ByteBuffer allocate(int bufferLen);
-
-  /**
-   * A simple buffer allocator that just uses ByteBuffer's
-   * allocate/allocateDirect API.
-   */
-  public static class SimpleBufferAllocator extends BufferAllocator {
-
-    public SimpleBufferAllocator(boolean usingDirect) {
-      super(usingDirect);
+    public BufferAllocator(boolean usingDirect) {
+        this.usingDirect = usingDirect;
     }
 
-    @Override
-    public ByteBuffer allocate(int bufferLen) {
-      return isUsingDirect() ? ByteBuffer.allocateDirect(bufferLen) :
-          ByteBuffer.allocate(bufferLen);
-    }
-  }
-
-  /**
-   * A buffer allocator that allocates a buffer from an existing large buffer by
-   * slice calling, but if no available space just degrades as
-   * SimpleBufferAllocator. So please ensure enough space for it.
-   */
-  public static class SlicedBufferAllocator extends BufferAllocator {
-    private ByteBuffer overallBuffer;
-
-    public SlicedBufferAllocator(boolean usingDirect, int totalBufferLen) {
-      super(usingDirect);
-      overallBuffer = isUsingDirect() ?
-          ByteBuffer.allocateDirect(totalBufferLen) :
-          ByteBuffer.allocate(totalBufferLen);
+    protected boolean isUsingDirect() {
+        return usingDirect;
     }
 
-    @Override
-    public ByteBuffer allocate(int bufferLen) {
-      if (bufferLen > overallBuffer.capacity() - overallBuffer.position()) {
-        // If no available space for the requested length, then allocate new
-        return isUsingDirect() ? ByteBuffer.allocateDirect(bufferLen) :
-            ByteBuffer.allocate(bufferLen);
-      }
+    /**
+     * Allocate and return a ByteBuffer of specified length.
+     * @param bufferLen
+     * @return
+     */
+    public abstract ByteBuffer allocate(int bufferLen);
 
-      overallBuffer.limit(overallBuffer.position() + bufferLen);
-      ByteBuffer result = overallBuffer.slice();
-      overallBuffer.position(overallBuffer.position() + bufferLen);
-      return result;
+    /**
+     * A simple buffer allocator that just uses ByteBuffer's
+     * allocate/allocateDirect API.
+     */
+    public static class SimpleBufferAllocator extends BufferAllocator {
+
+        public SimpleBufferAllocator(boolean usingDirect) {
+            super(usingDirect);
+        }
+
+        @Override
+        public ByteBuffer allocate(int bufferLen) {
+            return isUsingDirect() ? ByteBuffer.allocateDirect(bufferLen) : ByteBuffer.allocate(bufferLen);
+        }
     }
-  }
 
+    /**
+     * A buffer allocator that allocates a buffer from an existing large buffer by
+     * slice calling, but if no available space just degrades as
+     * SimpleBufferAllocator. So please ensure enough space for it.
+     */
+    public static class SlicedBufferAllocator extends BufferAllocator {
+
+        private ByteBuffer overallBuffer;
+
+        public SlicedBufferAllocator(boolean usingDirect, int totalBufferLen) {
+            super(usingDirect);
+            overallBuffer = isUsingDirect() ? ByteBuffer.allocateDirect(totalBufferLen) : ByteBuffer.allocate(totalBufferLen);
+        }
+
+        @Override
+        public ByteBuffer allocate(int bufferLen) {
+            if (bufferLen > overallBuffer.capacity() - overallBuffer.position()) {
+                // If no available space for the requested length, then allocate new
+                return isUsingDirect() ? ByteBuffer.allocateDirect(bufferLen) : ByteBuffer.allocate(bufferLen);
+            }
+            overallBuffer.limit(overallBuffer.position() + bufferLen);
+            ByteBuffer result = overallBuffer.slice();
+            overallBuffer.position(overallBuffer.position() + bufferLen);
+            return result;
+        }
+    }
 }

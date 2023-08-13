@@ -25,9 +25,9 @@ import java.io.IOException;
  */
 public class StateStoreUnavailableException extends IOException {
 
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  public StateStoreUnavailableException(String msg) {
-    super(msg);
-  }
+    public StateStoreUnavailableException(String msg) {
+        super(msg);
+    }
 }

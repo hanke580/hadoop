@@ -22,10 +22,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
 import java.util.HashSet;
 import java.util.Set;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -34,105 +32,89 @@ import org.junit.Test;
  */
 public class TestBlockPlacementStatusWithUpgradeDomain {
 
-  private Set<String> upgradeDomains;
-  private BlockPlacementStatusDefault bpsd =
-      mock(BlockPlacementStatusDefault.class);
+    private Set<String> upgradeDomains;
 
-  @Before
-  public void setup() {
-    upgradeDomains = new HashSet<String>();
-    upgradeDomains.add("1");
-    upgradeDomains.add("2");
-    upgradeDomains.add("3");
-    when(bpsd.isPlacementPolicySatisfied()).thenReturn(true);
-  }
+    private BlockPlacementStatusDefault bpsd = mock(BlockPlacementStatusDefault.class);
 
-  @Test
-  public void testIsPolicySatisfiedParentFalse() {
-    when(bpsd.isPlacementPolicySatisfied()).thenReturn(false);
-    when(bpsd.getAdditionalReplicasRequired()).thenReturn(1);
-    BlockPlacementStatusWithUpgradeDomain bps =
-        new BlockPlacementStatusWithUpgradeDomain(bpsd, upgradeDomains, 3, 3);
+    @Before
+    public void setup() {
+        upgradeDomains = new HashSet<String>();
+        upgradeDomains.add("1");
+        upgradeDomains.add("2");
+        upgradeDomains.add("3");
+        when(bpsd.isPlacementPolicySatisfied()).thenReturn(true);
+    }
 
-    // Parent policy is not satisfied but upgrade domain policy is
-    assertFalse(bps.isPlacementPolicySatisfied());
-    assertEquals(1, bps.getAdditionalReplicasRequired());
-  }
+    @Test
+    public void testIsPolicySatisfiedParentFalse() {
+        when(bpsd.isPlacementPolicySatisfied()).thenReturn(false);
+        when(bpsd.getAdditionalReplicasRequired()).thenReturn(1);
+        BlockPlacementStatusWithUpgradeDomain bps = new BlockPlacementStatusWithUpgradeDomain(bpsd, upgradeDomains, 3, 3);
+        // Parent policy is not satisfied but upgrade domain policy is
+        assertFalse(bps.isPlacementPolicySatisfied());
+        assertEquals(1, bps.getAdditionalReplicasRequired());
+    }
 
-  @Test
-  public void testIsPolicySatisfiedAllEqual() {
-    BlockPlacementStatusWithUpgradeDomain bps =
-        new BlockPlacementStatusWithUpgradeDomain(bpsd, upgradeDomains, 3, 3);
-    // Number of domains, replicas and upgradeDomainFactor is equal and parent
-    // policy is satisfied
-    assertTrue(bps.isPlacementPolicySatisfied());
-    assertEquals(0, bps.getAdditionalReplicasRequired());
-  }
+    @Test
+    public void testIsPolicySatisfiedAllEqual() {
+        BlockPlacementStatusWithUpgradeDomain bps = new BlockPlacementStatusWithUpgradeDomain(bpsd, upgradeDomains, 3, 3);
+        // Number of domains, replicas and upgradeDomainFactor is equal and parent
+        // policy is satisfied
+        assertTrue(bps.isPlacementPolicySatisfied());
+        assertEquals(0, bps.getAdditionalReplicasRequired());
+    }
 
-  @Test
-  public void testIsPolicySatisfiedSmallDomains() {
-    // Number of domains is less than replicas but equal to factor
-    BlockPlacementStatusWithUpgradeDomain bps =
-        new BlockPlacementStatusWithUpgradeDomain(bpsd, upgradeDomains, 4, 3);
-    assertTrue(bps.isPlacementPolicySatisfied());
-    assertEquals(0, bps.getAdditionalReplicasRequired());
+    @Test
+    public void testIsPolicySatisfiedSmallDomains() {
+        // Number of domains is less than replicas but equal to factor
+        BlockPlacementStatusWithUpgradeDomain bps = new BlockPlacementStatusWithUpgradeDomain(bpsd, upgradeDomains, 4, 3);
+        assertTrue(bps.isPlacementPolicySatisfied());
+        assertEquals(0, bps.getAdditionalReplicasRequired());
+        // Same as above but replicas is greater than factor
+        bps = new BlockPlacementStatusWithUpgradeDomain(bpsd, upgradeDomains, 4, 2);
+        assertTrue(bps.isPlacementPolicySatisfied());
+        assertEquals(0, bps.getAdditionalReplicasRequired());
+        // Number of domains is less than replicas and factor
+        bps = new BlockPlacementStatusWithUpgradeDomain(bpsd, upgradeDomains, 4, 4);
+        assertFalse(bps.isPlacementPolicySatisfied());
+        assertEquals(1, bps.getAdditionalReplicasRequired());
+    }
 
-    // Same as above but replicas is greater than factor
-    bps = new BlockPlacementStatusWithUpgradeDomain(bpsd, upgradeDomains, 4, 2);
-    assertTrue(bps.isPlacementPolicySatisfied());
-    assertEquals(0, bps.getAdditionalReplicasRequired());
+    @Test
+    public void testIsPolicySatisfiedSmallReplicas() {
+        // Replication factor 1 file
+        upgradeDomains.clear();
+        upgradeDomains.add("1");
+        BlockPlacementStatusWithUpgradeDomain bps = new BlockPlacementStatusWithUpgradeDomain(bpsd, upgradeDomains, 1, 3);
+        assertTrue(bps.isPlacementPolicySatisfied());
+        assertEquals(0, bps.getAdditionalReplicasRequired());
+        // Replication factor 2 file, but one domain
+        bps = new BlockPlacementStatusWithUpgradeDomain(bpsd, upgradeDomains, 2, 3);
+        assertFalse(bps.isPlacementPolicySatisfied());
+        assertEquals(1, bps.getAdditionalReplicasRequired());
+        // Replication factor 2 file, but two domains
+        upgradeDomains.add("2");
+        bps = new BlockPlacementStatusWithUpgradeDomain(bpsd, upgradeDomains, 2, 3);
+        assertTrue(bps.isPlacementPolicySatisfied());
+        assertEquals(0, bps.getAdditionalReplicasRequired());
+    }
 
-    // Number of domains is less than replicas and factor
-    bps = new BlockPlacementStatusWithUpgradeDomain(bpsd, upgradeDomains, 4, 4);
-    assertFalse(bps.isPlacementPolicySatisfied());
-    assertEquals(1, bps.getAdditionalReplicasRequired());
-  }
-
-  @Test
-  public void testIsPolicySatisfiedSmallReplicas() {
-    // Replication factor 1 file
-    upgradeDomains.clear();
-    upgradeDomains.add("1");
-    BlockPlacementStatusWithUpgradeDomain bps =
-        new BlockPlacementStatusWithUpgradeDomain(bpsd, upgradeDomains, 1, 3);
-    assertTrue(bps.isPlacementPolicySatisfied());
-    assertEquals(0, bps.getAdditionalReplicasRequired());
-
-    // Replication factor 2 file, but one domain
-    bps =
-        new BlockPlacementStatusWithUpgradeDomain(bpsd, upgradeDomains, 2, 3);
-    assertFalse(bps.isPlacementPolicySatisfied());
-    assertEquals(1, bps.getAdditionalReplicasRequired());
-
-    // Replication factor 2 file, but two domains
-    upgradeDomains.add("2");
-    bps =
-        new BlockPlacementStatusWithUpgradeDomain(bpsd, upgradeDomains, 2, 3);
-    assertTrue(bps.isPlacementPolicySatisfied());
-    assertEquals(0, bps.getAdditionalReplicasRequired());
-  }
-
-  @Test
-  public void testPolicyIsNotSatisfiedInsufficientDomains() {
-    // Insufficient Domains - 1 domain, replication factor 3
-    upgradeDomains.clear();
-    upgradeDomains.add("1");
-    BlockPlacementStatusWithUpgradeDomain bps =
-        new BlockPlacementStatusWithUpgradeDomain(bpsd, upgradeDomains, 3, 3);
-    assertFalse(bps.isPlacementPolicySatisfied());
-    assertEquals(2, bps.getAdditionalReplicasRequired());
-
-    // One domain, replication factor 2 file
-    bps =
-        new BlockPlacementStatusWithUpgradeDomain(bpsd, upgradeDomains, 2, 3);
-    assertFalse(bps.isPlacementPolicySatisfied());
-    assertEquals(1, bps.getAdditionalReplicasRequired());
-
-    // 2 domains, replication factor 3
-    upgradeDomains.add("2");
-    bps =
-        new BlockPlacementStatusWithUpgradeDomain(bpsd, upgradeDomains, 3, 3);
-    assertFalse(bps.isPlacementPolicySatisfied());
-    assertEquals(1, bps.getAdditionalReplicasRequired());
-  }
+    @Test
+    public void testPolicyIsNotSatisfiedInsufficientDomains() {
+        // Insufficient Domains - 1 domain, replication factor 3
+        upgradeDomains.clear();
+        upgradeDomains.add("1");
+        BlockPlacementStatusWithUpgradeDomain bps = new BlockPlacementStatusWithUpgradeDomain(bpsd, upgradeDomains, 3, 3);
+        assertFalse(bps.isPlacementPolicySatisfied());
+        assertEquals(2, bps.getAdditionalReplicasRequired());
+        // One domain, replication factor 2 file
+        bps = new BlockPlacementStatusWithUpgradeDomain(bpsd, upgradeDomains, 2, 3);
+        assertFalse(bps.isPlacementPolicySatisfied());
+        assertEquals(1, bps.getAdditionalReplicasRequired());
+        // 2 domains, replication factor 3
+        upgradeDomains.add("2");
+        bps = new BlockPlacementStatusWithUpgradeDomain(bpsd, upgradeDomains, 3, 3);
+        assertFalse(bps.isPlacementPolicySatisfied());
+        assertEquals(1, bps.getAdditionalReplicasRequired());
+    }
 }

@@ -18,7 +18,6 @@ package org.apache.hadoop.fs;
 
 import java.io.Serializable;
 import java.nio.ByteBuffer;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
@@ -28,18 +27,19 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
 public interface PartHandle extends Serializable {
-  /**
-   * @return Serialized from in bytes.
-   */
-  default byte[] toByteArray() {
-    ByteBuffer bb = bytes();
-    byte[] ret = new byte[bb.remaining()];
-    bb.get(ret);
-    return ret;
-  }
 
-  ByteBuffer bytes();
+    /**
+     * @return Serialized from in bytes.
+     */
+    default byte[] toByteArray() {
+        ByteBuffer bb = bytes();
+        byte[] ret = new byte[bb.remaining()];
+        bb.get(ret);
+        return ret;
+    }
 
-  @Override
-  boolean equals(Object other);
+    ByteBuffer bytes();
+
+    @Override
+    boolean equals(Object other);
 }

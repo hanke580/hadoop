@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * Registry Service Exceptions
  * <p>
@@ -31,3 +30,4 @@
  *   {@link org.apache.hadoop.registry.client.exceptions.RegistryIOException}
  */
 package org.apache.hadoop.registry.client.exceptions;
+

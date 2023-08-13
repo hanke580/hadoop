@@ -29,39 +29,42 @@ import org.apache.hadoop.security.token.Token;
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
 public class StripedBlockInfo {
-  private final ExtendedBlock block;
-  private final DatanodeInfo[] datanodes;
-  private final Token<BlockTokenIdentifier>[] blockTokens;
-  private final byte[] blockIndices;
-  private final ErasureCodingPolicy ecPolicy;
 
-  public StripedBlockInfo(ExtendedBlock block, DatanodeInfo[] datanodes,
-      Token<BlockTokenIdentifier>[] blockTokens, byte[] blockIndices,
-      ErasureCodingPolicy ecPolicy) {
-    this.block = block;
-    this.datanodes = datanodes;
-    this.blockTokens = blockTokens;
-    this.blockIndices = blockIndices;
-    this.ecPolicy = ecPolicy;
-  }
+    private final ExtendedBlock block;
 
-  public ExtendedBlock getBlock() {
-    return block;
-  }
+    private final DatanodeInfo[] datanodes;
 
-  public DatanodeInfo[] getDatanodes() {
-    return datanodes;
-  }
+    private final Token<BlockTokenIdentifier>[] blockTokens;
 
-  public Token<BlockTokenIdentifier>[] getBlockTokens() {
-    return blockTokens;
-  }
+    private final byte[] blockIndices;
 
-  public byte[] getBlockIndices() {
-    return blockIndices;
-  }
+    private final ErasureCodingPolicy ecPolicy;
 
-  public ErasureCodingPolicy getErasureCodingPolicy() {
-    return ecPolicy;
-  }
+    public StripedBlockInfo(ExtendedBlock block, DatanodeInfo[] datanodes, Token<BlockTokenIdentifier>[] blockTokens, byte[] blockIndices, ErasureCodingPolicy ecPolicy) {
+        this.block = block;
+        this.datanodes = datanodes;
+        this.blockTokens = blockTokens;
+        this.blockIndices = blockIndices;
+        this.ecPolicy = ecPolicy;
+    }
+
+    public ExtendedBlock getBlock() {
+        return block;
+    }
+
+    public DatanodeInfo[] getDatanodes() {
+        return datanodes;
+    }
+
+    public Token<BlockTokenIdentifier>[] getBlockTokens() {
+        return blockTokens;
+    }
+
+    public byte[] getBlockIndices() {
+        return blockIndices;
+    }
+
+    public ErasureCodingPolicy getErasureCodingPolicy() {
+        return ecPolicy;
+    }
 }

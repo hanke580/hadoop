@@ -18,12 +18,10 @@
 package org.apache.hadoop.fs.contract.hdfs;
 
 import java.io.IOException;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.contract.AbstractContractMultipartUploaderTest;
 import org.apache.hadoop.fs.contract.AbstractFSContract;
@@ -31,43 +29,41 @@ import org.apache.hadoop.fs.contract.AbstractFSContract;
 /**
  * Test MultipartUploader tests on HDFS.
  */
-public class TestHDFSContractMultipartUploader extends
-    AbstractContractMultipartUploaderTest {
+public class TestHDFSContractMultipartUploader extends AbstractContractMultipartUploaderTest {
 
-  protected static final Logger LOG =
-      LoggerFactory.getLogger(AbstractContractMultipartUploaderTest.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(AbstractContractMultipartUploaderTest.class);
 
-  @BeforeClass
-  public static void createCluster() throws IOException {
-    HDFSContract.createCluster();
-  }
+    @BeforeClass
+    public static void createCluster() throws IOException {
+        HDFSContract.createCluster();
+    }
 
-  @AfterClass
-  public static void teardownCluster() throws IOException {
-    HDFSContract.destroyCluster();
-  }
+    @AfterClass
+    public static void teardownCluster() throws IOException {
+        HDFSContract.destroyCluster();
+    }
 
-  @Override
-  protected AbstractFSContract createContract(Configuration conf) {
-    return new HDFSContract(conf);
-  }
+    @Override
+    protected AbstractFSContract createContract(Configuration conf) {
+        return new HDFSContract(conf);
+    }
 
-  /**
-   * HDFS doesn't have any restriction on the part size.
-   * @return 1KB
-   */
-  @Override
-  protected int partSizeInBytes() {
-    return 1024;
-  }
+    /**
+     * HDFS doesn't have any restriction on the part size.
+     * @return 1KB
+     */
+    @Override
+    protected int partSizeInBytes() {
+        return 1024;
+    }
 
-  @Override
-  protected boolean finalizeConsumesUploadIdImmediately() {
-    return true;
-  }
+    @Override
+    protected boolean finalizeConsumesUploadIdImmediately() {
+        return true;
+    }
 
-  @Override
-  protected boolean supportsConcurrentUploadsToSamePath() {
-    return true;
-  }
+    @Override
+    protected boolean supportsConcurrentUploadsToSamePath() {
+        return true;
+    }
 }

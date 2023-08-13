@@ -19,13 +19,9 @@ package org.apache.hadoop.fs.shell.find;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
-
 import java.io.IOException;
-
 import org.apache.hadoop.fs.shell.PathData;
-
 import java.io.PrintStream;
-
 import org.apache.hadoop.fs.FileSystem;
 import org.junit.Before;
 import org.junit.Rule;
@@ -33,29 +29,29 @@ import org.junit.rules.Timeout;
 import org.junit.Test;
 
 public class TestPrint {
-  private FileSystem mockFs;
 
-  @Rule
-  public Timeout globalTimeout = new Timeout(10000);
+    private FileSystem mockFs;
 
-  @Before
-  public void resetMock() throws IOException {
-    mockFs = MockFileSystem.setup();
-  }
+    @Rule
+    public Timeout globalTimeout = new Timeout(10000);
 
-  // test the full path is printed to stdout
-  @Test
-  public void testPrint() throws IOException {
-    Print print = new Print();
-    PrintStream out = mock(PrintStream.class);
-    FindOptions options = new FindOptions();
-    options.setOut(out);
-    print.setOptions(options);
+    @Before
+    public void resetMock() throws IOException {
+        mockFs = MockFileSystem.setup();
+    }
 
-    String filename = "/one/two/test";
-    PathData item = new PathData(filename, mockFs.getConf());
-    assertEquals(Result.PASS, print.apply(item, -1));
-    verify(out).print(filename + '\n');
-    verifyNoMoreInteractions(out);
-  }
+    // test the full path is printed to stdout
+    @Test
+    public void testPrint() throws IOException {
+        Print print = new Print();
+        PrintStream out = mock(PrintStream.class);
+        FindOptions options = new FindOptions();
+        options.setOut(out);
+        print.setOptions(options);
+        String filename = "/one/two/test";
+        PathData item = new PathData(filename, mockFs.getConf());
+        assertEquals(Result.PASS, print.apply(item, -1));
+        verify(out).print(filename + '\n');
+        verifyNoMoreInteractions(out);
+    }
 }

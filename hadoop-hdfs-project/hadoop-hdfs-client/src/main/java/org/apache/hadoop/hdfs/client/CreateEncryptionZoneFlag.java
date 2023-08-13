@@ -35,36 +35,36 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceStability.Evolving
 public enum CreateEncryptionZoneFlag {
 
-  /**
-   * Do not provision a trash directory in the encryption zone.
-   *
-   * @see CreateEncryptionZoneFlag#NO_TRASH
-   */
-  NO_TRASH((short) 0x00),
-  /**
-   * Provision a trash directory .Trash/ in the
-   * encryption zone.
-   *
-   * @see CreateEncryptionZoneFlag#PROVISION_TRASH
-   */
-  PROVISION_TRASH((short) 0x01);
+    /**
+     * Do not provision a trash directory in the encryption zone.
+     *
+     * @see CreateEncryptionZoneFlag#NO_TRASH
+     */
+    NO_TRASH((short) 0x00),
+    /**
+     * Provision a trash directory .Trash/ in the
+     * encryption zone.
+     *
+     * @see CreateEncryptionZoneFlag#PROVISION_TRASH
+     */
+    PROVISION_TRASH((short) 0x01);
 
-  private final short mode;
+    private final short mode;
 
-  CreateEncryptionZoneFlag(short mode) {
-    this.mode = mode;
-  }
-
-  public static CreateEncryptionZoneFlag valueOf(short mode) {
-    for (CreateEncryptionZoneFlag flag : CreateEncryptionZoneFlag.values()) {
-      if (flag.getMode() == mode) {
-        return flag;
-      }
+    CreateEncryptionZoneFlag(short mode) {
+        this.mode = mode;
     }
-    return null;
-  }
 
-  public short getMode() {
-    return mode;
-  }
+    public static CreateEncryptionZoneFlag valueOf(short mode) {
+        for (CreateEncryptionZoneFlag flag : CreateEncryptionZoneFlag.values()) {
+            if (flag.getMode() == mode) {
+                return flag;
+            }
+        }
+        return null;
+    }
+
+    public short getMode() {
+        return mode;
+    }
 }

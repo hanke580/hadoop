@@ -18,10 +18,8 @@
 package org.apache.hadoop.hdfs.server.federation.resolver.order;
 
 import static org.apache.hadoop.util.Time.monotonicNow;
-
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.server.federation.resolver.PathLocation;
 import org.apache.hadoop.hdfs.server.federation.router.RBFConfigKeys;
@@ -40,121 +38,129 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class RouterResolver<K, V> implements OrderedResolver {
 
-  private static final Logger LOG =
-      LoggerFactory.getLogger(RouterResolver.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RouterResolver.class);
 
-  /** Configuration key to set the minimum time to update subcluster info. */
-  public static final String MIN_UPDATE_PERIOD_KEY =
-      RBFConfigKeys.FEDERATION_ROUTER_PREFIX + "router-resolver.update-period";
-  /** 10 seconds by default. */
-  private static final long MIN_UPDATE_PERIOD_DEFAULT = TimeUnit.SECONDS
-      .toMillis(10);
+    /**
+     * Configuration key to set the minimum time to update subcluster info.
+     */
+    public static final String MIN_UPDATE_PERIOD_KEY = RBFConfigKeys.FEDERATION_ROUTER_PREFIX + "router-resolver.update-period";
 
-  /** Router service. */
-  private final Router router;
-  /** Minimum update time. */
-  private final long minUpdateTime;
+    /**
+     * 10 seconds by default.
+     */
+    private static final long MIN_UPDATE_PERIOD_DEFAULT = TimeUnit.SECONDS.toMillis(10);
 
-  /** K -> T template mapping. */
-  private Map<K, V> subclusterMapping = null;
-  /** Last time the subcluster mapping was updated. */
-  private long lastUpdated;
+    /**
+     * Router service.
+     */
+    private final Router router;
 
-  public RouterResolver(final Configuration conf, final Router routerService) {
-    this.minUpdateTime = conf.getTimeDuration(MIN_UPDATE_PERIOD_KEY,
-        MIN_UPDATE_PERIOD_DEFAULT, TimeUnit.MILLISECONDS);
-    this.router = routerService;
-  }
+    /**
+     * Minimum update time.
+     */
+    private final long minUpdateTime;
 
-  @Override
-  public String getFirstNamespace(String path, PathLocation loc) {
-    updateSubclusterMapping();
-    return chooseFirstNamespace(path, loc);
-  }
+    /**
+     * K -> T template mapping.
+     */
+    private Map<K, V> subclusterMapping = null;
 
-  /**
-   * The implementation for getting desired subcluster mapping info.
-   *
-   * @param membershipStore Membership store the resolver queried from.
-   * @return The map of desired type info.
-   */
-  protected abstract Map<K, V> getSubclusterInfo(
-      MembershipStore membershipStore);
+    /**
+     * Last time the subcluster mapping was updated.
+     */
+    private long lastUpdated;
 
-  /**
-   * Choose the first namespace from queried subcluster mapping info.
-   *
-   * @param path Path to check.
-   * @param loc Federated location with multiple destinations.
-   * @return First namespace out of the locations.
-   */
-  protected abstract String chooseFirstNamespace(String path, PathLocation loc);
+    public RouterResolver(final Configuration conf, final Router routerService) {
+        this.minUpdateTime = conf.getTimeDuration(MIN_UPDATE_PERIOD_KEY, MIN_UPDATE_PERIOD_DEFAULT, TimeUnit.MILLISECONDS);
+        this.router = routerService;
+    }
 
-  /**
-   * Update <NamespaceId, Subcluster Info> mapping info periodically.
-   */
-  private synchronized void updateSubclusterMapping() {
-    if (subclusterMapping == null
-        || (monotonicNow() - lastUpdated) > minUpdateTime) {
-      // Fetch the mapping asynchronously
-      Thread updater = new Thread(new Runnable() {
-        @Override
-        public void run() {
-          final MembershipStore membershipStore = getMembershipStore();
-          if (membershipStore == null) {
-            LOG.error("Cannot access the Membership store.");
-            return;
-          }
+    @Override
+    public String getFirstNamespace(String path, PathLocation loc) {
+        updateSubclusterMapping();
+        return chooseFirstNamespace(path, loc);
+    }
 
-          subclusterMapping = getSubclusterInfo(membershipStore);
-          lastUpdated = monotonicNow();
+    /**
+     * The implementation for getting desired subcluster mapping info.
+     *
+     * @param membershipStore Membership store the resolver queried from.
+     * @return The map of desired type info.
+     */
+    protected abstract Map<K, V> getSubclusterInfo(MembershipStore membershipStore);
+
+    /**
+     * Choose the first namespace from queried subcluster mapping info.
+     *
+     * @param path Path to check.
+     * @param loc Federated location with multiple destinations.
+     * @return First namespace out of the locations.
+     */
+    protected abstract String chooseFirstNamespace(String path, PathLocation loc);
+
+    /**
+     * Update <NamespaceId, Subcluster Info> mapping info periodically.
+     */
+    private synchronized void updateSubclusterMapping() {
+        if (subclusterMapping == null || (monotonicNow() - lastUpdated) > minUpdateTime) {
+            // Fetch the mapping asynchronously
+            Thread updater = new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    final MembershipStore membershipStore = getMembershipStore();
+                    if (membershipStore == null) {
+                        LOG.error("Cannot access the Membership store.");
+                        return;
+                    }
+                    subclusterMapping = getSubclusterInfo(membershipStore);
+                    lastUpdated = monotonicNow();
+                }
+            });
+            updater.start();
+            // Wait until initialized
+            if (subclusterMapping == null) {
+                try {
+                    LOG.debug("Wait to get the mapping for the first time");
+                    updater.join();
+                } catch (InterruptedException e) {
+                    LOG.error("Cannot wait for the updater to finish");
+                }
+            }
         }
-      });
-      updater.start();
+    }
 
-      // Wait until initialized
-      if (subclusterMapping == null) {
-        try {
-          LOG.debug("Wait to get the mapping for the first time");
-          updater.join();
-        } catch (InterruptedException e) {
-          LOG.error("Cannot wait for the updater to finish");
+    /**
+     * Get the Router RPC server.
+     *
+     * @return Router RPC server. Null if not possible.
+     */
+    protected RouterRpcServer getRpcServer() {
+        if (this.router == null) {
+            return null;
         }
-      }
+        return router.getRpcServer();
     }
-  }
 
-  /**
-   * Get the Router RPC server.
-   *
-   * @return Router RPC server. Null if not possible.
-   */
-  protected RouterRpcServer getRpcServer() {
-    if (this.router == null) {
-      return null;
+    /**
+     * Get the Membership store.
+     *
+     * @return Membership store.
+     */
+    protected MembershipStore getMembershipStore() {
+        StateStoreService stateStore = router.getStateStore();
+        if (stateStore == null) {
+            return null;
+        }
+        return stateStore.getRegisteredRecordStore(MembershipStore.class);
     }
-    return router.getRpcServer();
-  }
 
-  /**
-   * Get the Membership store.
-   *
-   * @return Membership store.
-   */
-  protected MembershipStore getMembershipStore() {
-    StateStoreService stateStore = router.getStateStore();
-    if (stateStore == null) {
-      return null;
+    /**
+     * Get subcluster mapping info.
+     *
+     * @return The map of subcluster info.
+     */
+    protected Map<K, V> getSubclusterMapping() {
+        return this.subclusterMapping;
     }
-    return stateStore.getRegisteredRecordStore(MembershipStore.class);
-  }
-
-  /**
-   * Get subcluster mapping info.
-   *
-   * @return The map of subcluster info.
-   */
-  protected Map<K, V> getSubclusterMapping() {
-    return this.subclusterMapping;
-  }
 }

@@ -28,7 +28,9 @@ import org.junit.rules.Timeout;
  * longer than expected.
  */
 public class UnitTestcaseTimeLimit {
-  public final int timeOutSecs = 10;
-  
-  @Rule public TestRule globalTimeout = new Timeout(timeOutSecs * 1000);
+
+    public final int timeOutSecs = 10;
+
+    @Rule
+    public TestRule globalTimeout = new Timeout(timeOutSecs * 1000);
 }

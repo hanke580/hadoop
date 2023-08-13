@@ -15,14 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.metrics2.lib;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.metrics2.MetricsInfo;
 import org.apache.hadoop.metrics2.MetricsRecordBuilder;
-
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -32,37 +30,36 @@ import java.util.concurrent.atomic.AtomicLong;
 @InterfaceStability.Evolving
 public class MutableCounterLong extends MutableCounter {
 
-  private AtomicLong value = new AtomicLong();
+    private AtomicLong value = new AtomicLong();
 
-  public MutableCounterLong(MetricsInfo info, long initValue) {
-    super(info);
-    this.value.set(initValue);
-  }
-
-  @Override
-  public void incr() {
-    incr(1);
-  }
-
-  /**
-   * Increment the value by a delta
-   * @param delta of the increment
-   */
-  public void incr(long delta) {
-    value.addAndGet(delta);
-    setChanged();
-  }
-
-  public long value() {
-    return value.get();
-  }
-
-  @Override
-  public void snapshot(MetricsRecordBuilder builder, boolean all) {
-    if (all || changed()) {
-      builder.addCounter(info(), value());
-      clearChanged();
+    public MutableCounterLong(MetricsInfo info, long initValue) {
+        super(info);
+        this.value.set(initValue);
     }
-  }
 
+    @Override
+    public void incr() {
+        incr(1);
+    }
+
+    /**
+     * Increment the value by a delta
+     * @param delta of the increment
+     */
+    public void incr(long delta) {
+        value.addAndGet(delta);
+        setChanged();
+    }
+
+    public long value() {
+        return value.get();
+    }
+
+    @Override
+    public void snapshot(MetricsRecordBuilder builder, boolean all) {
+        if (all || changed()) {
+            builder.addCounter(info(), value());
+            clearChanged();
+        }
+    }
 }

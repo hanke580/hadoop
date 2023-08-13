@@ -29,11 +29,9 @@ import org.apache.hadoop.hdfs.web.URLConnectionFactory;
 import org.apache.hadoop.util.JsonSerialization;
 import org.apache.hadoop.util.Timer;
 import org.apache.http.HttpStatus;
-
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import static org.apache.hadoop.hdfs.client.HdfsClientConfigKeys.OAUTH_CLIENT_ID_KEY;
 import static org.apache.hadoop.hdfs.client.HdfsClientConfigKeys.OAUTH_REFRESH_URL_KEY;
 import static org.apache.hadoop.hdfs.web.oauth2.OAuth2Constants.ACCESS_TOKEN;
@@ -52,93 +50,69 @@ import static org.apache.hadoop.hdfs.web.oauth2.Utils.notNull;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
-public class ConfRefreshTokenBasedAccessTokenProvider
-    extends AccessTokenProvider {
+public class ConfRefreshTokenBasedAccessTokenProvider extends AccessTokenProvider {
 
-  public static final String OAUTH_REFRESH_TOKEN_KEY
-      = "dfs.webhdfs.oauth2.refresh.token";
-  public static final String OAUTH_REFRESH_TOKEN_EXPIRES_KEY
-      = "dfs.webhdfs.oauth2.refresh.token.expires.ms.since.epoch";
+    public static final String OAUTH_REFRESH_TOKEN_KEY = "dfs.webhdfs.oauth2.refresh.token";
 
-  private AccessTokenTimer accessTokenTimer;
+    public static final String OAUTH_REFRESH_TOKEN_EXPIRES_KEY = "dfs.webhdfs.oauth2.refresh.token.expires.ms.since.epoch";
 
-  private String accessToken;
+    private AccessTokenTimer accessTokenTimer;
 
-  private String refreshToken;
+    private String accessToken;
 
-  private String clientId;
+    private String refreshToken;
 
-  private String refreshURL;
+    private String clientId;
 
+    private String refreshURL;
 
-  public ConfRefreshTokenBasedAccessTokenProvider() {
-    this.accessTokenTimer = new AccessTokenTimer();
-  }
-
-  public ConfRefreshTokenBasedAccessTokenProvider(Timer timer) {
-    this.accessTokenTimer = new AccessTokenTimer(timer);
-  }
-
-  @Override
-  public void setConf(Configuration conf) {
-    super.setConf(conf);
-    refreshToken = notNull(conf, (OAUTH_REFRESH_TOKEN_KEY));
-
-    accessTokenTimer.setExpiresInMSSinceEpoch(
-        notNull(conf, OAUTH_REFRESH_TOKEN_EXPIRES_KEY));
-
-    clientId = notNull(conf, OAUTH_CLIENT_ID_KEY);
-    refreshURL = notNull(conf, OAUTH_REFRESH_URL_KEY);
-
-  }
-
-  @Override
-  public synchronized String getAccessToken() throws IOException {
-    if(accessTokenTimer.shouldRefresh()) {
-      refresh();
+    public ConfRefreshTokenBasedAccessTokenProvider() {
+        this.accessTokenTimer = new AccessTokenTimer();
     }
 
-    return accessToken;
-  }
-
-  void refresh() throws IOException {
-    try {
-      OkHttpClient client = new OkHttpClient();
-      client.setConnectTimeout(URLConnectionFactory.DEFAULT_SOCKET_TIMEOUT,
-          TimeUnit.MILLISECONDS);
-      client.setReadTimeout(URLConnectionFactory.DEFAULT_SOCKET_TIMEOUT,
-                TimeUnit.MILLISECONDS);
-
-      String bodyString = Utils.postBody(GRANT_TYPE, REFRESH_TOKEN,
-          REFRESH_TOKEN, refreshToken,
-          CLIENT_ID, clientId);
-
-      RequestBody body = RequestBody.create(URLENCODED, bodyString);
-
-      Request request = new Request.Builder()
-          .url(refreshURL)
-          .post(body)
-          .build();
-      Response responseBody = client.newCall(request).execute();
-
-      if (responseBody.code() != HttpStatus.SC_OK) {
-        throw new IllegalArgumentException("Received invalid http response: "
-            + responseBody.code() + ", text = " + responseBody.toString());
-      }
-
-      Map<?, ?> response = JsonSerialization.mapReader().readValue(
-          responseBody.body().string());
-
-      String newExpiresIn = response.get(EXPIRES_IN).toString();
-      accessTokenTimer.setExpiresIn(newExpiresIn);
-
-      accessToken = response.get(ACCESS_TOKEN).toString();
-    } catch (Exception e) {
-      throw new IOException("Exception while refreshing access token", e);
+    public ConfRefreshTokenBasedAccessTokenProvider(Timer timer) {
+        this.accessTokenTimer = new AccessTokenTimer(timer);
     }
-  }
 
-  public String getRefreshToken() {
-    return refreshToken;
-  }
+    @Override
+    public void setConf(Configuration conf) {
+        super.setConf(conf);
+        refreshToken = notNull(conf, (OAUTH_REFRESH_TOKEN_KEY));
+        accessTokenTimer.setExpiresInMSSinceEpoch(notNull(conf, OAUTH_REFRESH_TOKEN_EXPIRES_KEY));
+        clientId = notNull(conf, OAUTH_CLIENT_ID_KEY);
+        refreshURL = notNull(conf, OAUTH_REFRESH_URL_KEY);
+    }
+
+    @Override
+    public synchronized String getAccessToken() throws IOException {
+        if (accessTokenTimer.shouldRefresh()) {
+            refresh();
+        }
+        return accessToken;
+    }
+
+    void refresh() throws IOException {
+        try {
+            OkHttpClient client = new OkHttpClient();
+            client.setConnectTimeout(URLConnectionFactory.DEFAULT_SOCKET_TIMEOUT, TimeUnit.MILLISECONDS);
+            client.setReadTimeout(URLConnectionFactory.DEFAULT_SOCKET_TIMEOUT, TimeUnit.MILLISECONDS);
+            String bodyString = Utils.postBody(GRANT_TYPE, REFRESH_TOKEN, REFRESH_TOKEN, refreshToken, CLIENT_ID, clientId);
+            RequestBody body = RequestBody.create(URLENCODED, bodyString);
+            Request request = new Request.Builder().url(refreshURL).post(body).build();
+            Response responseBody = client.newCall(request).execute();
+            if (responseBody.code() != HttpStatus.SC_OK) {
+                throw new IllegalArgumentException("Received invalid http response: " + responseBody.code() + ", text = " + responseBody.toString());
+            }
+            Map<?, ?> response = JsonSerialization.mapReader().readValue(responseBody.body().string());
+            String newExpiresIn = response.get(EXPIRES_IN).toString();
+            accessTokenTimer.setExpiresIn(newExpiresIn);
+            accessToken = response.get(ACCESS_TOKEN).toString();
+        } catch (Exception e) {
+            throw new IOException("Exception while refreshing access token", e);
+        }
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
 }

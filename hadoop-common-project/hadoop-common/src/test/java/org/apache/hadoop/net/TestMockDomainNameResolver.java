@@ -23,11 +23,9 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -35,37 +33,30 @@ import static org.junit.Assert.assertEquals;
  */
 public class TestMockDomainNameResolver {
 
-  private Configuration conf;
+    private Configuration conf;
 
-  @Rule
-  public final ExpectedException exception = ExpectedException.none();
+    @Rule
+    public final ExpectedException exception = ExpectedException.none();
 
-  @Before
-  public void setup() {
-    conf = new Configuration();
-    conf.set(CommonConfigurationKeys.HADOOP_DOMAINNAME_RESOLVER_IMPL,
-        MockDomainNameResolver.class.getName());
-  }
+    @Before
+    public void setup() {
+        conf = new Configuration();
+        conf.set(CommonConfigurationKeys.HADOOP_DOMAINNAME_RESOLVER_IMPL, MockDomainNameResolver.class.getName());
+    }
 
-  @Test
-  public void testMockDomainNameResolverCanBeCreated() throws IOException {
-    DomainNameResolver resolver = DomainNameResolverFactory.newInstance(
-        conf, CommonConfigurationKeys.HADOOP_DOMAINNAME_RESOLVER_IMPL);
-    InetAddress[] addrs = resolver.getAllByDomainName(
-        MockDomainNameResolver.DOMAIN);
+    @Test
+    public void testMockDomainNameResolverCanBeCreated() throws IOException {
+        DomainNameResolver resolver = DomainNameResolverFactory.newInstance(conf, CommonConfigurationKeys.HADOOP_DOMAINNAME_RESOLVER_IMPL);
+        InetAddress[] addrs = resolver.getAllByDomainName(MockDomainNameResolver.DOMAIN);
+        assertEquals(2, addrs.length);
+        assertEquals(MockDomainNameResolver.ADDR_1, addrs[0].getHostAddress());
+        assertEquals(MockDomainNameResolver.ADDR_2, addrs[1].getHostAddress());
+    }
 
-    assertEquals(2, addrs.length);
-    assertEquals(MockDomainNameResolver.ADDR_1, addrs[0].getHostAddress());
-    assertEquals(MockDomainNameResolver.ADDR_2, addrs[1].getHostAddress());
-  }
-
-  @Test
-  public void testMockDomainNameResolverCanNotBeCreated()
-      throws UnknownHostException {
-    DomainNameResolver resolver = DomainNameResolverFactory.newInstance(
-        conf, CommonConfigurationKeys.HADOOP_DOMAINNAME_RESOLVER_IMPL);
-    exception.expect(UnknownHostException.class);
-    resolver.getAllByDomainName(
-        MockDomainNameResolver.UNKNOW_DOMAIN);
-  }
+    @Test
+    public void testMockDomainNameResolverCanNotBeCreated() throws UnknownHostException {
+        DomainNameResolver resolver = DomainNameResolverFactory.newInstance(conf, CommonConfigurationKeys.HADOOP_DOMAINNAME_RESOLVER_IMPL);
+        exception.expect(UnknownHostException.class);
+        resolver.getAllByDomainName(MockDomainNameResolver.UNKNOW_DOMAIN);
+    }
 }

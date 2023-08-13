@@ -18,23 +18,20 @@
 package org.apache.hadoop.hdfs.server.namenode;
 
 import org.junit.Test;
-
 import java.util.HashSet;
 import java.util.Set;
-
 import static org.junit.Assert.assertTrue;
 
 public class TestNameNodeConfiguration {
 
-  /**
-   * Detect duplicate keys in {@link NameNode#NAMENODE_SPECIFIC_KEYS}.
-   */
-  @Test
-  public void testNameNodeSpecificKeys() {
-    Set<String> keySet = new HashSet<>();
-    for (String key : NameNode.NAMENODE_SPECIFIC_KEYS) {
-      assertTrue("Duplicate key: " + key
-          + " in NameNode.NAMENODE_SPECIFIC_KEYS.", keySet.add(key));
+    /**
+     * Detect duplicate keys in {@link NameNode#NAMENODE_SPECIFIC_KEYS}.
+     */
+    @Test
+    public void testNameNodeSpecificKeys() {
+        Set<String> keySet = new HashSet<>();
+        for (String key : NameNode.NAMENODE_SPECIFIC_KEYS) {
+            assertTrue("Duplicate key: " + key + " in NameNode.NAMENODE_SPECIFIC_KEYS.", keySet.add(key));
+        }
     }
-  }
 }

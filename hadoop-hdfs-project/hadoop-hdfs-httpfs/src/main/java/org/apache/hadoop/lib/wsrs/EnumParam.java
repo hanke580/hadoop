@@ -15,31 +15,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.lib.wsrs;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.util.StringUtils;
-
 import java.util.Arrays;
 
 @InterfaceAudience.Private
 public abstract class EnumParam<E extends Enum<E>> extends Param<E> {
-  Class<E> klass;
 
-  public EnumParam(String name, Class<E> e, E defaultValue) {
-    super(name, defaultValue);
-    klass = e;
-  }
+    Class<E> klass;
 
-  @Override
-  protected E parse(String str) throws Exception {
-    return Enum.valueOf(klass, StringUtils.toUpperCase(str));
-  }
+    public EnumParam(String name, Class<E> e, E defaultValue) {
+        super(name, defaultValue);
+        klass = e;
+    }
 
-  @Override
-  protected String getDomain() {
-    return StringUtils.join(",", Arrays.asList(klass.getEnumConstants()));
-  }
+    @Override
+    protected E parse(String str) throws Exception {
+        return Enum.valueOf(klass, StringUtils.toUpperCase(str));
+    }
 
+    @Override
+    protected String getDomain() {
+        return StringUtils.join(",", Arrays.asList(klass.getEnumConstants()));
+    }
 }

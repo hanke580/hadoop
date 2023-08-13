@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * This package is for classes to be shared across object stores; for internal
  * use within the hadoop-* modules only. No stability guarantees.
@@ -26,3 +25,4 @@ package org.apache.hadoop.fs.store;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

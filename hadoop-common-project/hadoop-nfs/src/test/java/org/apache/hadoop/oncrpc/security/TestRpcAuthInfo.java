@@ -18,7 +18,6 @@
 package org.apache.hadoop.oncrpc.security;
 
 import static org.junit.Assert.assertEquals;
-
 import org.apache.hadoop.oncrpc.security.RpcAuthInfo;
 import org.apache.hadoop.oncrpc.security.RpcAuthInfo.AuthFlavor;
 import org.junit.Test;
@@ -27,17 +26,18 @@ import org.junit.Test;
  * Tests for {@link RpcAuthInfo}
  */
 public class TestRpcAuthInfo {
-  @Test
-  public void testAuthFlavor() {
-    assertEquals(AuthFlavor.AUTH_NONE, AuthFlavor.fromValue(0));
-    assertEquals(AuthFlavor.AUTH_SYS, AuthFlavor.fromValue(1));
-    assertEquals(AuthFlavor.AUTH_SHORT, AuthFlavor.fromValue(2));
-    assertEquals(AuthFlavor.AUTH_DH, AuthFlavor.fromValue(3));
-    assertEquals(AuthFlavor.RPCSEC_GSS, AuthFlavor.fromValue(6));
-  }
-  
-  @Test(expected=IllegalArgumentException.class)
-  public void testInvalidAuthFlavor() {
-    assertEquals(AuthFlavor.AUTH_NONE, AuthFlavor.fromValue(4));
-  }
+
+    @Test
+    public void testAuthFlavor() {
+        assertEquals(AuthFlavor.AUTH_NONE, AuthFlavor.fromValue(0));
+        assertEquals(AuthFlavor.AUTH_SYS, AuthFlavor.fromValue(1));
+        assertEquals(AuthFlavor.AUTH_SHORT, AuthFlavor.fromValue(2));
+        assertEquals(AuthFlavor.AUTH_DH, AuthFlavor.fromValue(3));
+        assertEquals(AuthFlavor.RPCSEC_GSS, AuthFlavor.fromValue(6));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testInvalidAuthFlavor() {
+        assertEquals(AuthFlavor.AUTH_NONE, AuthFlavor.fromValue(4));
+    }
 }

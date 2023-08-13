@@ -28,8 +28,10 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
 public class ObserverRetryOnActiveException extends StandbyException {
-  static final long serialVersionUID = 1L;
-  public ObserverRetryOnActiveException(String msg) {
-    super(msg);
-  }
+
+    static final long serialVersionUID = 1L;
+
+    public ObserverRetryOnActiveException(String msg) {
+        super(msg);
+    }
 }

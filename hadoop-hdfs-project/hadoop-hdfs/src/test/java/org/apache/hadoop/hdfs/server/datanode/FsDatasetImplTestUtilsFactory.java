@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.datanode;
 
 import org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.FsDatasetImplTestUtils;
@@ -23,15 +22,15 @@ import org.apache.hadoop.hdfs.server.datanode.fsdataset.impl.FsDatasetImplTestUt
 /**
  * A factory for creating {@link FsDatasetImplTestUtils} objects.
  */
-public final class FsDatasetImplTestUtilsFactory
-    extends FsDatasetTestUtils.Factory<FsDatasetTestUtils> {
-  @Override
-  public FsDatasetTestUtils newInstance(DataNode datanode) {
-    return new FsDatasetImplTestUtils(datanode);
-  }
+public final class FsDatasetImplTestUtilsFactory extends FsDatasetTestUtils.Factory<FsDatasetTestUtils> {
 
-  @Override
-  public int getDefaultNumOfDataDirs() {
-    return FsDatasetImplTestUtils.DEFAULT_NUM_OF_DATA_DIRS;
-  }
+    @Override
+    public FsDatasetTestUtils newInstance(DataNode datanode) {
+        return new FsDatasetImplTestUtils(datanode);
+    }
+
+    @Override
+    public int getDefaultNumOfDataDirs() {
+        return FsDatasetImplTestUtils.DEFAULT_NUM_OF_DATA_DIRS;
+    }
 }

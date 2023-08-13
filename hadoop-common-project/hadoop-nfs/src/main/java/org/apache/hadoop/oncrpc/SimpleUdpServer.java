@@ -19,7 +19,6 @@ package org.apache.hadoop.oncrpc;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
-
 import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.Channels;
@@ -33,59 +32,59 @@ import org.slf4j.LoggerFactory;
  * Simple UDP server implemented based on netty.
  */
 public class SimpleUdpServer {
-  public static final Logger LOG =
-      LoggerFactory.getLogger(SimpleUdpServer.class);
-  private final int SEND_BUFFER_SIZE = 65536;
-  private final int RECEIVE_BUFFER_SIZE = 65536;
 
-  protected final int port;
-  protected final SimpleChannelUpstreamHandler rpcProgram;
-  protected final int workerCount;
-  protected int boundPort = -1; // Will be set after server starts
-  private ConnectionlessBootstrap server;
-  private Channel ch;
+    public static final Logger LOG = LoggerFactory.getLogger(SimpleUdpServer.class);
 
-  public SimpleUdpServer(int port, SimpleChannelUpstreamHandler program,
-      int workerCount) {
-    this.port = port;
-    this.rpcProgram = program;
-    this.workerCount = workerCount;
-  }
+    private final int SEND_BUFFER_SIZE = 65536;
 
-  public void run() {
-    // Configure the client.
-    DatagramChannelFactory f = new NioDatagramChannelFactory(
-        Executors.newCachedThreadPool(), workerCount);
+    private final int RECEIVE_BUFFER_SIZE = 65536;
 
-    server = new ConnectionlessBootstrap(f);
-    server.setPipeline(Channels.pipeline(RpcUtil.STAGE_RPC_MESSAGE_PARSER,
-        rpcProgram, RpcUtil.STAGE_RPC_UDP_RESPONSE));
+    protected final int port;
 
-    server.setOption("broadcast", "false");
-    server.setOption("sendBufferSize", SEND_BUFFER_SIZE);
-    server.setOption("receiveBufferSize", RECEIVE_BUFFER_SIZE);
-    server.setOption("reuseAddress", true);
+    protected final SimpleChannelUpstreamHandler rpcProgram;
 
-    // Listen to the UDP port
-    ch = server.bind(new InetSocketAddress(port));
-    InetSocketAddress socketAddr = (InetSocketAddress) ch.getLocalAddress();
-    boundPort = socketAddr.getPort();
+    protected final int workerCount;
 
-    LOG.info("Started listening to UDP requests at port " + boundPort + " for "
-        + rpcProgram + " with workerCount " + workerCount);
-  }
+    // Will be set after server starts
+    protected int boundPort = -1;
 
-  // boundPort will be set only after server starts
-  public int getBoundPort() {
-    return this.boundPort;
-  }
+    private ConnectionlessBootstrap server;
 
-  public void shutdown() {
-    if (ch != null) {
-      ch.close().awaitUninterruptibly();
+    private Channel ch;
+
+    public SimpleUdpServer(int port, SimpleChannelUpstreamHandler program, int workerCount) {
+        this.port = port;
+        this.rpcProgram = program;
+        this.workerCount = workerCount;
     }
-    if (server != null) {
-      server.releaseExternalResources();
+
+    public void run() {
+        // Configure the client.
+        DatagramChannelFactory f = new NioDatagramChannelFactory(Executors.newCachedThreadPool(), workerCount);
+        server = new ConnectionlessBootstrap(f);
+        server.setPipeline(Channels.pipeline(RpcUtil.STAGE_RPC_MESSAGE_PARSER, rpcProgram, RpcUtil.STAGE_RPC_UDP_RESPONSE));
+        server.setOption("broadcast", "false");
+        server.setOption("sendBufferSize", SEND_BUFFER_SIZE);
+        server.setOption("receiveBufferSize", RECEIVE_BUFFER_SIZE);
+        server.setOption("reuseAddress", true);
+        // Listen to the UDP port
+        ch = server.bind(new InetSocketAddress(port));
+        InetSocketAddress socketAddr = (InetSocketAddress) ch.getLocalAddress();
+        boundPort = socketAddr.getPort();
+        LOG.info("Started listening to UDP requests at port " + boundPort + " for " + rpcProgram + " with workerCount " + workerCount);
     }
-  }
+
+    // boundPort will be set only after server starts
+    public int getBoundPort() {
+        return this.boundPort;
+    }
+
+    public void shutdown() {
+        if (ch != null) {
+            ch.close().awaitUninterruptibly();
+        }
+        if (server != null) {
+            server.releaseExternalResources();
+        }
+    }
 }

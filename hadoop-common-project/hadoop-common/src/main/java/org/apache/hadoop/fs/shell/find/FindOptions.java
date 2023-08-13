@@ -20,7 +20,6 @@ package org.apache.hadoop.fs.shell.find;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Date;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.shell.CommandFactory;
 
@@ -28,244 +27,259 @@ import org.apache.hadoop.fs.shell.CommandFactory;
  * Options to be used by the {@link Find} command and its {@link Expression}s.
  */
 public class FindOptions {
-  /** Output stream to be used. */
-  private PrintStream out;
 
-  /** Error stream to be used. */
-  private PrintStream err;
+    /**
+     * Output stream to be used.
+     */
+    private PrintStream out;
 
-  /** Input stream to be used. */
-  private InputStream in;
+    /**
+     * Error stream to be used.
+     */
+    private PrintStream err;
 
-  /**
-   * Indicates whether the expression should be applied to the directory tree
-   * depth first.
-   */
-  private boolean depthFirst = false;
+    /**
+     * Input stream to be used.
+     */
+    private InputStream in;
 
-  /** Indicates whether symbolic links should be followed. */
-  private boolean followLink = false;
+    /**
+     * Indicates whether the expression should be applied to the directory tree
+     * depth first.
+     */
+    private boolean depthFirst = false;
 
-  /**
-   * Indicates whether symbolic links specified as command arguments should be
-   * followed.
-   */
-  private boolean followArgLink = false;
+    /**
+     * Indicates whether symbolic links should be followed.
+     */
+    private boolean followLink = false;
 
-  /** Start time of the find process. */
-  private long startTime = new Date().getTime();
+    /**
+     * Indicates whether symbolic links specified as command arguments should be
+     * followed.
+     */
+    private boolean followArgLink = false;
 
-  /**
-   * Depth at which to start applying expressions.
-   */
-  private int minDepth = 0;
+    /**
+     * Start time of the find process.
+     */
+    private long startTime = new Date().getTime();
 
-  /**
-   * Depth at which to stop applying expressions.
-   */
-  private int maxDepth = Integer.MAX_VALUE;
+    /**
+     * Depth at which to start applying expressions.
+     */
+    private int minDepth = 0;
 
-  /** Factory for retrieving command classes. */
-  private CommandFactory commandFactory;
+    /**
+     * Depth at which to stop applying expressions.
+     */
+    private int maxDepth = Integer.MAX_VALUE;
 
-  /** Configuration object. */
-  private Configuration configuration = new Configuration();
+    /**
+     * Factory for retrieving command classes.
+     */
+    private CommandFactory commandFactory;
 
-  /**
-   * Sets the output stream to be used.
-   *
-   * @param out output stream to be used
-   */
-  public void setOut(PrintStream out) {
-    this.out = out;
-  }
+    /**
+     * Configuration object.
+     */
+    private Configuration configuration = new Configuration();
 
-  /**
-   * Returns the output stream to be used.
-   *
-   * @return output stream to be used
-   */
-  public PrintStream getOut() {
-    return this.out;
-  }
+    /**
+     * Sets the output stream to be used.
+     *
+     * @param out output stream to be used
+     */
+    public void setOut(PrintStream out) {
+        this.out = out;
+    }
 
-  /**
-   * Sets the error stream to be used.
-   *
-   * @param err error stream to be used
-   */
-  public void setErr(PrintStream err) {
-    this.err = err;
-  }
+    /**
+     * Returns the output stream to be used.
+     *
+     * @return output stream to be used
+     */
+    public PrintStream getOut() {
+        return this.out;
+    }
 
-  /**
-   * Returns the error stream to be used.
-   *
-   * @return error stream to be used
-   */
-  public PrintStream getErr() {
-    return this.err;
-  }
+    /**
+     * Sets the error stream to be used.
+     *
+     * @param err error stream to be used
+     */
+    public void setErr(PrintStream err) {
+        this.err = err;
+    }
 
-  /**
-   * Sets the input stream to be used.
-   *
-   * @param in input stream to be used
-   */
-  public void setIn(InputStream in) {
-    this.in = in;
-  }
+    /**
+     * Returns the error stream to be used.
+     *
+     * @return error stream to be used
+     */
+    public PrintStream getErr() {
+        return this.err;
+    }
 
-  /**
-   * Returns the input stream to be used.
-   *
-   * @return input stream to be used
-   */
-  public InputStream getIn() {
-    return this.in;
-  }
+    /**
+     * Sets the input stream to be used.
+     *
+     * @param in input stream to be used
+     */
+    public void setIn(InputStream in) {
+        this.in = in;
+    }
 
-  /**
-   * Sets flag indicating whether the expression should be applied to the
-   * directory tree depth first.
-   *
-   * @param depthFirst true indicates depth first traversal
-   */
-  public void setDepthFirst(boolean depthFirst) {
-    this.depthFirst = depthFirst;
-  }
+    /**
+     * Returns the input stream to be used.
+     *
+     * @return input stream to be used
+     */
+    public InputStream getIn() {
+        return this.in;
+    }
 
-  /**
-   * Should directory tree be traversed depth first?
-   *
-   * @return true indicate depth first traversal
-   */
-  public boolean isDepthFirst() {
-    return this.depthFirst;
-  }
+    /**
+     * Sets flag indicating whether the expression should be applied to the
+     * directory tree depth first.
+     *
+     * @param depthFirst true indicates depth first traversal
+     */
+    public void setDepthFirst(boolean depthFirst) {
+        this.depthFirst = depthFirst;
+    }
 
-  /**
-   * Sets flag indicating whether symbolic links should be followed.
-   *
-   * @param followLink true indicates follow links
-   */
-  public void setFollowLink(boolean followLink) {
-    this.followLink = followLink;
-  }
+    /**
+     * Should directory tree be traversed depth first?
+     *
+     * @return true indicate depth first traversal
+     */
+    public boolean isDepthFirst() {
+        return this.depthFirst;
+    }
 
-  /**
-   * Should symbolic links be follows?
-   *
-   * @return true indicates links should be followed
-   */
-  public boolean isFollowLink() {
-    return this.followLink;
-  }
+    /**
+     * Sets flag indicating whether symbolic links should be followed.
+     *
+     * @param followLink true indicates follow links
+     */
+    public void setFollowLink(boolean followLink) {
+        this.followLink = followLink;
+    }
 
-  /**
-   * Sets flag indicating whether command line symbolic links should be
-   * followed.
-   *
-   * @param followArgLink true indicates follow links
-   */
-  public void setFollowArgLink(boolean followArgLink) {
-    this.followArgLink = followArgLink;
-  }
+    /**
+     * Should symbolic links be follows?
+     *
+     * @return true indicates links should be followed
+     */
+    public boolean isFollowLink() {
+        return this.followLink;
+    }
 
-  /**
-   * Should command line symbolic links be follows?
-   *
-   * @return true indicates links should be followed
-   */
-  public boolean isFollowArgLink() {
-    return this.followArgLink;
-  }
+    /**
+     * Sets flag indicating whether command line symbolic links should be
+     * followed.
+     *
+     * @param followArgLink true indicates follow links
+     */
+    public void setFollowArgLink(boolean followArgLink) {
+        this.followArgLink = followArgLink;
+    }
 
-  /**
-   * Returns the start time of this {@link Find} command.
-   *
-   * @return start time (in milliseconds since epoch)
-   */
-  public long getStartTime() {
-    return this.startTime;
-  }
+    /**
+     * Should command line symbolic links be follows?
+     *
+     * @return true indicates links should be followed
+     */
+    public boolean isFollowArgLink() {
+        return this.followArgLink;
+    }
 
-  /**
-   * Set the start time of this {@link Find} command.
-   *
-   * @param time start time (in milliseconds since epoch)
-   */
-  public void setStartTime(long time) {
-    this.startTime = time;
-  }
+    /**
+     * Returns the start time of this {@link Find} command.
+     *
+     * @return start time (in milliseconds since epoch)
+     */
+    public long getStartTime() {
+        return this.startTime;
+    }
 
-  /**
-   * Returns the minimum depth for applying expressions.
-   *
-   * @return min depth
-   */
-  public int getMinDepth() {
-    return this.minDepth;
-  }
+    /**
+     * Set the start time of this {@link Find} command.
+     *
+     * @param time start time (in milliseconds since epoch)
+     */
+    public void setStartTime(long time) {
+        this.startTime = time;
+    }
 
-  /**
-   * Sets the minimum depth for applying expressions.
-   *
-   * @param minDepth minimum depth
-   */
-  public void setMinDepth(int minDepth) {
-    this.minDepth = minDepth;
-  }
+    /**
+     * Returns the minimum depth for applying expressions.
+     *
+     * @return min depth
+     */
+    public int getMinDepth() {
+        return this.minDepth;
+    }
 
-  /**
-   * Returns the maximum depth for applying expressions.
-   *
-   * @return maximum depth
-   */
-  public int getMaxDepth() {
-    return this.maxDepth;
-  }
+    /**
+     * Sets the minimum depth for applying expressions.
+     *
+     * @param minDepth minimum depth
+     */
+    public void setMinDepth(int minDepth) {
+        this.minDepth = minDepth;
+    }
 
-  /**
-   * Sets the maximum depth for applying expressions.
-   *
-   * @param maxDepth maximum depth
-   */
-  public void setMaxDepth(int maxDepth) {
-    this.maxDepth = maxDepth;
-  }
+    /**
+     * Returns the maximum depth for applying expressions.
+     *
+     * @return maximum depth
+     */
+    public int getMaxDepth() {
+        return this.maxDepth;
+    }
 
-  /**
-   * Set the command factory.
-   *
-   * @param factory {@link CommandFactory}
-   */
-  public void setCommandFactory(CommandFactory factory) {
-    this.commandFactory = factory;
-  }
+    /**
+     * Sets the maximum depth for applying expressions.
+     *
+     * @param maxDepth maximum depth
+     */
+    public void setMaxDepth(int maxDepth) {
+        this.maxDepth = maxDepth;
+    }
 
-  /**
-   * Return the command factory.
-   *
-   * @return {@link CommandFactory}
-   */
-  public CommandFactory getCommandFactory() {
-    return this.commandFactory;
-  }
+    /**
+     * Set the command factory.
+     *
+     * @param factory {@link CommandFactory}
+     */
+    public void setCommandFactory(CommandFactory factory) {
+        this.commandFactory = factory;
+    }
 
-  /**
-   * Set the {@link Configuration}
-   *
-   * @param configuration {@link Configuration}
-   */
-  public void setConfiguration(Configuration configuration) {
-    this.configuration = configuration;
-  }
+    /**
+     * Return the command factory.
+     *
+     * @return {@link CommandFactory}
+     */
+    public CommandFactory getCommandFactory() {
+        return this.commandFactory;
+    }
 
-  /**
-   * Return the {@link Configuration} return configuration {@link Configuration}
-   */
-  public Configuration getConfiguration() {
-    return this.configuration;
-  }
+    /**
+     * Set the {@link Configuration}
+     *
+     * @param configuration {@link Configuration}
+     */
+    public void setConfiguration(Configuration configuration) {
+        this.configuration = configuration;
+    }
+
+    /**
+     * Return the {@link Configuration} return configuration {@link Configuration}
+     */
+    public Configuration getConfiguration() {
+        return this.configuration;
+    }
 }

@@ -15,30 +15,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.federation.security;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.security.token.delegation.DelegationTokenIdentifier;
 import org.apache.hadoop.security.token.delegation.AbstractDelegationTokenSecretManager;
-
 import java.io.IOException;
 
 /**
  * Mock functionality of AbstractDelegationTokenSecretManager.
  * Test case that SecretManager is not running.
  */
-public class MockNotRunningSecretManager
-    extends AbstractDelegationTokenSecretManager<DelegationTokenIdentifier> {
+public class MockNotRunningSecretManager extends AbstractDelegationTokenSecretManager<DelegationTokenIdentifier> {
 
-  public MockNotRunningSecretManager(Configuration conf)
-      throws IOException {
-    super(100000, 100000, 100000, 100000);
-    // It doesn't execute startThreads() to keep the running status false.
-  }
+    public MockNotRunningSecretManager(Configuration conf) throws IOException {
+        super(100000, 100000, 100000, 100000);
+        // It doesn't execute startThreads() to keep the running status false.
+    }
 
-  @Override
-  public DelegationTokenIdentifier createIdentifier() {
-    return new DelegationTokenIdentifier();
-  }
+    @Override
+    public DelegationTokenIdentifier createIdentifier() {
+        return new DelegationTokenIdentifier();
+    }
 }

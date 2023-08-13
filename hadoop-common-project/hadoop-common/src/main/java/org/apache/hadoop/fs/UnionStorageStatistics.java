@@ -19,7 +19,6 @@ package org.apache.hadoop.fs;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-
 import com.google.common.base.Preconditions;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
@@ -31,101 +30,98 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Private
 @InterfaceStability.Unstable
 public class UnionStorageStatistics extends StorageStatistics {
-  /**
-   * The underlying StorageStatistics.
-   */
-  private final StorageStatistics[] stats;
 
-  private class LongStatisticIterator implements Iterator<LongStatistic> {
-    private int statIdx;
+    /**
+     * The underlying StorageStatistics.
+     */
+    private final StorageStatistics[] stats;
 
-    private Iterator<LongStatistic> cur;
+    private class LongStatisticIterator implements Iterator<LongStatistic> {
 
-    LongStatisticIterator() {
-      this.statIdx = 0;
-      this.cur = null;
-    }
+        private int statIdx;
 
-    @Override
-    public boolean hasNext() {
-      return (getIter() != null);
-    }
+        private Iterator<LongStatistic> cur;
 
-    private Iterator<LongStatistic> getIter() {
-      while ((cur == null) || (!cur.hasNext())) {
-        if (stats.length >= statIdx) {
-          return null;
+        LongStatisticIterator() {
+            this.statIdx = 0;
+            this.cur = null;
         }
-        cur = stats[statIdx++].getLongStatistics();
-      }
-      return cur;
+
+        @Override
+        public boolean hasNext() {
+            return (getIter() != null);
+        }
+
+        private Iterator<LongStatistic> getIter() {
+            while ((cur == null) || (!cur.hasNext())) {
+                if (stats.length >= statIdx) {
+                    return null;
+                }
+                cur = stats[statIdx++].getLongStatistics();
+            }
+            return cur;
+        }
+
+        @Override
+        public LongStatistic next() {
+            Iterator<LongStatistic> iter = getIter();
+            if (iter == null) {
+                throw new NoSuchElementException();
+            }
+            return iter.next();
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    public UnionStorageStatistics(String name, StorageStatistics[] stats) {
+        super(name);
+        Preconditions.checkArgument(name != null, "The name of union storage statistics can not be null!");
+        Preconditions.checkArgument(stats != null, "The stats of union storage statistics can not be null!");
+        for (StorageStatistics stat : stats) {
+            Preconditions.checkArgument(stat != null, "The stats of union storage statistics can not have null element!");
+        }
+        this.stats = stats;
     }
 
     @Override
-    public LongStatistic next() {
-      Iterator<LongStatistic> iter = getIter();
-      if (iter == null) {
-        throw new NoSuchElementException();
-      }
-      return iter.next();
+    public Iterator<LongStatistic> getLongStatistics() {
+        return new LongStatisticIterator();
     }
 
     @Override
-    public void remove() {
-      throw new UnsupportedOperationException();
-    }
-  }
-
-  public UnionStorageStatistics(String name, StorageStatistics[] stats) {
-    super(name);
-
-    Preconditions.checkArgument(name != null,
-        "The name of union storage statistics can not be null!");
-    Preconditions.checkArgument(stats != null,
-        "The stats of union storage statistics can not be null!");
-    for (StorageStatistics stat : stats) {
-      Preconditions.checkArgument(stat != null,
-          "The stats of union storage statistics can not have null element!");
+    public Long getLong(String key) {
+        for (StorageStatistics stat : stats) {
+            Long val = stat.getLong(key);
+            if (val != null) {
+                return val;
+            }
+        }
+        return null;
     }
 
-    this.stats = stats;
-  }
-
-  @Override
-  public Iterator<LongStatistic> getLongStatistics() {
-    return new LongStatisticIterator();
-  }
-
-  @Override
-  public Long getLong(String key) {
-    for (StorageStatistics stat : stats) {
-      Long val = stat.getLong(key);
-      if (val != null) {
-        return val;
-      }
+    /**
+     * Return true if a statistic is being tracked.
+     *
+     * @return         True only if the statistic is being tracked.
+     */
+    @Override
+    public boolean isTracked(String key) {
+        for (StorageStatistics stat : stats) {
+            if (stat.isTracked(key)) {
+                return true;
+            }
+        }
+        return false;
     }
-    return null;
-  }
 
-  /**
-   * Return true if a statistic is being tracked.
-   *
-   * @return         True only if the statistic is being tracked.
-   */
-  @Override
-  public boolean isTracked(String key) {
-    for (StorageStatistics stat : stats) {
-      if (stat.isTracked(key)) {
-        return true;
-      }
+    @Override
+    public void reset() {
+        for (StorageStatistics stat : stats) {
+            stat.reset();
+        }
     }
-    return false;
-  }
-
-  @Override
-  public void reset() {
-    for (StorageStatistics stat : stats) {
-      stat.reset();
-    }
-  }
 }

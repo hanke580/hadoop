@@ -19,7 +19,6 @@ package org.apache.hadoop.fs;
 
 import java.io.IOException;
 import java.io.Serializable;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.util.StringInterner;
@@ -60,286 +59,292 @@ import org.apache.hadoop.util.StringInterner;
 @InterfaceAudience.Public
 @InterfaceStability.Stable
 public class BlockLocation implements Serializable {
-  private static final long serialVersionUID = 0x22986f6d;
 
-  private String[] hosts; // Datanode hostnames
-  private String[] cachedHosts; // Datanode hostnames with a cached replica
-  private String[] names; // Datanode IP:xferPort for accessing the block
-  private String[] topologyPaths; // Full path name in network topology
-  private String[] storageIds; // Storage ID of each replica
-  private StorageType[] storageTypes; // Storage type of each replica
-  private long offset;  // Offset of the block in the file
-  private long length;
-  private boolean corrupt;
+    private static final long serialVersionUID = 0x22986f6d;
 
-  private static final String[] EMPTY_STR_ARRAY = new String[0];
-  private static final StorageType[] EMPTY_STORAGE_TYPE_ARRAY =
-      new StorageType[0];
+    // Datanode hostnames
+    private String[] hosts;
 
-  /**
-   * Default Constructor.
-   */
-  public BlockLocation() {
-    this(EMPTY_STR_ARRAY, EMPTY_STR_ARRAY, 0L, 0L);
-  }
+    // Datanode hostnames with a cached replica
+    private String[] cachedHosts;
 
-  /**
-   * Copy constructor.
-   */
-  public BlockLocation(BlockLocation that) {
-    this.hosts = that.hosts;
-    this.cachedHosts = that.cachedHosts;
-    this.names = that.names;
-    this.topologyPaths = that.topologyPaths;
-    this.offset = that.offset;
-    this.length = that.length;
-    this.corrupt = that.corrupt;
-    this.storageIds = that.storageIds;
-    this.storageTypes = that.storageTypes;
-  }
+    // Datanode IP:xferPort for accessing the block
+    private String[] names;
 
-  /**
-   * Constructor with host, name, offset and length.
-   */
-  public BlockLocation(String[] names, String[] hosts, long offset, 
-                       long length) {
-    this(names, hosts, offset, length, false);
-  }
+    // Full path name in network topology
+    private String[] topologyPaths;
 
-  /**
-   * Constructor with host, name, offset, length and corrupt flag.
-   */
-  public BlockLocation(String[] names, String[] hosts, long offset, 
-                       long length, boolean corrupt) {
-    this(names, hosts, null, offset, length, corrupt);
-  }
+    // Storage ID of each replica
+    private String[] storageIds;
 
-  /**
-   * Constructor with host, name, network topology, offset and length.
-   */
-  public BlockLocation(String[] names, String[] hosts, String[] topologyPaths,
-                       long offset, long length) {
-    this(names, hosts, topologyPaths, offset, length, false);
-  }
+    // Storage type of each replica
+    private StorageType[] storageTypes;
 
-  /**
-   * Constructor with host, name, network topology, offset, length 
-   * and corrupt flag.
-   */
-  public BlockLocation(String[] names, String[] hosts, String[] topologyPaths,
-                       long offset, long length, boolean corrupt) {
-    this(names, hosts, null, topologyPaths, offset, length, corrupt);
-  }
+    // Offset of the block in the file
+    private long offset;
 
-  public BlockLocation(String[] names, String[] hosts, String[] cachedHosts,
-      String[] topologyPaths, long offset, long length, boolean corrupt) {
-    this(names, hosts, cachedHosts, topologyPaths, null, null, offset, length,
-        corrupt);
-  }
+    private long length;
 
-  public BlockLocation(String[] names, String[] hosts, String[] cachedHosts,
-      String[] topologyPaths, String[] storageIds, StorageType[] storageTypes,
-      long offset, long length, boolean corrupt) {
-    if (names == null) {
-      this.names = EMPTY_STR_ARRAY;
-    } else {
-      this.names = StringInterner.internStringsInArray(names);
+    private boolean corrupt;
+
+    private static final String[] EMPTY_STR_ARRAY = new String[0];
+
+    private static final StorageType[] EMPTY_STORAGE_TYPE_ARRAY = new StorageType[0];
+
+    /**
+     * Default Constructor.
+     */
+    public BlockLocation() {
+        this(EMPTY_STR_ARRAY, EMPTY_STR_ARRAY, 0L, 0L);
     }
-    if (hosts == null) {
-      this.hosts = EMPTY_STR_ARRAY;
-    } else {
-      this.hosts = StringInterner.internStringsInArray(hosts);
+
+    /**
+     * Copy constructor.
+     */
+    public BlockLocation(BlockLocation that) {
+        this.hosts = that.hosts;
+        this.cachedHosts = that.cachedHosts;
+        this.names = that.names;
+        this.topologyPaths = that.topologyPaths;
+        this.offset = that.offset;
+        this.length = that.length;
+        this.corrupt = that.corrupt;
+        this.storageIds = that.storageIds;
+        this.storageTypes = that.storageTypes;
     }
-    if (cachedHosts == null) {
-      this.cachedHosts = EMPTY_STR_ARRAY;
-    } else {
-      this.cachedHosts = StringInterner.internStringsInArray(cachedHosts);
+
+    /**
+     * Constructor with host, name, offset and length.
+     */
+    public BlockLocation(String[] names, String[] hosts, long offset, long length) {
+        this(names, hosts, offset, length, false);
     }
-    if (topologyPaths == null) {
-      this.topologyPaths = EMPTY_STR_ARRAY;
-    } else {
-      this.topologyPaths = StringInterner.internStringsInArray(topologyPaths);
+
+    /**
+     * Constructor with host, name, offset, length and corrupt flag.
+     */
+    public BlockLocation(String[] names, String[] hosts, long offset, long length, boolean corrupt) {
+        this(names, hosts, null, offset, length, corrupt);
     }
-    if (storageIds == null) {
-      this.storageIds = EMPTY_STR_ARRAY;
-    } else {
-      this.storageIds = StringInterner.internStringsInArray(storageIds);
+
+    /**
+     * Constructor with host, name, network topology, offset and length.
+     */
+    public BlockLocation(String[] names, String[] hosts, String[] topologyPaths, long offset, long length) {
+        this(names, hosts, topologyPaths, offset, length, false);
     }
-    if (storageTypes == null) {
-      this.storageTypes = EMPTY_STORAGE_TYPE_ARRAY;
-    } else {
-      this.storageTypes = storageTypes;
+
+    /**
+     * Constructor with host, name, network topology, offset, length
+     * and corrupt flag.
+     */
+    public BlockLocation(String[] names, String[] hosts, String[] topologyPaths, long offset, long length, boolean corrupt) {
+        this(names, hosts, null, topologyPaths, offset, length, corrupt);
     }
-    this.offset = offset;
-    this.length = length;
-    this.corrupt = corrupt;
-  }
 
-  /**
-   * Get the list of hosts (hostname) hosting this block.
-   */
-  public String[] getHosts() throws IOException {
-    return hosts;
-  }
-
-  /**
-   * Get the list of hosts (hostname) hosting a cached replica of the block.
-   */
-  public String[] getCachedHosts() {
-    return cachedHosts;
-  }
-
-  /**
-   * Get the list of names (IP:xferPort) hosting this block.
-   */
-  public String[] getNames() throws IOException {
-    return names;
-  }
-
-  /**
-   * Get the list of network topology paths for each of the hosts.
-   * The last component of the path is the "name" (IP:xferPort).
-   */
-  public String[] getTopologyPaths() throws IOException {
-    return topologyPaths;
-  }
-
-  /**
-   * Get the storageID of each replica of the block.
-   */
-  public String[] getStorageIds() {
-    return storageIds;
-  }
-
-  /**
-   * Get the storage type of each replica of the block.
-   */
-  public StorageType[] getStorageTypes() {
-    return storageTypes;
-  }
-
-  /**
-   * Get the start offset of file associated with this block.
-   */
-  public long getOffset() {
-    return offset;
-  }
-  
-  /**
-   * Get the length of the block.
-   */
-  public long getLength() {
-    return length;
-  }
-
-  /**
-   * Get the corrupt flag.
-   */
-  public boolean isCorrupt() {
-    return corrupt;
-  }
-
-  /**
-   * Return true if the block is striped (erasure coded).
-   */
-  public boolean isStriped() {
-    return false;
-  }
-
-  /**
-   * Set the start offset of file associated with this block.
-   */
-  public void setOffset(long offset) {
-    this.offset = offset;
-  }
-
-  /**
-   * Set the length of block.
-   */
-  public void setLength(long length) {
-    this.length = length;
-  }
-
-  /**
-   * Set the corrupt flag.
-   */
-  public void setCorrupt(boolean corrupt) {
-    this.corrupt = corrupt;
-  }
-
-  /**
-   * Set the hosts hosting this block.
-   */
-  public void setHosts(String[] hosts) throws IOException {
-    if (hosts == null) {
-      this.hosts = EMPTY_STR_ARRAY;
-    } else {
-      this.hosts = StringInterner.internStringsInArray(hosts);
+    public BlockLocation(String[] names, String[] hosts, String[] cachedHosts, String[] topologyPaths, long offset, long length, boolean corrupt) {
+        this(names, hosts, cachedHosts, topologyPaths, null, null, offset, length, corrupt);
     }
-  }
 
-  /**
-   * Set the hosts hosting a cached replica of this block.
-   */
-  public void setCachedHosts(String[] cachedHosts) {
-    if (cachedHosts == null) {
-      this.cachedHosts = EMPTY_STR_ARRAY;
-    } else {
-      this.cachedHosts = StringInterner.internStringsInArray(cachedHosts);
+    public BlockLocation(String[] names, String[] hosts, String[] cachedHosts, String[] topologyPaths, String[] storageIds, StorageType[] storageTypes, long offset, long length, boolean corrupt) {
+        if (names == null) {
+            this.names = EMPTY_STR_ARRAY;
+        } else {
+            this.names = StringInterner.internStringsInArray(names);
+        }
+        if (hosts == null) {
+            this.hosts = EMPTY_STR_ARRAY;
+        } else {
+            this.hosts = StringInterner.internStringsInArray(hosts);
+        }
+        if (cachedHosts == null) {
+            this.cachedHosts = EMPTY_STR_ARRAY;
+        } else {
+            this.cachedHosts = StringInterner.internStringsInArray(cachedHosts);
+        }
+        if (topologyPaths == null) {
+            this.topologyPaths = EMPTY_STR_ARRAY;
+        } else {
+            this.topologyPaths = StringInterner.internStringsInArray(topologyPaths);
+        }
+        if (storageIds == null) {
+            this.storageIds = EMPTY_STR_ARRAY;
+        } else {
+            this.storageIds = StringInterner.internStringsInArray(storageIds);
+        }
+        if (storageTypes == null) {
+            this.storageTypes = EMPTY_STORAGE_TYPE_ARRAY;
+        } else {
+            this.storageTypes = storageTypes;
+        }
+        this.offset = offset;
+        this.length = length;
+        this.corrupt = corrupt;
     }
-  }
 
-  /**
-   * Set the names (host:port) hosting this block.
-   */
-  public void setNames(String[] names) throws IOException {
-    if (names == null) {
-      this.names = EMPTY_STR_ARRAY;
-    } else {
-      this.names = StringInterner.internStringsInArray(names);
+    /**
+     * Get the list of hosts (hostname) hosting this block.
+     */
+    public String[] getHosts() throws IOException {
+        return hosts;
     }
-  }
 
-  /**
-   * Set the network topology paths of the hosts.
-   */
-  public void setTopologyPaths(String[] topologyPaths) throws IOException {
-    if (topologyPaths == null) {
-      this.topologyPaths = EMPTY_STR_ARRAY;
-    } else {
-      this.topologyPaths = StringInterner.internStringsInArray(topologyPaths);
+    /**
+     * Get the list of hosts (hostname) hosting a cached replica of the block.
+     */
+    public String[] getCachedHosts() {
+        return cachedHosts;
     }
-  }
 
-  public void setStorageIds(String[] storageIds) {
-    if (storageIds == null) {
-      this.storageIds = EMPTY_STR_ARRAY;
-    } else {
-      this.storageIds = StringInterner.internStringsInArray(storageIds);
+    /**
+     * Get the list of names (IP:xferPort) hosting this block.
+     */
+    public String[] getNames() throws IOException {
+        return names;
     }
-  }
 
-  public void setStorageTypes(StorageType[] storageTypes) {
-    if (storageTypes == null) {
-      this.storageTypes = EMPTY_STORAGE_TYPE_ARRAY;
-    } else {
-      this.storageTypes = storageTypes;
+    /**
+     * Get the list of network topology paths for each of the hosts.
+     * The last component of the path is the "name" (IP:xferPort).
+     */
+    public String[] getTopologyPaths() throws IOException {
+        return topologyPaths;
     }
-  }
 
-  @Override
-  public String toString() {
-    StringBuilder result = new StringBuilder();
-    result.append(offset)
-        .append(',')
-        .append(length);
-    if (corrupt) {
-      result.append("(corrupt)");
+    /**
+     * Get the storageID of each replica of the block.
+     */
+    public String[] getStorageIds() {
+        return storageIds;
     }
-    for(String h: hosts) {
-      result.append(',');
-      result.append(h);
+
+    /**
+     * Get the storage type of each replica of the block.
+     */
+    public StorageType[] getStorageTypes() {
+        return storageTypes;
     }
-    return result.toString();
-  }
+
+    /**
+     * Get the start offset of file associated with this block.
+     */
+    public long getOffset() {
+        return offset;
+    }
+
+    /**
+     * Get the length of the block.
+     */
+    public long getLength() {
+        return length;
+    }
+
+    /**
+     * Get the corrupt flag.
+     */
+    public boolean isCorrupt() {
+        return corrupt;
+    }
+
+    /**
+     * Return true if the block is striped (erasure coded).
+     */
+    public boolean isStriped() {
+        return false;
+    }
+
+    /**
+     * Set the start offset of file associated with this block.
+     */
+    public void setOffset(long offset) {
+        this.offset = offset;
+    }
+
+    /**
+     * Set the length of block.
+     */
+    public void setLength(long length) {
+        this.length = length;
+    }
+
+    /**
+     * Set the corrupt flag.
+     */
+    public void setCorrupt(boolean corrupt) {
+        this.corrupt = corrupt;
+    }
+
+    /**
+     * Set the hosts hosting this block.
+     */
+    public void setHosts(String[] hosts) throws IOException {
+        if (hosts == null) {
+            this.hosts = EMPTY_STR_ARRAY;
+        } else {
+            this.hosts = StringInterner.internStringsInArray(hosts);
+        }
+    }
+
+    /**
+     * Set the hosts hosting a cached replica of this block.
+     */
+    public void setCachedHosts(String[] cachedHosts) {
+        if (cachedHosts == null) {
+            this.cachedHosts = EMPTY_STR_ARRAY;
+        } else {
+            this.cachedHosts = StringInterner.internStringsInArray(cachedHosts);
+        }
+    }
+
+    /**
+     * Set the names (host:port) hosting this block.
+     */
+    public void setNames(String[] names) throws IOException {
+        if (names == null) {
+            this.names = EMPTY_STR_ARRAY;
+        } else {
+            this.names = StringInterner.internStringsInArray(names);
+        }
+    }
+
+    /**
+     * Set the network topology paths of the hosts.
+     */
+    public void setTopologyPaths(String[] topologyPaths) throws IOException {
+        if (topologyPaths == null) {
+            this.topologyPaths = EMPTY_STR_ARRAY;
+        } else {
+            this.topologyPaths = StringInterner.internStringsInArray(topologyPaths);
+        }
+    }
+
+    public void setStorageIds(String[] storageIds) {
+        if (storageIds == null) {
+            this.storageIds = EMPTY_STR_ARRAY;
+        } else {
+            this.storageIds = StringInterner.internStringsInArray(storageIds);
+        }
+    }
+
+    public void setStorageTypes(StorageType[] storageTypes) {
+        if (storageTypes == null) {
+            this.storageTypes = EMPTY_STORAGE_TYPE_ARRAY;
+        } else {
+            this.storageTypes = storageTypes;
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append(offset).append(',').append(length);
+        if (corrupt) {
+            result.append("(corrupt)");
+        }
+        for (String h : hosts) {
+            result.append(',');
+            result.append(h);
+        }
+        return result.toString();
+    }
 }

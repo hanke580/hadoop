@@ -18,7 +18,6 @@
 package org.apache.hadoop.ipc;
 
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
@@ -30,13 +29,13 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Private
 @InterfaceStability.Stable
 public interface ProtocolMetaInterface {
-  
-  /**
-   * Checks whether the given method name is supported by the server.
-   * It is assumed that all method names are unique for a protocol.
-   * @param methodName The name of the method
-   * @return true if method is supported, otherwise false.
-   * @throws IOException
-   */
-  public boolean isMethodSupported(String methodName) throws IOException;
+
+    /**
+     * Checks whether the given method name is supported by the server.
+     * It is assumed that all method names are unique for a protocol.
+     * @param methodName The name of the method
+     * @return true if method is supported, otherwise false.
+     * @throws IOException
+     */
+    public boolean isMethodSupported(String methodName) throws IOException;
 }

@@ -29,13 +29,8 @@ import org.apache.hadoop.security.KerberosInfo;
  * Note: This extends the protocolbuffer service based interface to
  * add annotations required for security.
  */
-@KerberosInfo(
-    serverPrincipal = DFSConfigKeys.DFS_JOURNALNODE_KERBEROS_PRINCIPAL_KEY,
-    clientPrincipal = DFSConfigKeys.DFS_NAMENODE_KERBEROS_PRINCIPAL_KEY)
-@ProtocolInfo(protocolName = 
-    "org.apache.hadoop.hdfs.qjournal.protocol.QJournalProtocol",
-    protocolVersion = 1)
+@KerberosInfo(serverPrincipal = DFSConfigKeys.DFS_JOURNALNODE_KERBEROS_PRINCIPAL_KEY, clientPrincipal = DFSConfigKeys.DFS_NAMENODE_KERBEROS_PRINCIPAL_KEY)
+@ProtocolInfo(protocolName = "org.apache.hadoop.hdfs.qjournal.protocol.QJournalProtocol", protocolVersion = 1)
 @InterfaceAudience.Private
-public interface QJournalProtocolPB extends
-    QJournalProtocolService.BlockingInterface {
+public interface QJournalProtocolPB extends QJournalProtocolService.BlockingInterface {
 }

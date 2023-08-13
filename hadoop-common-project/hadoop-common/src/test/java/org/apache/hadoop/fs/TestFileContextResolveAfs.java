@@ -15,13 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.fs;
-
 
 import java.io.IOException;
 import java.util.Set;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.test.GenericTestUtils;
 import org.junit.Assert;
@@ -32,37 +29,35 @@ import org.junit.Test;
  * Tests resolution of AbstractFileSystems for a given path with symlinks.
  */
 public class TestFileContextResolveAfs {
-  static {
-    FileSystem.enableSymlinks();
-  }
 
-  private static String TEST_ROOT_DIR_LOCAL =
-      GenericTestUtils.getTestDir().getAbsolutePath();
+    static {
+        FileSystem.enableSymlinks();
+    }
 
-  private FileContext fc;
-  private FileSystem localFs;
-  
-  @Before
-  public void setup() throws IOException {
-    fc = FileContext.getFileContext();
-  }
-  
-  @Test (timeout = 30000)
-  public void testFileContextResolveAfs() throws IOException {
-    Configuration conf = new Configuration();
-    localFs = FileSystem.get(conf);
-    
-    Path localPath = new Path(TEST_ROOT_DIR_LOCAL + "/TestFileContextResolveAfs1");
-    Path linkPath = localFs.makeQualified(new Path(TEST_ROOT_DIR_LOCAL,
-      "TestFileContextResolveAfs2"));
-    localFs.mkdirs(new Path(TEST_ROOT_DIR_LOCAL));
-    localFs.create(localPath);
-    
-    fc.createSymlink(localPath, linkPath, true);
-    Set<AbstractFileSystem> afsList = fc.resolveAbstractFileSystems(linkPath);
-    Assert.assertEquals(1, afsList.size());
-    localFs.deleteOnExit(localPath);
-    localFs.deleteOnExit(linkPath);
-    localFs.close();
-  }
+    private static String TEST_ROOT_DIR_LOCAL = GenericTestUtils.getTestDir().getAbsolutePath();
+
+    private FileContext fc;
+
+    private FileSystem localFs;
+
+    @Before
+    public void setup() throws IOException {
+        fc = FileContext.getFileContext();
+    }
+
+    @Test(timeout = 30000)
+    public void testFileContextResolveAfs() throws IOException {
+        Configuration conf = new Configuration();
+        localFs = FileSystem.get(conf);
+        Path localPath = new Path(TEST_ROOT_DIR_LOCAL + "/TestFileContextResolveAfs1");
+        Path linkPath = localFs.makeQualified(new Path(TEST_ROOT_DIR_LOCAL, "TestFileContextResolveAfs2"));
+        localFs.mkdirs(new Path(TEST_ROOT_DIR_LOCAL));
+        localFs.create(localPath);
+        fc.createSymlink(localPath, linkPath, true);
+        Set<AbstractFileSystem> afsList = fc.resolveAbstractFileSystems(linkPath);
+        Assert.assertEquals(1, afsList.size());
+        localFs.deleteOnExit(localPath);
+        localFs.deleteOnExit(linkPath);
+        localFs.close();
+    }
 }

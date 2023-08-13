@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.fs.http.server;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -29,15 +28,14 @@ import org.apache.hadoop.lib.servlet.FileSystemReleaseFilter;
 @InterfaceAudience.Private
 public class HttpFSReleaseFilter extends FileSystemReleaseFilter {
 
-  /**
-   * Returns the {@link FileSystemAccess} service to return the FileSystemAccess filesystem
-   * instance to.
-   *
-   * @return the FileSystemAccess service.
-   */
-  @Override
-  protected FileSystemAccess getFileSystemAccess() {
-    return HttpFSServerWebApp.get().get(FileSystemAccess.class);
-  }
-
+    /**
+     * Returns the {@link FileSystemAccess} service to return the FileSystemAccess filesystem
+     * instance to.
+     *
+     * @return the FileSystemAccess service.
+     */
+    @Override
+    protected FileSystemAccess getFileSystemAccess() {
+        return HttpFSServerWebApp.get().get(FileSystemAccess.class);
+    }
 }

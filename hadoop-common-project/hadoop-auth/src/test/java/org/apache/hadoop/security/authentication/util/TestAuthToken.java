@@ -19,109 +19,108 @@ import org.junit.Test;
 
 public class TestAuthToken {
 
-  @Test
-  public void testConstructor() throws Exception {
-    try {
-      new AuthToken(null, "p", "t");
-      Assert.fail();
-    } catch (IllegalArgumentException ex) {
-      // Expected
-    } catch (Throwable ex) {
-      Assert.fail();
+    @Test
+    public void testConstructor() throws Exception {
+        try {
+            new AuthToken(null, "p", "t");
+            Assert.fail();
+        } catch (IllegalArgumentException ex) {
+            // Expected
+        } catch (Throwable ex) {
+            Assert.fail();
+        }
+        try {
+            new AuthToken("", "p", "t");
+            Assert.fail();
+        } catch (IllegalArgumentException ex) {
+            // Expected
+        } catch (Throwable ex) {
+            Assert.fail();
+        }
+        try {
+            new AuthToken("u", null, "t");
+            Assert.fail();
+        } catch (IllegalArgumentException ex) {
+            // Expected
+        } catch (Throwable ex) {
+            Assert.fail();
+        }
+        try {
+            new AuthToken("u", "", "t");
+            Assert.fail();
+        } catch (IllegalArgumentException ex) {
+            // Expected
+        } catch (Throwable ex) {
+            Assert.fail();
+        }
+        try {
+            new AuthToken("u", "p", null);
+            Assert.fail();
+        } catch (IllegalArgumentException ex) {
+            // Expected
+        } catch (Throwable ex) {
+            Assert.fail();
+        }
+        try {
+            new AuthToken("u", "p", "");
+            Assert.fail();
+        } catch (IllegalArgumentException ex) {
+            // Expected
+        } catch (Throwable ex) {
+            Assert.fail();
+        }
+        new AuthToken("u", "p", "t");
     }
-    try {
-      new AuthToken("", "p", "t");
-      Assert.fail();
-    } catch (IllegalArgumentException ex) {
-      // Expected
-    } catch (Throwable ex) {
-      Assert.fail();
-    }
-    try {
-      new AuthToken("u", null, "t");
-      Assert.fail();
-    } catch (IllegalArgumentException ex) {
-      // Expected
-    } catch (Throwable ex) {
-      Assert.fail();
-    }
-    try {
-      new AuthToken("u", "", "t");
-      Assert.fail();
-    } catch (IllegalArgumentException ex) {
-      // Expected
-    } catch (Throwable ex) {
-      Assert.fail();
-    }
-    try {
-      new AuthToken("u", "p", null);
-      Assert.fail();
-    } catch (IllegalArgumentException ex) {
-      // Expected
-    } catch (Throwable ex) {
-      Assert.fail();
-    }
-    try {
-      new AuthToken("u", "p", "");
-      Assert.fail();
-    } catch (IllegalArgumentException ex) {
-      // Expected
-    } catch (Throwable ex) {
-      Assert.fail();
-    }
-    new AuthToken("u", "p", "t");
-  }
 
-  @Test
-  public void testGetters() throws Exception {
-    long expires = System.currentTimeMillis() + 50;
-    AuthToken token = new AuthToken("u", "p", "t");
-    token.setExpires(expires);
-    Assert.assertEquals("u", token.getUserName());
-    Assert.assertEquals("p", token.getName());
-    Assert.assertEquals("t", token.getType());
-    Assert.assertEquals(expires, token.getExpires());
-    Assert.assertFalse(token.isExpired());
-    Thread.sleep(70);               // +20 msec fuzz for timer granularity.
-    Assert.assertTrue(token.isExpired());
-  }
-
-  @Test
-  public void testToStringAndParse() throws Exception {
-    long expires = System.currentTimeMillis() + 50;
-    AuthToken token = new AuthToken("u", "p", "t");
-    token.setExpires(expires);
-    String str = token.toString();
-    token = AuthToken.parse(str);
-    Assert.assertEquals("p", token.getName());
-    Assert.assertEquals("t", token.getType());
-    Assert.assertEquals(expires, token.getExpires());
-    Assert.assertFalse(token.isExpired());
-    Thread.sleep(70);               // +20 msec fuzz for timer granularity.
-    Assert.assertTrue(token.isExpired());
-  }
-
-  @Test
-  public void testParseValidAndInvalid() throws Exception {
-    long expires = System.currentTimeMillis() + 50;
-    AuthToken token = new AuthToken("u", "p", "t");
-    token.setExpires(expires);
-    String ostr = token.toString();
-
-    String str1 = "\"" + ostr + "\"";
-    AuthToken.parse(str1);
-    
-    String str2 = ostr + "&s=1234";
-    AuthToken.parse(str2);
-
-    String str = ostr.substring(0, ostr.indexOf("e="));
-    try {
-      AuthToken.parse(str);
-      Assert.fail();
-    } catch (AuthenticationException ex) {
-      // Expected
-    } catch (Exception ex) {
-      Assert.fail();
+    @Test
+    public void testGetters() throws Exception {
+        long expires = System.currentTimeMillis() + 50;
+        AuthToken token = new AuthToken("u", "p", "t");
+        token.setExpires(expires);
+        Assert.assertEquals("u", token.getUserName());
+        Assert.assertEquals("p", token.getName());
+        Assert.assertEquals("t", token.getType());
+        Assert.assertEquals(expires, token.getExpires());
+        Assert.assertFalse(token.isExpired());
+        // +20 msec fuzz for timer granularity.
+        Thread.sleep(70);
+        Assert.assertTrue(token.isExpired());
     }
-  }
+
+    @Test
+    public void testToStringAndParse() throws Exception {
+        long expires = System.currentTimeMillis() + 50;
+        AuthToken token = new AuthToken("u", "p", "t");
+        token.setExpires(expires);
+        String str = token.toString();
+        token = AuthToken.parse(str);
+        Assert.assertEquals("p", token.getName());
+        Assert.assertEquals("t", token.getType());
+        Assert.assertEquals(expires, token.getExpires());
+        Assert.assertFalse(token.isExpired());
+        // +20 msec fuzz for timer granularity.
+        Thread.sleep(70);
+        Assert.assertTrue(token.isExpired());
+    }
+
+    @Test
+    public void testParseValidAndInvalid() throws Exception {
+        long expires = System.currentTimeMillis() + 50;
+        AuthToken token = new AuthToken("u", "p", "t");
+        token.setExpires(expires);
+        String ostr = token.toString();
+        String str1 = "\"" + ostr + "\"";
+        AuthToken.parse(str1);
+        String str2 = ostr + "&s=1234";
+        AuthToken.parse(str2);
+        String str = ostr.substring(0, ostr.indexOf("e="));
+        try {
+            AuthToken.parse(str);
+            Assert.fail();
+        } catch (AuthenticationException ex) {
+            // Expected
+        } catch (Exception ex) {
+            Assert.fail();
+        }
+    }
 }

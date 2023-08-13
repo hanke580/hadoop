@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.metrics2.lib;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -28,7 +27,7 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceStability.Evolving
 public class MutableRate extends MutableStat {
 
-  MutableRate(String name, String description, boolean extended) {
-    super(name, description, "Ops", "Time", extended);
-  }
+    MutableRate(String name, String description, boolean extended) {
+        super(name, description, "Ops", "Time", extended);
+    }
 }

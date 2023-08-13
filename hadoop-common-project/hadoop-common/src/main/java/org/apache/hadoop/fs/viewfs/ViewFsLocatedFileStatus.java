@@ -22,110 +22,111 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.LocatedFileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.permission.FsPermission;
-
 import java.io.IOException;
 
 class ViewFsLocatedFileStatus extends LocatedFileStatus {
-  final LocatedFileStatus myFs;
-  Path modifiedPath;
 
-  ViewFsLocatedFileStatus(LocatedFileStatus locatedFileStatus, Path path) {
-    myFs = locatedFileStatus;
-    modifiedPath = path;
-  }
+    final LocatedFileStatus myFs;
 
-  @Override
-  public long getLen() {
-    return myFs.getLen();
-  }
+    Path modifiedPath;
 
-  @Override
-  public boolean isFile() {
-    return myFs.isFile();
-  }
+    ViewFsLocatedFileStatus(LocatedFileStatus locatedFileStatus, Path path) {
+        myFs = locatedFileStatus;
+        modifiedPath = path;
+    }
 
-  @Override
-  public boolean isDirectory() {
-    return myFs.isDirectory();
-  }
+    @Override
+    public long getLen() {
+        return myFs.getLen();
+    }
 
-  @Override
-  public boolean isSymlink() {
-    return myFs.isSymlink();
-  }
+    @Override
+    public boolean isFile() {
+        return myFs.isFile();
+    }
 
-  @Override
-  public long getBlockSize() {
-    return myFs.getBlockSize();
-  }
+    @Override
+    public boolean isDirectory() {
+        return myFs.isDirectory();
+    }
 
-  @Override
-  public short getReplication() {
-    return myFs.getReplication();
-  }
+    @Override
+    public boolean isSymlink() {
+        return myFs.isSymlink();
+    }
 
-  @Override
-  public long getModificationTime() {
-    return myFs.getModificationTime();
-  }
+    @Override
+    public long getBlockSize() {
+        return myFs.getBlockSize();
+    }
 
-  @Override
-  public long getAccessTime() {
-    return myFs.getAccessTime();
-  }
+    @Override
+    public short getReplication() {
+        return myFs.getReplication();
+    }
 
-  @Override
-  public FsPermission getPermission() {
-    return myFs.getPermission();
-  }
+    @Override
+    public long getModificationTime() {
+        return myFs.getModificationTime();
+    }
 
-  @Override
-  public String getOwner() {
-    return myFs.getOwner();
-  }
+    @Override
+    public long getAccessTime() {
+        return myFs.getAccessTime();
+    }
 
-  @Override
-  public String getGroup() {
-    return myFs.getGroup();
-  }
+    @Override
+    public FsPermission getPermission() {
+        return myFs.getPermission();
+    }
 
-  @Override
-  public Path getPath() {
-    return modifiedPath;
-  }
+    @Override
+    public String getOwner() {
+        return myFs.getOwner();
+    }
 
-  @Override
-  public void setPath(final Path p) {
-    modifiedPath = p;
-  }
+    @Override
+    public String getGroup() {
+        return myFs.getGroup();
+    }
 
-  @Override
-  public Path getSymlink() throws IOException {
-    return myFs.getSymlink();
-  }
+    @Override
+    public Path getPath() {
+        return modifiedPath;
+    }
 
-  @Override
-  public void setSymlink(Path p) {
-    myFs.setSymlink(p);
-  }
+    @Override
+    public void setPath(final Path p) {
+        modifiedPath = p;
+    }
 
-  @Override
-  public BlockLocation[] getBlockLocations() {
-    return myFs.getBlockLocations();
-  }
+    @Override
+    public Path getSymlink() throws IOException {
+        return myFs.getSymlink();
+    }
 
-  @Override
-  public int compareTo(FileStatus o) {
-    return super.compareTo(o);
-  }
+    @Override
+    public void setSymlink(Path p) {
+        myFs.setSymlink(p);
+    }
 
-  @Override
-  public boolean equals(Object o) {
-    return super.equals(o);
-  }
+    @Override
+    public BlockLocation[] getBlockLocations() {
+        return myFs.getBlockLocations();
+    }
 
-  @Override
-  public int hashCode() {
-    return super.hashCode();
-  }
+    @Override
+    public int compareTo(FileStatus o) {
+        return super.compareTo(o);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 }

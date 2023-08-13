@@ -26,35 +26,28 @@ import static org.junit.Assert.*;
  * Test that the {@link NullGroupsMapping} really does nothing.
  */
 public class TestNullGroupsMapping {
-  private NullGroupsMapping ngm;
 
-  @Before
-  public void setUp() {
-    this.ngm = new NullGroupsMapping();
-  }
+    private NullGroupsMapping ngm;
 
-  /**
-   * Test of getGroups method, of class {@link NullGroupsMapping}.
-   */
-  @Test
-  public void testGetGroups() {
-    String user = "user";
-    List<String> expResult = Collections.emptyList();
-    List<String> result = ngm.getGroups(user);
+    @Before
+    public void setUp() {
+        this.ngm = new NullGroupsMapping();
+    }
 
-    assertEquals("No groups should be returned",
-        expResult, result);
-
-    ngm.cacheGroupsAdd(Arrays.asList(new String[] {"group1", "group2"}));
-    result = ngm.getGroups(user);
-
-    assertEquals("No groups should be returned",
-        expResult, result);
-
-    ngm.cacheGroupsRefresh();
-    result = ngm.getGroups(user);
-
-    assertEquals("No groups should be returned",
-        expResult, result);
-  }
+    /**
+     * Test of getGroups method, of class {@link NullGroupsMapping}.
+     */
+    @Test
+    public void testGetGroups() {
+        String user = "user";
+        List<String> expResult = Collections.emptyList();
+        List<String> result = ngm.getGroups(user);
+        assertEquals("No groups should be returned", expResult, result);
+        ngm.cacheGroupsAdd(Arrays.asList(new String[] { "group1", "group2" }));
+        result = ngm.getGroups(user);
+        assertEquals("No groups should be returned", expResult, result);
+        ngm.cacheGroupsRefresh();
+        result = ngm.getGroups(user);
+        assertEquals("No groups should be returned", expResult, result);
+    }
 }

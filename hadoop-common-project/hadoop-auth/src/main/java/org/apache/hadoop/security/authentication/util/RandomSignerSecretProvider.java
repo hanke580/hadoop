@@ -14,10 +14,8 @@
 package org.apache.hadoop.security.authentication.util;
 
 import com.google.common.annotations.VisibleForTesting;
-
 import java.security.SecureRandom;
 import java.util.Random;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
@@ -29,28 +27,29 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Private
 public class RandomSignerSecretProvider extends RolloverSignerSecretProvider {
 
-  private final Random rand;
+    private final Random rand;
 
-  public RandomSignerSecretProvider() {
-    super();
-    rand = new SecureRandom();
-  }
+    public RandomSignerSecretProvider() {
+        super();
+        rand = new SecureRandom();
+    }
 
-  /**
-   * This constructor lets you set the seed of the Random Number Generator and
-   * is meant for testing.
-   * @param seed the seed for the random number generator
-   */
-  @VisibleForTesting
-  public RandomSignerSecretProvider(long seed) {
-    super();
-    rand = new Random(seed);
-  }
+    /**
+     * This constructor lets you set the seed of the Random Number Generator and
+     * is meant for testing.
+     * @param seed the seed for the random number generator
+     */
+    @VisibleForTesting
+    public RandomSignerSecretProvider(long seed) {
+        super();
+        rand = new Random(seed);
+    }
 
-  @Override
-  protected byte[] generateNewSecret() {
-    byte[] secret = new byte[32]; // 32 bytes = 256 bits
-    rand.nextBytes(secret);
-    return secret;
-  }
+    @Override
+    protected byte[] generateNewSecret() {
+        // 32 bytes = 256 bits
+        byte[] secret = new byte[32];
+        rand.nextBytes(secret);
+        return secret;
+    }
 }

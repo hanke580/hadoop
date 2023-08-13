@@ -29,170 +29,155 @@ import org.apache.hadoop.io.erasurecode.ErasureCoderOptions;
  * It implements the {@link ErasureCoder} interface.
  */
 @InterfaceAudience.Private
-public abstract class ErasureDecoder extends Configured
-    implements ErasureCoder {
-  private final int numDataUnits;
-  private final int numParityUnits;
-  private final ErasureCoderOptions options;
+public abstract class ErasureDecoder extends Configured implements ErasureCoder {
 
-  public ErasureDecoder(ErasureCoderOptions options) {
-    this.options = options;
-    this.numDataUnits = options.getNumDataUnits();
-    this.numParityUnits = options.getNumParityUnits();
-  }
+    private final int numDataUnits;
 
-  @Override
-  public ErasureCodingStep calculateCoding(ECBlockGroup blockGroup) {
-    // We may have more than this when considering complicate cases. HADOOP-11550
-    return prepareDecodingStep(blockGroup);
-  }
+    private final int numParityUnits;
 
-  @Override
-  public int getNumDataUnits() {
-    return this.numDataUnits;
-  }
+    private final ErasureCoderOptions options;
 
-  @Override
-  public int getNumParityUnits() {
-    return this.numParityUnits;
-  }
-
-  @Override
-  public ErasureCoderOptions getOptions() {
-    return options;
-  }
-
-  /**
-   * We have all the data blocks and parity blocks as input blocks for
-   * recovering by default. It's codec specific
-   * @param blockGroup
-   * @return input blocks
-   */
-  protected ECBlock[] getInputBlocks(ECBlockGroup blockGroup) {
-    ECBlock[] inputBlocks = new ECBlock[getNumDataUnits() +
-            getNumParityUnits()];
-
-    System.arraycopy(blockGroup.getDataBlocks(), 0, inputBlocks,
-            0, getNumDataUnits());
-
-    System.arraycopy(blockGroup.getParityBlocks(), 0, inputBlocks,
-            getNumDataUnits(), getNumParityUnits());
-
-    return inputBlocks;
-  }
-
-  /**
-   * Which blocks were erased ?
-   * @param blockGroup
-   * @return output blocks to recover
-   */
-  protected ECBlock[] getOutputBlocks(ECBlockGroup blockGroup) {
-    ECBlock[] outputBlocks = new ECBlock[getNumErasedBlocks(blockGroup)];
-
-    int idx = 0;
-
-    for (int i = 0; i < getNumDataUnits(); i++) {
-      if (blockGroup.getDataBlocks()[i].isErased()) {
-        outputBlocks[idx++] = blockGroup.getDataBlocks()[i];
-      }
+    public ErasureDecoder(ErasureCoderOptions options) {
+        this.options = options;
+        this.numDataUnits = options.getNumDataUnits();
+        this.numParityUnits = options.getNumParityUnits();
     }
 
-    for (int i = 0; i < getNumParityUnits(); i++) {
-      if (blockGroup.getParityBlocks()[i].isErased()) {
-        outputBlocks[idx++] = blockGroup.getParityBlocks()[i];
-      }
+    @Override
+    public ErasureCodingStep calculateCoding(ECBlockGroup blockGroup) {
+        // We may have more than this when considering complicate cases. HADOOP-11550
+        return prepareDecodingStep(blockGroup);
     }
 
-    return outputBlocks;
-  }
-
-  @Override
-  public boolean preferDirectBuffer() {
-    return false;
-  }
-
-  @Override
-  public void release() {
-    // Nothing to do by default
-  }
-
-  /**
-   * Perform decoding against a block blockGroup.
-   * @param blockGroup
-   * @return decoding step for caller to do the real work
-   */
-  protected abstract ErasureCodingStep prepareDecodingStep(
-      ECBlockGroup blockGroup);
-
-  /**
-   * Get the number of erased blocks in the block group.
-   * @param blockGroup
-   * @return number of erased blocks
-   */
-  protected int getNumErasedBlocks(ECBlockGroup blockGroup) {
-    int num = getNumErasedBlocks(blockGroup.getParityBlocks());
-    num += getNumErasedBlocks(blockGroup.getDataBlocks());
-    return num;
-  }
-
-  /**
-   * Find out how many blocks are erased.
-   * @param inputBlocks all the input blocks
-   * @return number of erased blocks
-   */
-  protected static int getNumErasedBlocks(ECBlock[] inputBlocks) {
-    int numErased = 0;
-    for (int i = 0; i < inputBlocks.length; i++) {
-      if (inputBlocks[i].isErased()) {
-        numErased ++;
-      }
+    @Override
+    public int getNumDataUnits() {
+        return this.numDataUnits;
     }
 
-    return numErased;
-  }
-
-  /**
-   * Get indexes of erased blocks from inputBlocks
-   * @param inputBlocks
-   * @return indexes of erased blocks from inputBlocks
-   */
-  protected int[] getErasedIndexes(ECBlock[] inputBlocks) {
-    int numErased = getNumErasedBlocks(inputBlocks);
-    if (numErased == 0) {
-      return new int[0];
+    @Override
+    public int getNumParityUnits() {
+        return this.numParityUnits;
     }
 
-    int[] erasedIndexes = new int[numErased];
-    int i = 0, j = 0;
-    for (; i < inputBlocks.length && j < erasedIndexes.length; i++) {
-      if (inputBlocks[i].isErased()) {
-        erasedIndexes[j++] = i;
-      }
+    @Override
+    public ErasureCoderOptions getOptions() {
+        return options;
     }
 
-    return erasedIndexes;
-  }
-
-  /**
-   * Get erased input blocks from inputBlocks
-   * @param inputBlocks
-   * @return an array of erased blocks from inputBlocks
-   */
-  protected ECBlock[] getErasedBlocks(ECBlock[] inputBlocks) {
-    int numErased = getNumErasedBlocks(inputBlocks);
-    if (numErased == 0) {
-      return new ECBlock[0];
+    /**
+     * We have all the data blocks and parity blocks as input blocks for
+     * recovering by default. It's codec specific
+     * @param blockGroup
+     * @return input blocks
+     */
+    protected ECBlock[] getInputBlocks(ECBlockGroup blockGroup) {
+        ECBlock[] inputBlocks = new ECBlock[getNumDataUnits() + getNumParityUnits()];
+        System.arraycopy(blockGroup.getDataBlocks(), 0, inputBlocks, 0, getNumDataUnits());
+        System.arraycopy(blockGroup.getParityBlocks(), 0, inputBlocks, getNumDataUnits(), getNumParityUnits());
+        return inputBlocks;
     }
 
-    ECBlock[] erasedBlocks = new ECBlock[numErased];
-    int i = 0, j = 0;
-    for (; i < inputBlocks.length && j < erasedBlocks.length; i++) {
-      if (inputBlocks[i].isErased()) {
-        erasedBlocks[j++] = inputBlocks[i];
-      }
+    /**
+     * Which blocks were erased ?
+     * @param blockGroup
+     * @return output blocks to recover
+     */
+    protected ECBlock[] getOutputBlocks(ECBlockGroup blockGroup) {
+        ECBlock[] outputBlocks = new ECBlock[getNumErasedBlocks(blockGroup)];
+        int idx = 0;
+        for (int i = 0; i < getNumDataUnits(); i++) {
+            if (blockGroup.getDataBlocks()[i].isErased()) {
+                outputBlocks[idx++] = blockGroup.getDataBlocks()[i];
+            }
+        }
+        for (int i = 0; i < getNumParityUnits(); i++) {
+            if (blockGroup.getParityBlocks()[i].isErased()) {
+                outputBlocks[idx++] = blockGroup.getParityBlocks()[i];
+            }
+        }
+        return outputBlocks;
     }
 
-    return erasedBlocks;
-  }
+    @Override
+    public boolean preferDirectBuffer() {
+        return false;
+    }
 
+    @Override
+    public void release() {
+        // Nothing to do by default
+    }
+
+    /**
+     * Perform decoding against a block blockGroup.
+     * @param blockGroup
+     * @return decoding step for caller to do the real work
+     */
+    protected abstract ErasureCodingStep prepareDecodingStep(ECBlockGroup blockGroup);
+
+    /**
+     * Get the number of erased blocks in the block group.
+     * @param blockGroup
+     * @return number of erased blocks
+     */
+    protected int getNumErasedBlocks(ECBlockGroup blockGroup) {
+        int num = getNumErasedBlocks(blockGroup.getParityBlocks());
+        num += getNumErasedBlocks(blockGroup.getDataBlocks());
+        return num;
+    }
+
+    /**
+     * Find out how many blocks are erased.
+     * @param inputBlocks all the input blocks
+     * @return number of erased blocks
+     */
+    protected static int getNumErasedBlocks(ECBlock[] inputBlocks) {
+        int numErased = 0;
+        for (int i = 0; i < inputBlocks.length; i++) {
+            if (inputBlocks[i].isErased()) {
+                numErased++;
+            }
+        }
+        return numErased;
+    }
+
+    /**
+     * Get indexes of erased blocks from inputBlocks
+     * @param inputBlocks
+     * @return indexes of erased blocks from inputBlocks
+     */
+    protected int[] getErasedIndexes(ECBlock[] inputBlocks) {
+        int numErased = getNumErasedBlocks(inputBlocks);
+        if (numErased == 0) {
+            return new int[0];
+        }
+        int[] erasedIndexes = new int[numErased];
+        int i = 0, j = 0;
+        for (; i < inputBlocks.length && j < erasedIndexes.length; i++) {
+            if (inputBlocks[i].isErased()) {
+                erasedIndexes[j++] = i;
+            }
+        }
+        return erasedIndexes;
+    }
+
+    /**
+     * Get erased input blocks from inputBlocks
+     * @param inputBlocks
+     * @return an array of erased blocks from inputBlocks
+     */
+    protected ECBlock[] getErasedBlocks(ECBlock[] inputBlocks) {
+        int numErased = getNumErasedBlocks(inputBlocks);
+        if (numErased == 0) {
+            return new ECBlock[0];
+        }
+        ECBlock[] erasedBlocks = new ECBlock[numErased];
+        int i = 0, j = 0;
+        for (; i < inputBlocks.length && j < erasedBlocks.length; i++) {
+            if (inputBlocks[i].isErased()) {
+                erasedBlocks[j++] = inputBlocks[i];
+            }
+        }
+        return erasedBlocks;
+    }
 }

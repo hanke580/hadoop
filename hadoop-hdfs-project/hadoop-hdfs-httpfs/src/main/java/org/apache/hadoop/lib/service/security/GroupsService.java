@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.lib.service.security;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -24,35 +23,34 @@ import org.apache.hadoop.lib.server.BaseService;
 import org.apache.hadoop.lib.server.ServiceException;
 import org.apache.hadoop.lib.service.Groups;
 import org.apache.hadoop.lib.util.ConfigurationUtils;
-
 import java.io.IOException;
 import java.util.List;
 
 @InterfaceAudience.Private
 public class GroupsService extends BaseService implements Groups {
-  private static final String PREFIX = "groups";
 
-  private org.apache.hadoop.security.Groups hGroups;
+    private static final String PREFIX = "groups";
 
-  public GroupsService() {
-    super(PREFIX);
-  }
+    private org.apache.hadoop.security.Groups hGroups;
 
-  @Override
-  protected void init() throws ServiceException {
-    Configuration hConf = new Configuration(false);
-    ConfigurationUtils.copy(getServiceConfig(), hConf);
-    hGroups = new org.apache.hadoop.security.Groups(hConf);
-  }
+    public GroupsService() {
+        super(PREFIX);
+    }
 
-  @Override
-  public Class getInterface() {
-    return Groups.class;
-  }
+    @Override
+    protected void init() throws ServiceException {
+        Configuration hConf = new Configuration(false);
+        ConfigurationUtils.copy(getServiceConfig(), hConf);
+        hGroups = new org.apache.hadoop.security.Groups(hConf);
+    }
 
-  @Override
-  public List<String> getGroups(String user) throws IOException {
-    return hGroups.getGroups(user);
-  }
+    @Override
+    public Class getInterface() {
+        return Groups.class;
+    }
 
+    @Override
+    public List<String> getGroups(String user) throws IOException {
+        return hGroups.getGroups(user);
+    }
 }

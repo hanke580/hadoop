@@ -15,11 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs;
 
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
@@ -29,7 +27,8 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Public
 @InterfaceStability.Stable
 public class UnknownCipherSuiteException extends IOException {
-  public UnknownCipherSuiteException(String msg) {
-    super(msg);
-  }
+
+    public UnknownCipherSuiteException(String msg) {
+        super(msg);
+    }
 }

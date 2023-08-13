@@ -18,9 +18,7 @@
 package org.apache.hadoop.hdfs.server.namenode.ha;
 
 import org.apache.hadoop.conf.Configuration;
-
 import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_HA_TAILEDITS_INPROGRESS_KEY;
-
 
 /**
  * Test in progress tailing with small txn id per call.
@@ -32,15 +30,13 @@ import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_HA_TAILEDITS_INPROGRESS_K
  * This is to test that even with small number of configured
  * txnid, bootstrapStandby can still work. See HDFS-14806.
  */
-public class TestBootstrapStandbyWithInProgressTailing
-    extends TestBootstrapStandbyWithQJM {
-  @Override
-  public Configuration createConfig() {
-    Configuration conf = super.createConfig();
+public class TestBootstrapStandbyWithInProgressTailing extends TestBootstrapStandbyWithQJM {
 
-    conf.setBoolean(DFS_HA_TAILEDITS_INPROGRESS_KEY, true);
-    conf.setInt("dfs.ha.tail-edits.qjm.rpc.max-txns", 1);
-
-    return conf;
-  }
+    @Override
+    public Configuration createConfig() {
+        Configuration conf = super.createConfig();
+        conf.setBoolean(DFS_HA_TAILEDITS_INPROGRESS_KEY, true);
+        conf.setInt("dfs.ha.tail-edits.qjm.rpc.max-txns", 1);
+        return conf;
+    }
 }

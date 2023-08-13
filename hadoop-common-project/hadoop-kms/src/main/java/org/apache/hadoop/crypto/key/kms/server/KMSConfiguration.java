@@ -23,7 +23,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -34,160 +33,163 @@ import java.net.URL;
 @InterfaceAudience.Private
 public class KMSConfiguration {
 
-  static final Logger LOG = LoggerFactory.getLogger(KMSConfiguration.class);
+    static final Logger LOG = LoggerFactory.getLogger(KMSConfiguration.class);
 
-  public static final String KMS_CONFIG_DIR = "kms.config.dir";
-  public static final String KMS_DEFAULT_XML = "kms-default.xml";
-  public static final String KMS_SITE_XML = "kms-site.xml";
-  public static final String KMS_ACLS_XML = "kms-acls.xml";
+    public static final String KMS_CONFIG_DIR = "kms.config.dir";
 
-  public static final String CONFIG_PREFIX = "hadoop.kms.";
+    public static final String KMS_DEFAULT_XML = "kms-default.xml";
 
-  public static final String KEY_ACL_PREFIX = "key.acl.";
-  public static final String KEY_ACL_PREFIX_REGEX = "^key\\.acl\\..+";
-  public static final String DEFAULT_KEY_ACL_PREFIX = "default.key.acl.";
-  public static final String WHITELIST_KEY_ACL_PREFIX = "whitelist.key.acl.";
+    public static final String KMS_SITE_XML = "kms-site.xml";
 
-  // HTTP properties
-  public static final String HTTP_PORT_KEY = "hadoop.kms.http.port";
-  public static final int HTTP_PORT_DEFAULT = 9600;
-  public static final String HTTP_HOST_KEY = "hadoop.kms.http.host";
-  public static final String HTTP_HOST_DEFAULT = "0.0.0.0";
-  public static final String HTTP_ADMINS_KEY =
-      "hadoop.kms.http.administrators";
+    public static final String KMS_ACLS_XML = "kms-acls.xml";
 
-  // SSL properties
-  public static final String SSL_ENABLED_KEY = "hadoop.kms.ssl.enabled";
-  public static final boolean SSL_ENABLED_DEFAULT = false;
+    public static final String CONFIG_PREFIX = "hadoop.kms.";
 
-  // Property to set the backing KeyProvider
-  public static final String KEY_PROVIDER_URI = CONFIG_PREFIX +
-      "key.provider.uri";
+    public static final String KEY_ACL_PREFIX = "key.acl.";
 
-  // Property to Enable/Disable Caching
-  public static final String KEY_CACHE_ENABLE = CONFIG_PREFIX +
-      "cache.enable";
-  // Timeout for the Key and Metadata Cache
-  public static final String KEY_CACHE_TIMEOUT_KEY = CONFIG_PREFIX +
-      "cache.timeout.ms";
-  // TImeout for the Current Key cache
-  public static final String CURR_KEY_CACHE_TIMEOUT_KEY = CONFIG_PREFIX +
-      "current.key.cache.timeout.ms";
-  // Delay for Audit logs that need aggregation
-  public static final String KMS_AUDIT_AGGREGATION_WINDOW = CONFIG_PREFIX +
-      "audit.aggregation.window.ms";
+    public static final String KEY_ACL_PREFIX_REGEX = "^key\\.acl\\..+";
 
-  // Process name shown in metrics
-  public static final String METRICS_PROCESS_NAME_KEY =
-      CONFIG_PREFIX + "metrics.process.name";
-  public static final String METRICS_PROCESS_NAME_DEFAULT = "KMS";
+    public static final String DEFAULT_KEY_ACL_PREFIX = "default.key.acl.";
 
-  // Session id for metrics
-  public static final String METRICS_SESSION_ID_KEY =
-      CONFIG_PREFIX + "metrics.session.id";
+    public static final String WHITELIST_KEY_ACL_PREFIX = "whitelist.key.acl.";
 
-  // KMS Audit logger classes to use
-  public static final String KMS_AUDIT_LOGGER_KEY = CONFIG_PREFIX +
-      "audit.logger";
-  
-  public static final boolean KEY_CACHE_ENABLE_DEFAULT = true;
-  // 10 mins
-  public static final long KEY_CACHE_TIMEOUT_DEFAULT = 10 * 60 * 1000;
-  // 30 secs
-  public static final long CURR_KEY_CACHE_TIMEOUT_DEFAULT = 30 * 1000;
-  // 10 secs
-  public static final long KMS_AUDIT_AGGREGATION_WINDOW_DEFAULT = 10000;
+    // HTTP properties
+    public static final String HTTP_PORT_KEY = "hadoop.kms.http.port";
 
-  // Property to Enable/Disable per Key authorization
-  public static final String KEY_AUTHORIZATION_ENABLE = CONFIG_PREFIX +
-      "key.authorization.enable"; 
+    public static final int HTTP_PORT_DEFAULT = 9600;
 
-  public static final boolean KEY_AUTHORIZATION_ENABLE_DEFAULT = true;
+    public static final String HTTP_HOST_KEY = "hadoop.kms.http.host";
 
-  private static final String LOG4J_PROPERTIES = "kms-log4j.properties";
+    public static final String HTTP_HOST_DEFAULT = "0.0.0.0";
 
-  static {
-    Configuration.addDefaultResource(KMS_DEFAULT_XML);
-    Configuration.addDefaultResource(KMS_SITE_XML);
-  }
+    public static final String HTTP_ADMINS_KEY = "hadoop.kms.http.administrators";
 
-  static Configuration getConfiguration(boolean loadHadoopDefaults,
-      String ... resources) {
-    Configuration conf = new Configuration(loadHadoopDefaults);
-    String confDir = System.getProperty(KMS_CONFIG_DIR);
-    if (confDir != null) {
-      try {
-        Path confPath = new Path(confDir);
-        if (!confPath.isUriPathAbsolute()) {
-          throw new RuntimeException("System property '" + KMS_CONFIG_DIR +
-              "' must be an absolute path: " + confDir);
+    // SSL properties
+    public static final String SSL_ENABLED_KEY = "hadoop.kms.ssl.enabled";
+
+    public static final boolean SSL_ENABLED_DEFAULT = false;
+
+    // Property to set the backing KeyProvider
+    public static final String KEY_PROVIDER_URI = CONFIG_PREFIX + "key.provider.uri";
+
+    // Property to Enable/Disable Caching
+    public static final String KEY_CACHE_ENABLE = CONFIG_PREFIX + "cache.enable";
+
+    // Timeout for the Key and Metadata Cache
+    public static final String KEY_CACHE_TIMEOUT_KEY = CONFIG_PREFIX + "cache.timeout.ms";
+
+    // TImeout for the Current Key cache
+    public static final String CURR_KEY_CACHE_TIMEOUT_KEY = CONFIG_PREFIX + "current.key.cache.timeout.ms";
+
+    // Delay for Audit logs that need aggregation
+    public static final String KMS_AUDIT_AGGREGATION_WINDOW = CONFIG_PREFIX + "audit.aggregation.window.ms";
+
+    // Process name shown in metrics
+    public static final String METRICS_PROCESS_NAME_KEY = CONFIG_PREFIX + "metrics.process.name";
+
+    public static final String METRICS_PROCESS_NAME_DEFAULT = "KMS";
+
+    // Session id for metrics
+    public static final String METRICS_SESSION_ID_KEY = CONFIG_PREFIX + "metrics.session.id";
+
+    // KMS Audit logger classes to use
+    public static final String KMS_AUDIT_LOGGER_KEY = CONFIG_PREFIX + "audit.logger";
+
+    public static final boolean KEY_CACHE_ENABLE_DEFAULT = true;
+
+    // 10 mins
+    public static final long KEY_CACHE_TIMEOUT_DEFAULT = 10 * 60 * 1000;
+
+    // 30 secs
+    public static final long CURR_KEY_CACHE_TIMEOUT_DEFAULT = 30 * 1000;
+
+    // 10 secs
+    public static final long KMS_AUDIT_AGGREGATION_WINDOW_DEFAULT = 10000;
+
+    // Property to Enable/Disable per Key authorization
+    public static final String KEY_AUTHORIZATION_ENABLE = CONFIG_PREFIX + "key.authorization.enable";
+
+    public static final boolean KEY_AUTHORIZATION_ENABLE_DEFAULT = true;
+
+    private static final String LOG4J_PROPERTIES = "kms-log4j.properties";
+
+    static {
+        Configuration.addDefaultResource(KMS_DEFAULT_XML);
+        Configuration.addDefaultResource(KMS_SITE_XML);
+    }
+
+    static Configuration getConfiguration(boolean loadHadoopDefaults, String... resources) {
+        Configuration conf = new Configuration(loadHadoopDefaults);
+        String confDir = System.getProperty(KMS_CONFIG_DIR);
+        if (confDir != null) {
+            try {
+                Path confPath = new Path(confDir);
+                if (!confPath.isUriPathAbsolute()) {
+                    throw new RuntimeException("System property '" + KMS_CONFIG_DIR + "' must be an absolute path: " + confDir);
+                }
+                for (String resource : resources) {
+                    conf.addResource(new URL("file://" + new Path(confDir, resource).toUri()));
+                }
+            } catch (MalformedURLException ex) {
+                throw new RuntimeException(ex);
+            }
+        } else {
+            for (String resource : resources) {
+                conf.addResource(resource);
+            }
         }
-        for (String resource : resources) {
-          conf.addResource(new URL("file://" + new Path(confDir, resource).toUri()));
+        return conf;
+    }
+
+    public static Configuration getKMSConf() {
+        return getConfiguration(true, "core-site.xml", KMS_SITE_XML);
+    }
+
+    public static Configuration getACLsConf() {
+        return getConfiguration(false, KMS_ACLS_XML);
+    }
+
+    public static boolean isACLsFileNewer(long time) {
+        boolean newer = false;
+        String confDir = System.getProperty(KMS_CONFIG_DIR);
+        if (confDir != null) {
+            Path confPath = new Path(confDir);
+            if (!confPath.isUriPathAbsolute()) {
+                throw new RuntimeException("System property '" + KMS_CONFIG_DIR + "' must be an absolute path: " + confDir);
+            }
+            File f = new File(confDir, KMS_ACLS_XML);
+            LOG.trace("Checking file {}, modification time is {}, last reload time is" + " {}", f.getPath(), f.lastModified(), time);
+            // at least 100ms newer than time, we do this to ensure the file
+            // has been properly closed/flushed
+            newer = f.lastModified() - time > 100;
         }
-      } catch (MalformedURLException ex) {
-        throw new RuntimeException(ex);
-      }
-    } else {
-      for (String resource : resources) {
-        conf.addResource(resource);
-      }
+        return newer;
     }
-    return conf;
-  }
 
-  public static Configuration getKMSConf() {
-    return getConfiguration(true, "core-site.xml", KMS_SITE_XML);
-  }
-
-  public static Configuration getACLsConf() {
-    return getConfiguration(false, KMS_ACLS_XML);
-  }
-
-  public static boolean isACLsFileNewer(long time) {
-    boolean newer = false;
-    String confDir = System.getProperty(KMS_CONFIG_DIR);
-    if (confDir != null) {
-      Path confPath = new Path(confDir);
-      if (!confPath.isUriPathAbsolute()) {
-        throw new RuntimeException("System property '" + KMS_CONFIG_DIR +
-            "' must be an absolute path: " + confDir);
-      }
-      File f = new File(confDir, KMS_ACLS_XML);
-      LOG.trace("Checking file {}, modification time is {}, last reload time is"
-          + " {}", f.getPath(), f.lastModified(), time);
-      // at least 100ms newer than time, we do this to ensure the file
-      // has been properly closed/flushed
-      newer = f.lastModified() - time > 100;
-    }
-    return newer;
-  }
-
-  public static void initLogging() {
-    String confDir = System.getProperty(KMS_CONFIG_DIR);
-    if (confDir == null) {
-      throw new RuntimeException("System property '" +
-          KMSConfiguration.KMS_CONFIG_DIR + "' not defined");
-    }
-    if (System.getProperty("log4j.configuration") == null) {
-      System.setProperty("log4j.defaultInitOverride", "true");
-      boolean fromClasspath = true;
-      File log4jConf = new File(confDir, LOG4J_PROPERTIES).getAbsoluteFile();
-      if (log4jConf.exists()) {
-        PropertyConfigurator.configureAndWatch(log4jConf.getPath(), 1000);
-        fromClasspath = false;
-      } else {
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        URL log4jUrl = cl.getResource(LOG4J_PROPERTIES);
-        if (log4jUrl != null) {
-          PropertyConfigurator.configure(log4jUrl);
+    public static void initLogging() {
+        String confDir = System.getProperty(KMS_CONFIG_DIR);
+        if (confDir == null) {
+            throw new RuntimeException("System property '" + KMSConfiguration.KMS_CONFIG_DIR + "' not defined");
         }
-      }
-      LOG.debug("KMS log starting");
-      if (fromClasspath) {
-        LOG.warn("Log4j configuration file '{}' not found", LOG4J_PROPERTIES);
-        LOG.warn("Logging with INFO level to standard output");
-      }
+        if (System.getProperty("log4j.configuration") == null) {
+            System.setProperty("log4j.defaultInitOverride", "true");
+            boolean fromClasspath = true;
+            File log4jConf = new File(confDir, LOG4J_PROPERTIES).getAbsoluteFile();
+            if (log4jConf.exists()) {
+                PropertyConfigurator.configureAndWatch(log4jConf.getPath(), 1000);
+                fromClasspath = false;
+            } else {
+                ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                URL log4jUrl = cl.getResource(LOG4J_PROPERTIES);
+                if (log4jUrl != null) {
+                    PropertyConfigurator.configure(log4jUrl);
+                }
+            }
+            LOG.debug("KMS log starting");
+            if (fromClasspath) {
+                LOG.warn("Log4j configuration file '{}' not found", LOG4J_PROPERTIES);
+                LOG.warn("Logging with INFO level to standard output");
+            }
+        }
     }
-  }
 }

@@ -20,7 +20,6 @@ package org.apache.hadoop.http.resource;
 import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
-
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -29,7 +28,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import org.apache.hadoop.http.JettyUtils;
 import org.eclipse.jetty.util.ajax.JSON;
 import org.slf4j.Logger;
@@ -42,24 +40,22 @@ import org.slf4j.LoggerFactory;
  */
 @Path("")
 public class JerseyResource {
-  static final Logger LOG = LoggerFactory.getLogger(JerseyResource.class);
 
-  public static final String PATH = "path";
-  public static final String OP = "op";
+    static final Logger LOG = LoggerFactory.getLogger(JerseyResource.class);
 
-  @GET
-  @Path("{" + PATH + ":.*}")
-  @Produces({MediaType.APPLICATION_JSON + "; " + JettyUtils.UTF_8})
-  public Response get(
-      @PathParam(PATH) @DefaultValue("UNKNOWN_" + PATH) final String path,
-      @QueryParam(OP) @DefaultValue("UNKNOWN_" + OP) final String op
-      ) throws IOException {
-    LOG.info("get: " + PATH + "=" + path + ", " + OP + "=" + op);
+    public static final String PATH = "path";
 
-    final Map<String, Object> m = new TreeMap<String, Object>();
-    m.put(PATH, path);
-    m.put(OP, op);
-    final String js = JSON.toString(m);
-    return Response.ok(js).type(MediaType.APPLICATION_JSON).build();
-  }
+    public static final String OP = "op";
+
+    @GET
+    @Path("{" + PATH + ":.*}")
+    @Produces({ MediaType.APPLICATION_JSON + "; " + JettyUtils.UTF_8 })
+    public Response get(@PathParam(PATH) @DefaultValue("UNKNOWN_" + PATH) final String path, @QueryParam(OP) @DefaultValue("UNKNOWN_" + OP) final String op) throws IOException {
+        LOG.info("get: " + PATH + "=" + path + ", " + OP + "=" + op);
+        final Map<String, Object> m = new TreeMap<String, Object>();
+        m.put(PATH, path);
+        m.put(OP, op);
+        final String js = JSON.toString(m);
+        return Response.ok(js).type(MediaType.APPLICATION_JSON).build();
+    }
 }

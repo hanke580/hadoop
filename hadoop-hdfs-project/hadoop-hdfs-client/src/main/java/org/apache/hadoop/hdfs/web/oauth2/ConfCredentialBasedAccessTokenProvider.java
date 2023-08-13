@@ -22,7 +22,6 @@ import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.Timer;
-
 import static org.apache.hadoop.hdfs.web.oauth2.Utils.notNull;
 
 /**
@@ -33,30 +32,28 @@ import static org.apache.hadoop.hdfs.web.oauth2.Utils.notNull;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
-public class ConfCredentialBasedAccessTokenProvider
-    extends CredentialBasedAccessTokenProvider {
-  private String credential;
+public class ConfCredentialBasedAccessTokenProvider extends CredentialBasedAccessTokenProvider {
 
-  public ConfCredentialBasedAccessTokenProvider() {
-  }
+    private String credential;
 
-  public ConfCredentialBasedAccessTokenProvider(Timer timer) {
-    super(timer);
-  }
-
-  @Override
-  public void setConf(Configuration conf) {
-    super.setConf(conf);
-    credential = notNull(conf, OAUTH_CREDENTIAL_KEY);
-  }
-
-  @Override
-  public String getCredential() {
-    if(credential == null) {
-      throw new IllegalArgumentException("Credential has not been " +
-          "provided in configuration");
+    public ConfCredentialBasedAccessTokenProvider() {
     }
 
-    return credential;
-  }
+    public ConfCredentialBasedAccessTokenProvider(Timer timer) {
+        super(timer);
+    }
+
+    @Override
+    public void setConf(Configuration conf) {
+        super.setConf(conf);
+        credential = notNull(conf, OAUTH_CREDENTIAL_KEY);
+    }
+
+    @Override
+    public String getCredential() {
+        if (credential == null) {
+            throw new IllegalArgumentException("Credential has not been " + "provided in configuration");
+        }
+        return credential;
+    }
 }

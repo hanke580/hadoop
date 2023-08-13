@@ -26,40 +26,32 @@ import org.junit.Test;
  */
 public class TestRawErasureCoderBenchmark {
 
-  @Test
-  public void testDummyCoder() throws Exception {
-    // Dummy coder
-    RawErasureCoderBenchmark.performBench("encode",
-        RawErasureCoderBenchmark.CODER.DUMMY_CODER, 2, 100, 1024);
-    RawErasureCoderBenchmark.performBench("decode",
-        RawErasureCoderBenchmark.CODER.DUMMY_CODER, 5, 150, 100);
-  }
+    @Test
+    public void testDummyCoder() throws Exception {
+        // Dummy coder
+        RawErasureCoderBenchmark.performBench("encode", RawErasureCoderBenchmark.CODER.DUMMY_CODER, 2, 100, 1024);
+        RawErasureCoderBenchmark.performBench("decode", RawErasureCoderBenchmark.CODER.DUMMY_CODER, 5, 150, 100);
+    }
 
-  @Test
-  public void testLegacyRSCoder() throws Exception {
-    // Legacy RS Java coder
-    RawErasureCoderBenchmark.performBench("encode",
-        RawErasureCoderBenchmark.CODER.LEGACY_RS_CODER, 2, 80, 200);
-    RawErasureCoderBenchmark.performBench("decode",
-        RawErasureCoderBenchmark.CODER.LEGACY_RS_CODER, 5, 300, 350);
-  }
+    @Test
+    public void testLegacyRSCoder() throws Exception {
+        // Legacy RS Java coder
+        RawErasureCoderBenchmark.performBench("encode", RawErasureCoderBenchmark.CODER.LEGACY_RS_CODER, 2, 80, 200);
+        RawErasureCoderBenchmark.performBench("decode", RawErasureCoderBenchmark.CODER.LEGACY_RS_CODER, 5, 300, 350);
+    }
 
-  @Test
-  public void testRSCoder() throws Exception {
-    // RS Java coder
-    RawErasureCoderBenchmark.performBench("encode",
-        RawErasureCoderBenchmark.CODER.RS_CODER, 3, 200, 200);
-    RawErasureCoderBenchmark.performBench("decode",
-        RawErasureCoderBenchmark.CODER.RS_CODER, 4, 135, 20);
-  }
+    @Test
+    public void testRSCoder() throws Exception {
+        // RS Java coder
+        RawErasureCoderBenchmark.performBench("encode", RawErasureCoderBenchmark.CODER.RS_CODER, 3, 200, 200);
+        RawErasureCoderBenchmark.performBench("decode", RawErasureCoderBenchmark.CODER.RS_CODER, 4, 135, 20);
+    }
 
-  @Test
-  public void testISALCoder() throws Exception {
-    Assume.assumeTrue(ErasureCodeNative.isNativeCodeLoaded());
-    // ISA-L coder
-    RawErasureCoderBenchmark.performBench("encode",
-        RawErasureCoderBenchmark.CODER.ISAL_CODER, 5, 300, 64);
-    RawErasureCoderBenchmark.performBench("decode",
-        RawErasureCoderBenchmark.CODER.ISAL_CODER, 6, 200, 128);
-  }
+    @Test
+    public void testISALCoder() throws Exception {
+        Assume.assumeTrue(ErasureCodeNative.isNativeCodeLoaded());
+        // ISA-L coder
+        RawErasureCoderBenchmark.performBench("encode", RawErasureCoderBenchmark.CODER.ISAL_CODER, 5, 300, 64);
+        RawErasureCoderBenchmark.performBench("decode", RawErasureCoderBenchmark.CODER.ISAL_CODER, 6, 200, 128);
+    }
 }

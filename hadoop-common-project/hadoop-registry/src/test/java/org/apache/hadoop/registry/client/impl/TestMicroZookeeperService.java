@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.registry.client.impl;
 
 import org.apache.hadoop.service.ServiceOperations;
@@ -28,7 +27,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.junit.rules.Timeout;
-
 import java.io.IOException;
 
 /**
@@ -36,26 +34,25 @@ import java.io.IOException;
  */
 public class TestMicroZookeeperService extends Assert {
 
-  private MicroZookeeperService zookeeper;
+    private MicroZookeeperService zookeeper;
 
-  @Rule
-  public final Timeout testTimeout = new Timeout(10000);
-  @Rule
-  public TestName methodName = new TestName();
+    @Rule
+    public final Timeout testTimeout = new Timeout(10000);
 
-  @After
-  public void destroyZKServer() throws IOException {
+    @Rule
+    public TestName methodName = new TestName();
 
-    ServiceOperations.stop(zookeeper);
-  }
+    @After
+    public void destroyZKServer() throws IOException {
+        ServiceOperations.stop(zookeeper);
+    }
 
-  @Test
-  public void testTempDirSupport() throws Throwable {
-    Configuration conf = new RegistryConfiguration();
-    zookeeper = new MicroZookeeperService("t1");
-    zookeeper.init(conf);
-    zookeeper.start();
-    zookeeper.stop();
-  }
-
+    @Test
+    public void testTempDirSupport() throws Throwable {
+        Configuration conf = new RegistryConfiguration();
+        zookeeper = new MicroZookeeperService("t1");
+        zookeeper.init(conf);
+        zookeeper.start();
+        zookeeper.stop();
+    }
 }

@@ -15,13 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.namenode;
 
 import java.net.InetAddress;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.conf.Configuration;
@@ -38,56 +36,58 @@ import org.apache.hadoop.security.UserGroupInformation;
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
 public abstract class DefaultAuditLogger extends HdfsAuditLogger {
-  protected static final ThreadLocal<StringBuilder> STRING_BUILDER =
-      new ThreadLocal<StringBuilder>() {
+
+    protected static final ThreadLocal<StringBuilder> STRING_BUILDER = new ThreadLocal<StringBuilder>() {
+
         @Override
         protected StringBuilder initialValue() {
-          return new StringBuilder();
+            return new StringBuilder();
         }
-      };
+    };
 
-  protected volatile boolean isCallerContextEnabled;
+    protected volatile boolean isCallerContextEnabled;
 
-  /** The maximum bytes a caller context string can have. */
-  protected int callerContextMaxLen;
-  protected int callerSignatureMaxLen;
+    /**
+     * The maximum bytes a caller context string can have.
+     */
+    protected int callerContextMaxLen;
 
-  /** adds a tracking ID for all audit log events. */
-  protected boolean logTokenTrackingId;
+    protected int callerSignatureMaxLen;
 
-  /** List of commands to provide debug messages. */
-  protected Set<String> debugCmdSet = new HashSet<>();
+    /**
+     * adds a tracking ID for all audit log events.
+     */
+    protected boolean logTokenTrackingId;
 
-  /**
-   * Enable or disable CallerContext.
-   *
-   * @param value true, enable CallerContext, otherwise false to disable it.
-   */
-  void setCallerContextEnabled(final boolean value) {
-    isCallerContextEnabled = value;
-  }
+    /**
+     * List of commands to provide debug messages.
+     */
+    protected Set<String> debugCmdSet = new HashSet<>();
 
-  /**
-   * Get the value indicating if CallerContext is enabled.
-   *
-   * @return true, if CallerContext is enabled, otherwise false, if it's
-   *         disabled.
-   */
-  boolean getCallerContextEnabled() {
-    return isCallerContextEnabled;
-  }
+    /**
+     * Enable or disable CallerContext.
+     *
+     * @param value true, enable CallerContext, otherwise false to disable it.
+     */
+    void setCallerContextEnabled(final boolean value) {
+        isCallerContextEnabled = value;
+    }
 
-  public abstract void initialize(Configuration conf);
+    /**
+     * Get the value indicating if CallerContext is enabled.
+     *
+     * @return true, if CallerContext is enabled, otherwise false, if it's
+     *         disabled.
+     */
+    boolean getCallerContextEnabled() {
+        return isCallerContextEnabled;
+    }
 
-  public abstract void logAuditMessage(String message);
+    public abstract void initialize(Configuration conf);
 
-  public abstract void logAuditEvent(boolean succeeded, String userName,
-      InetAddress addr, String cmd, String src, String dst, FileStatus status,
-      UserGroupInformation ugi, DelegationTokenSecretManager dtSecretManager);
+    public abstract void logAuditMessage(String message);
 
-  public abstract void logAuditEvent(boolean succeeded, String userName,
-      InetAddress addr, String cmd, String src, String dst, FileStatus status,
-      CallerContext callerContext, UserGroupInformation ugi,
-      DelegationTokenSecretManager dtSecretManager);
+    public abstract void logAuditEvent(boolean succeeded, String userName, InetAddress addr, String cmd, String src, String dst, FileStatus status, UserGroupInformation ugi, DelegationTokenSecretManager dtSecretManager);
 
+    public abstract void logAuditEvent(boolean succeeded, String userName, InetAddress addr, String cmd, String src, String dst, FileStatus status, CallerContext callerContext, UserGroupInformation ugi, DelegationTokenSecretManager dtSecretManager);
 }

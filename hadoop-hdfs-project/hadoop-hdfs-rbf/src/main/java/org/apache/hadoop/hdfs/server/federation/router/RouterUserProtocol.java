@@ -18,11 +18,9 @@
 package org.apache.hadoop.hdfs.server.federation.router;
 
 import static org.apache.hadoop.hdfs.server.federation.router.RouterRpcServer.merge;
-
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.hadoop.hdfs.server.federation.resolver.ActiveNamenodeResolver;
 import org.apache.hadoop.hdfs.server.federation.resolver.FederationNamespaceInfo;
 import org.apache.hadoop.hdfs.server.namenode.NameNode.OperationCategory;
@@ -39,66 +37,65 @@ import org.slf4j.LoggerFactory;
  * {@link RefreshUserMappingsProtocol} {@link GetUserMappingsProtocol} in the
  * {@link RouterRpcServer}.
  */
-public class RouterUserProtocol
-    implements RefreshUserMappingsProtocol, GetUserMappingsProtocol {
+public class RouterUserProtocol implements RefreshUserMappingsProtocol, GetUserMappingsProtocol {
 
-  private static final Logger LOG =
-      LoggerFactory.getLogger(RouterUserProtocol.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RouterUserProtocol.class);
 
-  /** RPC server to receive client calls. */
-  private final RouterRpcServer rpcServer;
-  /** RPC clients to connect to the Namenodes. */
-  private final RouterRpcClient rpcClient;
+    /**
+     * RPC server to receive client calls.
+     */
+    private final RouterRpcServer rpcServer;
 
-  private final ActiveNamenodeResolver namenodeResolver;
+    /**
+     * RPC clients to connect to the Namenodes.
+     */
+    private final RouterRpcClient rpcClient;
 
-  public RouterUserProtocol(RouterRpcServer server) {
-    this.rpcServer = server;
-    this.rpcClient = this.rpcServer.getRPCClient();
-    this.namenodeResolver = this.rpcServer.getNamenodeResolver();
-  }
+    private final ActiveNamenodeResolver namenodeResolver;
 
-  @Override
-  public void refreshUserToGroupsMappings() throws IOException {
-    LOG.debug("Refresh user groups mapping in Router.");
-    rpcServer.checkOperation(OperationCategory.UNCHECKED);
-    Set<FederationNamespaceInfo> nss = namenodeResolver.getNamespaces();
-    if (nss.isEmpty()) {
-      Groups.getUserToGroupsMappingService().refresh();
-    } else {
-      RemoteMethod method = new RemoteMethod(RefreshUserMappingsProtocol.class,
-          "refreshUserToGroupsMappings");
-      rpcClient.invokeConcurrent(nss, method);
+    public RouterUserProtocol(RouterRpcServer server) {
+        this.rpcServer = server;
+        this.rpcClient = this.rpcServer.getRPCClient();
+        this.namenodeResolver = this.rpcServer.getNamenodeResolver();
     }
-  }
 
-  @Override
-  public void refreshSuperUserGroupsConfiguration() throws IOException {
-    LOG.debug("Refresh superuser groups configuration in Router.");
-    rpcServer.checkOperation(OperationCategory.UNCHECKED);
-    Set<FederationNamespaceInfo> nss = namenodeResolver.getNamespaces();
-    if (nss.isEmpty()) {
-      ProxyUsers.refreshSuperUserGroupsConfiguration();
-    } else {
-      RemoteMethod method = new RemoteMethod(RefreshUserMappingsProtocol.class,
-          "refreshSuperUserGroupsConfiguration");
-      rpcClient.invokeConcurrent(nss, method);
+    @Override
+    public void refreshUserToGroupsMappings() throws IOException {
+        LOG.debug("Refresh user groups mapping in Router.");
+        rpcServer.checkOperation(OperationCategory.UNCHECKED);
+        Set<FederationNamespaceInfo> nss = namenodeResolver.getNamespaces();
+        if (nss.isEmpty()) {
+            Groups.getUserToGroupsMappingService().refresh();
+        } else {
+            RemoteMethod method = new RemoteMethod(RefreshUserMappingsProtocol.class, "refreshUserToGroupsMappings");
+            rpcClient.invokeConcurrent(nss, method);
+        }
     }
-  }
 
-  @Override
-  public String[] getGroupsForUser(String user) throws IOException {
-    LOG.debug("Getting groups for user {}", user);
-    rpcServer.checkOperation(OperationCategory.UNCHECKED);
-    Set<FederationNamespaceInfo> nss = namenodeResolver.getNamespaces();
-    if (nss.isEmpty()) {
-      return UserGroupInformation.createRemoteUser(user).getGroupNames();
-    } else {
-      RemoteMethod method = new RemoteMethod(GetUserMappingsProtocol.class,
-          "getGroupsForUser", new Class<?>[] {String.class}, user);
-      Map<FederationNamespaceInfo, String[]> results =
-          rpcClient.invokeConcurrent(nss, method, String[].class);
-      return merge(results, String.class);
+    @Override
+    public void refreshSuperUserGroupsConfiguration() throws IOException {
+        LOG.debug("Refresh superuser groups configuration in Router.");
+        rpcServer.checkOperation(OperationCategory.UNCHECKED);
+        Set<FederationNamespaceInfo> nss = namenodeResolver.getNamespaces();
+        if (nss.isEmpty()) {
+            ProxyUsers.refreshSuperUserGroupsConfiguration();
+        } else {
+            RemoteMethod method = new RemoteMethod(RefreshUserMappingsProtocol.class, "refreshSuperUserGroupsConfiguration");
+            rpcClient.invokeConcurrent(nss, method);
+        }
     }
-  }
+
+    @Override
+    public String[] getGroupsForUser(String user) throws IOException {
+        LOG.debug("Getting groups for user {}", user);
+        rpcServer.checkOperation(OperationCategory.UNCHECKED);
+        Set<FederationNamespaceInfo> nss = namenodeResolver.getNamespaces();
+        if (nss.isEmpty()) {
+            return UserGroupInformation.createRemoteUser(user).getGroupNames();
+        } else {
+            RemoteMethod method = new RemoteMethod(GetUserMappingsProtocol.class, "getGroupsForUser", new Class<?>[] { String.class }, user);
+            Map<FederationNamespaceInfo, String[]> results = rpcClient.invokeConcurrent(nss, method, String[].class);
+            return merge(results, String.class);
+        }
+    }
 }

@@ -15,18 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.metrics2.util;
 
 import java.util.Map;
 
 public interface QuantileEstimator {
 
-  void insert(long value);
+    void insert(long value);
 
-  Map<Quantile, Long> snapshot();
+    Map<Quantile, Long> snapshot();
 
-  long getCount();
+    long getCount();
 
-  void clear();
+    void clear();
 }

@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.util;
 
 import java.io.IOException;
@@ -24,11 +23,9 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Set;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
-
 import org.apache.hadoop.hdfs.protocol.DatanodeAdminProperties;
 
 /**
@@ -44,26 +41,23 @@ import org.apache.hadoop.hdfs.protocol.DatanodeAdminProperties;
  *   {"hostName": "host3", "port": 0, "adminState": "DECOMMISSIONED"}
  * ]
  */
-@InterfaceAudience.LimitedPrivate({"HDFS"})
+@InterfaceAudience.LimitedPrivate({ "HDFS" })
 @InterfaceStability.Unstable
 public final class CombinedHostsFileWriter {
-  private CombinedHostsFileWriter() {
-  }
 
-  /**
-   * Serialize a set of DatanodeAdminProperties to a json file.
-   * @param hostsFile the json file name.
-   * @param allDNs the set of DatanodeAdminProperties
-   * @throws IOException
-   */
-  public static void writeFile(final String hostsFile,
-      final Set<DatanodeAdminProperties> allDNs) throws IOException {
-    final ObjectMapper objectMapper = new ObjectMapper();
-
-    try (Writer output =
-        new OutputStreamWriter(Files.newOutputStream(Paths.get(hostsFile)),
-            "UTF-8")) {
-      objectMapper.writeValue(output, allDNs);
+    private CombinedHostsFileWriter() {
     }
-  }
+
+    /**
+     * Serialize a set of DatanodeAdminProperties to a json file.
+     * @param hostsFile the json file name.
+     * @param allDNs the set of DatanodeAdminProperties
+     * @throws IOException
+     */
+    public static void writeFile(final String hostsFile, final Set<DatanodeAdminProperties> allDNs) throws IOException {
+        final ObjectMapper objectMapper = new ObjectMapper();
+        try (Writer output = new OutputStreamWriter(Files.newOutputStream(Paths.get(hostsFile)), "UTF-8")) {
+            objectMapper.writeValue(output, allDNs);
+        }
+    }
 }

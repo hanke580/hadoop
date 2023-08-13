@@ -17,23 +17,23 @@
 package org.apache.hadoop.registry.server.dns;
 
 import java.util.concurrent.Callable;
-
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.Record;
 
 public class LookupTask implements Callable<Record[]> {
 
-  private Name name;
-  private int type;
+    private Name name;
 
-  public LookupTask(Name name, int type) {
-    this.name = name;
-    this.type = type;
-  }
+    private int type;
 
-  @Override
-  public Record[] call() throws Exception {
-    return new Lookup(name, type).run();
-  }
+    public LookupTask(Name name, int type) {
+        this.name = name;
+        this.type = type;
+    }
+
+    @Override
+    public Record[] call() throws Exception {
+        return new Lookup(name, type).run();
+    }
 }

@@ -19,7 +19,6 @@ package org.apache.hadoop.ipc.metrics;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Writable;
@@ -31,30 +30,23 @@ import org.junit.Test;
 
 public class TestRpcMetrics {
 
-  @Test
-  public void metricsAreUnregistered() throws Exception {
+    @Test
+    public void metricsAreUnregistered() throws Exception {
+        Configuration conf = new Configuration();
+        Server server = new Server("0.0.0.0", 0, LongWritable.class, 1, conf) {
 
-    Configuration conf = new Configuration();
-    Server server = new Server("0.0.0.0", 0, LongWritable.class, 1, conf) {
-      @Override
-      public Writable call(
-          RPC.RpcKind rpcKind, String protocol, Writable param,
-          long receiveTime) throws Exception {
-        return null;
-      }
-    };
-    MetricsSystem metricsSystem = DefaultMetricsSystem.instance();
-    RpcMetrics rpcMetrics = server.getRpcMetrics();
-    RpcDetailedMetrics rpcDetailedMetrics = server.getRpcDetailedMetrics();
-
-    assertNotNull(metricsSystem.getSource(rpcMetrics.name()));
-    assertNotNull(metricsSystem.getSource(rpcDetailedMetrics.name()));
-
-    server.stop();
-
-    assertNull(metricsSystem.getSource(rpcMetrics.name()));
-    assertNull(metricsSystem.getSource(rpcDetailedMetrics.name()));
-
-  }
-
+            @Override
+            public Writable call(RPC.RpcKind rpcKind, String protocol, Writable param, long receiveTime) throws Exception {
+                return null;
+            }
+        };
+        MetricsSystem metricsSystem = DefaultMetricsSystem.instance();
+        RpcMetrics rpcMetrics = server.getRpcMetrics();
+        RpcDetailedMetrics rpcDetailedMetrics = server.getRpcDetailedMetrics();
+        assertNotNull(metricsSystem.getSource(rpcMetrics.name()));
+        assertNotNull(metricsSystem.getSource(rpcDetailedMetrics.name()));
+        server.stop();
+        assertNull(metricsSystem.getSource(rpcMetrics.name()));
+        assertNull(metricsSystem.getSource(rpcDetailedMetrics.name()));
+    }
 }

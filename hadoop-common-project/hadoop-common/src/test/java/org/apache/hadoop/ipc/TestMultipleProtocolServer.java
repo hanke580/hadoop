@@ -24,29 +24,26 @@ import org.junit.Test;
 
 public class TestMultipleProtocolServer extends TestRpcBase {
 
-  private static RPC.Server server;
+    private static RPC.Server server;
 
-  @Before
-  public void setUp() throws Exception {
-    super.setupConf();
+    @Before
+    public void setUp() throws Exception {
+        super.setupConf();
+        server = setupTestServer(conf, 2);
+    }
 
-    server = setupTestServer(conf, 2);
-  }
+    @After
+    public void tearDown() throws Exception {
+        server.stop();
+    }
 
-  @After
-  public void tearDown() throws Exception {
-    server.stop();
-  }
-
-
-  // Now test a PB service - a server  hosts both PB and Writable Rpcs.
-  @Test
-  public void testPBService() throws Exception {
-    // Set RPC engine to protobuf RPC engine
-    Configuration conf2 = new Configuration();
-    RPC.setProtocolEngine(conf2, TestRpcService.class,
-        ProtobufRpcEngine2.class);
-    TestRpcService client = RPC.getProxy(TestRpcService.class, 0, addr, conf2);
-    TestProtoBufRpc.testProtoBufRpc(client);
-  }
+    // Now test a PB service - a server  hosts both PB and Writable Rpcs.
+    @Test
+    public void testPBService() throws Exception {
+        // Set RPC engine to protobuf RPC engine
+        Configuration conf2 = new Configuration();
+        RPC.setProtocolEngine(conf2, TestRpcService.class, ProtobufRpcEngine2.class);
+        TestRpcService client = RPC.getProxy(TestRpcService.class, 0, addr, conf2);
+        TestProtoBufRpc.testProtoBufRpc(client);
+    }
 }

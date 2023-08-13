@@ -23,12 +23,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.InterruptedIOException;
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.nio.channels.ClosedByInterruptException;
-
 import static org.apache.hadoop.fs.CommonConfigurationKeysPublic.IPC_CLIENT_CONNECT_MAX_RETRIES_KEY;
 import static org.apache.hadoop.fs.CommonConfigurationKeysPublic.IPC_CLIENT_CONNECT_MAX_RETRIES_ON_SOCKET_TIMEOUTS_KEY;
 
@@ -36,109 +34,102 @@ import static org.apache.hadoop.fs.CommonConfigurationKeysPublic.IPC_CLIENT_CONN
  * tests that the proxy can be interrupted
  */
 public class TestRPCWaitForProxy extends TestRpcBase {
-  private static final Logger
-      LOG = LoggerFactory.getLogger(TestRPCWaitForProxy.class);
 
-  private static final Configuration conf = new Configuration();
+    private static final Logger LOG = LoggerFactory.getLogger(TestRPCWaitForProxy.class);
 
-  @Before
-  public void setupProtocolEngine() {
-    RPC.setProtocolEngine(conf, TestRpcService.class,
-        ProtobufRpcEngine2.class);
-  }
+    private static final Configuration conf = new Configuration();
 
-  /**
-   * This tests that the time-bounded wait for a proxy operation works, and
-   * times out.
-   *
-   * @throws Throwable any exception other than that which was expected
-   */
-  @Test(timeout = 50000)
-  public void testWaitForProxy() throws Throwable {
-    RpcThread worker = new RpcThread(0);
-    worker.start();
-    worker.join();
-    Throwable caught = worker.getCaught();
-    Throwable cause = caught.getCause();
-    Assert.assertNotNull("No exception was raised", cause);
-    if (!(cause instanceof ConnectException)) {
-      throw caught;
-    }
-  }
-
-  /**
-   * This test sets off a blocking thread and then interrupts it, before
-   * checking that the thread was interrupted
-   *
-   * @throws Throwable any exception other than that which was expected
-   */
-  @Test(timeout = 10000)
-  public void testInterruptedWaitForProxy() throws Throwable {
-    RpcThread worker = new RpcThread(100);
-    worker.start();
-    Thread.sleep(1000);
-    Assert.assertTrue("worker hasn't started", worker.waitStarted);
-    worker.interrupt();
-    worker.join();
-    Throwable caught = worker.getCaught();
-    Assert.assertNotNull("No exception was raised", caught);
-    // looking for the root cause here, which can be wrapped
-    // as part of the NetUtils work. Having this test look
-    // a the type of exception there would be brittle to improvements
-    // in exception diagnostics.
-    Throwable cause = caught.getCause();
-    if (cause == null) {
-      // no inner cause, use outer exception as root cause.
-      cause = caught;
-    } else if (cause.getCause() != null) {
-      cause = cause.getCause();
-    }
-    if (!(cause instanceof InterruptedIOException)
-        && !(cause instanceof ClosedByInterruptException)) {
-      throw caught;
-    }
-  }
-
-  /**
-   * This thread waits for a proxy for the specified timeout, and retains any
-   * throwable that was raised in the process
-   */
-
-  private class RpcThread extends Thread {
-    private Throwable caught;
-    private int connectRetries;
-    private volatile boolean waitStarted = false;
-
-    private RpcThread(int connectRetries) {
-      this.connectRetries = connectRetries;
-    }
-    @Override
-    public void run() {
-      try {
-        Configuration config = new Configuration(conf);
-        config.setInt(IPC_CLIENT_CONNECT_MAX_RETRIES_KEY,
-            connectRetries);
-        config.setInt(
-            IPC_CLIENT_CONNECT_MAX_RETRIES_ON_SOCKET_TIMEOUTS_KEY,
-            connectRetries);
-        waitStarted = true;
-
-        short invalidPort = 20;
-        InetSocketAddress invalidAddress = new InetSocketAddress(ADDRESS,
-            invalidPort);
-        TestRpcBase.TestRpcService proxy = RPC.getProxy(
-            TestRpcBase.TestRpcService.class,
-            1L, invalidAddress, conf);
-        // Test echo method
-        proxy.echo(null, newEchoRequest("hello"));
-
-      } catch (Throwable throwable) {
-        caught = throwable;
-      }
+    @Before
+    public void setupProtocolEngine() {
+        RPC.setProtocolEngine(conf, TestRpcService.class, ProtobufRpcEngine2.class);
     }
 
-    public Throwable getCaught() {
-      return caught;
+    /**
+     * This tests that the time-bounded wait for a proxy operation works, and
+     * times out.
+     *
+     * @throws Throwable any exception other than that which was expected
+     */
+    @Test(timeout = 50000)
+    public void testWaitForProxy() throws Throwable {
+        RpcThread worker = new RpcThread(0);
+        worker.start();
+        worker.join();
+        Throwable caught = worker.getCaught();
+        Throwable cause = caught.getCause();
+        Assert.assertNotNull("No exception was raised", cause);
+        if (!(cause instanceof ConnectException)) {
+            throw caught;
+        }
     }
-  }
+
+    /**
+     * This test sets off a blocking thread and then interrupts it, before
+     * checking that the thread was interrupted
+     *
+     * @throws Throwable any exception other than that which was expected
+     */
+    @Test(timeout = 10000)
+    public void testInterruptedWaitForProxy() throws Throwable {
+        RpcThread worker = new RpcThread(100);
+        worker.start();
+        Thread.sleep(1000);
+        Assert.assertTrue("worker hasn't started", worker.waitStarted);
+        worker.interrupt();
+        worker.join();
+        Throwable caught = worker.getCaught();
+        Assert.assertNotNull("No exception was raised", caught);
+        // looking for the root cause here, which can be wrapped
+        // as part of the NetUtils work. Having this test look
+        // a the type of exception there would be brittle to improvements
+        // in exception diagnostics.
+        Throwable cause = caught.getCause();
+        if (cause == null) {
+            // no inner cause, use outer exception as root cause.
+            cause = caught;
+        } else if (cause.getCause() != null) {
+            cause = cause.getCause();
+        }
+        if (!(cause instanceof InterruptedIOException) && !(cause instanceof ClosedByInterruptException)) {
+            throw caught;
+        }
+    }
+
+    /**
+     * This thread waits for a proxy for the specified timeout, and retains any
+     * throwable that was raised in the process
+     */
+    private class RpcThread extends Thread {
+
+        private Throwable caught;
+
+        private int connectRetries;
+
+        private volatile boolean waitStarted = false;
+
+        private RpcThread(int connectRetries) {
+            this.connectRetries = connectRetries;
+        }
+
+        @Override
+        public void run() {
+            try {
+                Configuration config = new Configuration(conf);
+                config.setInt(IPC_CLIENT_CONNECT_MAX_RETRIES_KEY, connectRetries);
+                config.setInt(IPC_CLIENT_CONNECT_MAX_RETRIES_ON_SOCKET_TIMEOUTS_KEY, connectRetries);
+                waitStarted = true;
+                short invalidPort = 20;
+                InetSocketAddress invalidAddress = new InetSocketAddress(ADDRESS, invalidPort);
+                TestRpcBase.TestRpcService proxy = RPC.getProxy(TestRpcBase.TestRpcService.class, 1L, invalidAddress, conf);
+                // Test echo method
+                proxy.echo(null, newEchoRequest("hello"));
+            } catch (Throwable throwable) {
+                caught = throwable;
+            }
+        }
+
+        public Throwable getCaught() {
+            return caught;
+        }
+    }
 }

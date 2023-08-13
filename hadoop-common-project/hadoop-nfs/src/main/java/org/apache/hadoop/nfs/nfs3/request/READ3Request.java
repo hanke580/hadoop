@@ -18,45 +18,45 @@
 package org.apache.hadoop.nfs.nfs3.request;
 
 import java.io.IOException;
-
 import org.apache.hadoop.nfs.nfs3.FileHandle;
 import org.apache.hadoop.oncrpc.XDR;
-
 import com.google.common.annotations.VisibleForTesting;
 
 /**
  * READ3 Request
  */
 public class READ3Request extends RequestWithHandle {
-  private final long offset;
-  private final int count;
 
-  public static READ3Request deserialize(XDR xdr) throws IOException {
-    FileHandle handle = readHandle(xdr);
-    long offset = xdr.readHyper();
-    int count = xdr.readInt();
-    return new READ3Request(handle, offset, count);
-  }
+    private final long offset;
 
-  @VisibleForTesting
-  public READ3Request(FileHandle handle, long offset, int count) {
-    super(handle);
-    this.offset = offset;
-    this.count = count;
-  }
-  
-  public long getOffset() {
-    return this.offset;
-  }
-  
-  public int getCount() {
-    return this.count;
-  }
-  
-  @Override
-  public void serialize(XDR xdr) {
-    handle.serialize(xdr);
-    xdr.writeLongAsHyper(offset);
-    xdr.writeInt(count);
-  }
+    private final int count;
+
+    public static READ3Request deserialize(XDR xdr) throws IOException {
+        FileHandle handle = readHandle(xdr);
+        long offset = xdr.readHyper();
+        int count = xdr.readInt();
+        return new READ3Request(handle, offset, count);
+    }
+
+    @VisibleForTesting
+    public READ3Request(FileHandle handle, long offset, int count) {
+        super(handle);
+        this.offset = offset;
+        this.count = count;
+    }
+
+    public long getOffset() {
+        return this.offset;
+    }
+
+    public int getCount() {
+        return this.count;
+    }
+
+    @Override
+    public void serialize(XDR xdr) {
+        handle.serialize(xdr);
+        xdr.writeLongAsHyper(offset);
+        xdr.writeInt(count);
+    }
 }

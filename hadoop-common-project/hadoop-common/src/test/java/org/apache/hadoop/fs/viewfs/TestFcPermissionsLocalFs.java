@@ -17,31 +17,28 @@
  */
 package org.apache.hadoop.fs.viewfs;
 
-
 import org.apache.hadoop.fs.FileContext;
 import org.apache.hadoop.fs.FileContextPermissionBase;
-
 import org.junit.After;
 import org.junit.Before;
 
+public class TestFcPermissionsLocalFs extends FileContextPermissionBase {
 
-public class TestFcPermissionsLocalFs  extends FileContextPermissionBase {
+    @Override
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+    }
 
-  @Override
-  @Before
-  public void setUp() throws Exception {
-    super.setUp();
-  }
-  
-  @Override
-  @After
-  public void tearDown() throws Exception {
-    super.tearDown();
-    ViewFsTestSetup.tearDownForViewFsLocalFs(fileContextTestHelper);
-  }
+    @Override
+    @After
+    public void tearDown() throws Exception {
+        super.tearDown();
+        ViewFsTestSetup.tearDownForViewFsLocalFs(fileContextTestHelper);
+    }
 
-  @Override
-  protected FileContext getFileContext() throws Exception {
-    return ViewFsTestSetup.setupForViewFsLocalFs(fileContextTestHelper);
-  }
+    @Override
+    protected FileContext getFileContext() throws Exception {
+        return ViewFsTestSetup.setupForViewFsLocalFs(fileContextTestHelper);
+    }
 }

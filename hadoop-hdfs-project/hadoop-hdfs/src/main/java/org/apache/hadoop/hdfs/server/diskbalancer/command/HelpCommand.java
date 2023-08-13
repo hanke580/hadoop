@@ -16,7 +16,6 @@
  * limitations under the License.
  *
  */
-
 package org.apache.hadoop.hdfs.server.diskbalancer.command;
 
 import com.google.common.base.Preconditions;
@@ -30,80 +29,68 @@ import org.apache.hadoop.hdfs.tools.DiskBalancerCLI;
  */
 public class HelpCommand extends Command {
 
-  /**
-   * Constructs a help command.
-   *
-   * @param conf - config
-   */
-  public HelpCommand(Configuration conf) {
-    super(conf);
-    addValidCommandParameters(DiskBalancerCLI.HELP, "Help Command");
-  }
-
-  /**
-   * Executes the Client Calls.
-   *
-   * @param cmd - CommandLine
-   */
-  @Override
-  public void execute(CommandLine cmd) throws Exception {
-    LOG.debug("Processing help Command.");
-    if (cmd == null) {
-      this.printHelp();
-      return;
+    /**
+     * Constructs a help command.
+     *
+     * @param conf - config
+     */
+    public HelpCommand(Configuration conf) {
+        super(conf);
+        addValidCommandParameters(DiskBalancerCLI.HELP, "Help Command");
     }
 
-    Preconditions.checkState(cmd.hasOption(DiskBalancerCLI.HELP));
-    verifyCommandOptions(DiskBalancerCLI.HELP, cmd);
-    String helpCommand = cmd.getOptionValue(DiskBalancerCLI.HELP);
-    if (helpCommand == null || helpCommand.isEmpty()) {
-      this.printHelp();
-      return;
+    /**
+     * Executes the Client Calls.
+     *
+     * @param cmd - CommandLine
+     */
+    @Override
+    public void execute(CommandLine cmd) throws Exception {
+        LOG.debug("Processing help Command.");
+        if (cmd == null) {
+            this.printHelp();
+            return;
+        }
+        Preconditions.checkState(cmd.hasOption(DiskBalancerCLI.HELP));
+        verifyCommandOptions(DiskBalancerCLI.HELP, cmd);
+        String helpCommand = cmd.getOptionValue(DiskBalancerCLI.HELP);
+        if (helpCommand == null || helpCommand.isEmpty()) {
+            this.printHelp();
+            return;
+        }
+        helpCommand = helpCommand.trim();
+        helpCommand = helpCommand.toLowerCase();
+        Command command = null;
+        switch(helpCommand) {
+            case DiskBalancerCLI.PLAN:
+                command = new PlanCommand(getConf());
+                break;
+            case DiskBalancerCLI.EXECUTE:
+                command = new ExecuteCommand(getConf());
+                break;
+            case DiskBalancerCLI.QUERY:
+                command = new QueryCommand(getConf());
+                break;
+            case DiskBalancerCLI.CANCEL:
+                command = new CancelCommand(getConf());
+                break;
+            case DiskBalancerCLI.REPORT:
+                command = new ReportCommand(getConf());
+                break;
+            default:
+                command = this;
+                break;
+        }
+        command.printHelp();
     }
 
-    helpCommand = helpCommand.trim();
-    helpCommand = helpCommand.toLowerCase();
-    Command command = null;
-    switch (helpCommand) {
-    case DiskBalancerCLI.PLAN:
-      command = new PlanCommand(getConf());
-      break;
-    case DiskBalancerCLI.EXECUTE:
-      command = new ExecuteCommand(getConf());
-      break;
-    case DiskBalancerCLI.QUERY:
-      command = new QueryCommand(getConf());
-      break;
-    case DiskBalancerCLI.CANCEL:
-      command = new CancelCommand(getConf());
-      break;
-    case DiskBalancerCLI.REPORT:
-      command = new ReportCommand(getConf());
-      break;
-    default:
-      command = this;
-      break;
+    /**
+     * Gets extended help for this command.
+     */
+    @Override
+    public void printHelp() {
+        String header = "\nDiskBalancer distributes data evenly between " + "different disks on a datanode. " + "DiskBalancer operates by generating a plan, that tells datanode " + "how to move data between disks. Users can execute a plan by " + "submitting it to the datanode. \nTo get specific help on a " + "particular command please run \n\n hdfs diskbalancer -help <command>.";
+        HelpFormatter helpFormatter = new HelpFormatter();
+        helpFormatter.printHelp("hdfs diskbalancer [command] [options]", header, DiskBalancerCLI.getHelpOptions(), "");
     }
-    command.printHelp();
-
-  }
-
-  /**
-   * Gets extended help for this command.
-   */
-  @Override
-  public void printHelp() {
-    String header = "\nDiskBalancer distributes data evenly between " +
-        "different disks on a datanode. " +
-        "DiskBalancer operates by generating a plan, that tells datanode " +
-        "how to move data between disks. Users can execute a plan by " +
-        "submitting it to the datanode. \nTo get specific help on a " +
-        "particular command please run \n\n hdfs diskbalancer -help <command>.";
-
-    HelpFormatter helpFormatter = new HelpFormatter();
-    helpFormatter.printHelp("hdfs diskbalancer [command] [options]",
-        header, DiskBalancerCLI.getHelpOptions(), "");
-  }
-
-
 }

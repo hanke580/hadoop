@@ -19,58 +19,54 @@ package org.apache.hadoop.conf;
 
 import java.util.List;
 import org.junit.Test;
-
 import static org.junit.Assert.*;
 
 public class TestGetInstances {
-  
-  interface SampleInterface {}
-  
-  interface ChildInterface extends SampleInterface {}
-  
-  static class SampleClass implements SampleInterface {
-    SampleClass() {}
-  }
 
-  static class AnotherClass implements ChildInterface {
-    AnotherClass() {}
-  }
-  
-  /**
-   * Makes sure <code>Configuration.getInstances()</code> returns
-   * instances of the required type.
-   */
-  @Test
-  public void testGetInstances() throws Exception {
-    Configuration conf = new Configuration();
-    
-    List<SampleInterface> classes =
-      conf.getInstances("no.such.property", SampleInterface.class);
-    assertTrue(classes.isEmpty());
+    interface SampleInterface {
+    }
 
-    conf.set("empty.property", "");
-    classes = conf.getInstances("empty.property", SampleInterface.class);
-    assertTrue(classes.isEmpty());
-    
-    conf.setStrings("some.classes",
-        SampleClass.class.getName(), AnotherClass.class.getName());
-    classes = conf.getInstances("some.classes", SampleInterface.class);
-    assertEquals(2, classes.size());
-    
-    try {
-      conf.setStrings("some.classes",
-          SampleClass.class.getName(), AnotherClass.class.getName(),
-          String.class.getName());
-      conf.getInstances("some.classes", SampleInterface.class);
-      fail("java.lang.String does not implement SampleInterface");
-    } catch (RuntimeException e) {}
-    
-    try {
-      conf.setStrings("some.classes",
-          SampleClass.class.getName(), AnotherClass.class.getName(),
-          "no.such.Class");
-      conf.getInstances("some.classes", SampleInterface.class);
-      fail("no.such.Class does not exist");
-    } catch (RuntimeException e) {}
-  }
+    interface ChildInterface extends SampleInterface {
+    }
+
+    static class SampleClass implements SampleInterface {
+
+        SampleClass() {
+        }
+    }
+
+    static class AnotherClass implements ChildInterface {
+
+        AnotherClass() {
+        }
+    }
+
+    /**
+     * Makes sure <code>Configuration.getInstances()</code> returns
+     * instances of the required type.
+     */
+    @Test
+    public void testGetInstances() throws Exception {
+        Configuration conf = new Configuration();
+        List<SampleInterface> classes = conf.getInstances("no.such.property", SampleInterface.class);
+        assertTrue(classes.isEmpty());
+        conf.set("empty.property", "");
+        classes = conf.getInstances("empty.property", SampleInterface.class);
+        assertTrue(classes.isEmpty());
+        conf.setStrings("some.classes", SampleClass.class.getName(), AnotherClass.class.getName());
+        classes = conf.getInstances("some.classes", SampleInterface.class);
+        assertEquals(2, classes.size());
+        try {
+            conf.setStrings("some.classes", SampleClass.class.getName(), AnotherClass.class.getName(), String.class.getName());
+            conf.getInstances("some.classes", SampleInterface.class);
+            fail("java.lang.String does not implement SampleInterface");
+        } catch (RuntimeException e) {
+        }
+        try {
+            conf.setStrings("some.classes", SampleClass.class.getName(), AnotherClass.class.getName(), "no.such.Class");
+            conf.getInstances("some.classes", SampleInterface.class);
+            fail("no.such.Class does not exist");
+        } catch (RuntimeException e) {
+        }
+    }
 }

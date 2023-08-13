@@ -23,13 +23,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import org.apache.hadoop.hdfs.server.federation.router.FederationUtil;
 import org.apache.hadoop.hdfs.server.federation.router.RBFConfigKeys;
 import org.apache.hadoop.hdfs.server.federation.router.RouterServiceState;
@@ -48,183 +46,125 @@ import org.junit.Test;
  */
 public class TestStateStoreRouterState extends TestStateStoreBase {
 
-  private static RouterStore routerStore;
+    private static RouterStore routerStore;
 
-  @BeforeClass
-  public static void create() {
-    // Reduce expirations to 2 seconds
-    getConf().setTimeDuration(
-        RBFConfigKeys.FEDERATION_STORE_ROUTER_EXPIRATION_MS,
-        2, TimeUnit.SECONDS);
-    // Set deletion time to 2 seconds
-    getConf().setTimeDuration(
-        RBFConfigKeys.FEDERATION_STORE_ROUTER_EXPIRATION_DELETION_MS,
-        2, TimeUnit.SECONDS);
-  }
-
-  @Before
-  public void setup() throws IOException, InterruptedException {
-
-    if (routerStore == null) {
-      routerStore =
-          getStateStore().getRegisteredRecordStore(RouterStore.class);
+    @BeforeClass
+    public static void create() {
+        // Reduce expirations to 2 seconds
+        getConf().setTimeDuration(RBFConfigKeys.FEDERATION_STORE_ROUTER_EXPIRATION_MS, 2, TimeUnit.SECONDS);
+        // Set deletion time to 2 seconds
+        getConf().setTimeDuration(RBFConfigKeys.FEDERATION_STORE_ROUTER_EXPIRATION_DELETION_MS, 2, TimeUnit.SECONDS);
     }
 
-    // Clear router status registrations
-    assertTrue(clearRecords(getStateStore(), RouterState.class));
-  }
+    @Before
+    public void setup() throws IOException, InterruptedException {
+        if (routerStore == null) {
+            routerStore = getStateStore().getRegisteredRecordStore(RouterStore.class);
+        }
+        // Clear router status registrations
+        assertTrue(clearRecords(getStateStore(), RouterState.class));
+    }
 
-  @Test
-  public void testStateStoreDisconnected() throws Exception {
+    @Test
+    public void testStateStoreDisconnected() throws Exception {
+        // Close the data store driver
+        getStateStore().closeDriver();
+        assertEquals(false, getStateStore().isDriverReady());
+        // Test all APIs that access the data store to ensure they throw the correct
+        // exception.
+        GetRouterRegistrationRequest getSingleRequest = GetRouterRegistrationRequest.newInstance();
+        verifyException(routerStore, "getRouterRegistration", StateStoreUnavailableException.class, new Class[] { GetRouterRegistrationRequest.class }, new Object[] { getSingleRequest });
+        GetRouterRegistrationsRequest getRequest = GetRouterRegistrationsRequest.newInstance();
+        routerStore.loadCache(true);
+        verifyException(routerStore, "getRouterRegistrations", StateStoreUnavailableException.class, new Class[] { GetRouterRegistrationsRequest.class }, new Object[] { getRequest });
+        RouterHeartbeatRequest hbRequest = RouterHeartbeatRequest.newInstance(RouterState.newInstance("test", 0, RouterServiceState.UNINITIALIZED));
+        verifyException(routerStore, "routerHeartbeat", StateStoreUnavailableException.class, new Class[] { RouterHeartbeatRequest.class }, new Object[] { hbRequest });
+    }
 
-    // Close the data store driver
-    getStateStore().closeDriver();
-    assertEquals(false, getStateStore().isDriverReady());
+    //
+    // Router
+    //
+    @Test
+    public void testUpdateRouterStatus() throws IllegalStateException, IOException {
+        long dateStarted = Time.now();
+        String address = "testaddress";
+        // Set
+        RouterHeartbeatRequest request = RouterHeartbeatRequest.newInstance(RouterState.newInstance(address, dateStarted, RouterServiceState.RUNNING));
+        assertTrue(routerStore.routerHeartbeat(request).getStatus());
+        // Verify
+        GetRouterRegistrationRequest getRequest = GetRouterRegistrationRequest.newInstance(address);
+        RouterState record = routerStore.getRouterRegistration(getRequest).getRouter();
+        assertNotNull(record);
+        assertEquals(RouterServiceState.RUNNING, record.getStatus());
+        assertEquals(address, record.getAddress());
+        assertEquals(FederationUtil.getCompileInfo(), record.getCompileInfo());
+        // Build version may vary a bit
+        assertFalse(record.getVersion().isEmpty());
+    }
 
-    // Test all APIs that access the data store to ensure they throw the correct
-    // exception.
-    GetRouterRegistrationRequest getSingleRequest =
-        GetRouterRegistrationRequest.newInstance();
-    verifyException(routerStore, "getRouterRegistration",
-        StateStoreUnavailableException.class,
-        new Class[] {GetRouterRegistrationRequest.class},
-        new Object[] {getSingleRequest});
+    @Test
+    public void testRouterStateExpiredAndDeletion() throws IOException, InterruptedException, TimeoutException {
+        long dateStarted = Time.now();
+        String address = "testaddress";
+        RouterHeartbeatRequest request = RouterHeartbeatRequest.newInstance(RouterState.newInstance(address, dateStarted, RouterServiceState.RUNNING));
+        // Set
+        assertTrue(routerStore.routerHeartbeat(request).getStatus());
+        // Verify
+        GetRouterRegistrationRequest getRequest = GetRouterRegistrationRequest.newInstance(address);
+        RouterState record = routerStore.getRouterRegistration(getRequest).getRouter();
+        assertNotNull(record);
+        // Wait past expiration (set in conf to 2 seconds)
+        GenericTestUtils.waitFor(() -> {
+            try {
+                RouterState routerState = routerStore.getRouterRegistration(getRequest).getRouter();
+                // Verify entry is expired
+                return routerState.getStatus() == RouterServiceState.EXPIRED;
+            } catch (IOException e) {
+                return false;
+            }
+        }, 100, 3000);
+        // Heartbeat again and this shouldn't be EXPIRED at this point
+        assertTrue(routerStore.routerHeartbeat(request).getStatus());
+        RouterState r = routerStore.getRouterRegistration(getRequest).getRouter();
+        assertEquals(RouterServiceState.RUNNING, r.getStatus());
+        // Wait past expiration (set in conf to 2 seconds)
+        GenericTestUtils.waitFor(() -> {
+            try {
+                RouterState routerState = routerStore.getRouterRegistration(getRequest).getRouter();
+                // Verify entry is expired
+                return routerState.getStatus() == RouterServiceState.EXPIRED;
+            } catch (IOException e) {
+                return false;
+            }
+        }, 100, 3000);
+        // Wait deletion (set in conf to 2 seconds)
+        GenericTestUtils.waitFor(() -> {
+            try {
+                RouterState routerState = routerStore.getRouterRegistration(getRequest).getRouter();
+                // Verify entry is deleted
+                return routerState.getStatus() == null;
+            } catch (IOException e) {
+                return false;
+            }
+        }, 100, 3000);
+    }
 
-    GetRouterRegistrationsRequest getRequest =
-        GetRouterRegistrationsRequest.newInstance();
-    routerStore.loadCache(true);
-    verifyException(routerStore, "getRouterRegistrations",
-        StateStoreUnavailableException.class,
-        new Class[] {GetRouterRegistrationsRequest.class},
-        new Object[] {getRequest});
-
-    RouterHeartbeatRequest hbRequest = RouterHeartbeatRequest.newInstance(
-        RouterState.newInstance("test", 0, RouterServiceState.UNINITIALIZED));
-    verifyException(routerStore, "routerHeartbeat",
-        StateStoreUnavailableException.class,
-        new Class[] {RouterHeartbeatRequest.class},
-        new Object[] {hbRequest});
-  }
-
-  //
-  // Router
-  //
-  @Test
-  public void testUpdateRouterStatus()
-      throws IllegalStateException, IOException {
-
-    long dateStarted = Time.now();
-    String address = "testaddress";
-
-    // Set
-    RouterHeartbeatRequest request = RouterHeartbeatRequest.newInstance(
-        RouterState.newInstance(
-            address, dateStarted, RouterServiceState.RUNNING));
-    assertTrue(routerStore.routerHeartbeat(request).getStatus());
-
-    // Verify
-    GetRouterRegistrationRequest getRequest =
-        GetRouterRegistrationRequest.newInstance(address);
-    RouterState record =
-        routerStore.getRouterRegistration(getRequest).getRouter();
-    assertNotNull(record);
-    assertEquals(RouterServiceState.RUNNING, record.getStatus());
-    assertEquals(address, record.getAddress());
-    assertEquals(FederationUtil.getCompileInfo(), record.getCompileInfo());
-    // Build version may vary a bit
-    assertFalse(record.getVersion().isEmpty());
-  }
-
-  @Test
-  public void testRouterStateExpiredAndDeletion()
-      throws IOException, InterruptedException, TimeoutException {
-
-    long dateStarted = Time.now();
-    String address = "testaddress";
-
-    RouterHeartbeatRequest request = RouterHeartbeatRequest.newInstance(
-        RouterState.newInstance(
-            address, dateStarted, RouterServiceState.RUNNING));
-    // Set
-    assertTrue(routerStore.routerHeartbeat(request).getStatus());
-
-    // Verify
-    GetRouterRegistrationRequest getRequest =
-        GetRouterRegistrationRequest.newInstance(address);
-    RouterState record =
-        routerStore.getRouterRegistration(getRequest).getRouter();
-    assertNotNull(record);
-
-    // Wait past expiration (set in conf to 2 seconds)
-    GenericTestUtils.waitFor(() -> {
-      try {
-        RouterState routerState = routerStore
-            .getRouterRegistration(getRequest).getRouter();
-        // Verify entry is expired
-        return routerState.getStatus() == RouterServiceState.EXPIRED;
-      } catch (IOException e) {
-        return false;
-      }
-    }, 100, 3000);
-
-    // Heartbeat again and this shouldn't be EXPIRED at this point
-    assertTrue(routerStore.routerHeartbeat(request).getStatus());
-    RouterState r = routerStore.getRouterRegistration(getRequest).getRouter();
-    assertEquals(RouterServiceState.RUNNING, r.getStatus());
-
-    // Wait past expiration (set in conf to 2 seconds)
-    GenericTestUtils.waitFor(() -> {
-      try {
-        RouterState routerState = routerStore
-            .getRouterRegistration(getRequest).getRouter();
-        // Verify entry is expired
-        return routerState.getStatus() == RouterServiceState.EXPIRED;
-      } catch (IOException e) {
-        return false;
-      }
-    }, 100, 3000);
-
-    // Wait deletion (set in conf to 2 seconds)
-    GenericTestUtils.waitFor(() -> {
-      try {
-        RouterState routerState = routerStore
-            .getRouterRegistration(getRequest).getRouter();
-        // Verify entry is deleted
-        return routerState.getStatus() == null;
-      } catch (IOException e) {
-        return false;
-      }
-    }, 100, 3000);
-  }
-
-  @Test
-  public void testGetAllRouterStates()
-      throws StateStoreUnavailableException, IOException {
-
-    // Set 2 entries
-    RouterHeartbeatRequest heartbeatRequest1 =
-        RouterHeartbeatRequest.newInstance(
-            RouterState.newInstance(
-                "testaddress1", Time.now(), RouterServiceState.RUNNING));
-    assertTrue(routerStore.routerHeartbeat(heartbeatRequest1).getStatus());
-
-    RouterHeartbeatRequest heartbeatRequest2 =
-        RouterHeartbeatRequest.newInstance(
-            RouterState.newInstance(
-                "testaddress2", Time.now(), RouterServiceState.RUNNING));
-    assertTrue(routerStore.routerHeartbeat(heartbeatRequest2).getStatus());
-
-    // Verify
-    routerStore.loadCache(true);
-    GetRouterRegistrationsRequest request =
-        GetRouterRegistrationsRequest.newInstance();
-    List<RouterState> entries =
-        routerStore.getRouterRegistrations(request).getRouters();
-    assertEquals(2, entries.size());
-    Collections.sort(entries);
-    assertEquals("testaddress1", entries.get(0).getAddress());
-    assertEquals("testaddress2", entries.get(1).getAddress());
-    assertEquals(RouterServiceState.RUNNING, entries.get(0).getStatus());
-    assertEquals(RouterServiceState.RUNNING, entries.get(1).getStatus());
-  }
+    @Test
+    public void testGetAllRouterStates() throws StateStoreUnavailableException, IOException {
+        // Set 2 entries
+        RouterHeartbeatRequest heartbeatRequest1 = RouterHeartbeatRequest.newInstance(RouterState.newInstance("testaddress1", Time.now(), RouterServiceState.RUNNING));
+        assertTrue(routerStore.routerHeartbeat(heartbeatRequest1).getStatus());
+        RouterHeartbeatRequest heartbeatRequest2 = RouterHeartbeatRequest.newInstance(RouterState.newInstance("testaddress2", Time.now(), RouterServiceState.RUNNING));
+        assertTrue(routerStore.routerHeartbeat(heartbeatRequest2).getStatus());
+        // Verify
+        routerStore.loadCache(true);
+        GetRouterRegistrationsRequest request = GetRouterRegistrationsRequest.newInstance();
+        List<RouterState> entries = routerStore.getRouterRegistrations(request).getRouters();
+        assertEquals(2, entries.size());
+        Collections.sort(entries);
+        assertEquals("testaddress1", entries.get(0).getAddress());
+        assertEquals("testaddress2", entries.get(1).getAddress());
+        assertEquals(RouterServiceState.RUNNING, entries.get(0).getStatus());
+        assertEquals(RouterServiceState.RUNNING, entries.get(1).getStatus());
+    }
 }

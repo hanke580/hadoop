@@ -23,7 +23,6 @@ import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.apache.hadoop.hdfs.server.namenode.Namesystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.ArrayDeque;
 import java.util.Queue;
 
@@ -32,123 +31,115 @@ import java.util.Queue;
  * the DatanodeAdmin BackOff and Default Monitors, which control decommission
  * and maintenance mode.
  */
-public abstract class DatanodeAdminMonitorBase
-    implements DatanodeAdminMonitorInterface, Configurable {
+public abstract class DatanodeAdminMonitorBase implements DatanodeAdminMonitorInterface, Configurable {
 
-  protected BlockManager blockManager;
-  protected Namesystem namesystem;
-  protected DatanodeAdminManager dnAdmin;
-  protected Configuration conf;
+    protected BlockManager blockManager;
 
-  protected final Queue<DatanodeDescriptor> pendingNodes = new ArrayDeque<>();
+    protected Namesystem namesystem;
 
-  /**
-   * The maximum number of nodes to track in outOfServiceNodeBlocks.
-   * A value of 0 means no limit.
-   */
-  protected int maxConcurrentTrackedNodes;
+    protected DatanodeAdminManager dnAdmin;
 
-  private static final Logger LOG =
-      LoggerFactory.getLogger(DatanodeAdminMonitorBase.class);
+    protected Configuration conf;
 
-  /**
-   * Set the cluster namesystem.
-   *
-   * @param ns The namesystem for the cluster
-   */
-  @Override
-  public void setNameSystem(Namesystem ns) {
-    this.namesystem = ns;
-  }
+    protected final Queue<DatanodeDescriptor> pendingNodes = new ArrayDeque<>();
 
-  /**
-   * Set the blockmanager for the cluster.
-   *
-   * @param bm The cluster BlockManager
-   */
-  @Override
-  public void setBlockManager(BlockManager bm) {
-    this.blockManager = bm;
-  }
+    /**
+     * The maximum number of nodes to track in outOfServiceNodeBlocks.
+     * A value of 0 means no limit.
+     */
+    protected int maxConcurrentTrackedNodes;
 
-  /**
-   * Set the DatanodeAdminManager instance in use in the namenode.
-   *
-   * @param admin The current DatanodeAdminManager
-   */
-  @Override
-  public void setDatanodeAdminManager(DatanodeAdminManager admin) {
-    this.dnAdmin = admin;
-  }
+    private static final Logger LOG = LoggerFactory.getLogger(DatanodeAdminMonitorBase.class);
 
-  /**
-   * Used by the Configurable interface, which is used by ReflectionUtils
-   * to create an instance of the monitor class. This method will be called to
-   * pass the Configuration to the new object.
-   *
-   * @param conf configuration to be used
-   */
-  @Override
-  public void setConf(Configuration conf) {
-    this.conf = conf;
-    this.maxConcurrentTrackedNodes = conf.getInt(
-        DFSConfigKeys.DFS_NAMENODE_DECOMMISSION_MAX_CONCURRENT_TRACKED_NODES,
-        DFSConfigKeys
-            .DFS_NAMENODE_DECOMMISSION_MAX_CONCURRENT_TRACKED_NODES_DEFAULT);
-    if (this.maxConcurrentTrackedNodes < 0) {
-      LOG.error("{} is set to an invalid value, it must be zero or greater. "+
-              "Defaulting to {}",
-          DFSConfigKeys.DFS_NAMENODE_DECOMMISSION_MAX_CONCURRENT_TRACKED_NODES,
-          DFSConfigKeys
-              .DFS_NAMENODE_DECOMMISSION_MAX_CONCURRENT_TRACKED_NODES_DEFAULT);
-      this.maxConcurrentTrackedNodes =
-          DFSConfigKeys
-              .DFS_NAMENODE_DECOMMISSION_MAX_CONCURRENT_TRACKED_NODES_DEFAULT;
+    /**
+     * Set the cluster namesystem.
+     *
+     * @param ns The namesystem for the cluster
+     */
+    @Override
+    public void setNameSystem(Namesystem ns) {
+        this.namesystem = ns;
     }
-    processConf();
-  }
 
-  /**
-   * Get the current Configuration stored in this object.
-   *
-   * @return Configuration used when the object was created
-   */
-  @Override
-  public Configuration getConf() {
-    return this.conf;
-  }
+    /**
+     * Set the blockmanager for the cluster.
+     *
+     * @param bm The cluster BlockManager
+     */
+    @Override
+    public void setBlockManager(BlockManager bm) {
+        this.blockManager = bm;
+    }
 
-  /**
-   * Abstract method which must be implemented by the sub-classes to process
-   * set various instance variables from the Configuration passed at object
-   * creation time.
-   */
-  protected abstract void processConf();
+    /**
+     * Set the DatanodeAdminManager instance in use in the namenode.
+     *
+     * @param admin The current DatanodeAdminManager
+     */
+    @Override
+    public void setDatanodeAdminManager(DatanodeAdminManager admin) {
+        this.dnAdmin = admin;
+    }
 
-  /**
-   * Start tracking a node for decommission or maintenance. The given Datanode
-   * will be queued for later processing in pendingNodes. This method must be
-   * called under the namenode write lock.
-   * @param dn The datanode to start tracking
-   */
-  @Override
-  public void startTrackingNode(DatanodeDescriptor dn) {
-    pendingNodes.add(dn);
-  }
+    /**
+     * Used by the Configurable interface, which is used by ReflectionUtils
+     * to create an instance of the monitor class. This method will be called to
+     * pass the Configuration to the new object.
+     *
+     * @param conf configuration to be used
+     */
+    @Override
+    public void setConf(Configuration conf) {
+        this.conf = conf;
+        this.maxConcurrentTrackedNodes = conf.getInt(DFSConfigKeys.DFS_NAMENODE_DECOMMISSION_MAX_CONCURRENT_TRACKED_NODES, DFSConfigKeys.DFS_NAMENODE_DECOMMISSION_MAX_CONCURRENT_TRACKED_NODES_DEFAULT);
+        if (this.maxConcurrentTrackedNodes < 0) {
+            LOG.error("{} is set to an invalid value, it must be zero or greater. " + "Defaulting to {}", DFSConfigKeys.DFS_NAMENODE_DECOMMISSION_MAX_CONCURRENT_TRACKED_NODES, DFSConfigKeys.DFS_NAMENODE_DECOMMISSION_MAX_CONCURRENT_TRACKED_NODES_DEFAULT);
+            this.maxConcurrentTrackedNodes = DFSConfigKeys.DFS_NAMENODE_DECOMMISSION_MAX_CONCURRENT_TRACKED_NODES_DEFAULT;
+        }
+        processConf();
+    }
 
-  /**
-   * Get the number of datanodes nodes in the pending queue. Ie the count of
-   * nodes waiting to decommission but have not yet started the process.
-   *
-   * @return The count of pending nodes
-   */
-  @Override
-  public int getPendingNodeCount() {
-    return pendingNodes.size();
-  }
+    /**
+     * Get the current Configuration stored in this object.
+     *
+     * @return Configuration used when the object was created
+     */
+    @Override
+    public Configuration getConf() {
+        return this.conf;
+    }
 
-  @Override
-  public Queue<DatanodeDescriptor> getPendingNodes() {
-    return pendingNodes;
-  }
+    /**
+     * Abstract method which must be implemented by the sub-classes to process
+     * set various instance variables from the Configuration passed at object
+     * creation time.
+     */
+    protected abstract void processConf();
+
+    /**
+     * Start tracking a node for decommission or maintenance. The given Datanode
+     * will be queued for later processing in pendingNodes. This method must be
+     * called under the namenode write lock.
+     * @param dn The datanode to start tracking
+     */
+    @Override
+    public void startTrackingNode(DatanodeDescriptor dn) {
+        pendingNodes.add(dn);
+    }
+
+    /**
+     * Get the number of datanodes nodes in the pending queue. Ie the count of
+     * nodes waiting to decommission but have not yet started the process.
+     *
+     * @return The count of pending nodes
+     */
+    @Override
+    public int getPendingNodeCount() {
+        return pendingNodes.size();
+    }
+
+    @Override
+    public Queue<DatanodeDescriptor> getPendingNodes() {
+        return pendingNodes;
+    }
 }

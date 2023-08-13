@@ -33,7 +33,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import org.mockito.stubbing.Answer;
 import org.slf4j.LoggerFactory;
-
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -43,79 +42,67 @@ import java.util.concurrent.locks.ReentrantLock;
  * Test that timeout is triggered during Disk Volume Checker.
  */
 public class TestDatasetVolumeCheckerTimeout {
-  public static final org.slf4j.Logger LOG =
-      LoggerFactory.getLogger(TestDatasetVolumeCheckerTimeout.class);
 
-  @Rule
-  public TestName testName = new TestName();
+    public static final org.slf4j.Logger LOG = LoggerFactory.getLogger(TestDatasetVolumeCheckerTimeout.class);
 
-  static Configuration conf;
-  private static final long DISK_CHECK_TIMEOUT = 10;
-  private static final long DISK_CHECK_TIME = 100;
-  static ReentrantLock lock = new ReentrantLock();
+    @Rule
+    public TestName testName = new TestName();
 
-  static {
-    conf = new HdfsConfiguration();
-    conf.setTimeDuration(
-        DFSConfigKeys.DFS_DATANODE_DISK_CHECK_TIMEOUT_KEY,
-        DISK_CHECK_TIMEOUT, TimeUnit.MILLISECONDS);
-  }
+    static Configuration conf;
 
-  static FsVolumeSpi makeSlowVolume() throws Exception {
-    final FsVolumeSpi volume = mock(FsVolumeSpi.class);
-    final FsVolumeReference reference = mock(FsVolumeReference.class);
-    final StorageLocation location = mock(StorageLocation.class);
+    private static final long DISK_CHECK_TIMEOUT = 10;
 
-    when(reference.getVolume()).thenReturn(volume);
-    when(volume.obtainReference()).thenReturn(reference);
-    when(volume.getStorageLocation()).thenReturn(location);
+    private static final long DISK_CHECK_TIME = 100;
 
-    when(volume.check(any())).thenAnswer(
-        (Answer<VolumeCheckResult>) invocationOnMock -> {
-        // Wait for the disk check to timeout and then release lock.
-        lock.lock();
-        lock.unlock();
-        return VolumeCheckResult.HEALTHY;
-      });
+    static ReentrantLock lock = new ReentrantLock();
 
-    return volume;
-  }
+    static {
+        conf = new HdfsConfiguration();
+        conf.setTimeDuration(DFSConfigKeys.DFS_DATANODE_DISK_CHECK_TIMEOUT_KEY, DISK_CHECK_TIMEOUT, TimeUnit.MILLISECONDS);
+    }
 
-  @Test (timeout = 300000)
-  public void testDiskCheckTimeout() throws Exception {
-    LOG.info("Executing {}", testName.getMethodName());
-    final FsVolumeSpi volume = makeSlowVolume();
-
-    final DatasetVolumeChecker checker =
-        new DatasetVolumeChecker(conf, new FakeTimer());
-    final AtomicLong numCallbackInvocations = new AtomicLong(0);
-
-    lock.lock();
-    /**
-     * Request a check and ensure it triggered {@link FsVolumeSpi#check}.
-     */
-    boolean result =
-        checker.checkVolume(volume, new DatasetVolumeChecker.Callback() {
-          @Override
-          public void call(Set<FsVolumeSpi> healthyVolumes,
-              Set<FsVolumeSpi> failedVolumes) {
-            numCallbackInvocations.incrementAndGet();
-
-            // Assert that the disk check registers a failed volume due to
-            // timeout
-            assertThat(healthyVolumes.size(), is(0));
-            assertThat(failedVolumes.size(), is(1));
-          }
+    static FsVolumeSpi makeSlowVolume() throws Exception {
+        final FsVolumeSpi volume = mock(FsVolumeSpi.class);
+        final FsVolumeReference reference = mock(FsVolumeReference.class);
+        final StorageLocation location = mock(StorageLocation.class);
+        when(reference.getVolume()).thenReturn(volume);
+        when(volume.obtainReference()).thenReturn(reference);
+        when(volume.getStorageLocation()).thenReturn(location);
+        when(volume.check(any())).thenAnswer((Answer<VolumeCheckResult>) invocationOnMock -> {
+            lock.lock();
+            lock.unlock();
+            return VolumeCheckResult.HEALTHY;
         });
+        return volume;
+    }
 
-    // Wait for the callback
-    Thread.sleep(DISK_CHECK_TIME);
+    @Test(timeout = 300000)
+    public void testDiskCheckTimeout() throws Exception {
+        LOG.info("Executing {}", testName.getMethodName());
+        final FsVolumeSpi volume = makeSlowVolume();
+        final DatasetVolumeChecker checker = new DatasetVolumeChecker(conf, new FakeTimer());
+        final AtomicLong numCallbackInvocations = new AtomicLong(0);
+        lock.lock();
+        /**
+         * Request a check and ensure it triggered {@link FsVolumeSpi#check}.
+         */
+        boolean result = checker.checkVolume(volume, new DatasetVolumeChecker.Callback() {
 
-    // Release lock
-    lock.unlock();
-
-    // Ensure that the check was invoked only once.
-    verify(volume, times(1)).check(any());
-    assertThat(numCallbackInvocations.get(), is(1L));
-  }
+            @Override
+            public void call(Set<FsVolumeSpi> healthyVolumes, Set<FsVolumeSpi> failedVolumes) {
+                numCallbackInvocations.incrementAndGet();
+                // Assert that the disk check registers a failed volume due to
+                // timeout
+                assertThat(healthyVolumes.size(), is(0));
+                assertThat(failedVolumes.size(), is(1));
+            }
+        });
+        // Wait for the callback
+        Thread.sleep(DISK_CHECK_TIME);
+        // Release lock
+        lock.unlock();
+        // Ensure that the check was invoked only once.
+        verify(volume, times(1)).check(any());
+        assertThat(numCallbackInvocations.get(), is(1L));
+    }
 }

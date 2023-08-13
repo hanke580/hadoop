@@ -5,9 +5,9 @@
  * licenses this file to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -17,45 +17,45 @@
 package org.apache.hadoop.io.file.tfile;
 
 import java.io.IOException;
-
 import org.apache.hadoop.util.Time;
 
 /**
- * this class is a time class to 
- * measure to measure the time 
+ * this class is a time class to
+ * measure to measure the time
  * taken for some event.
  */
-public  class Timer {
-  long startTimeEpoch;
-  long finishTimeEpoch;
-  
-  public void startTime() throws IOException {
-    startTimeEpoch = Time.now();
-  }
+public class Timer {
 
-  public void stopTime() throws IOException {
-    finishTimeEpoch = Time.now();
-  }
+    long startTimeEpoch;
 
-  public long getIntervalMillis() throws IOException {
-    return finishTimeEpoch - startTimeEpoch;
-  }
+    long finishTimeEpoch;
 
-  public void printlnWithTimestamp(String message) throws IOException {
-    System.out.println(formatCurrentTime() + "  " + message);
-  }
+    public void startTime() throws IOException {
+        startTimeEpoch = Time.now();
+    }
 
-  public String formatTime(long millis) {
-    return Time.formatTime(millis);
-  }
+    public void stopTime() throws IOException {
+        finishTimeEpoch = Time.now();
+    }
 
-  public String getIntervalString() throws IOException {
-    long time = getIntervalMillis();
-    return formatTime(time);
-  }
+    public long getIntervalMillis() throws IOException {
+        return finishTimeEpoch - startTimeEpoch;
+    }
 
-  public String formatCurrentTime() {
-    return formatTime(Time.now());
-  }
+    public void printlnWithTimestamp(String message) throws IOException {
+        System.out.println(formatCurrentTime() + "  " + message);
+    }
+
+    public String formatTime(long millis) {
+        return Time.formatTime(millis);
+    }
+
+    public String getIntervalString() throws IOException {
+        long time = getIntervalMillis();
+        return formatTime(time);
+    }
+
+    public String formatCurrentTime() {
+        return formatTime(Time.now());
+    }
 }
-

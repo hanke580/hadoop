@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * Implementations of state store data providers/drivers. Each driver is
  * responsible for maintaining, querying, updating and deleting persistent data
@@ -37,3 +36,4 @@ package org.apache.hadoop.hdfs.server.federation.store.driver.impl;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

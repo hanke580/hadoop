@@ -21,7 +21,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.hdfs.DFSConfigKeys;
@@ -40,121 +39,105 @@ import org.junit.After;
 import org.junit.Before;
 
 abstract public class BaseReplicationPolicyTest {
-  {
-    GenericTestUtils.setLogLevel(BlockPlacementPolicy.LOG, Level.ALL);
-  }
 
-  protected NetworkTopology cluster;
-  protected DatanodeDescriptor dataNodes[];
-  protected static final int BLOCK_SIZE = 1024;
-  protected NameNode namenode;
-  protected DatanodeManager dnManager;
-  protected BlockPlacementPolicy replicator;
-  protected final String filename = "/dummyfile.txt";
-  protected DatanodeStorageInfo[] storages;
-  protected String blockPlacementPolicy;
-  protected NamenodeProtocols nameNodeRpc = null;
-
-  static void updateHeartbeatWithUsage(DatanodeDescriptor dn,
-    long capacity, long dfsUsed, long remaining, long blockPoolUsed,
-    long dnCacheCapacity, long dnCacheUsed, int xceiverCount,
-    int volFailures) {
-    dn.getStorageInfos()[0].setUtilizationForTesting(
-        capacity, dfsUsed, remaining, blockPoolUsed);
-    dn.updateHeartbeat(
-        BlockManagerTestUtil.getStorageReportsForDatanode(dn),
-        dnCacheCapacity, dnCacheUsed, xceiverCount, volFailures, null);
-  }
-
-  abstract DatanodeDescriptor[] getDatanodeDescriptors(Configuration conf);
-
-  @Before
-  public void setupCluster() throws Exception {
-    Configuration conf = new HdfsConfiguration();
-    dataNodes = getDatanodeDescriptors(conf);
-
-    FileSystem.setDefaultUri(conf, "hdfs://localhost:0");
-    conf.set(DFSConfigKeys.DFS_NAMENODE_HTTP_ADDRESS_KEY, "0.0.0.0:0");
-    File baseDir = PathUtils.getTestDir(TestReplicationPolicy.class);
-    conf.set(DFSConfigKeys.DFS_NAMENODE_NAME_DIR_KEY,
-        new File(baseDir, "name").getPath());
-    conf.set(DFSConfigKeys.DFS_BLOCK_REPLICATOR_CLASSNAME_KEY,
-        blockPlacementPolicy);
-    conf.setBoolean(
-        DFSConfigKeys.DFS_NAMENODE_AVOID_STALE_DATANODE_FOR_READ_KEY, true);
-    conf.setBoolean(
-        DFSConfigKeys.DFS_NAMENODE_AVOID_STALE_DATANODE_FOR_WRITE_KEY, true);
-    DFSTestUtil.formatNameNode(conf);
-    namenode = new NameNode(conf);
-    nameNodeRpc = namenode.getRpcServer();
-
-    final BlockManager bm = namenode.getNamesystem().getBlockManager();
-    replicator = bm.getBlockPlacementPolicy();
-    cluster = bm.getDatanodeManager().getNetworkTopology();
-    dnManager = bm.getDatanodeManager();
-    // construct network topology
-    for (int i=0; i < dataNodes.length; i++) {
-      cluster.add(dataNodes[i]);
-      bm.getDatanodeManager().getHeartbeatManager().addDatanode(
-          dataNodes[i]);
-      bm.getDatanodeManager().getHeartbeatManager().updateDnStat(
-          dataNodes[i]);
+    {
+        GenericTestUtils.setLogLevel(BlockPlacementPolicy.LOG, Level.ALL);
     }
-    updateHeartbeatWithUsage();
-  }
 
-  void updateHeartbeatWithUsage() {
-    for (int i=0; i < dataNodes.length; i++) {
-      updateHeartbeatWithUsage(dataNodes[i],
-          2* HdfsServerConstants.MIN_BLOCKS_FOR_WRITE*BLOCK_SIZE, 0L,
-          2* HdfsServerConstants.MIN_BLOCKS_FOR_WRITE*BLOCK_SIZE, 0L, 0L, 0L, 0, 0);
+    protected NetworkTopology cluster;
+
+    protected DatanodeDescriptor[] dataNodes;
+
+    protected static final int BLOCK_SIZE = 1024;
+
+    protected NameNode namenode;
+
+    protected DatanodeManager dnManager;
+
+    protected BlockPlacementPolicy replicator;
+
+    protected final String filename = "/dummyfile.txt";
+
+    protected DatanodeStorageInfo[] storages;
+
+    protected String blockPlacementPolicy;
+
+    protected NamenodeProtocols nameNodeRpc = null;
+
+    static void updateHeartbeatWithUsage(DatanodeDescriptor dn, long capacity, long dfsUsed, long remaining, long blockPoolUsed, long dnCacheCapacity, long dnCacheUsed, int xceiverCount, int volFailures) {
+        dn.getStorageInfos()[0].setUtilizationForTesting(capacity, dfsUsed, remaining, blockPoolUsed);
+        dn.updateHeartbeat(BlockManagerTestUtil.getStorageReportsForDatanode(dn), dnCacheCapacity, dnCacheUsed, xceiverCount, volFailures, null);
     }
-  }
 
-  @After
-  public void tearDown() throws Exception {
-    namenode.stop();
-  }
+    abstract DatanodeDescriptor[] getDatanodeDescriptors(Configuration conf);
 
-  boolean isOnSameRack(DatanodeStorageInfo left, DatanodeStorageInfo right) {
-    return isOnSameRack(left, right.getDatanodeDescriptor());
-  }
+    @Before
+    public void setupCluster() throws Exception {
+        Configuration conf = new HdfsConfiguration();
+        dataNodes = getDatanodeDescriptors(conf);
+        FileSystem.setDefaultUri(conf, "hdfs://localhost:0");
+        conf.set(DFSConfigKeys.DFS_NAMENODE_HTTP_ADDRESS_KEY, "0.0.0.0:0");
+        File baseDir = PathUtils.getTestDir(TestReplicationPolicy.class);
+        conf.set(DFSConfigKeys.DFS_NAMENODE_NAME_DIR_KEY, new File(baseDir, "name").getPath());
+        conf.set(DFSConfigKeys.DFS_BLOCK_REPLICATOR_CLASSNAME_KEY, blockPlacementPolicy);
+        conf.setBoolean(DFSConfigKeys.DFS_NAMENODE_AVOID_STALE_DATANODE_FOR_READ_KEY, true);
+        conf.setBoolean(DFSConfigKeys.DFS_NAMENODE_AVOID_STALE_DATANODE_FOR_WRITE_KEY, true);
+        DFSTestUtil.formatNameNode(conf);
+        namenode = new NameNode(conf);
+        nameNodeRpc = namenode.getRpcServer();
+        final BlockManager bm = namenode.getNamesystem().getBlockManager();
+        replicator = bm.getBlockPlacementPolicy();
+        cluster = bm.getDatanodeManager().getNetworkTopology();
+        dnManager = bm.getDatanodeManager();
+        // construct network topology
+        for (int i = 0; i < dataNodes.length; i++) {
+            cluster.add(dataNodes[i]);
+            bm.getDatanodeManager().getHeartbeatManager().addDatanode(dataNodes[i]);
+            bm.getDatanodeManager().getHeartbeatManager().updateDnStat(dataNodes[i]);
+        }
+        updateHeartbeatWithUsage();
+    }
 
-  boolean isOnSameRack(DatanodeStorageInfo left, DatanodeDescriptor right) {
-    return cluster.isOnSameRack(left.getDatanodeDescriptor(), right);
-  }
+    void updateHeartbeatWithUsage() {
+        for (int i = 0; i < dataNodes.length; i++) {
+            updateHeartbeatWithUsage(dataNodes[i], 2 * HdfsServerConstants.MIN_BLOCKS_FOR_WRITE * BLOCK_SIZE, 0L, 2 * HdfsServerConstants.MIN_BLOCKS_FOR_WRITE * BLOCK_SIZE, 0L, 0L, 0L, 0, 0);
+        }
+    }
 
-  DatanodeStorageInfo[] chooseTarget(int numOfReplicas) {
-    return chooseTarget(numOfReplicas, dataNodes[0]);
-  }
+    @After
+    public void tearDown() throws Exception {
+        namenode.stop();
+    }
 
-  DatanodeStorageInfo[] chooseTarget(int numOfReplicas,
-      DatanodeDescriptor writer) {
-    return chooseTarget(numOfReplicas, writer,
-        new ArrayList<DatanodeStorageInfo>());
-  }
+    boolean isOnSameRack(DatanodeStorageInfo left, DatanodeStorageInfo right) {
+        return isOnSameRack(left, right.getDatanodeDescriptor());
+    }
 
-  DatanodeStorageInfo[] chooseTarget(int numOfReplicas,
-      List<DatanodeStorageInfo> chosenNodes) {
-    return chooseTarget(numOfReplicas, dataNodes[0], chosenNodes);
-  }
+    boolean isOnSameRack(DatanodeStorageInfo left, DatanodeDescriptor right) {
+        return cluster.isOnSameRack(left.getDatanodeDescriptor(), right);
+    }
 
-  DatanodeStorageInfo[] chooseTarget(int numOfReplicas,
-      DatanodeDescriptor writer, List<DatanodeStorageInfo> chosenNodes) {
-    return chooseTarget(numOfReplicas, writer, chosenNodes, null);
-  }
+    DatanodeStorageInfo[] chooseTarget(int numOfReplicas) {
+        return chooseTarget(numOfReplicas, dataNodes[0]);
+    }
 
-  DatanodeStorageInfo[] chooseTarget(int numOfReplicas,
-      List<DatanodeStorageInfo> chosenNodes, Set<Node> excludedNodes) {
-    return chooseTarget(numOfReplicas, dataNodes[0], chosenNodes,
-        excludedNodes);
-  }
+    DatanodeStorageInfo[] chooseTarget(int numOfReplicas, DatanodeDescriptor writer) {
+        return chooseTarget(numOfReplicas, writer, new ArrayList<DatanodeStorageInfo>());
+    }
 
-  DatanodeStorageInfo[] chooseTarget(int numOfReplicas,
-     DatanodeDescriptor writer, List<DatanodeStorageInfo> chosenNodes,
-     Set<Node> excludedNodes) {
-    return replicator.chooseTarget(filename, numOfReplicas, writer,
-        chosenNodes, false, excludedNodes, BLOCK_SIZE,
-        TestBlockStoragePolicy.DEFAULT_STORAGE_POLICY, null);
-  }
+    DatanodeStorageInfo[] chooseTarget(int numOfReplicas, List<DatanodeStorageInfo> chosenNodes) {
+        return chooseTarget(numOfReplicas, dataNodes[0], chosenNodes);
+    }
+
+    DatanodeStorageInfo[] chooseTarget(int numOfReplicas, DatanodeDescriptor writer, List<DatanodeStorageInfo> chosenNodes) {
+        return chooseTarget(numOfReplicas, writer, chosenNodes, null);
+    }
+
+    DatanodeStorageInfo[] chooseTarget(int numOfReplicas, List<DatanodeStorageInfo> chosenNodes, Set<Node> excludedNodes) {
+        return chooseTarget(numOfReplicas, dataNodes[0], chosenNodes, excludedNodes);
+    }
+
+    DatanodeStorageInfo[] chooseTarget(int numOfReplicas, DatanodeDescriptor writer, List<DatanodeStorageInfo> chosenNodes, Set<Node> excludedNodes) {
+        return replicator.chooseTarget(filename, numOfReplicas, writer, chosenNodes, false, excludedNodes, BLOCK_SIZE, TestBlockStoragePolicy.DEFAULT_STORAGE_POLICY, null);
+    }
 }

@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.metrics2.lib;
 
 import com.google.common.collect.Sets;
@@ -34,7 +33,6 @@ import org.apache.hadoop.metrics2.util.SampleStat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Helper class to manage a group of mutable rate metrics.
  *
@@ -48,145 +46,140 @@ import org.slf4j.LoggerFactory;
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
 public class MutableRatesWithAggregation extends MutableMetric {
-  static final Logger LOG =
-      LoggerFactory.getLogger(MutableRatesWithAggregation.class);
-  private final Map<String, MutableRate> globalMetrics =
-      new ConcurrentHashMap<>();
-  private final Set<Class<?>> protocolCache = Sets.newHashSet();
 
-  private final ConcurrentLinkedDeque<WeakReference<ConcurrentMap<String, ThreadSafeSampleStat>>>
-      weakReferenceQueue = new ConcurrentLinkedDeque<>();
-  private final ThreadLocal<ConcurrentMap<String, ThreadSafeSampleStat>>
-      threadLocalMetricsMap = new ThreadLocal<>();
-  // prefix for metric name
-  private String typePrefix = "";
+    static final Logger LOG = LoggerFactory.getLogger(MutableRatesWithAggregation.class);
 
-  /**
-   * Initialize the registry with all the methods in a protocol
-   * so they all show up in the first snapshot.
-   * Convenient for JMX implementations.
-   * @param protocol the protocol class
-   */
-  public void init(Class<?> protocol) {
-    if (protocolCache.contains(protocol)) {
-      return;
-    }
-    protocolCache.add(protocol);
-    for (Method method : protocol.getDeclaredMethods()) {
-      String name = method.getName();
-      LOG.debug(name);
-      addMetricIfNotExists(name);
-    }
-  }
+    private final Map<String, MutableRate> globalMetrics = new ConcurrentHashMap<>();
 
-  /**
-   * Initialize the registry with all rate names passed in.
-   * This is an alternative to the above init function since this metric
-   * can be used more than just for rpc name.
-   * @param names the array of all rate names
-   */
-  public void init(String[] names) {
-    for (String name : names) {
-      addMetricIfNotExists(name);
-    }
-  }
+    private final Set<Class<?>> protocolCache = Sets.newHashSet();
 
-  /**
-   * Add a rate sample for a rate metric.
-   * @param name of the rate metric
-   * @param elapsed time
-   */
-  public void add(String name, long elapsed) {
-    ConcurrentMap<String, ThreadSafeSampleStat> localStats =
-        threadLocalMetricsMap.get();
-    if (localStats == null) {
-      localStats = new ConcurrentHashMap<>();
-      threadLocalMetricsMap.set(localStats);
-      weakReferenceQueue.add(new WeakReference<>(localStats));
-    }
-    ThreadSafeSampleStat stat = localStats.get(name);
-    if (stat == null) {
-      stat = new ThreadSafeSampleStat();
-      localStats.put(name, stat);
-    }
-    stat.add(elapsed);
-  }
+    private final ConcurrentLinkedDeque<WeakReference<ConcurrentMap<String, ThreadSafeSampleStat>>> weakReferenceQueue = new ConcurrentLinkedDeque<>();
 
-  @Override
-  public synchronized void snapshot(MetricsRecordBuilder rb, boolean all) {
-    Iterator<WeakReference<ConcurrentMap<String, ThreadSafeSampleStat>>> iter =
-        weakReferenceQueue.iterator();
-    while (iter.hasNext()) {
-      ConcurrentMap<String, ThreadSafeSampleStat> map = iter.next().get();
-      if (map == null) {
-        // Thread has died; clean up its state
-        iter.remove();
-      } else {
-        aggregateLocalStatesToGlobalMetrics(map);
-      }
-    }
-    for (MutableRate globalMetric : globalMetrics.values()) {
-      globalMetric.snapshot(rb, all);
-    }
-  }
+    private final ThreadLocal<ConcurrentMap<String, ThreadSafeSampleStat>> threadLocalMetricsMap = new ThreadLocal<>();
 
-  /**
-   * Collects states maintained in {@link ThreadLocal}, if any.
-   */
-  synchronized void collectThreadLocalStates() {
-    final ConcurrentMap<String, ThreadSafeSampleStat> localStats =
-        threadLocalMetricsMap.get();
-    if (localStats != null) {
-      aggregateLocalStatesToGlobalMetrics(localStats);
-    }
-  }
+    // prefix for metric name
+    private String typePrefix = "";
 
-  /**
-   * Aggregates the thread's local samples into the global metrics. The caller
-   * should ensure its thread safety.
-   */
-  private void aggregateLocalStatesToGlobalMetrics(
-      final ConcurrentMap<String, ThreadSafeSampleStat> localStats) {
-    for (Map.Entry<String, ThreadSafeSampleStat> entry : localStats
-        .entrySet()) {
-      String name = entry.getKey();
-      MutableRate globalMetric = addMetricIfNotExists(name);
-      entry.getValue().snapshotInto(globalMetric);
-    }
-  }
-
-  Map<String, MutableRate> getGlobalMetrics() {
-    return globalMetrics;
-  }
-
-  private synchronized MutableRate addMetricIfNotExists(String name) {
-    MutableRate metric = globalMetrics.get(name);
-    if (metric == null) {
-      metric = new MutableRate(name + typePrefix, name + typePrefix, false);
-      globalMetrics.put(name, metric);
-    }
-    return metric;
-  }
-
-  private static class ThreadSafeSampleStat {
-
-    private SampleStat stat = new SampleStat();
-
-    synchronized void add(double x) {
-      stat.add(x);
+    /**
+     * Initialize the registry with all the methods in a protocol
+     * so they all show up in the first snapshot.
+     * Convenient for JMX implementations.
+     * @param protocol the protocol class
+     */
+    public void init(Class<?> protocol) {
+        if (protocolCache.contains(protocol)) {
+            return;
+        }
+        protocolCache.add(protocol);
+        for (Method method : protocol.getDeclaredMethods()) {
+            String name = method.getName();
+            LOG.debug(name);
+            addMetricIfNotExists(name);
+        }
     }
 
-    synchronized void snapshotInto(MutableRate metric) {
-      if (stat.numSamples() > 0) {
-        metric.add(stat.numSamples(), Math.round(stat.total()));
-        stat.reset();
-      }
+    /**
+     * Initialize the registry with all rate names passed in.
+     * This is an alternative to the above init function since this metric
+     * can be used more than just for rpc name.
+     * @param names the array of all rate names
+     */
+    public void init(String[] names) {
+        for (String name : names) {
+            addMetricIfNotExists(name);
+        }
     }
-  }
 
-  public void init(Class<?> protocol, String prefix) {
-    this.typePrefix = prefix;
-    init(protocol);
-  }
+    /**
+     * Add a rate sample for a rate metric.
+     * @param name of the rate metric
+     * @param elapsed time
+     */
+    public void add(String name, long elapsed) {
+        ConcurrentMap<String, ThreadSafeSampleStat> localStats = threadLocalMetricsMap.get();
+        if (localStats == null) {
+            localStats = new ConcurrentHashMap<>();
+            threadLocalMetricsMap.set(localStats);
+            weakReferenceQueue.add(new WeakReference<>(localStats));
+        }
+        ThreadSafeSampleStat stat = localStats.get(name);
+        if (stat == null) {
+            stat = new ThreadSafeSampleStat();
+            localStats.put(name, stat);
+        }
+        stat.add(elapsed);
+    }
 
+    @Override
+    public synchronized void snapshot(MetricsRecordBuilder rb, boolean all) {
+        Iterator<WeakReference<ConcurrentMap<String, ThreadSafeSampleStat>>> iter = weakReferenceQueue.iterator();
+        while (iter.hasNext()) {
+            ConcurrentMap<String, ThreadSafeSampleStat> map = iter.next().get();
+            if (map == null) {
+                // Thread has died; clean up its state
+                iter.remove();
+            } else {
+                aggregateLocalStatesToGlobalMetrics(map);
+            }
+        }
+        for (MutableRate globalMetric : globalMetrics.values()) {
+            globalMetric.snapshot(rb, all);
+        }
+    }
+
+    /**
+     * Collects states maintained in {@link ThreadLocal}, if any.
+     */
+    synchronized void collectThreadLocalStates() {
+        final ConcurrentMap<String, ThreadSafeSampleStat> localStats = threadLocalMetricsMap.get();
+        if (localStats != null) {
+            aggregateLocalStatesToGlobalMetrics(localStats);
+        }
+    }
+
+    /**
+     * Aggregates the thread's local samples into the global metrics. The caller
+     * should ensure its thread safety.
+     */
+    private void aggregateLocalStatesToGlobalMetrics(final ConcurrentMap<String, ThreadSafeSampleStat> localStats) {
+        for (Map.Entry<String, ThreadSafeSampleStat> entry : localStats.entrySet()) {
+            String name = entry.getKey();
+            MutableRate globalMetric = addMetricIfNotExists(name);
+            entry.getValue().snapshotInto(globalMetric);
+        }
+    }
+
+    Map<String, MutableRate> getGlobalMetrics() {
+        return globalMetrics;
+    }
+
+    private synchronized MutableRate addMetricIfNotExists(String name) {
+        MutableRate metric = globalMetrics.get(name);
+        if (metric == null) {
+            metric = new MutableRate(name + typePrefix, name + typePrefix, false);
+            globalMetrics.put(name, metric);
+        }
+        return metric;
+    }
+
+    private static class ThreadSafeSampleStat {
+
+        private SampleStat stat = new SampleStat();
+
+        synchronized void add(double x) {
+            stat.add(x);
+        }
+
+        synchronized void snapshotInto(MutableRate metric) {
+            if (stat.numSamples() > 0) {
+                metric.add(stat.numSamples(), Math.round(stat.total()));
+                stat.reset();
+            }
+        }
+    }
+
+    public void init(Class<?> protocol, String prefix) {
+        this.typePrefix = prefix;
+        init(protocol);
+    }
 }

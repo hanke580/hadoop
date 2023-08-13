@@ -15,11 +15,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.hadoop.fs.contract;
 
 import java.io.FileNotFoundException;
-
 import org.apache.hadoop.fs.Path;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -28,34 +26,33 @@ import org.slf4j.LoggerFactory;
 /**
  * Test setTimes -if supported
  */
-public abstract class AbstractContractSetTimesTest extends
-    AbstractFSContractTestBase {
-  private static final Logger LOG =
-      LoggerFactory.getLogger(AbstractContractSetTimesTest.class);
+public abstract class AbstractContractSetTimesTest extends AbstractFSContractTestBase {
 
-  private Path testPath;
-  private Path target;
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractContractSetTimesTest.class);
 
-  @Override
-  public void setup() throws Exception {
-    super.setup();
-    skipIfUnsupported(SUPPORTS_SETTIMES);
+    private Path testPath;
 
-    //delete the test directory
-    testPath = path("test");
-    target = new Path(testPath, "target");
-  }
+    private Path target;
 
-  @Test
-  public void testSetTimesNonexistentFile() throws Throwable {
-    try {
-      long time = System.currentTimeMillis();
-      getFileSystem().setTimes(target, time, time);
-      //got here: trouble
-      fail("expected a failure");
-    } catch (FileNotFoundException e) {
-      //expected
-      handleExpectedException(e);
+    @Override
+    public void setup() throws Exception {
+        super.setup();
+        skipIfUnsupported(SUPPORTS_SETTIMES);
+        //delete the test directory
+        testPath = path("test");
+        target = new Path(testPath, "target");
     }
-  }
+
+    @Test
+    public void testSetTimesNonexistentFile() throws Throwable {
+        try {
+            long time = System.currentTimeMillis();
+            getFileSystem().setTimes(target, time, time);
+            //got here: trouble
+            fail("expected a failure");
+        } catch (FileNotFoundException e) {
+            //expected
+            handleExpectedException(e);
+        }
+    }
 }

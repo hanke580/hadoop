@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.registry.client.api;
 
 import com.google.common.base.Preconditions;
@@ -27,52 +26,47 @@ import org.apache.hadoop.registry.server.dns.RegistryDNS;
  */
 public final class DNSOperationsFactory implements RegistryConstants {
 
-  /**
-   * DNS Implementation type.
-   */
-  public enum DNSImplementation {
-    DNSJAVA
-  }
+    /**
+     * DNS Implementation type.
+     */
+    public enum DNSImplementation {
 
-  private DNSOperationsFactory() {
-  }
-
-  /**
-   * Create and initialize a DNS operations instance.
-   *
-   * @param conf configuration
-   * @return a DNS operations instance
-   */
-  public static DNSOperations createInstance(Configuration conf) {
-    return createInstance("DNSOperations", DNSImplementation.DNSJAVA, conf);
-  }
-
-  /**
-   * Create and initialize a registry operations instance.
-   * Access rights will be determined from the configuration.
-   *
-   * @param name name of the instance
-   * @param impl the DNS implementation.
-   * @param conf configuration
-   * @return a registry operations instance
-   */
-  public static DNSOperations createInstance(String name,
-      DNSImplementation impl,
-      Configuration conf) {
-    Preconditions.checkArgument(conf != null, "Null configuration");
-    DNSOperations operations = null;
-    switch (impl) {
-    case DNSJAVA:
-      operations = new RegistryDNS(name);
-      break;
-
-    default:
-      throw new IllegalArgumentException(
-          String.format("%s is not available", impl.toString()));
+        DNSJAVA
     }
 
-    //operations.init(conf);
-    return operations;
-  }
+    private DNSOperationsFactory() {
+    }
 
+    /**
+     * Create and initialize a DNS operations instance.
+     *
+     * @param conf configuration
+     * @return a DNS operations instance
+     */
+    public static DNSOperations createInstance(Configuration conf) {
+        return createInstance("DNSOperations", DNSImplementation.DNSJAVA, conf);
+    }
+
+    /**
+     * Create and initialize a registry operations instance.
+     * Access rights will be determined from the configuration.
+     *
+     * @param name name of the instance
+     * @param impl the DNS implementation.
+     * @param conf configuration
+     * @return a registry operations instance
+     */
+    public static DNSOperations createInstance(String name, DNSImplementation impl, Configuration conf) {
+        Preconditions.checkArgument(conf != null, "Null configuration");
+        DNSOperations operations = null;
+        switch(impl) {
+            case DNSJAVA:
+                operations = new RegistryDNS(name);
+                break;
+            default:
+                throw new IllegalArgumentException(String.format("%s is not available", impl.toString()));
+        }
+        //operations.init(conf);
+        return operations;
+    }
 }

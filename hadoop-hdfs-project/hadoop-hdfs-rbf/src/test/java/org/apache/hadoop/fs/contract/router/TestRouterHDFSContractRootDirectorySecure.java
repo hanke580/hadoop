@@ -11,7 +11,6 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License. See accompanying LICENSE file.
  */
-
 package org.apache.hadoop.fs.contract.router;
 
 import org.apache.hadoop.conf.Configuration;
@@ -19,52 +18,50 @@ import org.apache.hadoop.fs.contract.AbstractContractRootDirectoryTest;
 import org.apache.hadoop.fs.contract.AbstractFSContract;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-
 import java.io.IOException;
 
 /**
  * Test secure root dir operations on the Router-based FS.
  */
-public class TestRouterHDFSContractRootDirectorySecure
-    extends AbstractContractRootDirectoryTest {
+public class TestRouterHDFSContractRootDirectorySecure extends AbstractContractRootDirectoryTest {
 
-  @BeforeClass
-  public static void createCluster() throws Exception {
-    RouterHDFSContract.createCluster(true);
-  }
+    @BeforeClass
+    public static void createCluster() throws Exception {
+        RouterHDFSContract.createCluster(true);
+    }
 
-  @AfterClass
-  public static void teardownCluster() throws IOException {
-    RouterHDFSContract.destroyCluster();
-  }
+    @AfterClass
+    public static void teardownCluster() throws IOException {
+        RouterHDFSContract.destroyCluster();
+    }
 
-  @Override
-  protected AbstractFSContract createContract(Configuration conf) {
-    return new RouterHDFSContract(conf);
-  }
+    @Override
+    protected AbstractFSContract createContract(Configuration conf) {
+        return new RouterHDFSContract(conf);
+    }
 
-  @Override
-  public void testListEmptyRootDirectory() throws IOException {
-    // It doesn't apply because we still have the mount points here
-  }
+    @Override
+    public void testListEmptyRootDirectory() throws IOException {
+        // It doesn't apply because we still have the mount points here
+    }
 
-  @Override
-  public void testRmEmptyRootDirNonRecursive() throws IOException {
-    // It doesn't apply because we still have the mount points here
-  }
+    @Override
+    public void testRmEmptyRootDirNonRecursive() throws IOException {
+        // It doesn't apply because we still have the mount points here
+    }
 
-  @Override
-  public void testRecursiveRootListing() throws IOException {
-    // It doesn't apply because we still have the mount points here
-  }
+    @Override
+    public void testRecursiveRootListing() throws IOException {
+        // It doesn't apply because we still have the mount points here
+    }
 
-  @Override
-  public void testRmRootRecursive() {
-    // It doesn't apply because we still have the mount points here
-  }
+    @Override
+    public void testRmRootRecursive() {
+        // It doesn't apply because we still have the mount points here
+    }
 
-  @Override
-  public void testRmEmptyRootDirRecursive() {
-    // It doesn't apply because we still have the mount points here
-  }
+    @Override
+    public void testRmEmptyRootDirRecursive() {
+        // It doesn't apply because we still have the mount points here
+    }
 }

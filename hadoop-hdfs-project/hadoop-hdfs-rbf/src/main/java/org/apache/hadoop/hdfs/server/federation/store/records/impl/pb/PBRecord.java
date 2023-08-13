@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.server.federation.store.records.impl.pb;
 
 import java.io.IOException;
-
 import org.apache.hadoop.thirdparty.protobuf.Message;
 
 /**
@@ -26,22 +25,22 @@ import org.apache.hadoop.thirdparty.protobuf.Message;
  */
 public interface PBRecord {
 
-  /**
-   * Get the protocol for the record.
-   * @return The protocol for this record.
-   */
-  Message getProto();
+    /**
+     * Get the protocol for the record.
+     * @return The protocol for this record.
+     */
+    Message getProto();
 
-  /**
-   * Set the protocol for the record.
-   * @param proto Protocol for this record.
-   */
-  void setProto(Message proto);
+    /**
+     * Set the protocol for the record.
+     * @param proto Protocol for this record.
+     */
+    void setProto(Message proto);
 
-  /**
-   * Populate this record with serialized data.
-   * @param base64String Serialized data in base64.
-   * @throws IOException If it cannot read the data.
-   */
-  void readInstance(String base64String) throws IOException;
+    /**
+     * Populate this record with serialized data.
+     * @param base64String Serialized data in base64.
+     * @throws IOException If it cannot read the data.
+     */
+    void readInstance(String base64String) throws IOException;
 }

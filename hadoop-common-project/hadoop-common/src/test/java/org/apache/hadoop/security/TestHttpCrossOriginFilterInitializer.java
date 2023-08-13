@@ -15,44 +15,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.security;
 
 import java.util.Map;
-
 import org.apache.hadoop.conf.Configuration;
-
 import org.junit.Assert;
 import org.junit.Test;
 
 public class TestHttpCrossOriginFilterInitializer {
 
-  @Test
-  public void testGetFilterParameters() {
-
-    // Initialize configuration object
-    Configuration conf = new Configuration();
-    conf.set(HttpCrossOriginFilterInitializer.PREFIX + "rootparam",
-        "rootvalue");
-    conf.set(HttpCrossOriginFilterInitializer.PREFIX + "nested.param",
-        "nestedvalue");
-    conf.set("outofscopeparam", "outofscopevalue");
-
-    // call function under test
-    Map<String, String> filterParameters = HttpCrossOriginFilterInitializer
-        .getFilterParameters(conf, HttpCrossOriginFilterInitializer.PREFIX);
-
-    // retrieve values
-    String rootvalue = filterParameters.get("rootparam");
-    String nestedvalue = filterParameters.get("nested.param");
-    String outofscopeparam = filterParameters.get("outofscopeparam");
-
-    // verify expected values are in place
-    Assert.assertEquals("Could not find filter parameter", "rootvalue",
-        rootvalue);
-    Assert.assertEquals("Could not find filter parameter", "nestedvalue",
-        nestedvalue);
-    Assert.assertNull("Found unexpected value in filter parameters",
-        outofscopeparam);
-  }
+    @Test
+    public void testGetFilterParameters() {
+        // Initialize configuration object
+        Configuration conf = new Configuration();
+        conf.set(HttpCrossOriginFilterInitializer.PREFIX + "rootparam", "rootvalue");
+        conf.set(HttpCrossOriginFilterInitializer.PREFIX + "nested.param", "nestedvalue");
+        conf.set("outofscopeparam", "outofscopevalue");
+        // call function under test
+        Map<String, String> filterParameters = HttpCrossOriginFilterInitializer.getFilterParameters(conf, HttpCrossOriginFilterInitializer.PREFIX);
+        // retrieve values
+        String rootvalue = filterParameters.get("rootparam");
+        String nestedvalue = filterParameters.get("nested.param");
+        String outofscopeparam = filterParameters.get("outofscopeparam");
+        // verify expected values are in place
+        Assert.assertEquals("Could not find filter parameter", "rootvalue", rootvalue);
+        Assert.assertEquals("Could not find filter parameter", "nestedvalue", nestedvalue);
+        Assert.assertNull("Found unexpected value in filter parameters", outofscopeparam);
+    }
 }

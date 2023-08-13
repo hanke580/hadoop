@@ -26,10 +26,8 @@ import java.nio.ByteBuffer;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Objects;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
-
 import static java.lang.invoke.MethodHandles.constant;
 import static java.lang.invoke.MethodHandles.dropArguments;
 import static java.lang.invoke.MethodHandles.filterReturnValue;
@@ -47,76 +45,70 @@ import static java.lang.invoke.MethodType.methodType;
 @InterfaceStability.Unstable
 public final class CleanerUtil {
 
-  // Prevent instantiation
-  private CleanerUtil(){}
-
-  /**
-   * <code>true</code>, if this platform supports unmapping mmapped files.
-   */
-  public static final boolean UNMAP_SUPPORTED;
-
-  /**
-   * if {@link #UNMAP_SUPPORTED} is {@code false}, this contains the reason
-   * why unmapping is not supported.
-   */
-  public static final String UNMAP_NOT_SUPPORTED_REASON;
-
-
-  private static final BufferCleaner CLEANER;
-
-  /**
-   * Reference to a BufferCleaner that does unmapping.
-   * @return {@code null} if not supported.
-   */
-  public static BufferCleaner getCleaner() {
-    return CLEANER;
-  }
-
-  static {
-    final Object hack = AccessController.doPrivileged(
-        (PrivilegedAction<Object>) CleanerUtil::unmapHackImpl);
-    if (hack instanceof BufferCleaner) {
-      CLEANER = (BufferCleaner) hack;
-      UNMAP_SUPPORTED = true;
-      UNMAP_NOT_SUPPORTED_REASON = null;
-    } else {
-      CLEANER = null;
-      UNMAP_SUPPORTED = false;
-      UNMAP_NOT_SUPPORTED_REASON = hack.toString();
+    // Prevent instantiation
+    private CleanerUtil() {
     }
-  }
 
-  private static Object unmapHackImpl() {
-    final MethodHandles.Lookup lookup = MethodHandles.lookup();
-    try {
-      try {
-        // *** sun.misc.Unsafe unmapping (Java 9+) ***
-        final Class<?> unsafeClass = Class.forName("sun.misc.Unsafe");
-        // first check if Unsafe has the right method, otherwise we can
-        // give up without doing any security critical stuff:
-        final MethodHandle unmapper = lookup.findVirtual(unsafeClass,
-            "invokeCleaner", methodType(void.class, ByteBuffer.class));
-        // fetch the unsafe instance and bind it to the virtual MH:
-        final Field f = unsafeClass.getDeclaredField("theUnsafe");
-        f.setAccessible(true);
-        final Object theUnsafe = f.get(null);
-        return newBufferCleaner(ByteBuffer.class, unmapper.bindTo(theUnsafe));
-      } catch (SecurityException se) {
-        // rethrow to report errors correctly (we need to catch it here,
-        // as we also catch RuntimeException below!):
-        throw se;
-      } catch (ReflectiveOperationException | RuntimeException e) {
-        // *** sun.misc.Cleaner unmapping (Java 8) ***
-        final Class<?> directBufferClass =
-            Class.forName("java.nio.DirectByteBuffer");
+    /**
+     * <code>true</code>, if this platform supports unmapping mmapped files.
+     */
+    public static final boolean UNMAP_SUPPORTED;
 
-        final Method m = directBufferClass.getMethod("cleaner");
-        m.setAccessible(true);
-        final MethodHandle directBufferCleanerMethod = lookup.unreflect(m);
-        final Class<?> cleanerClass =
-            directBufferCleanerMethod.type().returnType();
+    /**
+     * if {@link #UNMAP_SUPPORTED} is {@code false}, this contains the reason
+     * why unmapping is not supported.
+     */
+    public static final String UNMAP_NOT_SUPPORTED_REASON;
 
-        /*
+    private static final BufferCleaner CLEANER;
+
+    /**
+     * Reference to a BufferCleaner that does unmapping.
+     * @return {@code null} if not supported.
+     */
+    public static BufferCleaner getCleaner() {
+        return CLEANER;
+    }
+
+    static {
+        final Object hack = AccessController.doPrivileged((PrivilegedAction<Object>) CleanerUtil::unmapHackImpl);
+        if (hack instanceof BufferCleaner) {
+            CLEANER = (BufferCleaner) hack;
+            UNMAP_SUPPORTED = true;
+            UNMAP_NOT_SUPPORTED_REASON = null;
+        } else {
+            CLEANER = null;
+            UNMAP_SUPPORTED = false;
+            UNMAP_NOT_SUPPORTED_REASON = hack.toString();
+        }
+    }
+
+    private static Object unmapHackImpl() {
+        final MethodHandles.Lookup lookup = MethodHandles.lookup();
+        try {
+            try {
+                // *** sun.misc.Unsafe unmapping (Java 9+) ***
+                final Class<?> unsafeClass = Class.forName("sun.misc.Unsafe");
+                // first check if Unsafe has the right method, otherwise we can
+                // give up without doing any security critical stuff:
+                final MethodHandle unmapper = lookup.findVirtual(unsafeClass, "invokeCleaner", methodType(void.class, ByteBuffer.class));
+                // fetch the unsafe instance and bind it to the virtual MH:
+                final Field f = unsafeClass.getDeclaredField("theUnsafe");
+                f.setAccessible(true);
+                final Object theUnsafe = f.get(null);
+                return newBufferCleaner(ByteBuffer.class, unmapper.bindTo(theUnsafe));
+            } catch (SecurityException se) {
+                // rethrow to report errors correctly (we need to catch it here,
+                // as we also catch RuntimeException below!):
+                throw se;
+            } catch (ReflectiveOperationException | RuntimeException e) {
+                // *** sun.misc.Cleaner unmapping (Java 8) ***
+                final Class<?> directBufferClass = Class.forName("java.nio.DirectByteBuffer");
+                final Method m = directBufferClass.getMethod("cleaner");
+                m.setAccessible(true);
+                final MethodHandle directBufferCleanerMethod = lookup.unreflect(m);
+                final Class<?> cleanerClass = directBufferCleanerMethod.type().returnType();
+                /*
          * "Compile" a MethodHandle that basically is equivalent
          * to the following code:
          *
@@ -132,68 +124,50 @@ public final class CleanerUtil {
          *   }
          * }
          */
-        final MethodHandle cleanMethod = lookup.findVirtual(
-            cleanerClass, "clean", methodType(void.class));
-        final MethodHandle nonNullTest = lookup.findStatic(Objects.class,
-            "nonNull", methodType(boolean.class, Object.class))
-            .asType(methodType(boolean.class, cleanerClass));
-        final MethodHandle noop = dropArguments(
-            constant(Void.class, null).asType(methodType(void.class)),
-            0, cleanerClass);
-        final MethodHandle unmapper = filterReturnValue(
-            directBufferCleanerMethod,
-            guardWithTest(nonNullTest, cleanMethod, noop))
-            .asType(methodType(void.class, ByteBuffer.class));
-        return newBufferCleaner(directBufferClass, unmapper);
-      }
-    } catch (SecurityException se) {
-      return "Unmapping is not supported, because not all required " +
-          "permissions are given to the Hadoop JAR file: " + se +
-          " [Please grant at least the following permissions: " +
-          "RuntimePermission(\"accessClassInPackage.sun.misc\") " +
-          " and ReflectPermission(\"suppressAccessChecks\")]";
-    } catch (ReflectiveOperationException | RuntimeException e) {
-      return "Unmapping is not supported on this platform, " +
-          "because internal Java APIs are not compatible with " +
-          "this Hadoop version: " + e;
-    }
-  }
-
-  private static BufferCleaner newBufferCleaner(
-      final Class<?> unmappableBufferClass, final MethodHandle unmapper) {
-    assert Objects.equals(
-        methodType(void.class, ByteBuffer.class), unmapper.type());
-    return buffer -> {
-      if (!buffer.isDirect()) {
-        throw new IllegalArgumentException(
-            "unmapping only works with direct buffers");
-      }
-      if (!unmappableBufferClass.isInstance(buffer)) {
-        throw new IllegalArgumentException("buffer is not an instance of " +
-            unmappableBufferClass.getName());
-      }
-      final Throwable error = AccessController.doPrivileged(
-          (PrivilegedAction<Throwable>) () -> {
-            try {
-              unmapper.invokeExact(buffer);
-              return null;
-            } catch (Throwable t) {
-              return t;
+                final MethodHandle cleanMethod = lookup.findVirtual(cleanerClass, "clean", methodType(void.class));
+                final MethodHandle nonNullTest = lookup.findStatic(Objects.class, "nonNull", methodType(boolean.class, Object.class)).asType(methodType(boolean.class, cleanerClass));
+                final MethodHandle noop = dropArguments(constant(Void.class, null).asType(methodType(void.class)), 0, cleanerClass);
+                final MethodHandle unmapper = filterReturnValue(directBufferCleanerMethod, guardWithTest(nonNullTest, cleanMethod, noop)).asType(methodType(void.class, ByteBuffer.class));
+                return newBufferCleaner(directBufferClass, unmapper);
             }
-          });
-      if (error != null) {
-        throw new IOException("Unable to unmap the mapped buffer", error);
-      }
-    };
-  }
+        } catch (SecurityException se) {
+            return "Unmapping is not supported, because not all required " + "permissions are given to the Hadoop JAR file: " + se + " [Please grant at least the following permissions: " + "RuntimePermission(\"accessClassInPackage.sun.misc\") " + " and ReflectPermission(\"suppressAccessChecks\")]";
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            return "Unmapping is not supported on this platform, " + "because internal Java APIs are not compatible with " + "this Hadoop version: " + e;
+        }
+    }
 
-  /**
-   * Pass in an implementation of this interface to cleanup ByteBuffers.
-   * CleanerUtil implements this to allow unmapping of bytebuffers
-   * with private Java APIs.
-   */
-  @FunctionalInterface
-  public interface BufferCleaner {
-    void freeBuffer(ByteBuffer b) throws IOException;
-  }
+    private static BufferCleaner newBufferCleaner(final Class<?> unmappableBufferClass, final MethodHandle unmapper) {
+        assert Objects.equals(methodType(void.class, ByteBuffer.class), unmapper.type());
+        return buffer -> {
+            if (!buffer.isDirect()) {
+                throw new IllegalArgumentException("unmapping only works with direct buffers");
+            }
+            if (!unmappableBufferClass.isInstance(buffer)) {
+                throw new IllegalArgumentException("buffer is not an instance of " + unmappableBufferClass.getName());
+            }
+            final Throwable error = AccessController.doPrivileged((PrivilegedAction<Throwable>) () -> {
+                try {
+                    unmapper.invokeExact(buffer);
+                    return null;
+                } catch (Throwable t) {
+                    return t;
+                }
+            });
+            if (error != null) {
+                throw new IOException("Unable to unmap the mapped buffer", error);
+            }
+        };
+    }
+
+    /**
+     * Pass in an implementation of this interface to cleanup ByteBuffers.
+     * CleanerUtil implements this to allow unmapping of bytebuffers
+     * with private Java APIs.
+     */
+    @FunctionalInterface
+    public interface BufferCleaner {
+
+        void freeBuffer(ByteBuffer b) throws IOException;
+    }
 }

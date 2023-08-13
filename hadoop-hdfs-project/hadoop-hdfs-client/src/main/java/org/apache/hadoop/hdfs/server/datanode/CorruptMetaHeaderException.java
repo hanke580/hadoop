@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.datanode;
 
 import java.io.IOException;
@@ -25,12 +24,11 @@ import java.io.IOException;
  */
 public class CorruptMetaHeaderException extends IOException {
 
-  CorruptMetaHeaderException(String msg) {
-    super(msg);
-  }
+    CorruptMetaHeaderException(String msg) {
+        super(msg);
+    }
 
-  CorruptMetaHeaderException(String msg, Throwable cause) {
-    super(msg, cause);
-  }
-
+    CorruptMetaHeaderException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 }

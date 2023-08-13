@@ -15,15 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.datanode;
-
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.apache.hadoop.hdfs.server.datanode.fsdataset.FsVolumeSpi;
-
 import javax.annotation.Nullable;
 
 /**
@@ -33,23 +30,19 @@ import javax.annotation.Nullable;
 @InterfaceAudience.Private
 public class FaultInjectorFileIoEvents {
 
-  private final boolean isEnabled;
+    private final boolean isEnabled;
 
-  public FaultInjectorFileIoEvents(@Nullable Configuration conf) {
-    if (conf != null) {
-      isEnabled = conf.getBoolean(DFSConfigKeys
-          .DFS_DATANODE_ENABLE_FILEIO_FAULT_INJECTION_KEY, DFSConfigKeys
-          .DFS_DATANODE_ENABLE_FILEIO_FAULT_INJECTION_DEFAULT);
-    } else {
-      isEnabled = false;
+    public FaultInjectorFileIoEvents(@Nullable Configuration conf) {
+        if (conf != null) {
+            isEnabled = conf.getBoolean(DFSConfigKeys.DFS_DATANODE_ENABLE_FILEIO_FAULT_INJECTION_KEY, DFSConfigKeys.DFS_DATANODE_ENABLE_FILEIO_FAULT_INJECTION_DEFAULT);
+        } else {
+            isEnabled = false;
+        }
     }
-  }
 
-  public void beforeMetadataOp(
-      @Nullable FsVolumeSpi volume, FileIoProvider.OPERATION op) {
-  }
+    public void beforeMetadataOp(@Nullable FsVolumeSpi volume, FileIoProvider.OPERATION op) {
+    }
 
-  public void beforeFileIo(
-      @Nullable FsVolumeSpi volume, FileIoProvider.OPERATION op, long len) {
-  }
+    public void beforeFileIo(@Nullable FsVolumeSpi volume, FileIoProvider.OPERATION op, long len) {
+    }
 }

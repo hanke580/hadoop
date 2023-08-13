@@ -15,18 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.io.file.tfile;
 
 import java.io.IOException;
 
 public class TestTFileNoneCodecsStreams extends TestTFileStreams {
-  /**
-   * Test non-compression codec, using the same test cases as in the ByteArrays.
-   */
-  @Override
-  public void setUp() throws IOException {
-    init(Compression.Algorithm.NONE.getName(), "memcmp");
-    super.setUp();
-  }
+
+    /**
+     * Test non-compression codec, using the same test cases as in the ByteArrays.
+     */
+    @Override
+    public void setUp() throws IOException {
+        init(Compression.Algorithm.NONE.getName(), "memcmp");
+        super.setUp();
+    }
 }

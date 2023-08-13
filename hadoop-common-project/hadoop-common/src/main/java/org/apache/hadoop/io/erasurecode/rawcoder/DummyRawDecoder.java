@@ -29,17 +29,17 @@ import org.apache.hadoop.io.erasurecode.ErasureCoderOptions;
 @InterfaceAudience.Private
 public class DummyRawDecoder extends RawErasureDecoder {
 
-  public DummyRawDecoder(ErasureCoderOptions coderOptions) {
-    super(coderOptions);
-  }
+    public DummyRawDecoder(ErasureCoderOptions coderOptions) {
+        super(coderOptions);
+    }
 
-  @Override
-  protected void doDecode(ByteBufferDecodingState decodingState) {
-    // Nothing to do. Output buffers have already been reset
-  }
+    @Override
+    protected void doDecode(ByteBufferDecodingState decodingState) {
+        // Nothing to do. Output buffers have already been reset
+    }
 
-  @Override
-  protected void doDecode(ByteArrayDecodingState decodingState) {
-    // Nothing to do. Output buffers have already been reset
-  }
+    @Override
+    protected void doDecode(ByteArrayDecodingState decodingState) {
+        // Nothing to do. Output buffers have already been reset
+    }
 }

@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.server.federation.store.protocol;
 
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience.Private;
 import org.apache.hadoop.classification.InterfaceStability.Unstable;
 import org.apache.hadoop.hdfs.server.federation.store.driver.StateStoreSerializer;
@@ -29,23 +28,21 @@ import org.apache.hadoop.hdfs.server.federation.store.driver.StateStoreSerialize
  */
 public abstract class UpdateNamenodeRegistrationResponse {
 
-  public static UpdateNamenodeRegistrationResponse newInstance() {
-    return StateStoreSerializer.newRecord(
-        UpdateNamenodeRegistrationResponse.class);
-  }
+    public static UpdateNamenodeRegistrationResponse newInstance() {
+        return StateStoreSerializer.newRecord(UpdateNamenodeRegistrationResponse.class);
+    }
 
-  public static UpdateNamenodeRegistrationResponse newInstance(boolean status)
-      throws IOException {
-    UpdateNamenodeRegistrationResponse response = newInstance();
-    response.setResult(status);
-    return response;
-  }
+    public static UpdateNamenodeRegistrationResponse newInstance(boolean status) throws IOException {
+        UpdateNamenodeRegistrationResponse response = newInstance();
+        response.setResult(status);
+        return response;
+    }
 
-  @Private
-  @Unstable
-  public abstract boolean getResult();
+    @Private
+    @Unstable
+    public abstract boolean getResult();
 
-  @Private
-  @Unstable
-  public abstract void setResult(boolean result);
+    @Private
+    @Unstable
+    public abstract void setResult(boolean result);
 }

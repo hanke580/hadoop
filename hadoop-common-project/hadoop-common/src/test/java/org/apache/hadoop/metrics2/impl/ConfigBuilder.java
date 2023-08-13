@@ -15,65 +15,64 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.metrics2.impl;
 
 import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.SubsetConfiguration;
 import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
-
 import java.io.FileWriter;
 
 /**
  * Helper class for building configs, mostly used in tests
  */
 public class ConfigBuilder {
-  /** The built config */
-  public final PropertiesConfiguration config;
 
-  /**
-   * Default constructor
-   */
-  public ConfigBuilder() {
-    config = new PropertiesConfiguration();
-    config.setListDelimiterHandler(new DefaultListDelimiterHandler(','));
-  }
+    /**
+     * The built config
+     */
+    public final PropertiesConfiguration config;
 
-  /**
-   * Add a property to the config
-   * @param key of the property
-   * @param value of the property
-   * @return self
-   */
-  public ConfigBuilder add(String key, Object value) {
-    config.addProperty(key, value);
-    return this;
-  }
-
-  /**
-   * Save the config to a file
-   * @param filename  to save
-   * @return self
-   * @throws RuntimeException
-   */
-  public ConfigBuilder save(String filename) {
-    try {
-      FileWriter fw = new FileWriter(filename);
-      config.write(fw);
+    /**
+     * Default constructor
+     */
+    public ConfigBuilder() {
+        config = new PropertiesConfiguration();
+        config.setListDelimiterHandler(new DefaultListDelimiterHandler(','));
     }
-    catch (Exception e) {
-      throw new RuntimeException("Error saving config", e);
-    }
-    return this;
-  }
 
-  /**
-   * Return a subset configuration (so getParent() can be used.)
-   * @param prefix  of the subset
-   * @return the subset config
-   */
-  public SubsetConfiguration subset(String prefix) {
-    return new SubsetConfiguration(config, prefix, ".");
-  }
+    /**
+     * Add a property to the config
+     * @param key of the property
+     * @param value of the property
+     * @return self
+     */
+    public ConfigBuilder add(String key, Object value) {
+        config.addProperty(key, value);
+        return this;
+    }
+
+    /**
+     * Save the config to a file
+     * @param filename  to save
+     * @return self
+     * @throws RuntimeException
+     */
+    public ConfigBuilder save(String filename) {
+        try {
+            FileWriter fw = new FileWriter(filename);
+            config.write(fw);
+        } catch (Exception e) {
+            throw new RuntimeException("Error saving config", e);
+        }
+        return this;
+    }
+
+    /**
+     * Return a subset configuration (so getParent() can be used.)
+     * @param prefix  of the subset
+     * @return the subset config
+     */
+    public SubsetConfiguration subset(String prefix) {
+        return new SubsetConfiguration(config, prefix, ".");
+    }
 }
-

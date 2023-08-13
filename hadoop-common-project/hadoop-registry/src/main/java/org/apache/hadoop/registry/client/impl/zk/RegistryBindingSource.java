@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.registry.client.impl.zk;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -28,9 +27,9 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceStability.Evolving
 public interface RegistryBindingSource {
 
-  /**
-   * Supply the binding information for this registry
-   * @return the binding information data
-   */
-  BindingInformation supplyBindingInformation();
+    /**
+     * Supply the binding information for this registry
+     * @return the binding information data
+     */
+    BindingInformation supplyBindingInformation();
 }

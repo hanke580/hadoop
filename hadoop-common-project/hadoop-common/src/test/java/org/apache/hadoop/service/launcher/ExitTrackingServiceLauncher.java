@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.service.launcher;
 
 import org.apache.hadoop.service.Service;
@@ -29,31 +28,30 @@ import org.apache.hadoop.util.ExitUtil;
  * {@link ExitUtil} class.
  * @param <S> type of service to launch
  */
-public class ExitTrackingServiceLauncher<S extends Service> extends
-    ServiceLauncher<S> {
+public class ExitTrackingServiceLauncher<S extends Service> extends ServiceLauncher<S> {
 
-  private ExitUtil.ExitException exitException;
+    private ExitUtil.ExitException exitException;
 
-  public ExitTrackingServiceLauncher(String serviceClassName) {
-    super(serviceClassName);
-  }
+    public ExitTrackingServiceLauncher(String serviceClassName) {
+        super(serviceClassName);
+    }
 
-  @Override
-  protected void exit(ExitUtil.ExitException ee) {
-    exitException = ee;
-    super.exit(ee);
-  }
+    @Override
+    protected void exit(ExitUtil.ExitException ee) {
+        exitException = ee;
+        super.exit(ee);
+    }
 
-  @Override
-  protected void exit(int exitCode, String message) {
-    exit(new ServiceLaunchException(exitCode, message));
-  }
+    @Override
+    protected void exit(int exitCode, String message) {
+        exit(new ServiceLaunchException(exitCode, message));
+    }
 
-  public void bindCommandOptions() {
-    super.bindCommandOptions();
-  }
+    public void bindCommandOptions() {
+        super.bindCommandOptions();
+    }
 
-  public ExitUtil.ExitException getExitException() {
-    return exitException;
-  }
+    public ExitUtil.ExitException getExitException() {
+        return exitException;
+    }
 }

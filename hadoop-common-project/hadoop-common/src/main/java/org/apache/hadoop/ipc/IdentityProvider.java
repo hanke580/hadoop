@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.ipc;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -29,10 +28,11 @@ import org.apache.hadoop.classification.InterfaceAudience;
  */
 @InterfaceAudience.Private
 public interface IdentityProvider {
-  /**
-   * Return the string used for scheduling.
-   * @param obj the schedulable to use.
-   * @return string identity, or null if no identity could be made.
-   */
-  public String makeIdentity(Schedulable obj);
+
+    /**
+     * Return the string used for scheduling.
+     * @param obj the schedulable to use.
+     * @return string identity, or null if no identity could be made.
+     */
+    public String makeIdentity(Schedulable obj);
 }

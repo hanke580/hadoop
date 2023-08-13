@@ -17,16 +17,14 @@
  */
 package org.apache.hadoop.fs;
 
-
 import org.junit.Before;
 
-public class TestLocalFSFileContextCreateMkdir extends
-  FileContextCreateMkdirBaseTest {
+public class TestLocalFSFileContextCreateMkdir extends FileContextCreateMkdirBaseTest {
 
-  @Override
-  @Before
-  public void setUp() throws Exception {
-    fc = FileContext.getLocalFSFileContext();
-    super.setUp();
-  }
+    @Override
+    @Before
+    public void setUp() throws Exception {
+        fc = FileContext.getLocalFSFileContext();
+        super.setUp();
+    }
 }

@@ -20,10 +20,8 @@ package org.apache.hadoop.util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -35,202 +33,207 @@ import org.slf4j.LoggerFactory;
  */
 public class TestInstrumentedReadWriteLock {
 
-  static final Logger LOG = LoggerFactory.getLogger(
-          TestInstrumentedReadWriteLock.class);
+    static final Logger LOG = LoggerFactory.getLogger(TestInstrumentedReadWriteLock.class);
 
-  @Rule
-  public TestName name = new TestName();
+    @Rule
+    public TestName name = new TestName();
 
-  /**
-   * Tests exclusive access of the write lock.
-   * @throws Exception
-   */
-  @Test(timeout=10000)
-  public void testWriteLock() throws Exception {
-    String testname = name.getMethodName();
-    final ThreadLocal<Boolean> locked = new ThreadLocal<Boolean>();
-    locked.set(Boolean.FALSE);
-    InstrumentedReadWriteLock readWriteLock = new InstrumentedReadWriteLock(
-        true, testname, LOG, 2000, 300);
-    final AutoCloseableLock writeLock = new AutoCloseableLock(
-        readWriteLock.writeLock()) {
-      @Override
-      public AutoCloseableLock acquire() {
-        AutoCloseableLock lock = super.acquire();
-        locked.set(Boolean.TRUE);
-        return lock;
-      }
-
-      @Override
-      public void release() {
-        super.release();
+    /**
+     * Tests exclusive access of the write lock.
+     * @throws Exception
+     */
+    @Test(timeout = 10000)
+    public void testWriteLock() throws Exception {
+        String testname = name.getMethodName();
+        final ThreadLocal<Boolean> locked = new ThreadLocal<Boolean>();
         locked.set(Boolean.FALSE);
-      }
-    };
-    final AutoCloseableLock readLock = new AutoCloseableLock(
-        readWriteLock.readLock());
-    try (AutoCloseableLock lock = writeLock.acquire()) {
-      Thread competingWriteThread = new Thread() {
-        @Override
-        public void run() {
-          assertFalse(writeLock.tryLock());
-        }
-      };
-      competingWriteThread.start();
-      competingWriteThread.join();
-      Thread competingReadThread = new Thread() {
-        @Override
-        public void run() {
-          assertFalse(readLock.tryLock());
+        InstrumentedReadWriteLock readWriteLock = new InstrumentedReadWriteLock(true, testname, LOG, 2000, 300);
+        final AutoCloseableLock writeLock = new AutoCloseableLock(readWriteLock.writeLock()) {
+
+            @Override
+            public AutoCloseableLock acquire() {
+                AutoCloseableLock lock = super.acquire();
+                locked.set(Boolean.TRUE);
+                return lock;
+            }
+
+            @Override
+            public void release() {
+                super.release();
+                locked.set(Boolean.FALSE);
+            }
         };
-      };
-      competingReadThread.start();
-      competingReadThread.join();
-    }
-    assertFalse(locked.get());
-    locked.remove();
-  }
+        final AutoCloseableLock readLock = new AutoCloseableLock(readWriteLock.readLock());
+        try (AutoCloseableLock lock = writeLock.acquire()) {
+            Thread competingWriteThread = new Thread() {
 
-  /**
-   * Tests the read lock.
-   * @throws Exception
-   */
-  @Test(timeout=10000)
-  public void testReadLock() throws Exception {
-    String testname = name.getMethodName();
-    InstrumentedReadWriteLock readWriteLock = new InstrumentedReadWriteLock(
-        true, testname, LOG, 2000, 300);
-    final AutoCloseableLock readLock = new AutoCloseableLock(
-        readWriteLock.readLock());
-    final AutoCloseableLock writeLock = new AutoCloseableLock(
-        readWriteLock.writeLock());
-    try (AutoCloseableLock lock = readLock.acquire()) {
-      Thread competingReadThread = new Thread() {
-        @Override
-        public void run() {
-          assertTrue(readLock.tryLock());
-          readLock.release();
+                @Override
+                public void run() {
+                    assertFalse(writeLock.tryLock());
+                }
+            };
+            competingWriteThread.start();
+            competingWriteThread.join();
+            Thread competingReadThread = new Thread() {
+
+                @Override
+                public void run() {
+                    assertFalse(readLock.tryLock());
+                }
+            };
+            competingReadThread.start();
+            competingReadThread.join();
         }
-      };
-      competingReadThread.start();
-      competingReadThread.join();
-      Thread competingWriteThread = new Thread() {
-        @Override
-        public void run() {
-          assertFalse(writeLock.tryLock());
-        }
-      };
-      competingWriteThread.start();
-      competingWriteThread.join();
+        assertFalse(locked.get());
+        locked.remove();
     }
-  }
 
-  /**
-   * Tests the warning when the read lock is held longer than threshold.
-   * @throws Exception
-   */
-  @Test(timeout=10000)
-  public void testReadLockLongHoldingReport() throws Exception {
-    String testname = name.getMethodName();
-    final AtomicLong time = new AtomicLong(0);
-    Timer mclock = new Timer() {
-      @Override
-      public long monotonicNow() {
-        return time.get();
-      }
-    };
+    /**
+     * Tests the read lock.
+     * @throws Exception
+     */
+    @Test(timeout = 10000)
+    public void testReadLock() throws Exception {
+        String testname = name.getMethodName();
+        InstrumentedReadWriteLock readWriteLock = new InstrumentedReadWriteLock(true, testname, LOG, 2000, 300);
+        final AutoCloseableLock readLock = new AutoCloseableLock(readWriteLock.readLock());
+        final AutoCloseableLock writeLock = new AutoCloseableLock(readWriteLock.writeLock());
+        try (AutoCloseableLock lock = readLock.acquire()) {
+            Thread competingReadThread = new Thread() {
 
-    final AtomicLong wlogged = new AtomicLong(0);
-    final AtomicLong wsuppresed = new AtomicLong(0);
-    ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock(true);
-    InstrumentedReadLock readLock = new InstrumentedReadLock(testname, LOG,
-        readWriteLock, 2000, 300, mclock) {
-      @Override
-      protected void logWarning(
-          long lockHeldTime, SuppressedSnapshot stats) {
-        wlogged.incrementAndGet();
-        wsuppresed.set(stats.getSuppressedCount());
-      }
-    };
+                @Override
+                public void run() {
+                    assertTrue(readLock.tryLock());
+                    readLock.release();
+                }
+            };
+            competingReadThread.start();
+            competingReadThread.join();
+            Thread competingWriteThread = new Thread() {
 
-    readLock.lock();   // t = 0
-    time.set(100);
-    readLock.unlock(); // t = 100
-    assertEquals(0, wlogged.get());
-    assertEquals(0, wsuppresed.get());
+                @Override
+                public void run() {
+                    assertFalse(writeLock.tryLock());
+                }
+            };
+            competingWriteThread.start();
+            competingWriteThread.join();
+        }
+    }
 
-    readLock.lock();   // t = 100
-    time.set(500);
-    readLock.unlock(); // t = 500
-    assertEquals(1, wlogged.get());
-    assertEquals(0, wsuppresed.get());
+    /**
+     * Tests the warning when the read lock is held longer than threshold.
+     * @throws Exception
+     */
+    @Test(timeout = 10000)
+    public void testReadLockLongHoldingReport() throws Exception {
+        String testname = name.getMethodName();
+        final AtomicLong time = new AtomicLong(0);
+        Timer mclock = new Timer() {
 
-    // the suppress counting is only changed when
-    // log is needed in the test
-    readLock.lock();   // t = 500
-    time.set(900);
-    readLock.unlock(); // t = 900
-    assertEquals(1, wlogged.get());
-    assertEquals(0, wsuppresed.get());
+            @Override
+            public long monotonicNow() {
+                return time.get();
+            }
+        };
+        final AtomicLong wlogged = new AtomicLong(0);
+        final AtomicLong wsuppresed = new AtomicLong(0);
+        ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock(true);
+        InstrumentedReadLock readLock = new InstrumentedReadLock(testname, LOG, readWriteLock, 2000, 300, mclock) {
 
-    readLock.lock();   // t = 900
-    time.set(3000);
-    readLock.unlock(); // t = 3000
-    assertEquals(2, wlogged.get());
-    assertEquals(1, wsuppresed.get());
-  }
+            @Override
+            protected void logWarning(long lockHeldTime, SuppressedSnapshot stats) {
+                wlogged.incrementAndGet();
+                wsuppresed.set(stats.getSuppressedCount());
+            }
+        };
+        // t = 0
+        readLock.lock();
+        time.set(100);
+        // t = 100
+        readLock.unlock();
+        assertEquals(0, wlogged.get());
+        assertEquals(0, wsuppresed.get());
+        // t = 100
+        readLock.lock();
+        time.set(500);
+        // t = 500
+        readLock.unlock();
+        assertEquals(1, wlogged.get());
+        assertEquals(0, wsuppresed.get());
+        // the suppress counting is only changed when
+        // log is needed in the test
+        // t = 500
+        readLock.lock();
+        time.set(900);
+        // t = 900
+        readLock.unlock();
+        assertEquals(1, wlogged.get());
+        assertEquals(0, wsuppresed.get());
+        // t = 900
+        readLock.lock();
+        time.set(3000);
+        // t = 3000
+        readLock.unlock();
+        assertEquals(2, wlogged.get());
+        assertEquals(1, wsuppresed.get());
+    }
 
-  /**
-   * Tests the warning when the write lock is held longer than threshold.
-   * @throws Exception
-   */
-  @Test(timeout=10000)
-  public void testWriteLockLongHoldingReport() throws Exception {
-    String testname = name.getMethodName();
-    final AtomicLong time = new AtomicLong(0);
-    Timer mclock = new Timer() {
-      @Override
-      public long monotonicNow() {
-        return time.get();
-      }
-    };
+    /**
+     * Tests the warning when the write lock is held longer than threshold.
+     * @throws Exception
+     */
+    @Test(timeout = 10000)
+    public void testWriteLockLongHoldingReport() throws Exception {
+        String testname = name.getMethodName();
+        final AtomicLong time = new AtomicLong(0);
+        Timer mclock = new Timer() {
 
-    final AtomicLong wlogged = new AtomicLong(0);
-    final AtomicLong wsuppresed = new AtomicLong(0);
-    ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock(true);
-    InstrumentedWriteLock writeLock = new InstrumentedWriteLock(testname, LOG,
-        readWriteLock, 2000, 300, mclock) {
-      @Override
-      protected void logWarning(long lockHeldTime, SuppressedSnapshot stats) {
-        wlogged.incrementAndGet();
-        wsuppresed.set(stats.getSuppressedCount());
-      }
-    };
+            @Override
+            public long monotonicNow() {
+                return time.get();
+            }
+        };
+        final AtomicLong wlogged = new AtomicLong(0);
+        final AtomicLong wsuppresed = new AtomicLong(0);
+        ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock(true);
+        InstrumentedWriteLock writeLock = new InstrumentedWriteLock(testname, LOG, readWriteLock, 2000, 300, mclock) {
 
-    writeLock.lock();   // t = 0
-    time.set(100);
-    writeLock.unlock(); // t = 100
-    assertEquals(0, wlogged.get());
-    assertEquals(0, wsuppresed.get());
-
-    writeLock.lock();   // t = 100
-    time.set(500);
-    writeLock.unlock(); // t = 500
-    assertEquals(1, wlogged.get());
-    assertEquals(0, wsuppresed.get());
-
-    // the suppress counting is only changed when
-    // log is needed in the test
-    writeLock.lock();   // t = 500
-    time.set(900);
-    writeLock.unlock(); // t = 900
-    assertEquals(1, wlogged.get());
-    assertEquals(0, wsuppresed.get());
-
-    writeLock.lock();   // t = 900
-    time.set(3000);
-    writeLock.unlock(); // t = 3000
-    assertEquals(2, wlogged.get());
-    assertEquals(1, wsuppresed.get());
-  }
+            @Override
+            protected void logWarning(long lockHeldTime, SuppressedSnapshot stats) {
+                wlogged.incrementAndGet();
+                wsuppresed.set(stats.getSuppressedCount());
+            }
+        };
+        // t = 0
+        writeLock.lock();
+        time.set(100);
+        // t = 100
+        writeLock.unlock();
+        assertEquals(0, wlogged.get());
+        assertEquals(0, wsuppresed.get());
+        // t = 100
+        writeLock.lock();
+        time.set(500);
+        // t = 500
+        writeLock.unlock();
+        assertEquals(1, wlogged.get());
+        assertEquals(0, wsuppresed.get());
+        // the suppress counting is only changed when
+        // log is needed in the test
+        // t = 500
+        writeLock.lock();
+        time.set(900);
+        // t = 900
+        writeLock.unlock();
+        assertEquals(1, wlogged.get());
+        assertEquals(0, wsuppresed.get());
+        // t = 900
+        writeLock.lock();
+        time.set(3000);
+        // t = 3000
+        writeLock.unlock();
+        assertEquals(2, wlogged.get());
+        assertEquals(1, wsuppresed.get());
+    }
 }

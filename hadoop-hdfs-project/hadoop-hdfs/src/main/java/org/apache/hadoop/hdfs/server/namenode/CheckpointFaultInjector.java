@@ -25,33 +25,46 @@ import java.io.IOException;
  * process.
  */
 public class CheckpointFaultInjector {
-  public static CheckpointFaultInjector instance =
-      new CheckpointFaultInjector();
 
-  public static CheckpointFaultInjector getInstance() {
-    return instance;
-  }
+    public static CheckpointFaultInjector instance = new CheckpointFaultInjector();
 
-  public static void set(CheckpointFaultInjector instance) {
-    CheckpointFaultInjector.instance = instance;
-  }
-  public void beforeGetImageSetsHeaders() throws IOException {}
-  public void afterSecondaryCallsRollEditLog() throws IOException {}
-  public void duringMerge() throws IOException {}
-  public void afterSecondaryUploadsNewImage() throws IOException {}
-  public void aboutToSendFile(File localfile) throws IOException {}
+    public static CheckpointFaultInjector getInstance() {
+        return instance;
+    }
 
-  public boolean shouldSendShortFile(File localfile) {
-    return false;
-  }
-  public boolean shouldCorruptAByte(File localfile) {
-    return false;
-  }
-  
-  public void afterMD5Rename() throws IOException {}
-  public void beforeEditsRename() throws IOException {}
+    public static void set(CheckpointFaultInjector instance) {
+        CheckpointFaultInjector.instance = instance;
+    }
 
-  public void duringUploadInProgess() throws InterruptedException, IOException {
-  }
+    public void beforeGetImageSetsHeaders() throws IOException {
+    }
 
+    public void afterSecondaryCallsRollEditLog() throws IOException {
+    }
+
+    public void duringMerge() throws IOException {
+    }
+
+    public void afterSecondaryUploadsNewImage() throws IOException {
+    }
+
+    public void aboutToSendFile(File localfile) throws IOException {
+    }
+
+    public boolean shouldSendShortFile(File localfile) {
+        return false;
+    }
+
+    public boolean shouldCorruptAByte(File localfile) {
+        return false;
+    }
+
+    public void afterMD5Rename() throws IOException {
+    }
+
+    public void beforeEditsRename() throws IOException {
+    }
+
+    public void duringUploadInProgess() throws InterruptedException, IOException {
+    }
 }

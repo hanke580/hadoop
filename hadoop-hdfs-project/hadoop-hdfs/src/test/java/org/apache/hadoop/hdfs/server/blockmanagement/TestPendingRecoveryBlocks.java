@@ -21,7 +21,6 @@ import org.apache.hadoop.hdfs.protocol.Block;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -30,58 +29,56 @@ import static org.junit.Assert.assertTrue;
  */
 public class TestPendingRecoveryBlocks {
 
-  private PendingRecoveryBlocks pendingRecoveryBlocks;
-  private final long recoveryTimeout = 1000L;
+    private PendingRecoveryBlocks pendingRecoveryBlocks;
 
-  private final BlockInfo blk1 = getBlock(1);
-  private final BlockInfo blk2 = getBlock(2);
-  private final BlockInfo blk3 = getBlock(3);
+    private final long recoveryTimeout = 1000L;
 
-  @Before
-  public void setUp() {
-    pendingRecoveryBlocks =
-        Mockito.spy(new PendingRecoveryBlocks(recoveryTimeout));
-  }
+    private final BlockInfo blk1 = getBlock(1);
 
-  BlockInfo getBlock(long blockId) {
-    return new BlockInfoContiguous(new Block(blockId), (short) 0);
-  }
+    private final BlockInfo blk2 = getBlock(2);
 
-  @Test
-  public void testAddDifferentBlocks() {
-    assertTrue(pendingRecoveryBlocks.add(blk1));
-    assertTrue(pendingRecoveryBlocks.isUnderRecovery(blk1));
-    assertTrue(pendingRecoveryBlocks.add(blk2));
-    assertTrue(pendingRecoveryBlocks.isUnderRecovery(blk2));
-    assertTrue(pendingRecoveryBlocks.add(blk3));
-    assertTrue(pendingRecoveryBlocks.isUnderRecovery(blk3));
-  }
+    private final BlockInfo blk3 = getBlock(3);
 
-  @Test
-  public void testAddAndRemoveBlocks() {
-    // Add blocks
-    assertTrue(pendingRecoveryBlocks.add(blk1));
-    assertTrue(pendingRecoveryBlocks.add(blk2));
+    @Before
+    public void setUp() {
+        pendingRecoveryBlocks = Mockito.spy(new PendingRecoveryBlocks(recoveryTimeout));
+    }
 
-    // Remove blk1
-    pendingRecoveryBlocks.remove(blk1);
+    BlockInfo getBlock(long blockId) {
+        return new BlockInfoContiguous(new Block(blockId), (short) 0);
+    }
 
-    // Adding back blk1 should succeed
-    assertTrue(pendingRecoveryBlocks.add(blk1));
-  }
+    @Test
+    public void testAddDifferentBlocks() {
+        assertTrue(pendingRecoveryBlocks.add(blk1));
+        assertTrue(pendingRecoveryBlocks.isUnderRecovery(blk1));
+        assertTrue(pendingRecoveryBlocks.add(blk2));
+        assertTrue(pendingRecoveryBlocks.isUnderRecovery(blk2));
+        assertTrue(pendingRecoveryBlocks.add(blk3));
+        assertTrue(pendingRecoveryBlocks.isUnderRecovery(blk3));
+    }
 
-  @Test
-  public void testAddBlockWithPreviousRecoveryTimedOut() {
-    // Add blk
-    Mockito.doReturn(0L).when(pendingRecoveryBlocks).getTime();
-    assertTrue(pendingRecoveryBlocks.add(blk1));
+    @Test
+    public void testAddAndRemoveBlocks() {
+        // Add blocks
+        assertTrue(pendingRecoveryBlocks.add(blk1));
+        assertTrue(pendingRecoveryBlocks.add(blk2));
+        // Remove blk1
+        pendingRecoveryBlocks.remove(blk1);
+        // Adding back blk1 should succeed
+        assertTrue(pendingRecoveryBlocks.add(blk1));
+    }
 
-    // Should fail, has not timed out yet
-    Mockito.doReturn(recoveryTimeout / 2).when(pendingRecoveryBlocks).getTime();
-    assertFalse(pendingRecoveryBlocks.add(blk1));
-
-    // Should succeed after timing out
-    Mockito.doReturn(recoveryTimeout * 2).when(pendingRecoveryBlocks).getTime();
-    assertTrue(pendingRecoveryBlocks.add(blk1));
-  }
+    @Test
+    public void testAddBlockWithPreviousRecoveryTimedOut() {
+        // Add blk
+        Mockito.doReturn(0L).when(pendingRecoveryBlocks).getTime();
+        assertTrue(pendingRecoveryBlocks.add(blk1));
+        // Should fail, has not timed out yet
+        Mockito.doReturn(recoveryTimeout / 2).when(pendingRecoveryBlocks).getTime();
+        assertFalse(pendingRecoveryBlocks.add(blk1));
+        // Should succeed after timing out
+        Mockito.doReturn(recoveryTimeout * 2).when(pendingRecoveryBlocks).getTime();
+        assertTrue(pendingRecoveryBlocks.add(blk1));
+    }
 }

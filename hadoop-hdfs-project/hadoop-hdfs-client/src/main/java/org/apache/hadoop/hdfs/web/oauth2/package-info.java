@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 /**
  * OAuth2-based WebHDFS authentication.
  */
@@ -24,3 +23,4 @@
 package org.apache.hadoop.hdfs.web.oauth2;
 
 import org.apache.hadoop.classification.InterfaceAudience;
+

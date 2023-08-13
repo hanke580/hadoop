@@ -15,8 +15,8 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 /**
- Commands for disk balancer command line tool.
+ * Commands for disk balancer command line tool.
  */
 package org.apache.hadoop.hdfs.server.diskbalancer.command;
+

@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.datanode.extdataset;
 
 import org.apache.hadoop.hdfs.server.datanode.Replica;
@@ -54,35 +53,35 @@ import org.junit.Test;
  */
 public class TestExternalDataset {
 
-  /**
-   * Tests instantiating an FsDatasetSpi subclass.
-   */
-  @Test
-  public void testInstantiateDatasetImpl() throws Throwable {
-    FsDatasetSpi<?> inst = new ExternalDatasetImpl();
-  }
+    /**
+     * Tests instantiating an FsDatasetSpi subclass.
+     */
+    @Test
+    public void testInstantiateDatasetImpl() throws Throwable {
+        FsDatasetSpi<?> inst = new ExternalDatasetImpl();
+    }
 
-  /**
-   * Tests instantiating a Replica subclass.
-   */
-  @Test
-  public void testIntantiateExternalReplica() throws Throwable {
-    Replica inst = new ExternalReplica();
-  }
+    /**
+     * Tests instantiating a Replica subclass.
+     */
+    @Test
+    public void testIntantiateExternalReplica() throws Throwable {
+        Replica inst = new ExternalReplica();
+    }
 
-  /**
-   * Tests instantiating a ReplicaInPipelineInterface subclass.
-   */
-  @Test
-  public void testInstantiateReplicaInPipeline() throws Throwable {
-    ReplicaInPipeline inst = new ExternalReplicaInPipeline();
-  }
+    /**
+     * Tests instantiating a ReplicaInPipelineInterface subclass.
+     */
+    @Test
+    public void testInstantiateReplicaInPipeline() throws Throwable {
+        ReplicaInPipeline inst = new ExternalReplicaInPipeline();
+    }
 
-  /**
-   * Tests instantiating an FsVolumeSpi subclass.
-   */
-  @Test
-  public void testInstantiateVolumeImpl() throws Throwable {
-    FsVolumeSpi inst = new ExternalVolumeImpl();
-  }
+    /**
+     * Tests instantiating an FsVolumeSpi subclass.
+     */
+    @Test
+    public void testInstantiateVolumeImpl() throws Throwable {
+        FsVolumeSpi inst = new ExternalVolumeImpl();
+    }
 }

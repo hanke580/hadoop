@@ -15,11 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.namenode;
 
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
@@ -29,9 +27,10 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
 public class LeaseExpiredException extends IOException {
-  private static final long serialVersionUID = 1L;
 
-  public LeaseExpiredException(String msg) {
-    super(msg);
-  }
+    private static final long serialVersionUID = 1L;
+
+    public LeaseExpiredException(String msg) {
+        super(msg);
+    }
 }

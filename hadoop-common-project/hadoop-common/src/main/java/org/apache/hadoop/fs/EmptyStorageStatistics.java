@@ -25,26 +25,27 @@ import java.util.Iterator;
  * data.
  */
 class EmptyStorageStatistics extends StorageStatistics {
-  EmptyStorageStatistics(String name) {
-    super(name);
-  }
 
-  @Override
-  public Iterator<LongStatistic> getLongStatistics() {
-    return Collections.emptyIterator();
-  }
+    EmptyStorageStatistics(String name) {
+        super(name);
+    }
 
-  @Override
-  public Long getLong(String key) {
-    return null;
-  }
+    @Override
+    public Iterator<LongStatistic> getLongStatistics() {
+        return Collections.emptyIterator();
+    }
 
-  @Override
-  public boolean isTracked(String key) {
-    return false;
-  }
+    @Override
+    public Long getLong(String key) {
+        return null;
+    }
 
-  @Override
-  public void reset() {
-  }
+    @Override
+    public boolean isTracked(String key) {
+        return false;
+    }
+
+    @Override
+    public void reset() {
+    }
 }

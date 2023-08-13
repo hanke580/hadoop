@@ -16,7 +16,6 @@
  * limitations under the License.
  *
  */
-
 package org.apache.hadoop.io.retry;
 
 import java.io.IOException;
@@ -27,23 +26,23 @@ import java.util.Map;
  */
 public class MultiException extends IOException {
 
-  private final Map<String, Exception> exes;
+    private final Map<String, Exception> exes;
 
-  public MultiException(Map<String, Exception> exes) {
-    this.exes = exes;
-  }
-
-  public Map<String, Exception> getExceptions() {
-    return exes;
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder("{");
-    for (Exception e : exes.values()) {
-      sb.append(e.toString()).append(", ");
+    public MultiException(Map<String, Exception> exes) {
+        this.exes = exes;
     }
-    sb.append("}");
-    return "MultiException[" + sb.toString() + "]";
-  }
+
+    public Map<String, Exception> getExceptions() {
+        return exes;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("{");
+        for (Exception e : exes.values()) {
+            sb.append(e.toString()).append(", ");
+        }
+        sb.append("}");
+        return "MultiException[" + sb.toString() + "]";
+    }
 }

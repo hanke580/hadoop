@@ -18,11 +18,9 @@
 package org.apache.hadoop.hdfs;
 
 import static org.junit.Assert.fail;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.channels.ClosedChannelException;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -30,34 +28,29 @@ import org.junit.Test;
 
 public class TestClose {
 
-  @Test
-  public void testWriteAfterClose() throws IOException {
-    Configuration conf = new Configuration();
-    MiniDFSCluster cluster = new MiniDFSCluster.Builder(conf)
-        .build();
-    
-    try {
-      final byte[] data = "foo".getBytes();
-      
-      FileSystem fs = FileSystem.get(conf);
-      OutputStream out = fs.create(new Path("/test"));
-      
-      out.write(data);
-      out.close();
-      try {
-        // Should fail.
-        out.write(data);
-        fail("Should not have been able to write more data after file is closed.");
-      } catch (ClosedChannelException cce) {
-        // We got the correct exception. Ignoring.
-      }
-      // Should succeed. Double closes are OK.
-      out.close();
-    } finally {
-      if (cluster != null) {
-        cluster.shutdown();
-      }
+    @Test
+    public void testWriteAfterClose() throws IOException {
+        Configuration conf = new Configuration();
+        MiniDFSCluster cluster = new MiniDFSCluster.Builder(conf).build();
+        try {
+            final byte[] data = "foo".getBytes();
+            FileSystem fs = FileSystem.get(conf);
+            OutputStream out = fs.create(new Path("/test"));
+            out.write(data);
+            out.close();
+            try {
+                // Should fail.
+                out.write(data);
+                fail("Should not have been able to write more data after file is closed.");
+            } catch (ClosedChannelException cce) {
+                // We got the correct exception. Ignoring.
+            }
+            // Should succeed. Double closes are OK.
+            out.close();
+        } finally {
+            if (cluster != null) {
+                cluster.shutdown();
+            }
+        }
     }
-  }
-  
 }

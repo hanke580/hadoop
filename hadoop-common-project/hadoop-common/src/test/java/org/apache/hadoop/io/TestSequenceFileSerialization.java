@@ -15,9 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.io;
-
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -28,47 +26,41 @@ import org.apache.hadoop.test.GenericTestUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
 
 public class TestSequenceFileSerialization {
-  private Configuration conf;
-  private FileSystem fs;
-  
-  @Before
-  public void setUp() throws Exception {
-    conf = new Configuration();
-    conf.set("io.serializations",
-        "org.apache.hadoop.io.serializer.JavaSerialization");
-    fs = FileSystem.getLocal(conf);  
-  }
-  
-  @After
-  public void tearDown() throws Exception {
-    fs.close();
-  }
 
-  @Test
-  public void testJavaSerialization() throws Exception {
-    Path file = new Path(GenericTestUtils.getTempPath("testseqser.seq"));
-    
-    fs.delete(file, true);
-    Writer writer = SequenceFile.createWriter(fs, conf, file, Long.class,
-        String.class);
-    
-    writer.append(1L, "one");
-    writer.append(2L, "two");
-    
-    writer.close();
-    
-    Reader reader = new Reader(fs, file, conf);
-    assertEquals(1L, reader.next((Object) null));
-    assertEquals("one", reader.getCurrentValue((Object) null));
-    assertEquals(2L, reader.next((Object) null));
-    assertEquals("two", reader.getCurrentValue((Object) null));
-    assertNull(reader.next((Object) null));
-    reader.close();
-    
-  }
+    private Configuration conf;
+
+    private FileSystem fs;
+
+    @Before
+    public void setUp() throws Exception {
+        conf = new Configuration();
+        conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization");
+        fs = FileSystem.getLocal(conf);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        fs.close();
+    }
+
+    @Test
+    public void testJavaSerialization() throws Exception {
+        Path file = new Path(GenericTestUtils.getTempPath("testseqser.seq"));
+        fs.delete(file, true);
+        Writer writer = SequenceFile.createWriter(fs, conf, file, Long.class, String.class);
+        writer.append(1L, "one");
+        writer.append(2L, "two");
+        writer.close();
+        Reader reader = new Reader(fs, file, conf);
+        assertEquals(1L, reader.next((Object) null));
+        assertEquals("one", reader.getCurrentValue((Object) null));
+        assertEquals(2L, reader.next((Object) null));
+        assertEquals("two", reader.getCurrentValue((Object) null));
+        assertNull(reader.next((Object) null));
+        reader.close();
+    }
 }

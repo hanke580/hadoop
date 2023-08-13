@@ -18,84 +18,82 @@
 package org.apache.hadoop.hdfs.server.blockmanagement;
 
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.fs.ContentSummary;
 import org.apache.hadoop.security.AccessControlException;
 
-/** 
+/**
  * This interface is used by the block manager to expose a
  * few characteristics of a collection of Block/BlockUnderConstruction.
  */
 @InterfaceAudience.Private
 public interface BlockCollection {
-  /**
-   * Get the last block of the collection.
-   */
-  BlockInfo getLastBlock();
 
-  /** 
-   * Get content summary.
-   */
-  ContentSummary computeContentSummary(BlockStoragePolicySuite bsps)
-      throws AccessControlException;
+    /**
+     * Get the last block of the collection.
+     */
+    BlockInfo getLastBlock();
 
-  /**
-   * @return the number of blocks or block groups
-   */ 
-  int numBlocks();
+    /**
+     * Get content summary.
+     */
+    ContentSummary computeContentSummary(BlockStoragePolicySuite bsps) throws AccessControlException;
 
-  /**
-   * Get the blocks (striped or contiguous).
-   */
-  BlockInfo[] getBlocks();
+    /**
+     * @return the number of blocks or block groups
+     */
+    int numBlocks();
 
-  /**
-   * Get preferred block size for the collection 
-   * @return preferred block size in bytes
-   */
-  long getPreferredBlockSize();
+    /**
+     * Get the blocks (striped or contiguous).
+     */
+    BlockInfo[] getBlocks();
 
-  /**
-   * Get block replication for the collection.
-   * @return block replication value. Return 0 if the file is erasure coded.
-   */
-  short getPreferredBlockReplication();
+    /**
+     * Get preferred block size for the collection
+     * @return preferred block size in bytes
+     */
+    long getPreferredBlockSize();
 
-  /**
-   * @return the storage policy ID.
-   */
-  byte getStoragePolicyID();
+    /**
+     * Get block replication for the collection.
+     * @return block replication value. Return 0 if the file is erasure coded.
+     */
+    short getPreferredBlockReplication();
 
-  /**
-   * Get the name of the collection.
-   */
-  String getName();
+    /**
+     * @return the storage policy ID.
+     */
+    byte getStoragePolicyID();
 
-  /**
-   * Set the block (contiguous or striped) at the given index.
-   */
-  void setBlock(int index, BlockInfo blk);
+    /**
+     * Get the name of the collection.
+     */
+    String getName();
 
-  /**
-   * Convert the last block of the collection to an under-construction block
-   * and set the locations.
-   */
-  void convertLastBlockToUC(BlockInfo lastBlock,
-      DatanodeStorageInfo[] targets) throws IOException;
+    /**
+     * Set the block (contiguous or striped) at the given index.
+     */
+    void setBlock(int index, BlockInfo blk);
 
-  /**
-   * @return whether the block collection is under construction.
-   */
-  boolean isUnderConstruction();
+    /**
+     * Convert the last block of the collection to an under-construction block
+     * and set the locations.
+     */
+    void convertLastBlockToUC(BlockInfo lastBlock, DatanodeStorageInfo[] targets) throws IOException;
 
-  /**
-   * @return whether the block collection is in striping format
-   */
-  boolean isStriped();
+    /**
+     * @return whether the block collection is under construction.
+     */
+    boolean isUnderConstruction();
 
-  /**
-   * @return the id for the block collection
-   */
-  long getId();
+    /**
+     * @return whether the block collection is in striping format
+     */
+    boolean isStriped();
+
+    /**
+     * @return the id for the block collection
+     */
+    long getId();
 }

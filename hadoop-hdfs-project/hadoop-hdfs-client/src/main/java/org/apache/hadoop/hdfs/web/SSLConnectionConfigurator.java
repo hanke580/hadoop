@@ -23,7 +23,6 @@ import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.authentication.client.ConnectionConfigurator;
 import org.apache.hadoop.security.ssl.SSLFactory;
-
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
@@ -36,37 +35,40 @@ import java.security.GeneralSecurityException;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
-
 public class SSLConnectionConfigurator implements ConnectionConfigurator {
-  private final SSLFactory factory;
-  private final SSLSocketFactory sf;
-  private final HostnameVerifier hv;
-  private final int connectTimeout;
-  private final int readTimeout;
 
-  SSLConnectionConfigurator(int connectTimeout, int readTimeout,
-      Configuration conf) throws IOException, GeneralSecurityException {
-    factory = new SSLFactory(SSLFactory.Mode.CLIENT, conf);
-    factory.init();
-    sf = factory.createSSLSocketFactory();
-    hv = factory.getHostnameVerifier();
-    this.connectTimeout = connectTimeout;
-    this.readTimeout = readTimeout;
-  }
+    private final SSLFactory factory;
 
-  @Override
-  public HttpURLConnection configure(HttpURLConnection conn) {
-    if (conn instanceof HttpsURLConnection) {
-      HttpsURLConnection c = (HttpsURLConnection) conn;
-      c.setSSLSocketFactory(sf);
-      c.setHostnameVerifier(hv);
+    private final SSLSocketFactory sf;
+
+    private final HostnameVerifier hv;
+
+    private final int connectTimeout;
+
+    private final int readTimeout;
+
+    SSLConnectionConfigurator(int connectTimeout, int readTimeout, Configuration conf) throws IOException, GeneralSecurityException {
+        factory = new SSLFactory(SSLFactory.Mode.CLIENT, conf);
+        factory.init();
+        sf = factory.createSSLSocketFactory();
+        hv = factory.getHostnameVerifier();
+        this.connectTimeout = connectTimeout;
+        this.readTimeout = readTimeout;
     }
-    conn.setConnectTimeout(connectTimeout);
-    conn.setReadTimeout(readTimeout);
-    return conn;
-  }
 
-  void destroy() {
-    factory.destroy();
-  }
+    @Override
+    public HttpURLConnection configure(HttpURLConnection conn) {
+        if (conn instanceof HttpsURLConnection) {
+            HttpsURLConnection c = (HttpsURLConnection) conn;
+            c.setSSLSocketFactory(sf);
+            c.setHostnameVerifier(hv);
+        }
+        conn.setConnectTimeout(connectTimeout);
+        conn.setReadTimeout(readTimeout);
+        return conn;
+    }
+
+    void destroy() {
+        factory.destroy();
+    }
 }

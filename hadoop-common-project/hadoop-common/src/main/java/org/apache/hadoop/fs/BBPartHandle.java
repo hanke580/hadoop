@@ -18,7 +18,6 @@ package org.apache.hadoop.fs;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
@@ -29,35 +28,34 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceStability.Unstable
 public final class BBPartHandle implements PartHandle {
 
-  private static final long serialVersionUID = 0x23ce3eb1;
+    private static final long serialVersionUID = 0x23ce3eb1;
 
-  private final byte[] bytes;
+    private final byte[] bytes;
 
-  private BBPartHandle(ByteBuffer byteBuffer){
-    this.bytes = byteBuffer.array();
-  }
-
-  public static PartHandle from(ByteBuffer byteBuffer) {
-    return new BBPartHandle(byteBuffer);
-  }
-
-  @Override
-  public ByteBuffer bytes() {
-    return ByteBuffer.wrap(bytes);
-  }
-
-  @Override
-  public int hashCode() {
-    return Arrays.hashCode(bytes);
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (!(other instanceof PartHandle)) {
-      return false;
-
+    private BBPartHandle(ByteBuffer byteBuffer) {
+        this.bytes = byteBuffer.array();
     }
-    PartHandle o = (PartHandle) other;
-    return bytes().equals(o.bytes());
-  }
+
+    public static PartHandle from(ByteBuffer byteBuffer) {
+        return new BBPartHandle(byteBuffer);
+    }
+
+    @Override
+    public ByteBuffer bytes() {
+        return ByteBuffer.wrap(bytes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(bytes);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof PartHandle)) {
+            return false;
+        }
+        PartHandle o = (PartHandle) other;
+        return bytes().equals(o.bytes());
+    }
 }

@@ -15,9 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * Filesystem implementations that allow Hadoop to read directly from
  * HTTP / HTTPS endpoints.
  */
 package org.apache.hadoop.fs.http;
+

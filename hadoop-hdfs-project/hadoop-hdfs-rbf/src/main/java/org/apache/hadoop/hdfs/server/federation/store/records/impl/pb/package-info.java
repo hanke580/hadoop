@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * The protobuf implementations of state store data records defined in the
  * org.apache.hadoop.hdfs.server.federation.store.records package. Each
@@ -27,3 +26,4 @@ package org.apache.hadoop.hdfs.server.federation.store.records.impl.pb;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

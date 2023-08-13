@@ -15,14 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.namenode.snapshot;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.protocol.SnapshotException;
 import org.apache.hadoop.hdfs.server.namenode.FSDirectory;
@@ -35,75 +33,63 @@ import org.apache.hadoop.util.Time;
 import org.junit.Assert;
 import org.junit.Test;
 
-
 /**
  * Testing snapshot manager functionality.
  */
 public class TestSnapshotManager {
-  private static final int testMaxSnapshotLimit = 7;
 
-  /**
-   * Test that the global limit on snapshots is honored.
-   */
-  @Test (timeout=10000)
-  public void testSnapshotLimits() throws Exception {
-    // Setup mock objects for SnapshotManager.createSnapshot.
-    //
-    LeaseManager leaseManager = mock(LeaseManager.class);
-    INodeDirectory ids = mock(INodeDirectory.class);
-    FSDirectory fsdir = mock(FSDirectory.class);
-    INodesInPath iip = mock(INodesInPath.class);
+    private static final int testMaxSnapshotLimit = 7;
 
-    SnapshotManager sm = spy(new SnapshotManager(new Configuration(), fsdir));
-    doReturn(ids).when(sm).getSnapshottableRoot(any());
-    doReturn(testMaxSnapshotLimit).when(sm).getMaxSnapshotID();
-
-    // Create testMaxSnapshotLimit snapshots. These should all succeed.
-    //
-    for (Integer i = 0; i < testMaxSnapshotLimit; ++i) {
-      sm.createSnapshot(leaseManager, iip, "dummy", i.toString(), Time.now());
+    /**
+     * Test that the global limit on snapshots is honored.
+     */
+    @Test(timeout = 10000)
+    public void testSnapshotLimits() throws Exception {
+        // Setup mock objects for SnapshotManager.createSnapshot.
+        //
+        LeaseManager leaseManager = mock(LeaseManager.class);
+        INodeDirectory ids = mock(INodeDirectory.class);
+        FSDirectory fsdir = mock(FSDirectory.class);
+        INodesInPath iip = mock(INodesInPath.class);
+        SnapshotManager sm = spy(new SnapshotManager(new Configuration(), fsdir));
+        doReturn(ids).when(sm).getSnapshottableRoot(any());
+        doReturn(testMaxSnapshotLimit).when(sm).getMaxSnapshotID();
+        // Create testMaxSnapshotLimit snapshots. These should all succeed.
+        //
+        for (Integer i = 0; i < testMaxSnapshotLimit; ++i) {
+            sm.createSnapshot(leaseManager, iip, "dummy", i.toString(), Time.now());
+        }
+        // Attempt to create one more snapshot. This should fail due to snapshot
+        // ID rollover.
+        //
+        try {
+            sm.createSnapshot(leaseManager, iip, "dummy", "shouldFailSnapshot", Time.now());
+            Assert.fail("Expected SnapshotException not thrown");
+        } catch (SnapshotException se) {
+            Assert.assertTrue(StringUtils.toLowerCase(se.getMessage()).contains("rollover"));
+        }
+        // Delete a snapshot to free up a slot.
+        //
+        sm.deleteSnapshot(iip, "", mock(INode.ReclaimContext.class), Time.now());
+        // Attempt to create a snapshot again. It should still fail due
+        // to snapshot ID rollover.
+        //
+        try {
+            sm.createSnapshot(leaseManager, iip, "dummy", "shouldFailSnapshot2", Time.now());
+            Assert.fail("Expected SnapshotException not thrown");
+        } catch (SnapshotException se) {
+            Assert.assertTrue(StringUtils.toLowerCase(se.getMessage()).contains("rollover"));
+        }
     }
 
-    // Attempt to create one more snapshot. This should fail due to snapshot
-    // ID rollover.
-    //
-    try {
-      sm.createSnapshot(leaseManager, iip, "dummy", "shouldFailSnapshot",
-          Time.now());
-      Assert.fail("Expected SnapshotException not thrown");
-    } catch (SnapshotException se) {
-      Assert.assertTrue(
-          StringUtils.toLowerCase(se.getMessage()).contains("rollover"));
+    /**
+     *  Snapshot is identified by INODE CURRENT_STATE_ID.
+     *  So maximum allowable snapshotID should be less than CURRENT_STATE_ID
+     */
+    @Test
+    public void testValidateSnapshotIDWidth() {
+        FSDirectory fsdir = mock(FSDirectory.class);
+        SnapshotManager snapshotManager = new SnapshotManager(new Configuration(), fsdir);
+        Assert.assertTrue(snapshotManager.getMaxSnapshotID() < Snapshot.CURRENT_STATE_ID);
     }
-
-    // Delete a snapshot to free up a slot.
-    //
-    sm.deleteSnapshot(iip, "", mock(INode.ReclaimContext.class), Time.now());
-
-    // Attempt to create a snapshot again. It should still fail due
-    // to snapshot ID rollover.
-    //
-    try {
-      sm.createSnapshot(leaseManager, iip, "dummy", "shouldFailSnapshot2",
-          Time.now());
-      Assert.fail("Expected SnapshotException not thrown");
-    } catch (SnapshotException se) {
-      Assert.assertTrue(
-          StringUtils.toLowerCase(se.getMessage()).contains("rollover"));
-    }
-  }
-
-  /**
-   *  Snapshot is identified by INODE CURRENT_STATE_ID.
-   *  So maximum allowable snapshotID should be less than CURRENT_STATE_ID
-   */
-  @Test
-  public void testValidateSnapshotIDWidth() {
-    FSDirectory fsdir = mock(FSDirectory.class);
-    SnapshotManager snapshotManager = new SnapshotManager(new Configuration(),
-        fsdir);
-    Assert.assertTrue(snapshotManager.
-        getMaxSnapshotID() < Snapshot.CURRENT_STATE_ID);
-  }
-
 }

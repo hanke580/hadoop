@@ -15,8 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * Configuration for the Hadoop Service Registry.
  */
 package org.apache.hadoop.registry.conf;
+

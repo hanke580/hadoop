@@ -24,7 +24,6 @@ import org.apache.hadoop.portmap.PortmapMapping;
 import org.apache.hadoop.util.ShutdownHookManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import static org.apache.hadoop.util.ExitUtil.terminate;
 
 /**
@@ -32,68 +31,71 @@ import static org.apache.hadoop.util.ExitUtil.terminate;
  * Only TCP server is supported and UDP is not supported.
  */
 public abstract class Nfs3Base {
-  public static final Logger LOG = LoggerFactory.getLogger(Nfs3Base.class);
-  private final RpcProgram rpcProgram;
-  private int nfsBoundPort; // Will set after server starts
 
-  public RpcProgram getRpcProgram() {
-    return rpcProgram;
-  }
+    public static final Logger LOG = LoggerFactory.getLogger(Nfs3Base.class);
 
-  protected Nfs3Base(RpcProgram rpcProgram, Configuration conf) {
-    this.rpcProgram = rpcProgram;
-    LOG.info("NFS server port set to: " + rpcProgram.getPort());
-  }
+    private final RpcProgram rpcProgram;
 
-  public void start(boolean register) {
-    startTCPServer(); // Start TCP server
+    // Will set after server starts
+    private int nfsBoundPort;
 
-    if (register) {
-      ShutdownHookManager.get().addShutdownHook(new NfsShutdownHook(),
-          SHUTDOWN_HOOK_PRIORITY);
-      try {
-        rpcProgram.register(PortmapMapping.TRANSPORT_TCP, nfsBoundPort);
-      } catch (Throwable e) {
-        LOG.error("Failed to register the NFSv3 service.", e);
-        terminate(1, e);
-      }
+    public RpcProgram getRpcProgram() {
+        return rpcProgram;
     }
-  }
 
-  private void startTCPServer() {
-    SimpleTcpServer tcpServer = new SimpleTcpServer(rpcProgram.getPort(),
-        rpcProgram, 0);
-    rpcProgram.startDaemons();
-    try {
-      tcpServer.run();
-    } catch (Throwable e) {
-      LOG.error("Failed to start the TCP server.", e);
-      if (tcpServer.getBoundPort() > 0) {
-        rpcProgram.unregister(PortmapMapping.TRANSPORT_TCP,
-            tcpServer.getBoundPort());
-      }
-      tcpServer.shutdown();
-      terminate(1, e);
+    protected Nfs3Base(RpcProgram rpcProgram, Configuration conf) {
+        this.rpcProgram = rpcProgram;
+        LOG.info("NFS server port set to: " + rpcProgram.getPort());
     }
-    nfsBoundPort = tcpServer.getBoundPort();
-  }
 
-  public void stop() {
-    if (nfsBoundPort > 0) {
-      rpcProgram.unregister(PortmapMapping.TRANSPORT_TCP, nfsBoundPort);
-      nfsBoundPort = 0;
+    public void start(boolean register) {
+        // Start TCP server
+        startTCPServer();
+        if (register) {
+            ShutdownHookManager.get().addShutdownHook(new NfsShutdownHook(), SHUTDOWN_HOOK_PRIORITY);
+            try {
+                rpcProgram.register(PortmapMapping.TRANSPORT_TCP, nfsBoundPort);
+            } catch (Throwable e) {
+                LOG.error("Failed to register the NFSv3 service.", e);
+                terminate(1, e);
+            }
+        }
     }
-    rpcProgram.stopDaemons();
-  }
-  /**
-   * Priority of the nfsd shutdown hook.
-   */
-  public static final int SHUTDOWN_HOOK_PRIORITY = 10;
 
-  private class NfsShutdownHook implements Runnable {
-    @Override
-    public synchronized void run() {
-      stop();
+    private void startTCPServer() {
+        SimpleTcpServer tcpServer = new SimpleTcpServer(rpcProgram.getPort(), rpcProgram, 0);
+        rpcProgram.startDaemons();
+        try {
+            tcpServer.run();
+        } catch (Throwable e) {
+            LOG.error("Failed to start the TCP server.", e);
+            if (tcpServer.getBoundPort() > 0) {
+                rpcProgram.unregister(PortmapMapping.TRANSPORT_TCP, tcpServer.getBoundPort());
+            }
+            tcpServer.shutdown();
+            terminate(1, e);
+        }
+        nfsBoundPort = tcpServer.getBoundPort();
     }
-  }
+
+    public void stop() {
+        if (nfsBoundPort > 0) {
+            rpcProgram.unregister(PortmapMapping.TRANSPORT_TCP, nfsBoundPort);
+            nfsBoundPort = 0;
+        }
+        rpcProgram.stopDaemons();
+    }
+
+    /**
+     * Priority of the nfsd shutdown hook.
+     */
+    public static final int SHUTDOWN_HOOK_PRIORITY = 10;
+
+    private class NfsShutdownHook implements Runnable {
+
+        @Override
+        public synchronized void run() {
+            stop();
+        }
+    }
 }

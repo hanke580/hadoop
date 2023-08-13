@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs;
 
 import org.apache.hadoop.classification.InterfaceAudience;
-
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -28,31 +27,34 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 @InterfaceAudience.Private
 public class DFSHedgedReadMetrics {
-  public final AtomicLong hedgedReadOps = new AtomicLong();
-  public final AtomicLong hedgedReadOpsWin = new AtomicLong();
-  public final AtomicLong hedgedReadOpsInCurThread = new AtomicLong();
 
-  public void incHedgedReadOps() {
-    hedgedReadOps.incrementAndGet();
-  }
+    public final AtomicLong hedgedReadOps = new AtomicLong();
 
-  public void incHedgedReadOpsInCurThread() {
-    hedgedReadOpsInCurThread.incrementAndGet();
-  }
+    public final AtomicLong hedgedReadOpsWin = new AtomicLong();
 
-  public void incHedgedReadWins() {
-    hedgedReadOpsWin.incrementAndGet();
-  }
+    public final AtomicLong hedgedReadOpsInCurThread = new AtomicLong();
 
-  public long getHedgedReadOps() {
-    return hedgedReadOps.longValue();
-  }
+    public void incHedgedReadOps() {
+        hedgedReadOps.incrementAndGet();
+    }
 
-  public long getHedgedReadOpsInCurThread() {
-    return hedgedReadOpsInCurThread.longValue();
-  }
+    public void incHedgedReadOpsInCurThread() {
+        hedgedReadOpsInCurThread.incrementAndGet();
+    }
 
-  public long getHedgedReadWins() {
-    return hedgedReadOpsWin.longValue();
-  }
+    public void incHedgedReadWins() {
+        hedgedReadOpsWin.incrementAndGet();
+    }
+
+    public long getHedgedReadOps() {
+        return hedgedReadOps.longValue();
+    }
+
+    public long getHedgedReadOpsInCurThread() {
+        return hedgedReadOpsInCurThread.longValue();
+    }
+
+    public long getHedgedReadWins() {
+        return hedgedReadOpsWin.longValue();
+    }
 }

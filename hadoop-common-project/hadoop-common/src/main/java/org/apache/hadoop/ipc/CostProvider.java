@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.ipc;
 
 import org.apache.hadoop.conf.Configuration;
@@ -27,20 +26,20 @@ import org.apache.hadoop.conf.Configuration;
  */
 public interface CostProvider {
 
-  /**
-   * Initialize this provider using the given configuration, examining only
-   * ones which fall within the provided namespace.
-   *
-   * @param namespace The namespace to use when looking up configurations.
-   * @param conf The configuration
-   */
-  void init(String namespace, Configuration conf);
+    /**
+     * Initialize this provider using the given configuration, examining only
+     * ones which fall within the provided namespace.
+     *
+     * @param namespace The namespace to use when looking up configurations.
+     * @param conf The configuration
+     */
+    void init(String namespace, Configuration conf);
 
-  /**
-   * Get cost from {@link ProcessingDetails} which will be used in scheduler.
-   *
-   * @param details Process details
-   * @return The cost of the call
-   */
-  long getCost(ProcessingDetails details);
+    /**
+     * Get cost from {@link ProcessingDetails} which will be used in scheduler.
+     *
+     * @param details Process details
+     * @return The cost of the call
+     */
+    long getCost(ProcessingDetails details);
 }

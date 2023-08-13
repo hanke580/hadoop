@@ -17,17 +17,13 @@
  */
 package org.apache.hadoop.http;
 
-
 import org.junit.Before;
 import org.junit.Test;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -38,58 +34,58 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
 /**
  * Test if the {@link IsActiveServlet} returns the right answer if the
  * underlying service is active.
  */
 public class TestIsActiveServlet {
 
-  private IsActiveServlet servlet;
-  private HttpServletRequest req;
-  private HttpServletResponse resp;
-  private ByteArrayOutputStream respOut;
+    private IsActiveServlet servlet;
 
-  @Before
-  public void setUp() throws Exception {
-    req = mock(HttpServletRequest.class);
-    resp = mock(HttpServletResponse.class);
-    respOut = new ByteArrayOutputStream();
-    PrintWriter writer = new PrintWriter(respOut);
-    when(resp.getWriter()).thenReturn(writer);
-  }
+    private HttpServletRequest req;
 
-  @Test
-  public void testSucceedsOnActive() throws IOException {
-    servlet = new IsActiveServlet() {
-      @Override
-      protected boolean isActive() {
-        return true;
-      }
-    };
+    private HttpServletResponse resp;
 
-    String response = doGet();
-    verify(resp, never()).sendError(anyInt(), anyString());
-    assertEquals(IsActiveServlet.RESPONSE_ACTIVE, response);
-  }
+    private ByteArrayOutputStream respOut;
 
-  @Test
-  public void testFailsOnInactive() throws IOException {
-    servlet = new IsActiveServlet() {
-      @Override
-      protected boolean isActive() {
-        return false;
-      }
-    };
+    @Before
+    public void setUp() throws Exception {
+        req = mock(HttpServletRequest.class);
+        resp = mock(HttpServletResponse.class);
+        respOut = new ByteArrayOutputStream();
+        PrintWriter writer = new PrintWriter(respOut);
+        when(resp.getWriter()).thenReturn(writer);
+    }
 
-    doGet();
-    verify(resp, atLeastOnce()).sendError(
-        eq(HttpServletResponse.SC_METHOD_NOT_ALLOWED),
-        eq(IsActiveServlet.RESPONSE_NOT_ACTIVE));
-  }
+    @Test
+    public void testSucceedsOnActive() throws IOException {
+        servlet = new IsActiveServlet() {
 
-  private String doGet() throws IOException {
-    servlet.doGet(req, resp);
-    return new String(respOut.toByteArray(), "UTF-8");
-  }
+            @Override
+            protected boolean isActive() {
+                return true;
+            }
+        };
+        String response = doGet();
+        verify(resp, never()).sendError(anyInt(), anyString());
+        assertEquals(IsActiveServlet.RESPONSE_ACTIVE, response);
+    }
+
+    @Test
+    public void testFailsOnInactive() throws IOException {
+        servlet = new IsActiveServlet() {
+
+            @Override
+            protected boolean isActive() {
+                return false;
+            }
+        };
+        doGet();
+        verify(resp, atLeastOnce()).sendError(eq(HttpServletResponse.SC_METHOD_NOT_ALLOWED), eq(IsActiveServlet.RESPONSE_NOT_ACTIVE));
+    }
+
+    private String doGet() throws IOException {
+        servlet.doGet(req, resp);
+        return new String(respOut.toByteArray(), "UTF-8");
+    }
 }

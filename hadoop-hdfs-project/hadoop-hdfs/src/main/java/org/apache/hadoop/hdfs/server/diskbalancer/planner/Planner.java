@@ -17,12 +17,12 @@
  */
 package org.apache.hadoop.hdfs.server.diskbalancer.planner;
 
-import org.apache.hadoop.hdfs.server.diskbalancer.datamodel
-    .DiskBalancerDataNode;
+import org.apache.hadoop.hdfs.server.diskbalancer.datamodel.DiskBalancerDataNode;
 
 /**
  * Planner interface allows different planners to be created.
  */
 public interface Planner {
-  NodePlan plan(DiskBalancerDataNode node) throws Exception;
+
+    NodePlan plan(DiskBalancerDataNode node) throws Exception;
 }

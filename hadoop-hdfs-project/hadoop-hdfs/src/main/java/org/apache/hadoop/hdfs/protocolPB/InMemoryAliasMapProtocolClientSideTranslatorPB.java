@@ -35,7 +35,6 @@ import org.apache.hadoop.ipc.RPC;
 import org.apache.hadoop.net.NetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.annotation.Nonnull;
 import java.io.Closeable;
 import java.io.IOException;
@@ -46,7 +45,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_PROVIDED_ALIASMAP_INMEMORY_RPC_ADDRESS;
 import static org.apache.hadoop.hdfs.DFSUtil.addKeySuffixes;
 import static org.apache.hadoop.hdfs.DFSUtil.createUri;
@@ -62,174 +60,126 @@ import static org.apache.hadoop.hdfs.protocol.proto.HdfsProtos.*;
  */
 @InterfaceAudience.Private
 @InterfaceStability.Unstable
-public class InMemoryAliasMapProtocolClientSideTranslatorPB
-    implements InMemoryAliasMapProtocol, Closeable {
+public class InMemoryAliasMapProtocolClientSideTranslatorPB implements InMemoryAliasMapProtocol, Closeable {
 
-  private static final Logger LOG =
-      LoggerFactory
-          .getLogger(InMemoryAliasMapProtocolClientSideTranslatorPB.class);
+    private static final Logger LOG = LoggerFactory.getLogger(InMemoryAliasMapProtocolClientSideTranslatorPB.class);
 
-  private AliasMapProtocolPB rpcProxy;
+    private AliasMapProtocolPB rpcProxy;
 
-  public InMemoryAliasMapProtocolClientSideTranslatorPB(
-      AliasMapProtocolPB rpcProxy) {
-    this.rpcProxy = rpcProxy;
-  }
+    public InMemoryAliasMapProtocolClientSideTranslatorPB(AliasMapProtocolPB rpcProxy) {
+        this.rpcProxy = rpcProxy;
+    }
 
-  public static Collection<InMemoryAliasMapProtocol> init(Configuration conf) {
-    Collection<InMemoryAliasMapProtocol> aliasMaps = new ArrayList<>();
-    // Try to connect to all configured nameservices as it is not known which
-    // nameservice supports the AliasMap.
-    for (String nsId : getNameServiceIds(conf)) {
-      try {
-        URI namenodeURI = null;
-        Configuration newConf = new Configuration(conf);
-        if (HAUtil.isHAEnabled(conf, nsId)) {
-          // set the failover-proxy provider if HA is enabled.
-          newConf.setClass(
-              addKeySuffixes(PROXY_PROVIDER_KEY_PREFIX, nsId),
-              InMemoryAliasMapFailoverProxyProvider.class,
-              AbstractNNFailoverProxyProvider.class);
-          namenodeURI = new URI(HdfsConstants.HDFS_URI_SCHEME + "://" + nsId);
-        } else {
-          String key =
-              addKeySuffixes(DFS_PROVIDED_ALIASMAP_INMEMORY_RPC_ADDRESS, nsId);
-          String addr = conf.get(key);
-          if (addr != null) {
-            namenodeURI = createUri(HdfsConstants.HDFS_URI_SCHEME,
-                NetUtils.createSocketAddr(addr));
-          }
+    public static Collection<InMemoryAliasMapProtocol> init(Configuration conf) {
+        Collection<InMemoryAliasMapProtocol> aliasMaps = new ArrayList<>();
+        // Try to connect to all configured nameservices as it is not known which
+        // nameservice supports the AliasMap.
+        for (String nsId : getNameServiceIds(conf)) {
+            try {
+                URI namenodeURI = null;
+                Configuration newConf = new Configuration(conf);
+                if (HAUtil.isHAEnabled(conf, nsId)) {
+                    // set the failover-proxy provider if HA is enabled.
+                    newConf.setClass(addKeySuffixes(PROXY_PROVIDER_KEY_PREFIX, nsId), InMemoryAliasMapFailoverProxyProvider.class, AbstractNNFailoverProxyProvider.class);
+                    namenodeURI = new URI(HdfsConstants.HDFS_URI_SCHEME + "://" + nsId);
+                } else {
+                    String key = addKeySuffixes(DFS_PROVIDED_ALIASMAP_INMEMORY_RPC_ADDRESS, nsId);
+                    String addr = conf.get(key);
+                    if (addr != null) {
+                        namenodeURI = createUri(HdfsConstants.HDFS_URI_SCHEME, NetUtils.createSocketAddr(addr));
+                    }
+                }
+                if (namenodeURI != null) {
+                    aliasMaps.add(NameNodeProxies.createProxy(newConf, namenodeURI, InMemoryAliasMapProtocol.class).getProxy());
+                    LOG.info("Connected to InMemoryAliasMap at {}", namenodeURI);
+                }
+            } catch (IOException | URISyntaxException e) {
+                LOG.warn("Exception in connecting to InMemoryAliasMap for nameservice " + "{}: {}", nsId, e);
+            }
         }
-        if (namenodeURI != null) {
-          aliasMaps.add(NameNodeProxies
-              .createProxy(newConf, namenodeURI, InMemoryAliasMapProtocol.class)
-              .getProxy());
-          LOG.info("Connected to InMemoryAliasMap at {}", namenodeURI);
+        // if a separate AliasMap is configured using
+        // DFS_PROVIDED_ALIASMAP_INMEMORY_RPC_ADDRESS, try to connect it.
+        if (conf.get(DFS_PROVIDED_ALIASMAP_INMEMORY_RPC_ADDRESS) != null) {
+            URI uri = createUri("hdfs", NetUtils.createSocketAddr(conf.get(DFS_PROVIDED_ALIASMAP_INMEMORY_RPC_ADDRESS)));
+            try {
+                aliasMaps.add(NameNodeProxies.createProxy(conf, uri, InMemoryAliasMapProtocol.class).getProxy());
+                LOG.info("Connected to InMemoryAliasMap at {}", uri);
+            } catch (IOException e) {
+                LOG.warn("Exception in connecting to InMemoryAliasMap at {}: {}", uri, e);
+            }
         }
-      } catch (IOException | URISyntaxException e) {
-        LOG.warn("Exception in connecting to InMemoryAliasMap for nameservice "
-            + "{}: {}", nsId, e);
-      }
+        return aliasMaps;
     }
-    // if a separate AliasMap is configured using
-    // DFS_PROVIDED_ALIASMAP_INMEMORY_RPC_ADDRESS, try to connect it.
-    if (conf.get(DFS_PROVIDED_ALIASMAP_INMEMORY_RPC_ADDRESS) != null) {
-      URI uri = createUri("hdfs", NetUtils.createSocketAddr(
-          conf.get(DFS_PROVIDED_ALIASMAP_INMEMORY_RPC_ADDRESS)));
-      try {
-        aliasMaps.add(NameNodeProxies
-            .createProxy(conf, uri, InMemoryAliasMapProtocol.class).getProxy());
-        LOG.info("Connected to InMemoryAliasMap at {}", uri);
-      } catch (IOException e) {
-        LOG.warn("Exception in connecting to InMemoryAliasMap at {}: {}", uri,
-            e);
-      }
+
+    @Override
+    public InMemoryAliasMap.IterationResult list(Optional<Block> marker) throws IOException {
+        ListRequestProto.Builder builder = ListRequestProto.newBuilder();
+        if (marker.isPresent()) {
+            builder.setMarker(PBHelperClient.convert(marker.get()));
+        }
+        ListRequestProto request = builder.build();
+        try {
+            ListResponseProto response = rpcProxy.list(null, request);
+            List<KeyValueProto> fileRegionsList = response.getFileRegionsList();
+            List<FileRegion> fileRegions = fileRegionsList.stream().map(kv -> new FileRegion(PBHelperClient.convert(kv.getKey()), PBHelperClient.convert(kv.getValue()))).collect(Collectors.toList());
+            BlockProto nextMarker = response.getNextMarker();
+            if (nextMarker.isInitialized()) {
+                return new InMemoryAliasMap.IterationResult(fileRegions, Optional.of(PBHelperClient.convert(nextMarker)));
+            } else {
+                return new InMemoryAliasMap.IterationResult(fileRegions, Optional.empty());
+            }
+        } catch (ServiceException e) {
+            throw ProtobufHelper.getRemoteException(e);
+        }
     }
-    return aliasMaps;
-  }
 
-  @Override
-  public InMemoryAliasMap.IterationResult list(Optional<Block> marker)
-      throws IOException {
-    ListRequestProto.Builder builder = ListRequestProto.newBuilder();
-    if (marker.isPresent()) {
-      builder.setMarker(PBHelperClient.convert(marker.get()));
+    @Nonnull
+    @Override
+    public Optional<ProvidedStorageLocation> read(@Nonnull Block block) throws IOException {
+        if (block == null) {
+            throw new IOException("Block cannot be null");
+        }
+        ReadRequestProto request = ReadRequestProto.newBuilder().setKey(PBHelperClient.convert(block)).build();
+        try {
+            ReadResponseProto response = rpcProxy.read(null, request);
+            ProvidedStorageLocationProto providedStorageLocation = response.getValue();
+            if (providedStorageLocation.isInitialized()) {
+                return Optional.of(PBHelperClient.convert(providedStorageLocation));
+            }
+            return Optional.empty();
+        } catch (ServiceException e) {
+            throw ProtobufHelper.getRemoteException(e);
+        }
     }
-    ListRequestProto request = builder.build();
-    try {
-      ListResponseProto response = rpcProxy.list(null, request);
-      List<KeyValueProto> fileRegionsList = response.getFileRegionsList();
 
-      List<FileRegion> fileRegions = fileRegionsList
-          .stream()
-          .map(kv -> new FileRegion(
-              PBHelperClient.convert(kv.getKey()),
-              PBHelperClient.convert(kv.getValue())
-          ))
-          .collect(Collectors.toList());
-      BlockProto nextMarker = response.getNextMarker();
-
-      if (nextMarker.isInitialized()) {
-        return new InMemoryAliasMap.IterationResult(fileRegions,
-            Optional.of(PBHelperClient.convert(nextMarker)));
-      } else {
-        return new InMemoryAliasMap.IterationResult(fileRegions,
-            Optional.empty());
-      }
-
-    } catch (ServiceException e) {
-      throw ProtobufHelper.getRemoteException(e);
+    @Override
+    public void write(@Nonnull Block block, @Nonnull ProvidedStorageLocation providedStorageLocation) throws IOException {
+        if (block == null || providedStorageLocation == null) {
+            throw new IOException("Provided block and location cannot be null");
+        }
+        WriteRequestProto request = WriteRequestProto.newBuilder().setKeyValuePair(KeyValueProto.newBuilder().setKey(PBHelperClient.convert(block)).setValue(PBHelperClient.convert(providedStorageLocation)).build()).build();
+        try {
+            rpcProxy.write(null, request);
+        } catch (ServiceException e) {
+            throw ProtobufHelper.getRemoteException(e);
+        }
     }
-  }
 
-  @Nonnull
-  @Override
-  public Optional<ProvidedStorageLocation> read(@Nonnull Block block)
-      throws IOException {
-
-    if (block == null) {
-      throw new IOException("Block cannot be null");
+    @Override
+    public String getBlockPoolId() throws IOException {
+        try {
+            BlockPoolResponseProto response = rpcProxy.getBlockPoolId(null, BlockPoolRequestProto.newBuilder().build());
+            return response.getBlockPoolId();
+        } catch (ServiceException e) {
+            throw ProtobufHelper.getRemoteException(e);
+        }
     }
-    ReadRequestProto request =
-        ReadRequestProto
-            .newBuilder()
-            .setKey(PBHelperClient.convert(block))
-            .build();
-    try {
-      ReadResponseProto response = rpcProxy.read(null, request);
 
-      ProvidedStorageLocationProto providedStorageLocation =
-          response.getValue();
-      if (providedStorageLocation.isInitialized()) {
-        return Optional.of(PBHelperClient.convert(providedStorageLocation));
-      }
-      return Optional.empty();
-
-    } catch (ServiceException e) {
-      throw ProtobufHelper.getRemoteException(e);
+    @Override
+    public void close() throws IOException {
+        LOG.info("Stopping rpcProxy in" + "InMemoryAliasMapProtocolClientSideTranslatorPB");
+        if (rpcProxy != null) {
+            RPC.stopProxy(rpcProxy);
+        }
     }
-  }
-
-  @Override
-  public void write(@Nonnull Block block,
-      @Nonnull ProvidedStorageLocation providedStorageLocation)
-      throws IOException {
-    if (block == null || providedStorageLocation == null) {
-      throw new IOException("Provided block and location cannot be null");
-    }
-    WriteRequestProto request =
-        WriteRequestProto
-            .newBuilder()
-            .setKeyValuePair(KeyValueProto.newBuilder()
-                .setKey(PBHelperClient.convert(block))
-                .setValue(PBHelperClient.convert(providedStorageLocation))
-                .build())
-            .build();
-
-    try {
-      rpcProxy.write(null, request);
-    } catch (ServiceException e) {
-      throw ProtobufHelper.getRemoteException(e);
-    }
-  }
-
-  @Override
-  public String getBlockPoolId() throws IOException {
-    try {
-      BlockPoolResponseProto response = rpcProxy.getBlockPoolId(null,
-          BlockPoolRequestProto.newBuilder().build());
-      return response.getBlockPoolId();
-    } catch (ServiceException e) {
-      throw ProtobufHelper.getRemoteException(e);
-    }
-  }
-
-  @Override
-  public void close() throws IOException {
-    LOG.info("Stopping rpcProxy in" +
-        "InMemoryAliasMapProtocolClientSideTranslatorPB");
-    if (rpcProxy != null) {
-      RPC.stopProxy(rpcProxy);
-    }
-  }
 }

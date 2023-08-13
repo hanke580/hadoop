@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.ipc;
 
 import org.apache.hadoop.security.UserGroupInformation;
@@ -25,12 +24,12 @@ import org.apache.hadoop.security.UserGroupInformation;
  * identity. All jobs launched by a user will be grouped together.
  */
 public class UserIdentityProvider implements IdentityProvider {
-  public String makeIdentity(Schedulable obj) {
-    UserGroupInformation ugi = obj.getUserGroupInformation();
-    if (ugi == null) {
-      return null;
-    }
 
-    return ugi.getUserName();
-  }
+    public String makeIdentity(Schedulable obj) {
+        UserGroupInformation ugi = obj.getUserGroupInformation();
+        if (ugi == null) {
+            return null;
+        }
+        return ugi.getUserName();
+    }
 }

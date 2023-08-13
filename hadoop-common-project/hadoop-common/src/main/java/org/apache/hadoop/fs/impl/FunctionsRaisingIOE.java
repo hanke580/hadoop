@@ -15,11 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.fs.impl;
 
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
@@ -30,40 +28,39 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceStability.Unstable
 public final class FunctionsRaisingIOE {
 
-  private FunctionsRaisingIOE() {
-  }
+    private FunctionsRaisingIOE() {
+    }
 
-  /**
-   * Function of arity 1 which may raise an IOException.
-   * @param <T> type of arg1
-   * @param <R> type of return value.
-   */
-  @FunctionalInterface
-  public interface FunctionRaisingIOE<T, R> {
+    /**
+     * Function of arity 1 which may raise an IOException.
+     * @param <T> type of arg1
+     * @param <R> type of return value.
+     */
+    @FunctionalInterface
+    public interface FunctionRaisingIOE<T, R> {
 
-    R apply(T t) throws IOException;
-  }
+        R apply(T t) throws IOException;
+    }
 
-  /**
-   * Function of arity 2 which may raise an IOException.
-   * @param <T> type of arg1
-   * @param <U> type of arg2
-   * @param <R> type of return value.
-   */
-  @FunctionalInterface
-  public interface BiFunctionRaisingIOE<T, U, R> {
+    /**
+     * Function of arity 2 which may raise an IOException.
+     * @param <T> type of arg1
+     * @param <U> type of arg2
+     * @param <R> type of return value.
+     */
+    @FunctionalInterface
+    public interface BiFunctionRaisingIOE<T, U, R> {
 
-    R apply(T t, U u) throws IOException;
-  }
+        R apply(T t, U u) throws IOException;
+    }
 
-  /**
-   * This is a callable which only raises an IOException.
-   * @param <R> return type
-   */
-  @FunctionalInterface
-  public interface CallableRaisingIOE<R> {
+    /**
+     * This is a callable which only raises an IOException.
+     * @param <R> return type
+     */
+    @FunctionalInterface
+    public interface CallableRaisingIOE<R> {
 
-    R apply() throws IOException;
-  }
-
+        R apply() throws IOException;
+    }
 }

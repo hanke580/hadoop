@@ -19,88 +19,88 @@ package org.apache.hadoop.fs.sftp;
 
 import java.io.IOException;
 import java.io.InputStream;
-
 import org.apache.hadoop.fs.FSInputStream;
 import org.apache.hadoop.fs.FileSystem;
 
-/** SFTP FileSystem input stream. */
+/**
+ * SFTP FileSystem input stream.
+ */
 class SFTPInputStream extends FSInputStream {
 
-  public static final String E_SEEK_NOTSUPPORTED = "Seek not supported";
-  public static final String E_NULL_INPUTSTREAM = "Null InputStream";
-  public static final String E_STREAM_CLOSED = "Stream closed";
+    public static final String E_SEEK_NOTSUPPORTED = "Seek not supported";
 
-  private InputStream wrappedStream;
-  private FileSystem.Statistics stats;
-  private boolean closed;
-  private long pos;
+    public static final String E_NULL_INPUTSTREAM = "Null InputStream";
 
-  SFTPInputStream(InputStream stream,  FileSystem.Statistics stats) {
+    public static final String E_STREAM_CLOSED = "Stream closed";
 
-    if (stream == null) {
-      throw new IllegalArgumentException(E_NULL_INPUTSTREAM);
-    }
-    this.wrappedStream = stream;
-    this.stats = stats;
+    private InputStream wrappedStream;
 
-    this.pos = 0;
-    this.closed = false;
-  }
+    private FileSystem.Statistics stats;
 
-  @Override
-  public void seek(long position) throws IOException {
-    throw new IOException(E_SEEK_NOTSUPPORTED);
-  }
+    private boolean closed;
 
-  @Override
-  public boolean seekToNewSource(long targetPos) throws IOException {
-    throw new IOException(E_SEEK_NOTSUPPORTED);
-  }
+    private long pos;
 
-  @Override
-  public long getPos() throws IOException {
-    return pos;
-  }
-
-  @Override
-  public synchronized int read() throws IOException {
-    if (closed) {
-      throw new IOException(E_STREAM_CLOSED);
+    SFTPInputStream(InputStream stream, FileSystem.Statistics stats) {
+        if (stream == null) {
+            throw new IllegalArgumentException(E_NULL_INPUTSTREAM);
+        }
+        this.wrappedStream = stream;
+        this.stats = stats;
+        this.pos = 0;
+        this.closed = false;
     }
 
-    int byteRead = wrappedStream.read();
-    if (byteRead >= 0) {
-      pos++;
-    }
-    if (stats != null & byteRead >= 0) {
-      stats.incrementBytesRead(1);
-    }
-    return byteRead;
-  }
-
-  public synchronized int read(byte[] buf, int off, int len)
-      throws IOException {
-    if (closed) {
-      throw new IOException(E_STREAM_CLOSED);
+    @Override
+    public void seek(long position) throws IOException {
+        throw new IOException(E_SEEK_NOTSUPPORTED);
     }
 
-    int result = wrappedStream.read(buf, off, len);
-    if (result > 0) {
-      pos += result;
-    }
-    if (stats != null & result > 0) {
-      stats.incrementBytesRead(result);
+    @Override
+    public boolean seekToNewSource(long targetPos) throws IOException {
+        throw new IOException(E_SEEK_NOTSUPPORTED);
     }
 
-    return result;
-  }
-
-  public synchronized void close() throws IOException {
-    if (closed) {
-      return;
+    @Override
+    public long getPos() throws IOException {
+        return pos;
     }
-    super.close();
-    wrappedStream.close();
-    closed = true;
-  }
+
+    @Override
+    public synchronized int read() throws IOException {
+        if (closed) {
+            throw new IOException(E_STREAM_CLOSED);
+        }
+        int byteRead = wrappedStream.read();
+        if (byteRead >= 0) {
+            pos++;
+        }
+        if (stats != null & byteRead >= 0) {
+            stats.incrementBytesRead(1);
+        }
+        return byteRead;
+    }
+
+    public synchronized int read(byte[] buf, int off, int len) throws IOException {
+        if (closed) {
+            throw new IOException(E_STREAM_CLOSED);
+        }
+        int result = wrappedStream.read(buf, off, len);
+        if (result > 0) {
+            pos += result;
+        }
+        if (stats != null & result > 0) {
+            stats.incrementBytesRead(result);
+        }
+        return result;
+    }
+
+    public synchronized void close() throws IOException {
+        if (closed) {
+            return;
+        }
+        super.close();
+        wrappedStream.close();
+        closed = true;
+    }
 }

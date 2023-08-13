@@ -15,13 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.ipc;
 
 import org.junit.Test;
-
 import java.util.concurrent.TimeUnit;
-
 import static org.apache.hadoop.ipc.ProcessingDetails.Timing;
 import static org.junit.Assert.assertEquals;
 
@@ -30,32 +27,27 @@ import static org.junit.Assert.assertEquals;
  */
 public class TestProcessingDetails {
 
-  /**
-   * Test that the conversion of time values in various units in and out of the
-   * details are done properly.
-   */
-  @Test
-  public void testTimeConversion() {
-    ProcessingDetails details = new ProcessingDetails(TimeUnit.MICROSECONDS);
+    /**
+     * Test that the conversion of time values in various units in and out of the
+     * details are done properly.
+     */
+    @Test
+    public void testTimeConversion() {
+        ProcessingDetails details = new ProcessingDetails(TimeUnit.MICROSECONDS);
+        details.set(Timing.ENQUEUE, 10);
+        assertEquals(10, details.get(Timing.ENQUEUE));
+        assertEquals(10_000, details.get(Timing.ENQUEUE, TimeUnit.NANOSECONDS));
+        details.set(Timing.QUEUE, 20, TimeUnit.MILLISECONDS);
+        details.add(Timing.QUEUE, 20, TimeUnit.MICROSECONDS);
+        assertEquals(20_020, details.get(Timing.QUEUE));
+        assertEquals(0, details.get(Timing.QUEUE, TimeUnit.SECONDS));
+    }
 
-    details.set(Timing.ENQUEUE, 10);
-    assertEquals(10, details.get(Timing.ENQUEUE));
-    assertEquals(10_000, details.get(Timing.ENQUEUE, TimeUnit.NANOSECONDS));
-
-    details.set(Timing.QUEUE, 20, TimeUnit.MILLISECONDS);
-    details.add(Timing.QUEUE, 20, TimeUnit.MICROSECONDS);
-    assertEquals(20_020, details.get(Timing.QUEUE));
-    assertEquals(0, details.get(Timing.QUEUE, TimeUnit.SECONDS));
-  }
-
-  @Test
-  public void testToString() {
-    ProcessingDetails details = new ProcessingDetails(TimeUnit.MICROSECONDS);
-    details.set(Timing.ENQUEUE, 10);
-    details.set(Timing.QUEUE, 20, TimeUnit.MILLISECONDS);
-
-    assertEquals("enqueueTime=10 queueTime=20000 handlerTime=0 " +
-        "processingTime=0 lockfreeTime=0 lockwaitTime=0 locksharedTime=0 " +
-        "lockexclusiveTime=0 responseTime=0", details.toString());
-  }
+    @Test
+    public void testToString() {
+        ProcessingDetails details = new ProcessingDetails(TimeUnit.MICROSECONDS);
+        details.set(Timing.ENQUEUE, 10);
+        details.set(Timing.QUEUE, 20, TimeUnit.MILLISECONDS);
+        assertEquals("enqueueTime=10 queueTime=20000 handlerTime=0 " + "processingTime=0 lockfreeTime=0 lockwaitTime=0 locksharedTime=0 " + "lockexclusiveTime=0 responseTime=0", details.toString());
+    }
 }

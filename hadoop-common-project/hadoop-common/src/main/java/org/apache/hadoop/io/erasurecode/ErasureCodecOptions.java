@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.io.erasurecode;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -25,13 +24,14 @@ import org.apache.hadoop.classification.InterfaceAudience;
  */
 @InterfaceAudience.Private
 public class ErasureCodecOptions {
-  private ECSchema schema;
 
-  public ErasureCodecOptions(ECSchema schema) {
-    this.schema = schema;
-  }
+    private ECSchema schema;
 
-  public ECSchema getSchema() {
-    return schema;
-  }
+    public ErasureCodecOptions(ECSchema schema) {
+        this.schema = schema;
+    }
+
+    public ECSchema getSchema() {
+        return schema;
+    }
 }

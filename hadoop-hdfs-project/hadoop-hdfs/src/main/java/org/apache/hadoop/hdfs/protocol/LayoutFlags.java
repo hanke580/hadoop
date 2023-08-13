@@ -20,9 +20,7 @@ package org.apache.hadoop.hdfs.protocol;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience;
-
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
@@ -31,34 +29,32 @@ import com.google.common.collect.Sets;
 /**
  * LayoutFlags represent features which the FSImage and edit logs can either
  * support or not, independently of layout version.
- * 
+ *
  * Note: all flags starting with 'test' are reserved for unit test purposes.
  */
 @InterfaceAudience.Private
 public class LayoutFlags {
-  /**
-   * Load a LayoutFlags object from a stream.
-   *
-   * @param in            The stream to read from.
-   * @throws IOException
-   */
-  public static LayoutFlags read(DataInputStream in)
-      throws IOException {
-    int length = in.readInt();
-    if (length < 0) {
-      throw new IOException("The length of the feature flag section " +
-          "was negative at " + length + " bytes.");
-    } else if (length > 0) {
-      throw new IOException("Found feature flags which we can't handle. " +
-          "Please upgrade your software.");
+
+    /**
+     * Load a LayoutFlags object from a stream.
+     *
+     * @param in            The stream to read from.
+     * @throws IOException
+     */
+    public static LayoutFlags read(DataInputStream in) throws IOException {
+        int length = in.readInt();
+        if (length < 0) {
+            throw new IOException("The length of the feature flag section " + "was negative at " + length + " bytes.");
+        } else if (length > 0) {
+            throw new IOException("Found feature flags which we can't handle. " + "Please upgrade your software.");
+        }
+        return new LayoutFlags();
     }
-    return new LayoutFlags();
-  }
 
-  private LayoutFlags() {
-  }
+    private LayoutFlags() {
+    }
 
-  public static void write(DataOutputStream out) throws IOException {
-    out.writeInt(0);
-  }
+    public static void write(DataOutputStream out) throws IOException {
+        out.writeInt(0);
+    }
 }

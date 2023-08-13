@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.protocol;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -29,94 +28,86 @@ import org.apache.hadoop.util.StringUtils;
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
 public class DatanodeVolumeInfo {
-  private long usedSpace;
-  private long freeSpace;
-  private long reservedSpace;
-  private long reservedSpaceForReplicas;
-  private long numBlocks;
-  private StorageType storageType;
-  private String path;
 
-  public DatanodeVolumeInfo(String path, long usedSpace, long freeSpace,
-      long reservedSpace, long reservedSpaceForReplicas, long numBlocks,
-      StorageType type) {
-    this.usedSpace = usedSpace;
-    this.freeSpace = freeSpace;
-    this.reservedSpace = reservedSpace;
-    this.reservedSpaceForReplicas = reservedSpaceForReplicas;
-    this.numBlocks = numBlocks;
-    this.storageType = type;
-    this.path = path;
-  }
+    private long usedSpace;
 
-  /** get used space. */
-  public long getUsedSpace() {
-    return usedSpace;
-  }
+    private long freeSpace;
 
-  /**
-   * get free space.
-   */
-  public long getFreeSpace() {
-    return freeSpace;
-  }
+    private long reservedSpace;
 
-  /**
-   * get reserved space.
-   */
-  public long getReservedSpace() {
-    return reservedSpace;
-  }
+    private long reservedSpaceForReplicas;
 
-  /**
-   * get reserved space for replicas.
-   */
-  public long getReservedSpaceForReplicas() {
-    return reservedSpaceForReplicas;
-  }
+    private long numBlocks;
 
-  /**
-   * get number of blocks.
-   */
-  public long getNumBlocks() {
-    return numBlocks;
-  }
+    private StorageType storageType;
 
-  /**
-   * get storage type.
-   */
-  public StorageType getStorageType() {
-    return storageType;
-  }
+    private String path;
 
-  /**
-   * get volume path.
-   */
-  public String getPath() {
-    return path;
-  }
+    public DatanodeVolumeInfo(String path, long usedSpace, long freeSpace, long reservedSpace, long reservedSpaceForReplicas, long numBlocks, StorageType type) {
+        this.usedSpace = usedSpace;
+        this.freeSpace = freeSpace;
+        this.reservedSpace = reservedSpace;
+        this.reservedSpaceForReplicas = reservedSpaceForReplicas;
+        this.numBlocks = numBlocks;
+        this.storageType = type;
+        this.path = path;
+    }
 
-  /**
-   * get volume report.
-   */
-  public String getDatanodeVolumeReport() {
-    StringBuilder report = new StringBuilder();
-    report
-        .append("Directory: " + path)
-        .append("\nStorageType: " + storageType)
-        .append(
-            "\nCapacity Used: " + usedSpace + "("
-                + StringUtils.byteDesc(usedSpace) + ")")
-        .append(
-            "\nCapacity Left: " + freeSpace + "("
-                + StringUtils.byteDesc(freeSpace) + ")")
-        .append(
-            "\nCapacity Reserved: " + reservedSpace + "("
-                + StringUtils.byteDesc(reservedSpace) + ")")
-        .append(
-            "\nReserved Space for Replicas: " + reservedSpaceForReplicas + "("
-                + StringUtils.byteDesc(reservedSpaceForReplicas) + ")")
-        .append("\nBlocks: " + numBlocks);
-    return report.toString();
-  }
+    /**
+     * get used space.
+     */
+    public long getUsedSpace() {
+        return usedSpace;
+    }
+
+    /**
+     * get free space.
+     */
+    public long getFreeSpace() {
+        return freeSpace;
+    }
+
+    /**
+     * get reserved space.
+     */
+    public long getReservedSpace() {
+        return reservedSpace;
+    }
+
+    /**
+     * get reserved space for replicas.
+     */
+    public long getReservedSpaceForReplicas() {
+        return reservedSpaceForReplicas;
+    }
+
+    /**
+     * get number of blocks.
+     */
+    public long getNumBlocks() {
+        return numBlocks;
+    }
+
+    /**
+     * get storage type.
+     */
+    public StorageType getStorageType() {
+        return storageType;
+    }
+
+    /**
+     * get volume path.
+     */
+    public String getPath() {
+        return path;
+    }
+
+    /**
+     * get volume report.
+     */
+    public String getDatanodeVolumeReport() {
+        StringBuilder report = new StringBuilder();
+        report.append("Directory: " + path).append("\nStorageType: " + storageType).append("\nCapacity Used: " + usedSpace + "(" + StringUtils.byteDesc(usedSpace) + ")").append("\nCapacity Left: " + freeSpace + "(" + StringUtils.byteDesc(freeSpace) + ")").append("\nCapacity Reserved: " + reservedSpace + "(" + StringUtils.byteDesc(reservedSpace) + ")").append("\nReserved Space for Replicas: " + reservedSpaceForReplicas + "(" + StringUtils.byteDesc(reservedSpaceForReplicas) + ")").append("\nBlocks: " + numBlocks);
+        return report.toString();
+    }
 }

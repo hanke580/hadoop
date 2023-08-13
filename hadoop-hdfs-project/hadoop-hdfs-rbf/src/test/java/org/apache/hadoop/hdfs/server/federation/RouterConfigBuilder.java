@@ -27,162 +27,160 @@ import org.apache.hadoop.hdfs.server.federation.store.driver.StateStoreDriver;
  */
 public class RouterConfigBuilder {
 
-  private Configuration conf;
+    private Configuration conf;
 
-  private boolean enableRpcServer = false;
-  private boolean enableAdminServer = false;
-  private boolean enableHttpServer = false;
-  private boolean enableHeartbeat = false;
-  private boolean enableLocalHeartbeat = false;
-  private boolean enableStateStore = false;
-  private boolean enableMetrics = false;
-  private boolean enableQuota = false;
-  private boolean enableSafemode = false;
-  private boolean enableCacheRefresh;
+    private boolean enableRpcServer = false;
 
-  public RouterConfigBuilder(Configuration configuration) {
-    this.conf = configuration;
-  }
+    private boolean enableAdminServer = false;
 
-  public RouterConfigBuilder() {
-    this.conf = new Configuration(false);
-  }
+    private boolean enableHttpServer = false;
 
-  public RouterConfigBuilder all() {
-    this.enableRpcServer = true;
-    this.enableAdminServer = true;
-    this.enableHttpServer = true;
-    this.enableHeartbeat = true;
-    this.enableLocalHeartbeat = true;
-    this.enableStateStore = true;
-    this.enableMetrics = true;
-    this.enableSafemode = true;
-    return this;
-  }
+    private boolean enableHeartbeat = false;
 
-  public RouterConfigBuilder enableLocalHeartbeat(boolean enable) {
-    this.enableLocalHeartbeat = enable;
-    return this;
-  }
+    private boolean enableLocalHeartbeat = false;
 
-  public RouterConfigBuilder rpc(boolean enable) {
-    this.enableRpcServer = enable;
-    return this;
-  }
+    private boolean enableStateStore = false;
 
-  public RouterConfigBuilder admin(boolean enable) {
-    this.enableAdminServer = enable;
-    return this;
-  }
+    private boolean enableMetrics = false;
 
-  public RouterConfigBuilder http(boolean enable) {
-    this.enableHttpServer = enable;
-    return this;
-  }
+    private boolean enableQuota = false;
 
-  public RouterConfigBuilder heartbeat(boolean enable) {
-    this.enableHeartbeat = enable;
-    return this;
-  }
+    private boolean enableSafemode = false;
 
-  public RouterConfigBuilder stateStore(boolean enable) {
-    this.enableStateStore = enable;
-    return this;
-  }
+    private boolean enableCacheRefresh;
 
-  public RouterConfigBuilder metrics(boolean enable) {
-    this.enableMetrics = enable;
-    return this;
-  }
-
-  public RouterConfigBuilder quota(boolean enable) {
-    this.enableQuota = enable;
-    return this;
-  }
-
-  public RouterConfigBuilder safemode(boolean enable) {
-    this.enableSafemode = enable;
-    return this;
-  }
-
-  public RouterConfigBuilder refreshCache(boolean enable) {
-    this.enableCacheRefresh = enable;
-    return this;
-  }
-
-  public RouterConfigBuilder rpc() {
-    return this.rpc(true);
-  }
-
-  public RouterConfigBuilder admin() {
-    return this.admin(true);
-  }
-
-  public RouterConfigBuilder http() {
-    return this.http(true);
-  }
-
-  public RouterConfigBuilder heartbeat() {
-    return this.heartbeat(true);
-  }
-
-  public RouterConfigBuilder stateStore() {
-    // reset the State Store driver implementation class for testing
-    conf.setClass(RBFConfigKeys.FEDERATION_STORE_DRIVER_CLASS,
-        FederationStateStoreTestUtils.getTestDriverClass(),
-        StateStoreDriver.class);
-    return this.stateStore(true);
-  }
-
-  public RouterConfigBuilder metrics() {
-    return this.metrics(true);
-  }
-
-  public RouterConfigBuilder quota() {
-    return this.quota(true);
-  }
-
-  public RouterConfigBuilder safemode() {
-    return this.safemode(true);
-  }
-
-  public RouterConfigBuilder refreshCache() {
-    return this.refreshCache(true);
-  }
-
-  public Configuration build() {
-    conf.setBoolean(RBFConfigKeys.DFS_ROUTER_STORE_ENABLE,
-        this.enableStateStore);
-    conf.setBoolean(RBFConfigKeys.DFS_ROUTER_RPC_ENABLE, this.enableRpcServer);
-    if (this.enableRpcServer) {
-      conf.set(RBFConfigKeys.DFS_ROUTER_RPC_ADDRESS_KEY, "127.0.0.1:0");
-      conf.set(RBFConfigKeys.DFS_ROUTER_RPC_BIND_HOST_KEY, "0.0.0.0");
+    public RouterConfigBuilder(Configuration configuration) {
+        this.conf = configuration;
     }
-    conf.setBoolean(RBFConfigKeys.DFS_ROUTER_ADMIN_ENABLE,
-        this.enableAdminServer);
-    if (this.enableAdminServer) {
-      conf.set(RBFConfigKeys.DFS_ROUTER_ADMIN_ADDRESS_KEY, "127.0.0.1:0");
-      conf.set(RBFConfigKeys.DFS_ROUTER_ADMIN_BIND_HOST_KEY, "0.0.0.0");
+
+    public RouterConfigBuilder() {
+        this.conf = new Configuration(false);
     }
-    conf.setBoolean(RBFConfigKeys.DFS_ROUTER_HTTP_ENABLE,
-        this.enableHttpServer);
-    if (this.enableHttpServer) {
-      conf.set(RBFConfigKeys.DFS_ROUTER_HTTP_ADDRESS_KEY, "127.0.0.1:0");
-      conf.set(RBFConfigKeys.DFS_ROUTER_HTTPS_ADDRESS_KEY, "127.0.0.1:0");
-      conf.set(RBFConfigKeys.DFS_ROUTER_HTTP_BIND_HOST_KEY, "0.0.0.0");
+
+    public RouterConfigBuilder all() {
+        this.enableRpcServer = true;
+        this.enableAdminServer = true;
+        this.enableHttpServer = true;
+        this.enableHeartbeat = true;
+        this.enableLocalHeartbeat = true;
+        this.enableStateStore = true;
+        this.enableMetrics = true;
+        this.enableSafemode = true;
+        return this;
     }
-    conf.setBoolean(RBFConfigKeys.DFS_ROUTER_HEARTBEAT_ENABLE,
-        this.enableHeartbeat);
-    conf.setBoolean(RBFConfigKeys.DFS_ROUTER_MONITOR_LOCAL_NAMENODE,
-        this.enableLocalHeartbeat);
-    conf.setBoolean(RBFConfigKeys.DFS_ROUTER_METRICS_ENABLE,
-        this.enableMetrics);
-    conf.setBoolean(RBFConfigKeys.DFS_ROUTER_QUOTA_ENABLE,
-        this.enableQuota);
-    conf.setBoolean(RBFConfigKeys.DFS_ROUTER_SAFEMODE_ENABLE,
-        this.enableSafemode);
-    conf.setBoolean(RBFConfigKeys.MOUNT_TABLE_CACHE_UPDATE,
-        this.enableCacheRefresh);
-    return conf;
-  }
+
+    public RouterConfigBuilder enableLocalHeartbeat(boolean enable) {
+        this.enableLocalHeartbeat = enable;
+        return this;
+    }
+
+    public RouterConfigBuilder rpc(boolean enable) {
+        this.enableRpcServer = enable;
+        return this;
+    }
+
+    public RouterConfigBuilder admin(boolean enable) {
+        this.enableAdminServer = enable;
+        return this;
+    }
+
+    public RouterConfigBuilder http(boolean enable) {
+        this.enableHttpServer = enable;
+        return this;
+    }
+
+    public RouterConfigBuilder heartbeat(boolean enable) {
+        this.enableHeartbeat = enable;
+        return this;
+    }
+
+    public RouterConfigBuilder stateStore(boolean enable) {
+        this.enableStateStore = enable;
+        return this;
+    }
+
+    public RouterConfigBuilder metrics(boolean enable) {
+        this.enableMetrics = enable;
+        return this;
+    }
+
+    public RouterConfigBuilder quota(boolean enable) {
+        this.enableQuota = enable;
+        return this;
+    }
+
+    public RouterConfigBuilder safemode(boolean enable) {
+        this.enableSafemode = enable;
+        return this;
+    }
+
+    public RouterConfigBuilder refreshCache(boolean enable) {
+        this.enableCacheRefresh = enable;
+        return this;
+    }
+
+    public RouterConfigBuilder rpc() {
+        return this.rpc(true);
+    }
+
+    public RouterConfigBuilder admin() {
+        return this.admin(true);
+    }
+
+    public RouterConfigBuilder http() {
+        return this.http(true);
+    }
+
+    public RouterConfigBuilder heartbeat() {
+        return this.heartbeat(true);
+    }
+
+    public RouterConfigBuilder stateStore() {
+        // reset the State Store driver implementation class for testing
+        conf.setClass(RBFConfigKeys.FEDERATION_STORE_DRIVER_CLASS, FederationStateStoreTestUtils.getTestDriverClass(), StateStoreDriver.class);
+        return this.stateStore(true);
+    }
+
+    public RouterConfigBuilder metrics() {
+        return this.metrics(true);
+    }
+
+    public RouterConfigBuilder quota() {
+        return this.quota(true);
+    }
+
+    public RouterConfigBuilder safemode() {
+        return this.safemode(true);
+    }
+
+    public RouterConfigBuilder refreshCache() {
+        return this.refreshCache(true);
+    }
+
+    public Configuration build() {
+        conf.setBoolean(RBFConfigKeys.DFS_ROUTER_STORE_ENABLE, this.enableStateStore);
+        conf.setBoolean(RBFConfigKeys.DFS_ROUTER_RPC_ENABLE, this.enableRpcServer);
+        if (this.enableRpcServer) {
+            conf.set(RBFConfigKeys.DFS_ROUTER_RPC_ADDRESS_KEY, "127.0.0.1:0");
+            conf.set(RBFConfigKeys.DFS_ROUTER_RPC_BIND_HOST_KEY, "0.0.0.0");
+        }
+        conf.setBoolean(RBFConfigKeys.DFS_ROUTER_ADMIN_ENABLE, this.enableAdminServer);
+        if (this.enableAdminServer) {
+            conf.set(RBFConfigKeys.DFS_ROUTER_ADMIN_ADDRESS_KEY, "127.0.0.1:0");
+            conf.set(RBFConfigKeys.DFS_ROUTER_ADMIN_BIND_HOST_KEY, "0.0.0.0");
+        }
+        conf.setBoolean(RBFConfigKeys.DFS_ROUTER_HTTP_ENABLE, this.enableHttpServer);
+        if (this.enableHttpServer) {
+            conf.set(RBFConfigKeys.DFS_ROUTER_HTTP_ADDRESS_KEY, "127.0.0.1:0");
+            conf.set(RBFConfigKeys.DFS_ROUTER_HTTPS_ADDRESS_KEY, "127.0.0.1:0");
+            conf.set(RBFConfigKeys.DFS_ROUTER_HTTP_BIND_HOST_KEY, "0.0.0.0");
+        }
+        conf.setBoolean(RBFConfigKeys.DFS_ROUTER_HEARTBEAT_ENABLE, this.enableHeartbeat);
+        conf.setBoolean(RBFConfigKeys.DFS_ROUTER_MONITOR_LOCAL_NAMENODE, this.enableLocalHeartbeat);
+        conf.setBoolean(RBFConfigKeys.DFS_ROUTER_METRICS_ENABLE, this.enableMetrics);
+        conf.setBoolean(RBFConfigKeys.DFS_ROUTER_QUOTA_ENABLE, this.enableQuota);
+        conf.setBoolean(RBFConfigKeys.DFS_ROUTER_SAFEMODE_ENABLE, this.enableSafemode);
+        conf.setBoolean(RBFConfigKeys.MOUNT_TABLE_CACHE_UPDATE, this.enableCacheRefresh);
+        return conf;
+    }
 }

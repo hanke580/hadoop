@@ -15,12 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.fs;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
@@ -31,10 +29,9 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceStability.Evolving
 public interface HasFileDescriptor {
 
-  /**
-   * @return the FileDescriptor
-   * @throws IOException
-   */
-  public FileDescriptor getFileDescriptor() throws IOException;
-
+    /**
+     * @return the FileDescriptor
+     * @throws IOException
+     */
+    public FileDescriptor getFileDescriptor() throws IOException;
 }

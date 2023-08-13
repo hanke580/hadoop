@@ -15,70 +15,56 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.fs;
 
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.test.GenericTestUtils;
-
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class TestAvroFSInput {
 
-  private static final String INPUT_DIR = "AvroFSInput";
+    private static final String INPUT_DIR = "AvroFSInput";
 
-  private Path getInputPath() {
-    return new Path(GenericTestUtils.getTempPath(INPUT_DIR));
-  }
-
-  @Test
-  public void testAFSInput() throws Exception {
-    Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.getLocal(conf);
-
-    Path dir = getInputPath();
-
-    if (!fs.exists(dir)) {
-      fs.mkdirs(dir);
+    private Path getInputPath() {
+        return new Path(GenericTestUtils.getTempPath(INPUT_DIR));
     }
 
-    Path filePath = new Path(dir, "foo");
-    if (fs.exists(filePath)) {
-      fs.delete(filePath, false);
+    @Test
+    public void testAFSInput() throws Exception {
+        Configuration conf = new Configuration();
+        FileSystem fs = FileSystem.getLocal(conf);
+        Path dir = getInputPath();
+        if (!fs.exists(dir)) {
+            fs.mkdirs(dir);
+        }
+        Path filePath = new Path(dir, "foo");
+        if (fs.exists(filePath)) {
+            fs.delete(filePath, false);
+        }
+        FSDataOutputStream ostream = fs.create(filePath);
+        BufferedWriter w = new BufferedWriter(new OutputStreamWriter(ostream));
+        w.write("0123456789");
+        w.close();
+        // Create the stream
+        FileContext fc = FileContext.getFileContext(conf);
+        AvroFSInput avroFSIn = new AvroFSInput(fc, filePath);
+        assertEquals(10, avroFSIn.length());
+        // Check initial position
+        byte[] buf = new byte[1];
+        assertEquals(0, avroFSIn.tell());
+        // Check a read from that position.
+        avroFSIn.read(buf, 0, 1);
+        assertEquals(1, avroFSIn.tell());
+        assertEquals('0', (char) buf[0]);
+        // Check a seek + read
+        avroFSIn.seek(4);
+        assertEquals(4, avroFSIn.tell());
+        avroFSIn.read(buf, 0, 1);
+        assertEquals('4', (char) buf[0]);
+        assertEquals(5, avroFSIn.tell());
+        avroFSIn.close();
     }
-
-    FSDataOutputStream ostream = fs.create(filePath);
-    BufferedWriter w = new BufferedWriter(new OutputStreamWriter(ostream));
-    w.write("0123456789");
-    w.close();
-
-    // Create the stream
-    FileContext fc = FileContext.getFileContext(conf);
-    AvroFSInput avroFSIn = new AvroFSInput(fc, filePath);
-
-    assertEquals(10, avroFSIn.length());
-
-    // Check initial position
-    byte [] buf = new byte[1];
-    assertEquals(0, avroFSIn.tell());
-
-    // Check a read from that position.
-    avroFSIn.read(buf, 0, 1);
-    assertEquals(1, avroFSIn.tell());
-    assertEquals('0', (char)buf[0]);
-
-    // Check a seek + read
-    avroFSIn.seek(4);
-    assertEquals(4, avroFSIn.tell());
-    avroFSIn.read(buf, 0, 1);
-    assertEquals('4', (char)buf[0]);
-    assertEquals(5, avroFSIn.tell());
-
-    avroFSIn.close();
-  }
 }
-

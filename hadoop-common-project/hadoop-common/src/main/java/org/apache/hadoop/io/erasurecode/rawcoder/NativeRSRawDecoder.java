@@ -20,7 +20,6 @@ package org.apache.hadoop.io.erasurecode.rawcoder;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.io.erasurecode.ErasureCodeNative;
 import org.apache.hadoop.io.erasurecode.ErasureCoderOptions;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -30,49 +29,43 @@ import java.nio.ByteBuffer;
 @InterfaceAudience.Private
 public class NativeRSRawDecoder extends AbstractNativeRawDecoder {
 
-  static {
-    ErasureCodeNative.checkNativeCodeLoaded();
-  }
-
-  public NativeRSRawDecoder(ErasureCoderOptions coderOptions) {
-    super(coderOptions);
-    decoderLock.writeLock().lock();
-    try {
-      initImpl(coderOptions.getNumDataUnits(),
-          coderOptions.getNumParityUnits());
-    } finally {
-      decoderLock.writeLock().unlock();
+    static {
+        ErasureCodeNative.checkNativeCodeLoaded();
     }
-  }
 
-  @Override
-  protected void performDecodeImpl(
-      ByteBuffer[] inputs, int[] inputOffsets, int dataLen, int[] erased,
-      ByteBuffer[] outputs, int[] outputOffsets) throws IOException {
-    decodeImpl(inputs, inputOffsets, dataLen, erased, outputs, outputOffsets);
-  }
-
-  @Override
-  public void release() {
-    decoderLock.writeLock().lock();
-    try {
-      destroyImpl();
-    } finally {
-      decoderLock.writeLock().unlock();
+    public NativeRSRawDecoder(ErasureCoderOptions coderOptions) {
+        super(coderOptions);
+        decoderLock.writeLock().lock();
+        try {
+            initImpl(coderOptions.getNumDataUnits(), coderOptions.getNumParityUnits());
+        } finally {
+            decoderLock.writeLock().unlock();
+        }
     }
-  }
 
-  @Override
-  public boolean preferDirectBuffer() {
-    return true;
-  }
+    @Override
+    protected void performDecodeImpl(ByteBuffer[] inputs, int[] inputOffsets, int dataLen, int[] erased, ByteBuffer[] outputs, int[] outputOffsets) throws IOException {
+        decodeImpl(inputs, inputOffsets, dataLen, erased, outputs, outputOffsets);
+    }
 
-  private native void initImpl(int numDataUnits, int numParityUnits);
+    @Override
+    public void release() {
+        decoderLock.writeLock().lock();
+        try {
+            destroyImpl();
+        } finally {
+            decoderLock.writeLock().unlock();
+        }
+    }
 
-  private native void decodeImpl(
-          ByteBuffer[] inputs, int[] inputOffsets, int dataLen, int[] erased,
-          ByteBuffer[] outputs, int[] outputOffsets) throws IOException;
+    @Override
+    public boolean preferDirectBuffer() {
+        return true;
+    }
 
-  private native void destroyImpl();
+    private native void initImpl(int numDataUnits, int numParityUnits);
 
+    private native void decodeImpl(ByteBuffer[] inputs, int[] inputOffsets, int dataLen, int[] erased, ByteBuffer[] outputs, int[] outputOffsets) throws IOException;
+
+    private native void destroyImpl();
 }

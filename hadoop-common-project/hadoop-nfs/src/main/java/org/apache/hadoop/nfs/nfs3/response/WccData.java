@@ -24,43 +24,46 @@ import org.apache.hadoop.oncrpc.XDR;
  * WccData saved information used by client for weak cache consistency
  */
 public class WccData {
-  private WccAttr preOpAttr;
-  private Nfs3FileAttributes postOpAttr;
 
-  public WccAttr getPreOpAttr() {
-    return preOpAttr;
-  }
+    private WccAttr preOpAttr;
 
-  public void setPreOpAttr(WccAttr preOpAttr) {
-    this.preOpAttr = preOpAttr;
-  }
+    private Nfs3FileAttributes postOpAttr;
 
-  public Nfs3FileAttributes getPostOpAttr() {
-    return postOpAttr;
-  }
+    public WccAttr getPreOpAttr() {
+        return preOpAttr;
+    }
 
-  public void setPostOpAttr(Nfs3FileAttributes postOpAttr) {
-    this.postOpAttr = postOpAttr;
-  }
+    public void setPreOpAttr(WccAttr preOpAttr) {
+        this.preOpAttr = preOpAttr;
+    }
 
-  public WccData(WccAttr preOpAttr, Nfs3FileAttributes postOpAttr) {
-    this.preOpAttr = (preOpAttr == null) ? new WccAttr() : preOpAttr;
-    this.postOpAttr = (postOpAttr == null) ? new Nfs3FileAttributes()
-        : postOpAttr;
-  }
+    public Nfs3FileAttributes getPostOpAttr() {
+        return postOpAttr;
+    }
 
-  public static WccData deserialize(XDR xdr) {
-    xdr.readBoolean();
-    WccAttr preOpAttr = WccAttr.deserialize(xdr);
-    xdr.readBoolean();
-    Nfs3FileAttributes postOpAttr = Nfs3FileAttributes.deserialize(xdr);
-    return new WccData(preOpAttr, postOpAttr);
-  }
+    public void setPostOpAttr(Nfs3FileAttributes postOpAttr) {
+        this.postOpAttr = postOpAttr;
+    }
 
-  public void serialize(XDR out) {
-    out.writeBoolean(true); // attributes follow
-    preOpAttr.serialize(out);
-    out.writeBoolean(true); // attributes follow
-    postOpAttr.serialize(out);
-  }
+    public WccData(WccAttr preOpAttr, Nfs3FileAttributes postOpAttr) {
+        this.preOpAttr = (preOpAttr == null) ? new WccAttr() : preOpAttr;
+        this.postOpAttr = (postOpAttr == null) ? new Nfs3FileAttributes() : postOpAttr;
+    }
+
+    public static WccData deserialize(XDR xdr) {
+        xdr.readBoolean();
+        WccAttr preOpAttr = WccAttr.deserialize(xdr);
+        xdr.readBoolean();
+        Nfs3FileAttributes postOpAttr = Nfs3FileAttributes.deserialize(xdr);
+        return new WccData(preOpAttr, postOpAttr);
+    }
+
+    public void serialize(XDR out) {
+        // attributes follow
+        out.writeBoolean(true);
+        preOpAttr.serialize(out);
+        // attributes follow
+        out.writeBoolean(true);
+        postOpAttr.serialize(out);
+    }
 }

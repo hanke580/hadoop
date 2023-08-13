@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.server.federation.store.protocol;
 
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience.Public;
 import org.apache.hadoop.classification.InterfaceStability.Unstable;
 import org.apache.hadoop.hdfs.server.federation.store.driver.StateStoreSerializer;
@@ -30,22 +29,21 @@ import org.apache.hadoop.hdfs.server.federation.store.records.MountTable;
  */
 public abstract class UpdateMountTableEntryRequest {
 
-  public static UpdateMountTableEntryRequest newInstance() throws IOException {
-    return StateStoreSerializer.newRecord(UpdateMountTableEntryRequest.class);
-  }
+    public static UpdateMountTableEntryRequest newInstance() throws IOException {
+        return StateStoreSerializer.newRecord(UpdateMountTableEntryRequest.class);
+    }
 
-  public static UpdateMountTableEntryRequest newInstance(MountTable entry)
-      throws IOException {
-    UpdateMountTableEntryRequest request = newInstance();
-    request.setEntry(entry);
-    return request;
-  }
+    public static UpdateMountTableEntryRequest newInstance(MountTable entry) throws IOException {
+        UpdateMountTableEntryRequest request = newInstance();
+        request.setEntry(entry);
+        return request;
+    }
 
-  @Public
-  @Unstable
-  public abstract MountTable getEntry() throws IOException;
+    @Public
+    @Unstable
+    public abstract MountTable getEntry() throws IOException;
 
-  @Public
-  @Unstable
-  public abstract void setEntry(MountTable mount) throws IOException;
+    @Public
+    @Unstable
+    public abstract void setEntry(MountTable mount) throws IOException;
 }

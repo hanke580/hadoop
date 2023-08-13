@@ -15,16 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.io;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
-
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 
-/** A reusable {@link java.io.DataInput} implementation
+/**
+ * A reusable {@link java.io.DataInput} implementation
  * that reads from an in-memory buffer.
  *
  * <p>This saves memory over creating a new DataInputStream and
@@ -40,127 +39,193 @@ import java.io.DataInputStream;
  *   ... read buffer using DataInput methods ...
  * }
  * </pre>
- *  
  */
-@InterfaceAudience.LimitedPrivate({"HDFS", "MapReduce"})
+@InterfaceAudience.LimitedPrivate({ "HDFS", "MapReduce" })
 @InterfaceStability.Unstable
 public class DataInputBuffer extends DataInputStream {
-  private static class Buffer extends ByteArrayInputStream {
-    public Buffer() {
-      super(new byte[] {});
+
+    private static class Buffer extends ByteArrayInputStream {
+
+        public Buffer() {
+            super(new byte[] {});
+        }
+
+        public void reset(byte[] input, int start, int length) {
+            this.buf = input;
+            this.count = start + length;
+            this.mark = start;
+            this.pos = start;
+        }
+
+        public byte[] getData() {
+            return buf;
+        }
+
+        public int getPosition() {
+            return pos;
+        }
+
+        public int getLength() {
+            return count;
+        }
+
+        /* functions below comes verbatim from
+     hive.common.io.NonSyncByteArrayInputStream */
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public int read() {
+            return (pos < count) ? (buf[pos++] & 0xff) : -1;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public int read(byte[] b, int off, int len) {
+            if (b == null) {
+                throw new NullPointerException();
+            } else if (off < 0 || len < 0 || len > b.length - off) {
+                throw new IndexOutOfBoundsException();
+            }
+            try {
+                this.left_19 = (pos);
+                this.right_19 = (count);
+            } catch (Exception e) {
+                this.left_19 = 0L;
+                this.right_19 = 0L;
+            }
+            if (pos >= count) {
+                return -1;
+            }
+            try {
+                this.left_20 = (pos + len);
+                this.right_20 = (count);
+            } catch (Exception e) {
+                this.left_20 = 0L;
+                this.right_20 = 0L;
+            }
+            if (pos + len > count) {
+                len = count - pos;
+            }
+            try {
+                this.left_21 = (len);
+                this.right_21 = (0);
+            } catch (Exception e) {
+                this.left_21 = 0L;
+                this.right_21 = 0L;
+            }
+            if (len <= 0) {
+                return 0;
+            }
+            System.arraycopy(buf, pos, b, off, len);
+            pos += len;
+            return len;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public long skip(long n) {
+            try {
+                this.left_22 = (pos + n);
+                this.right_22 = (count);
+            } catch (Exception e) {
+                this.left_22 = 0L;
+                this.right_22 = 0L;
+            }
+            if (pos + n > count) {
+                n = count - pos;
+            }
+            try {
+                this.left_23 = (n);
+                this.right_23 = (0);
+            } catch (Exception e) {
+                this.left_23 = 0L;
+                this.right_23 = 0L;
+            }
+            if (n < 0) {
+                return 0;
+            }
+            pos += n;
+            return n;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public int available() {
+            return count - pos;
+        }
+
+        private long right_23;
+
+        private long right_22;
+
+        private long left_23;
+
+        private long right_21;
+
+        private long left_22;
+
+        private long right_20;
+
+        private long left_21;
+
+        private long left_20;
+
+        private long right_19;
+
+        private long left_19;
     }
 
+    private Buffer buffer;
+
+    /**
+     * Constructs a new empty buffer.
+     */
+    public DataInputBuffer() {
+        this(new Buffer());
+    }
+
+    private DataInputBuffer(Buffer buffer) {
+        super(buffer);
+        this.buffer = buffer;
+    }
+
+    /**
+     * Resets the data that the buffer reads.
+     */
+    public void reset(byte[] input, int length) {
+        buffer.reset(input, 0, length);
+    }
+
+    /**
+     * Resets the data that the buffer reads.
+     */
     public void reset(byte[] input, int start, int length) {
-      this.buf = input;
-      this.count = start+length;
-      this.mark = start;
-      this.pos = start;
+        buffer.reset(input, start, length);
     }
 
     public byte[] getData() {
-      return buf;
+        return buffer.getData();
     }
 
+    /**
+     * Returns the current position in the input.
+     */
     public int getPosition() {
-      return pos;
+        return buffer.getPosition();
     }
 
+    /**
+     * Returns the index one greater than the last valid character in the input
+     * stream buffer.
+     */
     public int getLength() {
-      return count;
+        return buffer.getLength();
     }
-
-    /* functions below comes verbatim from
-     hive.common.io.NonSyncByteArrayInputStream */
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int read() {
-      return (pos < count) ? (buf[pos++] & 0xff) : -1;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int read(byte[] b, int off, int len) {
-      if (b == null) {
-        throw new NullPointerException();
-      } else if (off < 0 || len < 0 || len > b.length - off) {
-        throw new IndexOutOfBoundsException();
-      }
-      if (pos >= count) {
-        return -1;
-      }
-      if (pos + len > count) {
-        len = count - pos;
-      }
-      if (len <= 0) {
-        return 0;
-      }
-      System.arraycopy(buf, pos, b, off, len);
-      pos += len;
-      return len;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public long skip(long n) {
-      if (pos + n > count) {
-        n = count - pos;
-      }
-      if (n < 0) {
-        return 0;
-      }
-      pos += n;
-      return n;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int available() {
-      return count - pos;
-    }
-  }
-
-  private Buffer buffer;
-  
-  /** Constructs a new empty buffer. */
-  public DataInputBuffer() {
-    this(new Buffer());
-  }
-
-  private DataInputBuffer(Buffer buffer) {
-    super(buffer);
-    this.buffer = buffer;
-  }
-
-  /** Resets the data that the buffer reads. */
-  public void reset(byte[] input, int length) {
-    buffer.reset(input, 0, length);
-  }
-
-  /** Resets the data that the buffer reads. */
-  public void reset(byte[] input, int start, int length) {
-    buffer.reset(input, start, length);
-  }
-  
-  public byte[] getData() {
-    return buffer.getData();
-  }
-
-  /** Returns the current position in the input. */
-  public int getPosition() { return buffer.getPosition(); }
-
-  /**
-   * Returns the index one greater than the last valid character in the input
-   * stream buffer.
-   */
-  public int getLength() { return buffer.getLength(); }
-
 }

@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.server.federation.store.driver;
 
 import java.io.IOException;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.hadoop.hdfs.server.federation.store.FederationStateStoreTestUtils;
@@ -33,62 +32,54 @@ import org.junit.Test;
  */
 public class TestStateStoreFileSystem extends TestStateStoreDriverBase {
 
-  private static MiniDFSCluster dfsCluster;
+    private static MiniDFSCluster dfsCluster;
 
-  @BeforeClass
-  public static void setupCluster() throws Exception {
-    Configuration conf = FederationStateStoreTestUtils
-        .getStateStoreConfiguration(StateStoreFileSystemImpl.class);
-    conf.set(StateStoreFileSystemImpl.FEDERATION_STORE_FS_PATH,
-        "/hdfs-federation/");
-
-    // Create HDFS cluster to back the state tore
-    MiniDFSCluster.Builder builder = new MiniDFSCluster.Builder(conf);
-    builder.numDataNodes(1);
-    dfsCluster = builder.build();
-    dfsCluster.waitClusterUp();
-    getStateStore(conf);
-  }
-
-  @AfterClass
-  public static void tearDownCluster() {
-    if (dfsCluster != null) {
-      dfsCluster.shutdown();
+    @BeforeClass
+    public static void setupCluster() throws Exception {
+        Configuration conf = FederationStateStoreTestUtils.getStateStoreConfiguration(StateStoreFileSystemImpl.class);
+        conf.set(StateStoreFileSystemImpl.FEDERATION_STORE_FS_PATH, "/hdfs-federation/");
+        // Create HDFS cluster to back the state tore
+        MiniDFSCluster.Builder builder = new MiniDFSCluster.Builder(conf);
+        builder.numDataNodes(1);
+        dfsCluster = builder.build();
+        dfsCluster.waitClusterUp();
+        getStateStore(conf);
     }
-  }
 
-  @Before
-  public void startup() throws IOException {
-    removeAll(getStateStoreDriver());
-  }
+    @AfterClass
+    public static void tearDownCluster() {
+        if (dfsCluster != null) {
+            dfsCluster.shutdown();
+        }
+    }
 
-  @Test
-  public void testInsert()
-      throws IllegalArgumentException, IllegalAccessException, IOException {
-    testInsert(getStateStoreDriver());
-  }
+    @Before
+    public void startup() throws IOException {
+        removeAll(getStateStoreDriver());
+    }
 
-  @Test
-  public void testUpdate() throws IllegalArgumentException, IOException,
-      SecurityException, ReflectiveOperationException {
-    testPut(getStateStoreDriver());
-  }
+    @Test
+    public void testInsert() throws IllegalArgumentException, IllegalAccessException, IOException {
+        testInsert(getStateStoreDriver());
+    }
 
-  @Test
-  public void testDelete()
-      throws IllegalArgumentException, IllegalAccessException, IOException {
-    testRemove(getStateStoreDriver());
-  }
+    @Test
+    public void testUpdate() throws IllegalArgumentException, IOException, SecurityException, ReflectiveOperationException {
+        testPut(getStateStoreDriver());
+    }
 
-  @Test
-  public void testFetchErrors()
-      throws IllegalArgumentException, IllegalAccessException, IOException {
-    testFetchErrors(getStateStoreDriver());
-  }
+    @Test
+    public void testDelete() throws IllegalArgumentException, IllegalAccessException, IOException {
+        testRemove(getStateStoreDriver());
+    }
 
-  @Test
-  public void testMetrics()
-      throws IllegalArgumentException, IllegalAccessException, IOException {
-    testMetrics(getStateStoreDriver());
-  }
+    @Test
+    public void testFetchErrors() throws IllegalArgumentException, IllegalAccessException, IOException {
+        testFetchErrors(getStateStoreDriver());
+    }
+
+    @Test
+    public void testMetrics() throws IllegalArgumentException, IllegalAccessException, IOException {
+        testMetrics(getStateStoreDriver());
+    }
 }

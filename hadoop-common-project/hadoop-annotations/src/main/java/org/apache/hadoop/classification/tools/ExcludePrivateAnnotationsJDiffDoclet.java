@@ -20,7 +20,6 @@ package org.apache.hadoop.classification.tools;
 import com.sun.javadoc.DocErrorReporter;
 import com.sun.javadoc.LanguageVersion;
 import com.sun.javadoc.RootDoc;
-
 import jdiff.JDiff;
 
 /**
@@ -31,29 +30,27 @@ import jdiff.JDiff;
  * It delegates to the JDiff Doclet, and takes the same options.
  */
 public class ExcludePrivateAnnotationsJDiffDoclet {
-  
-  public static LanguageVersion languageVersion() {
-    return LanguageVersion.JAVA_1_5;
-  }
-  
-  public static boolean start(RootDoc root) {
-    System.out.println(
-        ExcludePrivateAnnotationsJDiffDoclet.class.getSimpleName());
-    return JDiff.start(RootDocProcessor.process(root));
-  }
-  
-  public static int optionLength(String option) {
-    Integer length = StabilityOptions.optionLength(option);
-    if (length != null) {
-      return length;
+
+    public static LanguageVersion languageVersion() {
+        return LanguageVersion.JAVA_1_5;
     }
-    return JDiff.optionLength(option);
-  }
-  
-  public static boolean validOptions(String[][] options,
-      DocErrorReporter reporter) {
-    StabilityOptions.validOptions(options, reporter);
-    String[][] filteredOptions = StabilityOptions.filterOptions(options);
-    return JDiff.validOptions(filteredOptions, reporter);
-  }
+
+    public static boolean start(RootDoc root) {
+        System.out.println(ExcludePrivateAnnotationsJDiffDoclet.class.getSimpleName());
+        return JDiff.start(RootDocProcessor.process(root));
+    }
+
+    public static int optionLength(String option) {
+        Integer length = StabilityOptions.optionLength(option);
+        if (length != null) {
+            return length;
+        }
+        return JDiff.optionLength(option);
+    }
+
+    public static boolean validOptions(String[][] options, DocErrorReporter reporter) {
+        StabilityOptions.validOptions(options, reporter);
+        String[][] filteredOptions = StabilityOptions.filterOptions(options);
+        return JDiff.validOptions(filteredOptions, reporter);
+    }
 }

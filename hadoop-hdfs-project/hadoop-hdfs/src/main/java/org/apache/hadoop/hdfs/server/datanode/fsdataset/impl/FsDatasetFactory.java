@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.server.datanode.fsdataset.impl;
 
 import java.io.IOException;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.server.datanode.DataNode;
 import org.apache.hadoop.hdfs.server.datanode.DataStorage;
@@ -28,9 +27,9 @@ import org.apache.hadoop.hdfs.server.datanode.fsdataset.FsDatasetSpi;
  * A factory for creating {@link FsDatasetImpl} objects.
  */
 public class FsDatasetFactory extends FsDatasetSpi.Factory<FsDatasetImpl> {
-  @Override
-  public FsDatasetImpl newInstance(DataNode datanode,
-      DataStorage storage, Configuration conf) throws IOException {
-    return new FsDatasetImpl(datanode, storage, conf);
-  }
+
+    @Override
+    public FsDatasetImpl newInstance(DataNode datanode, DataStorage storage, Configuration conf) throws IOException {
+        return new FsDatasetImpl(datanode, storage, conf);
+    }
 }

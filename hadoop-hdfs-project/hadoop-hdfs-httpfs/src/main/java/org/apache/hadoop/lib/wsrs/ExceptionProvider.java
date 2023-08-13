@@ -15,45 +15,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.lib.wsrs;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.util.HttpExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 
 @InterfaceAudience.Private
 public class ExceptionProvider implements ExceptionMapper<Throwable> {
-  private static Logger LOG = LoggerFactory.getLogger(ExceptionProvider.class);
 
-  private static final String ENTER = System.getProperty("line.separator");
+    private static Logger LOG = LoggerFactory.getLogger(ExceptionProvider.class);
 
-  protected Response createResponse(Response.Status status, Throwable throwable) {
-    return HttpExceptionUtils.createJerseyExceptionResponse(status, throwable);
-  }
+    private static final String ENTER = System.getProperty("line.separator");
 
-  protected String getOneLineMessage(Throwable throwable) {
-    String message = throwable.getMessage();
-    if (message != null) {
-      int i = message.indexOf(ENTER);
-      if (i > -1) {
-        message = message.substring(0, i);
-      }
+    protected Response createResponse(Response.Status status, Throwable throwable) {
+        return HttpExceptionUtils.createJerseyExceptionResponse(status, throwable);
     }
-    return message;
-  }
 
-  protected void log(Response.Status status, Throwable throwable) {
-    LOG.debug("{}", throwable.getMessage(), throwable);
-  }
+    protected String getOneLineMessage(Throwable throwable) {
+        String message = throwable.getMessage();
+        if (message != null) {
+            int i = message.indexOf(ENTER);
+            if (i > -1) {
+                message = message.substring(0, i);
+            }
+        }
+        return message;
+    }
 
-  @Override
-  public Response toResponse(Throwable throwable) {
-    return createResponse(Response.Status.BAD_REQUEST, throwable);
-  }
+    protected void log(Response.Status status, Throwable throwable) {
+        LOG.debug("{}", throwable.getMessage(), throwable);
+    }
 
+    @Override
+    public Response toResponse(Throwable throwable) {
+        return createResponse(Response.Status.BAD_REQUEST, throwable);
+    }
 }

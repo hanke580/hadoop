@@ -20,9 +20,7 @@ package org.apache.hadoop.fs;
 import static org.apache.hadoop.fs.FileContextTestHelper.readFile;
 import static org.apache.hadoop.fs.FileContextTestHelper.writeFile;
 import static org.junit.Assert.assertTrue;
-
 import java.util.Arrays;
-
 import org.apache.hadoop.test.GenericTestUtils;
 import org.apache.hadoop.util.StringUtils;
 import org.junit.After;
@@ -39,73 +37,65 @@ import org.slf4j.event.Level;
  * </p>
  * <p>
  * To test a given {@link FileSystem} implementation create a subclass of this
- * test and override {@link #setUp()} to initialize the <code>fc</code> 
+ * test and override {@link #setUp()} to initialize the <code>fc</code>
  * {@link FileContext} instance variable.
- * 
+ *
  * </p>
  */
 public abstract class FileContextUtilBase {
-  protected final FileContextTestHelper fileContextTestHelper = new FileContextTestHelper();
-  protected FileContext fc;
-  
-  {
-    try {
-      GenericTestUtils.setLogLevel(FileSystem.LOG, Level.DEBUG);
-    } catch(Exception e) {
-      System.out.println("Cannot change log level\n"
-          + StringUtils.stringifyException(e));
+
+    protected final FileContextTestHelper fileContextTestHelper = new FileContextTestHelper();
+
+    protected FileContext fc;
+
+    {
+        try {
+            GenericTestUtils.setLogLevel(FileSystem.LOG, Level.DEBUG);
+        } catch (Exception e) {
+            System.out.println("Cannot change log level\n" + StringUtils.stringifyException(e));
+        }
     }
-  }
 
-  @Before
-  public void setUp() throws Exception {
-    fc.mkdir(fileContextTestHelper.getTestRootPath(fc), FileContext.DEFAULT_PERM, true);
-  }
-
-  @After
-  public void tearDown() throws Exception {
-    if (fc != null) {
-      fc.delete(fileContextTestHelper.getTestRootPath(fc), true);
+    @Before
+    public void setUp() throws Exception {
+        fc.mkdir(fileContextTestHelper.getTestRootPath(fc), FileContext.DEFAULT_PERM, true);
     }
-  }
-  
-  @Test
-  public void testFcCopy() throws Exception{
-    final String ts = "some random text";
-    Path file1 = fileContextTestHelper.getTestRootPath(fc, "file1");
-    Path file2 = fileContextTestHelper.getTestRootPath(fc, "file2");
-    
-    writeFile(fc, file1, ts.getBytes());
-    assertTrue(fc.util().exists(file1));
-    fc.util().copy(file1, file2);
 
-    // verify that newly copied file2 exists
-    assertTrue("Failed to copy file2  ", fc.util().exists(file2));
-    // verify that file2 contains test string
-    assertTrue("Copied files does not match ",Arrays.equals(ts.getBytes(),
-        readFile(fc,file2,ts.getBytes().length)));
-  }
+    @After
+    public void tearDown() throws Exception {
+        if (fc != null) {
+            fc.delete(fileContextTestHelper.getTestRootPath(fc), true);
+        }
+    }
 
-  @Test
-  public void testRecursiveFcCopy() throws Exception {
+    @Test
+    public void testFcCopy() throws Exception {
+        final String ts = "some random text";
+        Path file1 = fileContextTestHelper.getTestRootPath(fc, "file1");
+        Path file2 = fileContextTestHelper.getTestRootPath(fc, "file2");
+        writeFile(fc, file1, ts.getBytes());
+        assertTrue(fc.util().exists(file1));
+        fc.util().copy(file1, file2);
+        // verify that newly copied file2 exists
+        assertTrue("Failed to copy file2  ", fc.util().exists(file2));
+        // verify that file2 contains test string
+        assertTrue("Copied files does not match ", Arrays.equals(ts.getBytes(), readFile(fc, file2, ts.getBytes().length)));
+    }
 
-    final String ts = "some random text";
-    Path dir1 = fileContextTestHelper.getTestRootPath(fc, "dir1");
-    Path dir2 = fileContextTestHelper.getTestRootPath(fc, "dir2");
-
-    Path file1 = new Path(dir1, "file1");
-    fc.mkdir(dir1, null, false);
-    writeFile(fc, file1, ts.getBytes());
-    assertTrue(fc.util().exists(file1));
-
-    Path file2 = new Path(dir2, "file1");
-
-    fc.util().copy(dir1, dir2);
-
-    // verify that newly copied file2 exists
-    assertTrue("Failed to copy file2  ", fc.util().exists(file2));
-    // verify that file2 contains test string
-    assertTrue("Copied files does not match ",Arrays.equals(ts.getBytes(),
-        readFile(fc,file2,ts.getBytes().length)));
-  }
+    @Test
+    public void testRecursiveFcCopy() throws Exception {
+        final String ts = "some random text";
+        Path dir1 = fileContextTestHelper.getTestRootPath(fc, "dir1");
+        Path dir2 = fileContextTestHelper.getTestRootPath(fc, "dir2");
+        Path file1 = new Path(dir1, "file1");
+        fc.mkdir(dir1, null, false);
+        writeFile(fc, file1, ts.getBytes());
+        assertTrue(fc.util().exists(file1));
+        Path file2 = new Path(dir2, "file1");
+        fc.util().copy(dir1, dir2);
+        // verify that newly copied file2 exists
+        assertTrue("Failed to copy file2  ", fc.util().exists(file2));
+        // verify that file2 contains test string
+        assertTrue("Copied files does not match ", Arrays.equals(ts.getBytes(), readFile(fc, file2, ts.getBytes().length)));
+    }
 }

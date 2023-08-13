@@ -27,231 +27,251 @@ import org.apache.hadoop.hdfs.protocol.proto.HdfsProtos.ReencryptionInfoProto;
  * are not protected).
  */
 public class ZoneReencryptionStatus {
-  /**
-   * State of re-encryption.
-   */
-  public enum State {
-    /**
-     * Submitted for re-encryption but hasn't been picked up.
-     * This is the initial state.
-     */
-    Submitted,
-    /**
-     * Currently re-encrypting.
-     */
-    Processing,
-    /**
-     * Re-encryption completed.
-     */
-    Completed
-  }
 
-  private long id;
-  private String zoneName;
-  /**
-   * The re-encryption status of the zone. Note this is a in-memory only
-   * variable. On failover it will always be submitted, or completed if
-   * completionTime != 0;
-   */
-  private State state;
-  private String ezKeyVersionName;
-  private long submissionTime;
-  private long completionTime;
-  private boolean canceled;
-  /**
-   * Name of last file processed. It's important to record name (not inode)
-   * because we want to restore to the position even if the inode is removed.
-   */
-  private String lastCheckpointFile;
-  private long filesReencrypted;
-  private long numReencryptionFailures;
+    /**
+     * State of re-encryption.
+     */
+    public enum State {
 
-  /**
-   * Builder of {@link ZoneReencryptionStatus}.
-   */
-  public static final class Builder {
+        /**
+         * Submitted for re-encryption but hasn't been picked up.
+         * This is the initial state.
+         */
+        Submitted,
+        /**
+         * Currently re-encrypting.
+         */
+        Processing,
+        /**
+         * Re-encryption completed.
+         */
+        Completed
+    }
+
     private long id;
+
     private String zoneName;
+
+    /**
+     * The re-encryption status of the zone. Note this is a in-memory only
+     * variable. On failover it will always be submitted, or completed if
+     * completionTime != 0;
+     */
     private State state;
+
     private String ezKeyVersionName;
+
     private long submissionTime;
+
     private long completionTime;
+
     private boolean canceled;
+
+    /**
+     * Name of last file processed. It's important to record name (not inode)
+     * because we want to restore to the position even if the inode is removed.
+     */
     private String lastCheckpointFile;
+
     private long filesReencrypted;
-    private long fileReencryptionFailures;
 
-    public Builder() {
+    private long numReencryptionFailures;
+
+    /**
+     * Builder of {@link ZoneReencryptionStatus}.
+     */
+    public static final class Builder {
+
+        private long id;
+
+        private String zoneName;
+
+        private State state;
+
+        private String ezKeyVersionName;
+
+        private long submissionTime;
+
+        private long completionTime;
+
+        private boolean canceled;
+
+        private String lastCheckpointFile;
+
+        private long filesReencrypted;
+
+        private long fileReencryptionFailures;
+
+        public Builder() {
+        }
+
+        public Builder id(final long inodeid) {
+            id = inodeid;
+            return this;
+        }
+
+        public Builder zoneName(final String ezName) {
+            zoneName = ezName;
+            return this;
+        }
+
+        public Builder state(final State st) {
+            state = st;
+            return this;
+        }
+
+        public Builder ezKeyVersionName(final String ezkvn) {
+            ezKeyVersionName = ezkvn;
+            return this;
+        }
+
+        public Builder submissionTime(final long submission) {
+            submissionTime = submission;
+            return this;
+        }
+
+        public Builder completionTime(final long completion) {
+            completionTime = completion;
+            return this;
+        }
+
+        public Builder canceled(final boolean isCanceled) {
+            canceled = isCanceled;
+            return this;
+        }
+
+        public Builder lastCheckpointFile(final String lastFile) {
+            lastCheckpointFile = lastFile;
+            return this;
+        }
+
+        public Builder filesReencrypted(final long numReencrypted) {
+            filesReencrypted = numReencrypted;
+            return this;
+        }
+
+        public Builder fileReencryptionFailures(final long numFailures) {
+            fileReencryptionFailures = numFailures;
+            return this;
+        }
+
+        public ZoneReencryptionStatus build() {
+            ZoneReencryptionStatus ret = new ZoneReencryptionStatus();
+            Preconditions.checkArgument(id != 0, "no inode id set.");
+            Preconditions.checkNotNull(state, "no state id set.");
+            Preconditions.checkNotNull(ezKeyVersionName, "no keyVersionName set.");
+            Preconditions.checkArgument(submissionTime != 0, "no submission time set.");
+            ret.id = this.id;
+            ret.zoneName = this.zoneName;
+            ret.state = this.state;
+            ret.ezKeyVersionName = this.ezKeyVersionName;
+            ret.submissionTime = this.submissionTime;
+            ret.completionTime = this.completionTime;
+            ret.canceled = this.canceled;
+            ret.lastCheckpointFile = this.lastCheckpointFile;
+            ret.filesReencrypted = this.filesReencrypted;
+            ret.numReencryptionFailures = this.fileReencryptionFailures;
+            return ret;
+        }
     }
 
-    public Builder id(final long inodeid) {
-      id = inodeid;
-      return this;
+    public ZoneReencryptionStatus() {
+        reset();
     }
 
-    public Builder zoneName(final String ezName) {
-      zoneName = ezName;
-      return this;
+    void resetMetrics() {
+        filesReencrypted = 0;
+        numReencryptionFailures = 0;
     }
 
-    public Builder state(final State st) {
-      state = st;
-      return this;
+    public long getId() {
+        return id;
     }
 
-    public Builder ezKeyVersionName(final String ezkvn) {
-      ezKeyVersionName = ezkvn;
-      return this;
+    public String getZoneName() {
+        return zoneName;
     }
 
-    public Builder submissionTime(final long submission) {
-      submissionTime = submission;
-      return this;
+    void setState(final State s) {
+        state = s;
     }
 
-    public Builder completionTime(final long completion) {
-      completionTime = completion;
-      return this;
+    public State getState() {
+        return state;
     }
 
-    public Builder canceled(final boolean isCanceled) {
-      canceled = isCanceled;
-      return this;
+    public String getEzKeyVersionName() {
+        return ezKeyVersionName;
     }
 
-    public Builder lastCheckpointFile(final String lastFile) {
-      lastCheckpointFile = lastFile;
-      return this;
+    public long getSubmissionTime() {
+        return submissionTime;
     }
 
-    public Builder filesReencrypted(final long numReencrypted) {
-      filesReencrypted = numReencrypted;
-      return this;
+    public long getCompletionTime() {
+        return completionTime;
     }
 
-    public Builder fileReencryptionFailures(final long numFailures) {
-      fileReencryptionFailures = numFailures;
-      return this;
+    public boolean isCanceled() {
+        return canceled;
     }
 
-    public ZoneReencryptionStatus build() {
-      ZoneReencryptionStatus ret = new ZoneReencryptionStatus();
-      Preconditions.checkArgument(id != 0, "no inode id set.");
-      Preconditions.checkNotNull(state, "no state id set.");
-      Preconditions.checkNotNull(ezKeyVersionName, "no keyVersionName set.");
-      Preconditions
-          .checkArgument(submissionTime != 0, "no submission time set.");
-      ret.id = this.id;
-      ret.zoneName = this.zoneName;
-      ret.state = this.state;
-      ret.ezKeyVersionName = this.ezKeyVersionName;
-      ret.submissionTime = this.submissionTime;
-      ret.completionTime = this.completionTime;
-      ret.canceled = this.canceled;
-      ret.lastCheckpointFile = this.lastCheckpointFile;
-      ret.filesReencrypted = this.filesReencrypted;
-      ret.numReencryptionFailures = this.fileReencryptionFailures;
-      return ret;
+    public String getLastCheckpointFile() {
+        return lastCheckpointFile;
     }
-  }
 
-  public ZoneReencryptionStatus() {
-    reset();
-  }
+    public long getFilesReencrypted() {
+        return filesReencrypted;
+    }
 
-  void resetMetrics() {
-    filesReencrypted = 0;
-    numReencryptionFailures = 0;
-  }
+    public long getNumReencryptionFailures() {
+        return numReencryptionFailures;
+    }
 
-  public long getId() {
-    return id;
-  }
+    public void reset() {
+        state = State.Submitted;
+        ezKeyVersionName = null;
+        submissionTime = 0;
+        completionTime = 0;
+        canceled = false;
+        lastCheckpointFile = null;
+        resetMetrics();
+    }
 
-  public String getZoneName() {
-    return zoneName;
-  }
+    /**
+     * Set the zone name. The zone name is resolved from inode id and set during
+     * a listReencryptionStatus call, for the crypto admin to consume.
+     */
+    public void setZoneName(final String name) {
+        Preconditions.checkNotNull(name, "zone name cannot be null");
+        zoneName = name;
+    }
 
-  void setState(final State s) {
-    state = s;
-  }
+    public void cancel() {
+        canceled = true;
+    }
 
-  public State getState() {
-    return state;
-  }
+    void markZoneCompleted(final ReencryptionInfoProto proto) {
+        state = ZoneReencryptionStatus.State.Completed;
+        completionTime = proto.getCompletionTime();
+        lastCheckpointFile = null;
+        canceled = proto.getCanceled();
+        filesReencrypted = proto.getNumReencrypted();
+        numReencryptionFailures = proto.getNumFailures();
+    }
 
-  public String getEzKeyVersionName() {
-    return ezKeyVersionName;
-  }
+    void markZoneSubmitted(final ReencryptionInfoProto proto) {
+        reset();
+        state = ZoneReencryptionStatus.State.Submitted;
+        ezKeyVersionName = proto.getEzKeyVersionName();
+        submissionTime = proto.getSubmissionTime();
+        filesReencrypted = proto.getNumReencrypted();
+        numReencryptionFailures = proto.getNumFailures();
+    }
 
-  public long getSubmissionTime() {
-    return submissionTime;
-  }
-
-  public long getCompletionTime() {
-    return completionTime;
-  }
-
-  public boolean isCanceled() {
-    return canceled;
-  }
-
-  public String getLastCheckpointFile() {
-    return lastCheckpointFile;
-  }
-
-  public long getFilesReencrypted() {
-    return filesReencrypted;
-  }
-
-  public long getNumReencryptionFailures() {
-    return numReencryptionFailures;
-  }
-
-  public void reset() {
-    state = State.Submitted;
-    ezKeyVersionName = null;
-    submissionTime = 0;
-    completionTime = 0;
-    canceled = false;
-    lastCheckpointFile = null;
-    resetMetrics();
-  }
-
-  /**
-   * Set the zone name. The zone name is resolved from inode id and set during
-   * a listReencryptionStatus call, for the crypto admin to consume.
-   */
-  public void setZoneName(final String name) {
-    Preconditions.checkNotNull(name, "zone name cannot be null");
-    zoneName = name;
-  }
-
-  public void cancel() {
-    canceled = true;
-  }
-
-  void markZoneCompleted(final ReencryptionInfoProto proto) {
-    state = ZoneReencryptionStatus.State.Completed;
-    completionTime = proto.getCompletionTime();
-    lastCheckpointFile = null;
-    canceled = proto.getCanceled();
-    filesReencrypted = proto.getNumReencrypted();
-    numReencryptionFailures = proto.getNumFailures();
-  }
-
-  void markZoneSubmitted(final ReencryptionInfoProto proto) {
-    reset();
-    state = ZoneReencryptionStatus.State.Submitted;
-    ezKeyVersionName = proto.getEzKeyVersionName();
-    submissionTime = proto.getSubmissionTime();
-    filesReencrypted = proto.getNumReencrypted();
-    numReencryptionFailures = proto.getNumFailures();
-  }
-
-  void updateZoneProcess(final ReencryptionInfoProto proto) {
-    lastCheckpointFile = proto.getLastFile();
-    filesReencrypted = proto.getNumReencrypted();
-    numReencryptionFailures = proto.getNumFailures();
-  }
+    void updateZoneProcess(final ReencryptionInfoProto proto) {
+        lastCheckpointFile = proto.getLastFile();
+        filesReencrypted = proto.getNumReencrypted();
+        numReencryptionFailures = proto.getNumFailures();
+    }
 }

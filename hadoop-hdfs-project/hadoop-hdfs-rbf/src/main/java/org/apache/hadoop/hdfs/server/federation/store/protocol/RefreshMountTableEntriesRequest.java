@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.server.federation.store.protocol;
 
 import java.io.IOException;
-
 import org.apache.hadoop.hdfs.server.federation.store.driver.StateStoreSerializer;
 
 /**
@@ -26,9 +25,7 @@ import org.apache.hadoop.hdfs.server.federation.store.driver.StateStoreSerialize
  */
 public abstract class RefreshMountTableEntriesRequest {
 
-  public static RefreshMountTableEntriesRequest newInstance()
-      throws IOException {
-    return StateStoreSerializer
-        .newRecord(RefreshMountTableEntriesRequest.class);
-  }
+    public static RefreshMountTableEntriesRequest newInstance() throws IOException {
+        return StateStoreSerializer.newRecord(RefreshMountTableEntriesRequest.class);
+    }
 }

@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.server.federation.store.protocol;
 
 import java.io.IOException;
-
 import org.apache.hadoop.hdfs.server.federation.store.driver.StateStoreSerializer;
 
 /**
@@ -26,7 +25,8 @@ import org.apache.hadoop.hdfs.server.federation.store.driver.StateStoreSerialize
  * its state in State Store.
  */
 public abstract class EnterSafeModeRequest {
-  public static EnterSafeModeRequest newInstance() throws IOException {
-    return StateStoreSerializer.newRecord(EnterSafeModeRequest.class);
-  }
+
+    public static EnterSafeModeRequest newInstance() throws IOException {
+        return StateStoreSerializer.newRecord(EnterSafeModeRequest.class);
+    }
 }

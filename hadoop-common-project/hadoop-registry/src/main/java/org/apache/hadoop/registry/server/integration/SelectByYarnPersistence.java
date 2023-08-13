@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.registry.server.integration;
 
 import com.google.common.base.Preconditions;
@@ -28,33 +27,27 @@ import org.apache.hadoop.registry.server.services.RegistryAdminService;
 /**
  * Select an entry by the YARN persistence policy
  */
-public class SelectByYarnPersistence
-    implements RegistryAdminService.NodeSelector {
-  private final String id;
-  private final String targetPolicy;
+public class SelectByYarnPersistence implements RegistryAdminService.NodeSelector {
 
-  public SelectByYarnPersistence(String id, String targetPolicy) {
-    Preconditions.checkArgument(!StringUtils.isEmpty(id), "id");
-    Preconditions.checkArgument(!StringUtils.isEmpty(targetPolicy),
-        "targetPolicy");
-    this.id = id;
-    this.targetPolicy = targetPolicy;
-  }
+    private final String id;
 
-  @Override
-  public boolean shouldSelect(String path,
-      RegistryPathStatus registryPathStatus,
-      ServiceRecord serviceRecord) {
-    String policy =
-        serviceRecord.get(YarnRegistryAttributes.YARN_PERSISTENCE, "");
-    return id.equals(serviceRecord.get(YarnRegistryAttributes.YARN_ID, ""))
-           && (targetPolicy.equals(policy));
-  }
+    private final String targetPolicy;
 
-  @Override
-  public String toString() {
-    return String.format(
-        "Select by ID %s and policy %s: {}",
-        id, targetPolicy);
-  }
+    public SelectByYarnPersistence(String id, String targetPolicy) {
+        Preconditions.checkArgument(!StringUtils.isEmpty(id), "id");
+        Preconditions.checkArgument(!StringUtils.isEmpty(targetPolicy), "targetPolicy");
+        this.id = id;
+        this.targetPolicy = targetPolicy;
+    }
+
+    @Override
+    public boolean shouldSelect(String path, RegistryPathStatus registryPathStatus, ServiceRecord serviceRecord) {
+        String policy = serviceRecord.get(YarnRegistryAttributes.YARN_PERSISTENCE, "");
+        return id.equals(serviceRecord.get(YarnRegistryAttributes.YARN_ID, "")) && (targetPolicy.equals(policy));
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Select by ID %s and policy %s: {}", id, targetPolicy);
+    }
 }

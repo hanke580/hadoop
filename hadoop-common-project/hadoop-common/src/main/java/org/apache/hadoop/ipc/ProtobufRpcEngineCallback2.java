@@ -15,15 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.ipc;
 
 import org.apache.hadoop.thirdparty.protobuf.Message;
 
 public interface ProtobufRpcEngineCallback2 {
 
-  public void setResponse(Message message);
+    public void setResponse(Message message);
 
-  public void error(Throwable t);
-
+    public void error(Throwable t);
 }

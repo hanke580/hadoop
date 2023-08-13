@@ -21,10 +21,8 @@ import static org.apache.hadoop.hdfs.server.federation.store.FederationStateStor
 import static org.apache.hadoop.hdfs.server.federation.store.FederationStateStoreTestUtils.getStateStoreConfiguration;
 import static org.apache.hadoop.hdfs.server.federation.store.FederationStateStoreTestUtils.waitStateStore;
 import static org.junit.Assert.assertNotNull;
-
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.server.federation.router.RBFConfigKeys;
 import org.junit.AfterClass;
@@ -37,45 +35,42 @@ import org.junit.BeforeClass;
  */
 public class TestStateStoreBase {
 
-  private static StateStoreService stateStore;
-  private static Configuration conf;
+    private static StateStoreService stateStore;
 
-  protected static StateStoreService getStateStore() {
-    return stateStore;
-  }
+    private static Configuration conf;
 
-  protected static Configuration getConf() {
-    return conf;
-  }
-
-  @BeforeClass
-  public static void createBase() throws IOException, InterruptedException {
-
-    conf = getStateStoreConfiguration();
-
-    // Disable auto-reconnect to data store
-    conf.setLong(RBFConfigKeys.FEDERATION_STORE_CONNECTION_TEST_MS,
-        TimeUnit.HOURS.toMillis(1));
-  }
-
-  @AfterClass
-  public static void destroyBase() throws Exception {
-    if (stateStore != null) {
-      stateStore.stop();
-      stateStore.close();
-      stateStore = null;
+    protected static StateStoreService getStateStore() {
+        return stateStore;
     }
-  }
 
-  @Before
-  public void setupBase() throws IOException, InterruptedException,
-      InstantiationException, IllegalAccessException {
-    if (stateStore == null) {
-      stateStore = newStateStore(conf);
-      assertNotNull(stateStore);
+    protected static Configuration getConf() {
+        return conf;
     }
-    // Wait for state store to connect
-    stateStore.loadDriver();
-    waitStateStore(stateStore, TimeUnit.SECONDS.toMillis(10));
-  }
+
+    @BeforeClass
+    public static void createBase() throws IOException, InterruptedException {
+        conf = getStateStoreConfiguration();
+        // Disable auto-reconnect to data store
+        conf.setLong(RBFConfigKeys.FEDERATION_STORE_CONNECTION_TEST_MS, TimeUnit.HOURS.toMillis(1));
+    }
+
+    @AfterClass
+    public static void destroyBase() throws Exception {
+        if (stateStore != null) {
+            stateStore.stop();
+            stateStore.close();
+            stateStore = null;
+        }
+    }
+
+    @Before
+    public void setupBase() throws IOException, InterruptedException, InstantiationException, IllegalAccessException {
+        if (stateStore == null) {
+            stateStore = newStateStore(conf);
+            assertNotNull(stateStore);
+        }
+        // Wait for state store to connect
+        stateStore.loadDriver();
+        waitStateStore(stateStore, TimeUnit.SECONDS.toMillis(10));
+    }
 }

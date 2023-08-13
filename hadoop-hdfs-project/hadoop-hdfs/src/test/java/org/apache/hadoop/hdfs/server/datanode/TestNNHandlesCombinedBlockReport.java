@@ -15,11 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.datanode;
 
 import java.io.IOException;
-
 import org.apache.hadoop.hdfs.server.protocol.BlockReportContext;
 import org.apache.hadoop.hdfs.server.protocol.DatanodeRegistration;
 import org.apache.hadoop.hdfs.server.protocol.StorageBlockReport;
@@ -31,11 +29,9 @@ import org.apache.hadoop.hdfs.server.protocol.StorageBlockReport;
  */
 public class TestNNHandlesCombinedBlockReport extends BlockReportTestBase {
 
-  @Override
-  protected void sendBlockReports(DatanodeRegistration dnR, String poolId,
-                                  StorageBlockReport[] reports) throws IOException {
-    LOG.info("Sending combined block reports for " + dnR);
-    cluster.getNameNodeRpc().blockReport(dnR, poolId, reports,
-        new BlockReportContext(1, 0, System.nanoTime(), 0L, true));
-  }
+    @Override
+    protected void sendBlockReports(DatanodeRegistration dnR, String poolId, StorageBlockReport[] reports) throws IOException {
+        LOG.info("Sending combined block reports for " + dnR);
+        cluster.getNameNodeRpc().blockReport(dnR, poolId, reports, new BlockReportContext(1, 0, System.nanoTime(), 0L, true));
+    }
 }

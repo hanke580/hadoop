@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.ipc;
 
 /**
@@ -23,10 +22,11 @@ package org.apache.hadoop.ipc;
  * FairCallQueue.
  */
 public interface RpcMultiplexer {
-  /**
-   * Should get current index and optionally perform whatever is needed
-   * to prepare the next index.
-   * @return current index
-   */
-  int getAndAdvanceCurrentIndex();
+
+    /**
+     * Should get current index and optionally perform whatever is needed
+     * to prepare the next index.
+     * @return current index
+     */
+    int getAndAdvanceCurrentIndex();
 }

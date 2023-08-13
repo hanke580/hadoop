@@ -20,7 +20,6 @@ package org.apache.hadoop.crypto.key.kms.server;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.http.JettyUtils;
 import org.apache.hadoop.util.JsonSerialization;
-
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -46,27 +45,19 @@ import java.util.Map;
 @InterfaceAudience.Private
 public class KMSJSONWriter implements MessageBodyWriter<Object> {
 
-  @Override
-  public boolean isWriteable(Class<?> aClass, Type type,
-      Annotation[] annotations, MediaType mediaType) {
-    return Map.class.isAssignableFrom(aClass) ||
-        List.class.isAssignableFrom(aClass);
-  }
+    @Override
+    public boolean isWriteable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
+        return Map.class.isAssignableFrom(aClass) || List.class.isAssignableFrom(aClass);
+    }
 
-  @Override
-  public long getSize(Object obj, Class<?> aClass, Type type,
-      Annotation[] annotations, MediaType mediaType) {
-    return -1;
-  }
+    @Override
+    public long getSize(Object obj, Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
+        return -1;
+    }
 
-  @Override
-  public void writeTo(Object obj, Class<?> aClass, Type type,
-      Annotation[] annotations, MediaType mediaType,
-      MultivaluedMap<String, Object> stringObjectMultivaluedMap,
-      OutputStream outputStream) throws IOException, WebApplicationException {
-    Writer writer = new OutputStreamWriter(outputStream, Charset
-        .forName("UTF-8"));
-    JsonSerialization.writer().writeValue(writer, obj);
-  }
-
+    @Override
+    public void writeTo(Object obj, Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> stringObjectMultivaluedMap, OutputStream outputStream) throws IOException, WebApplicationException {
+        Writer writer = new OutputStreamWriter(outputStream, Charset.forName("UTF-8"));
+        JsonSerialization.writer().writeValue(writer, obj);
+    }
 }

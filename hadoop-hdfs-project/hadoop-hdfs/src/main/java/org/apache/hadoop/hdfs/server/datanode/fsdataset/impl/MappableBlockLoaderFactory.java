@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.datanode.fsdataset.impl;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -30,22 +29,22 @@ import org.apache.hadoop.io.nativeio.NativeIO;
 @InterfaceStability.Unstable
 public final class MappableBlockLoaderFactory {
 
-  private MappableBlockLoaderFactory() {
-    // Prevent instantiation
-  }
+    private MappableBlockLoaderFactory() {
+        // Prevent instantiation
+    }
 
-  /**
-   * Create a specific cache loader according to the configuration.
-   * If persistent memory volume is not configured, return a cache loader
-   * for DRAM cache. Otherwise, return a cache loader for pmem cache.
-   */
-  public static MappableBlockLoader createCacheLoader(DNConf conf) {
-    if (conf.getPmemVolumes() == null || conf.getPmemVolumes().length == 0) {
-      return new MemoryMappableBlockLoader();
+    /**
+     * Create a specific cache loader according to the configuration.
+     * If persistent memory volume is not configured, return a cache loader
+     * for DRAM cache. Otherwise, return a cache loader for pmem cache.
+     */
+    public static MappableBlockLoader createCacheLoader(DNConf conf) {
+        if (conf.getPmemVolumes() == null || conf.getPmemVolumes().length == 0) {
+            return new MemoryMappableBlockLoader();
+        }
+        if (NativeIO.isAvailable() && NativeIO.POSIX.isPmdkAvailable()) {
+            return new NativePmemMappableBlockLoader();
+        }
+        return new PmemMappableBlockLoader();
     }
-    if (NativeIO.isAvailable() && NativeIO.POSIX.isPmdkAvailable()) {
-      return new NativePmemMappableBlockLoader();
-    }
-    return new PmemMappableBlockLoader();
-  }
 }

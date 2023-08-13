@@ -15,15 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.io;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
-/** @deprecated use java.io.Closeable */
+/**
+ * @deprecated use java.io.Closeable
+ */
 @Deprecated
 @InterfaceAudience.Public
 @InterfaceStability.Stable
-public interface Closeable extends java.io.Closeable{
+public interface Closeable extends java.io.Closeable {
 }

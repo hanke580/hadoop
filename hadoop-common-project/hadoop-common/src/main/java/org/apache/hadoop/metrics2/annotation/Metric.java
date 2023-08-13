@@ -15,11 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.metrics2.annotation;
 
 import java.lang.annotation.*;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
@@ -30,47 +28,48 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
 @Documented
-@Target({ElementType.FIELD, ElementType.METHOD})
+@Target({ ElementType.FIELD, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Metric {
 
-  public enum Type {
-    DEFAULT, COUNTER, GAUGE, TAG
-  }
+    public enum Type {
 
-  /**
-   * Shorthand for optional name and description
-   * @return {description} or {name, description}
-   */
-  String[] value() default {};
+        DEFAULT, COUNTER, GAUGE, TAG
+    }
 
-  /**
-   * @return optional description of the metric
-   */
-  String about() default "";
+    /**
+     * Shorthand for optional name and description
+     * @return {description} or {name, description}
+     */
+    String[] value() default {};
 
-  /**
-   * @return optional sample name for MutableStat/Rate/Rates
-   */
-  String sampleName() default "Ops";
+    /**
+     * @return optional description of the metric
+     */
+    String about() default "";
 
-  /**
-   * @return optional value name for MutableStat/Rate/Rates
-   */
-  String valueName() default "Time";
+    /**
+     * @return optional sample name for MutableStat/Rate/Rates
+     */
+    String sampleName() default "Ops";
 
-  /**
-   * @return true to create a metric snapshot even if unchanged.
-   */
-  boolean always() default false;
+    /**
+     * @return optional value name for MutableStat/Rate/Rates
+     */
+    String valueName() default "Time";
 
-  /**
-   * @return optional type (counter|gauge) of the metric
-   */
-  Type type() default Type.DEFAULT;
+    /**
+     * @return true to create a metric snapshot even if unchanged.
+     */
+    boolean always() default false;
 
-  /**
-   * @return optional roll over interval in secs for MutableQuantiles
-   */
-  int interval() default 10;
+    /**
+     * @return optional type (counter|gauge) of the metric
+     */
+    Type type() default Type.DEFAULT;
+
+    /**
+     * @return optional roll over interval in secs for MutableQuantiles
+     */
+    int interval() default 10;
 }

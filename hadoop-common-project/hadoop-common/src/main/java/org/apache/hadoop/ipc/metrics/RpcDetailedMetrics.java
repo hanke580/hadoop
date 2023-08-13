@@ -31,58 +31,64 @@ import org.slf4j.LoggerFactory;
  * and publishing them through the metrics interfaces.
  */
 @InterfaceAudience.Private
-@Metrics(about="Per method RPC metrics", context="rpcdetailed")
+@Metrics(about = "Per method RPC metrics", context = "rpcdetailed")
 public class RpcDetailedMetrics {
 
-  @Metric MutableRatesWithAggregation rates;
-  @Metric MutableRatesWithAggregation deferredRpcRates;
+    @Metric
+    MutableRatesWithAggregation rates;
 
-  static final Logger LOG = LoggerFactory.getLogger(RpcDetailedMetrics.class);
-  final MetricsRegistry registry;
-  final String name;
+    @Metric
+    MutableRatesWithAggregation deferredRpcRates;
 
-  RpcDetailedMetrics(int port) {
-    name = "RpcDetailedActivityForPort"+ port;
-    registry = new MetricsRegistry("rpcdetailed")
-        .tag("port", "RPC port", String.valueOf(port));
-    LOG.debug(registry.info().toString());
-  }
+    static final Logger LOG = LoggerFactory.getLogger(RpcDetailedMetrics.class);
 
-  public String name() { return name; }
+    final MetricsRegistry registry;
 
-  public static RpcDetailedMetrics create(int port) {
-    RpcDetailedMetrics m = new RpcDetailedMetrics(port);
-    return DefaultMetricsSystem.instance().register(m.name, null, m);
-  }
+    final String name;
 
-  /**
-   * Initialize the metrics for JMX with protocol methods
-   * @param protocol the protocol class
-   */
-  public void init(Class<?> protocol) {
-    rates.init(protocol);
-    deferredRpcRates.init(protocol, "Deferred");
-  }
+    RpcDetailedMetrics(int port) {
+        name = "RpcDetailedActivityForPort" + port;
+        registry = new MetricsRegistry("rpcdetailed").tag("port", "RPC port", String.valueOf(port));
+        LOG.debug(registry.info().toString());
+    }
 
-  /**
-   * Add an RPC processing time sample
-   * @param rpcCallName of the RPC call
-   * @param processingTime  the processing time
-   */
-  //@Override // some instrumentation interface
-  public void addProcessingTime(String rpcCallName, long processingTime) {
-    rates.add(rpcCallName, processingTime);
-  }
+    public String name() {
+        return name;
+    }
 
-  public void addDeferredProcessingTime(String name, long processingTime) {
-    deferredRpcRates.add(name, processingTime);
-  }
+    public static RpcDetailedMetrics create(int port) {
+        RpcDetailedMetrics m = new RpcDetailedMetrics(port);
+        return DefaultMetricsSystem.instance().register(m.name, null, m);
+    }
 
-  /**
-   * Shutdown the instrumentation for the process
-   */
-  //@Override // some instrumentation interface
-  public void shutdown() {
-    DefaultMetricsSystem.instance().unregisterSource(name);
-  }
+    /**
+     * Initialize the metrics for JMX with protocol methods
+     * @param protocol the protocol class
+     */
+    public void init(Class<?> protocol) {
+        rates.init(protocol);
+        deferredRpcRates.init(protocol, "Deferred");
+    }
+
+    /**
+     * Add an RPC processing time sample
+     * @param rpcCallName of the RPC call
+     * @param processingTime  the processing time
+     */
+    //@Override // some instrumentation interface
+    public void addProcessingTime(String rpcCallName, long processingTime) {
+        rates.add(rpcCallName, processingTime);
+    }
+
+    public void addDeferredProcessingTime(String name, long processingTime) {
+        deferredRpcRates.add(name, processingTime);
+    }
+
+    /**
+     * Shutdown the instrumentation for the process
+     */
+    //@Override // some instrumentation interface
+    public void shutdown() {
+        DefaultMetricsSystem.instance().unregisterSource(name);
+    }
 }

@@ -15,13 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.protocol;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -36,72 +34,68 @@ import java.util.Map;
 @InterfaceAudience.Private
 @InterfaceStability.Unstable
 public final class SlowPeerReports {
-  /**
-   * A map from the DataNode's DataNodeUUID to its aggregate latency
-   * as seen by the reporting node.
-   *
-   * The exact choice of the aggregate is opaque to the NameNode but it
-   * should be chosen consistently by all DataNodes in the cluster.
-   * Examples of aggregates are 90th percentile (good) and mean (not so
-   * good).
-   *
-   * The NameNode must not attempt to interpret the aggregate latencies
-   * beyond exposing them as a diagnostic. e.g. metrics. Also, comparing
-   * latencies across reports from different DataNodes may not be not
-   * meaningful and must be avoided.
-   */
-  @Nonnull
-  private final Map<String, Double> slowPeers;
 
-  /**
-   * An object representing a SlowPeerReports with no entries. Should
-   * be used instead of null or creating new objects when there are
-   * no slow peers to report.
-   */
-  public static final SlowPeerReports EMPTY_REPORT =
-      new SlowPeerReports(ImmutableMap.of());
+    /**
+     * A map from the DataNode's DataNodeUUID to its aggregate latency
+     * as seen by the reporting node.
+     *
+     * The exact choice of the aggregate is opaque to the NameNode but it
+     * should be chosen consistently by all DataNodes in the cluster.
+     * Examples of aggregates are 90th percentile (good) and mean (not so
+     * good).
+     *
+     * The NameNode must not attempt to interpret the aggregate latencies
+     * beyond exposing them as a diagnostic. e.g. metrics. Also, comparing
+     * latencies across reports from different DataNodes may not be not
+     * meaningful and must be avoided.
+     */
+    @Nonnull
+    private final Map<String, Double> slowPeers;
 
-  private SlowPeerReports(Map<String, Double> slowPeers) {
-    this.slowPeers = slowPeers;
-  }
+    /**
+     * An object representing a SlowPeerReports with no entries. Should
+     * be used instead of null or creating new objects when there are
+     * no slow peers to report.
+     */
+    public static final SlowPeerReports EMPTY_REPORT = new SlowPeerReports(ImmutableMap.of());
 
-  public static SlowPeerReports create(
-      @Nullable Map<String, Double> slowPeers) {
-    if (slowPeers == null || slowPeers.isEmpty()) {
-      return EMPTY_REPORT;
-    }
-    return new SlowPeerReports(slowPeers);
-  }
-
-  public Map<String, Double> getSlowPeers() {
-    return slowPeers;
-  }
-
-  public boolean haveSlowPeers() {
-    return slowPeers.size() > 0;
-  }
-
-  /**
-   * Return true if the two objects represent the same set slow peer
-   * entries. Primarily for unit testing convenience.
-   */
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    private SlowPeerReports(Map<String, Double> slowPeers) {
+        this.slowPeers = slowPeers;
     }
 
-    if (!(o instanceof SlowPeerReports)) {
-      return false;
+    public static SlowPeerReports create(@Nullable Map<String, Double> slowPeers) {
+        if (slowPeers == null || slowPeers.isEmpty()) {
+            return EMPTY_REPORT;
+        }
+        return new SlowPeerReports(slowPeers);
     }
 
-    SlowPeerReports that = (SlowPeerReports) o;
+    public Map<String, Double> getSlowPeers() {
+        return slowPeers;
+    }
 
-    return slowPeers.equals(that.slowPeers);
-  }
+    public boolean haveSlowPeers() {
+        return slowPeers.size() > 0;
+    }
 
-  @Override
-  public int hashCode() {
-    return slowPeers.hashCode();
-  }
+    /**
+     * Return true if the two objects represent the same set slow peer
+     * entries. Primarily for unit testing convenience.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof SlowPeerReports)) {
+            return false;
+        }
+        SlowPeerReports that = (SlowPeerReports) o;
+        return slowPeers.equals(that.slowPeers);
+    }
+
+    @Override
+    public int hashCode() {
+        return slowPeers.hashCode();
+    }
 }

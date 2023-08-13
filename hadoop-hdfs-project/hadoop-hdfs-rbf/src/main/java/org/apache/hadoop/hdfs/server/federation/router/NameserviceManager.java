@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.server.federation.router;
 
 import java.io.IOException;
-
 import org.apache.hadoop.hdfs.server.federation.store.protocol.DisableNameserviceRequest;
 import org.apache.hadoop.hdfs.server.federation.store.protocol.DisableNameserviceResponse;
 import org.apache.hadoop.hdfs.server.federation.store.protocol.EnableNameserviceRequest;
@@ -31,30 +30,27 @@ import org.apache.hadoop.hdfs.server.federation.store.protocol.GetDisabledNamese
  */
 public interface NameserviceManager {
 
-  /**
-   * Disable a name service.
-   * @param request Request to disable a name service.
-   * @return Response to disable a name service.
-   * @throws IOException If it cannot perform the operation.
-   */
-  DisableNameserviceResponse disableNameservice(
-      DisableNameserviceRequest request) throws IOException;
+    /**
+     * Disable a name service.
+     * @param request Request to disable a name service.
+     * @return Response to disable a name service.
+     * @throws IOException If it cannot perform the operation.
+     */
+    DisableNameserviceResponse disableNameservice(DisableNameserviceRequest request) throws IOException;
 
-  /**
-   * Enable a name service.
-   * @param request Request to enable a name service.
-   * @return Response to disable a name service.
-   * @throws IOException If it cannot perform the operation.
-   */
-  EnableNameserviceResponse enableNameservice(EnableNameserviceRequest request)
-      throws IOException;
+    /**
+     * Enable a name service.
+     * @param request Request to enable a name service.
+     * @return Response to disable a name service.
+     * @throws IOException If it cannot perform the operation.
+     */
+    EnableNameserviceResponse enableNameservice(EnableNameserviceRequest request) throws IOException;
 
-  /**
-   * Get the list of disabled name service.
-   * @param request Request to get the disabled name services.
-   * @return Response to get the disabled name services.
-   * @throws IOException If it cannot perform the operation.
-   */
-  GetDisabledNameservicesResponse getDisabledNameservices(
-      GetDisabledNameservicesRequest request) throws IOException;
+    /**
+     * Get the list of disabled name service.
+     * @param request Request to get the disabled name services.
+     * @return Response to get the disabled name services.
+     * @throws IOException If it cannot perform the operation.
+     */
+    GetDisabledNameservicesResponse getDisabledNameservices(GetDisabledNameservicesRequest request) throws IOException;
 }

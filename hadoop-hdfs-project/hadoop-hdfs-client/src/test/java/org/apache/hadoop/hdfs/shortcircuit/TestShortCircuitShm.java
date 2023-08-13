@@ -29,81 +29,72 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 
 public class TestShortCircuitShm {
-  public static final Logger LOG = LoggerFactory.getLogger(
-      TestShortCircuitShm.class);
-  
-  private static final File TEST_BASE = GenericTestUtils.getTestDir();
 
-  @Before
-  public void before() {
-    Assume.assumeTrue(null == 
-        SharedFileDescriptorFactory.getLoadingFailureReason());
-  }
+    public static final Logger LOG = LoggerFactory.getLogger(TestShortCircuitShm.class);
 
-  @Test(timeout=60000)
-  public void testStartupShutdown() throws Exception {
-    File path = new File(TEST_BASE, "testStartupShutdown");
-    path.mkdirs();
-    SharedFileDescriptorFactory factory =
-        SharedFileDescriptorFactory.create("shm_",
-            new String[] { path.getAbsolutePath() } );
-    FileInputStream stream =
-        factory.createDescriptor("testStartupShutdown", 4096);
-    ShortCircuitShm shm = new ShortCircuitShm(ShmId.createRandom(), stream);
-    shm.free();
-    stream.close();
-    FileUtil.fullyDelete(path);
-  }
+    private static final File TEST_BASE = GenericTestUtils.getTestDir();
 
-  @Test(timeout=60000)
-  public void testAllocateSlots() throws Exception {
-    File path = new File(TEST_BASE, "testAllocateSlots");
-    path.mkdirs();
-    SharedFileDescriptorFactory factory =
-        SharedFileDescriptorFactory.create("shm_", 
-            new String[] { path.getAbsolutePath() });
-    FileInputStream stream =
-        factory.createDescriptor("testAllocateSlots", 4096);
-    ShortCircuitShm shm = new ShortCircuitShm(ShmId.createRandom(), stream);
-    int numSlots = 0;
-    ArrayList<Slot> slots = new ArrayList<Slot>();
-    while (!shm.isFull()) {
-      Slot slot = shm.allocAndRegisterSlot(new ExtendedBlockId(123L, "test_bp1"));
-      slots.add(slot);
-      numSlots++;
+    @Before
+    public void before() {
+        Assume.assumeTrue(null == SharedFileDescriptorFactory.getLoadingFailureReason());
     }
-    LOG.info("allocated " + numSlots + " slots before running out.");
-    int slotIdx = 0;
-    for (Iterator<Slot> iter = shm.slotIterator();
-        iter.hasNext(); ) {
-      Assert.assertTrue(slots.contains(iter.next()));
+
+    @Test(timeout = 60000)
+    public void testStartupShutdown() throws Exception {
+        File path = new File(TEST_BASE, "testStartupShutdown");
+        path.mkdirs();
+        SharedFileDescriptorFactory factory = SharedFileDescriptorFactory.create("shm_", new String[] { path.getAbsolutePath() });
+        FileInputStream stream = factory.createDescriptor("testStartupShutdown", 4096);
+        ShortCircuitShm shm = new ShortCircuitShm(ShmId.createRandom(), stream);
+        shm.free();
+        stream.close();
+        FileUtil.fullyDelete(path);
     }
-    for (Slot slot : slots) {
-      Assert.assertFalse(slot.addAnchor());
-      Assert.assertEquals(slotIdx++, slot.getSlotIdx());
+
+    @Test(timeout = 60000)
+    public void testAllocateSlots() throws Exception {
+        File path = new File(TEST_BASE, "testAllocateSlots");
+        path.mkdirs();
+        SharedFileDescriptorFactory factory = SharedFileDescriptorFactory.create("shm_", new String[] { path.getAbsolutePath() });
+        FileInputStream stream = factory.createDescriptor("testAllocateSlots", 4096);
+        ShortCircuitShm shm = new ShortCircuitShm(ShmId.createRandom(), stream);
+        int numSlots = 0;
+        ArrayList<Slot> slots = new ArrayList<Slot>();
+        while (!shm.isFull()) {
+            Slot slot = shm.allocAndRegisterSlot(new ExtendedBlockId(123L, "test_bp1"));
+            slots.add(slot);
+            numSlots++;
+        }
+        LOG.info("allocated " + numSlots + " slots before running out.");
+        int slotIdx = 0;
+        for (Iterator<Slot> iter = shm.slotIterator(); iter.hasNext(); ) {
+            Assert.assertTrue(slots.contains(iter.next()));
+        }
+        for (Slot slot : slots) {
+            Assert.assertFalse(slot.addAnchor());
+            Assert.assertEquals(slotIdx++, slot.getSlotIdx());
+        }
+        for (Slot slot : slots) {
+            slot.makeAnchorable();
+        }
+        for (Slot slot : slots) {
+            Assert.assertTrue(slot.addAnchor());
+        }
+        for (Slot slot : slots) {
+            slot.removeAnchor();
+        }
+        for (Slot slot : slots) {
+            shm.unregisterSlot(slot.getSlotIdx());
+            slot.makeInvalid();
+        }
+        shm.free();
+        stream.close();
+        FileUtil.fullyDelete(path);
     }
-    for (Slot slot : slots) {
-      slot.makeAnchorable();
-    }
-    for (Slot slot : slots) {
-      Assert.assertTrue(slot.addAnchor());
-    }
-    for (Slot slot : slots) {
-      slot.removeAnchor();
-    }
-    for (Slot slot : slots) {
-      shm.unregisterSlot(slot.getSlotIdx());
-      slot.makeInvalid();
-    }
-    shm.free();
-    stream.close();
-    FileUtil.fullyDelete(path);
-  }
 }

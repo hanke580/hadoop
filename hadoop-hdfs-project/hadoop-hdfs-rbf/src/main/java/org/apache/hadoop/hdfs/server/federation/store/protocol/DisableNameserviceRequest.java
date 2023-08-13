@@ -27,21 +27,21 @@ import org.apache.hadoop.hdfs.server.federation.store.driver.StateStoreSerialize
  */
 public abstract class DisableNameserviceRequest {
 
-  public static DisableNameserviceRequest newInstance() {
-    return StateStoreSerializer.newRecord(DisableNameserviceRequest.class);
-  }
+    public static DisableNameserviceRequest newInstance() {
+        return StateStoreSerializer.newRecord(DisableNameserviceRequest.class);
+    }
 
-  public static DisableNameserviceRequest newInstance(String nsId) {
-    DisableNameserviceRequest request = newInstance();
-    request.setNameServiceId(nsId);
-    return request;
-  }
+    public static DisableNameserviceRequest newInstance(String nsId) {
+        DisableNameserviceRequest request = newInstance();
+        request.setNameServiceId(nsId);
+        return request;
+    }
 
-  @Public
-  @Unstable
-  public abstract String getNameServiceId();
+    @Public
+    @Unstable
+    public abstract String getNameServiceId();
 
-  @Public
-  @Unstable
-  public abstract void setNameServiceId(String nsId);
+    @Public
+    @Unstable
+    public abstract void setNameServiceId(String nsId);
 }

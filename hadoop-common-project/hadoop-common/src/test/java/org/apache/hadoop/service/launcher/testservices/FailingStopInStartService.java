@@ -15,33 +15,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.service.launcher.testservices;
 
 /**
  * This service stops during its start operation.
  */
 public class FailingStopInStartService extends FailureTestService {
-  public static final String NAME =
-      "org.apache.hadoop.service.launcher.testservices.FailingStopInStartService";
-  public static final int EXIT_CODE = -4;
 
-  public FailingStopInStartService() {
-    super(false, false, true, 0);
-  }
+    public static final String NAME = "org.apache.hadoop.service.launcher.testservices.FailingStopInStartService";
 
-  @Override
-  protected void serviceStart() throws Exception {
-    super.serviceStart();
-    try {
-      stop();
-    } catch (Exception e) {
-      //this is secretly swallowed
+    public static final int EXIT_CODE = -4;
+
+    public FailingStopInStartService() {
+        super(false, false, true, 0);
     }
-  }
 
-  @Override
-  int getExitCode() {
-    return EXIT_CODE;
-  }
+    @Override
+    protected void serviceStart() throws Exception {
+        super.serviceStart();
+        try {
+            stop();
+        } catch (Exception e) {
+            //this is secretly swallowed
+        }
+    }
+
+    @Override
+    int getExitCode() {
+        return EXIT_CODE;
+    }
 }

@@ -26,63 +26,63 @@ import org.apache.hadoop.fs.permission.FsPermission;
  * See {@link org.apache.hadoop.fs.viewfs.ConfigUtil} for convenience lib.
  */
 public interface Constants {
-  /**
-   * Prefix for the config variable prefix for the ViewFs mount-table
-   */
-  public static final String CONFIG_VIEWFS_PREFIX = "fs.viewfs.mounttable";
- 
-  /**
-   * Prefix for the home dir for the mount table - if not specified
-   * then the hadoop default value (/user) is used.
-   */
-  public static final String CONFIG_VIEWFS_HOMEDIR = "homedir";
-  
-  /**
-   * Config variable name for the default mount table.
-   */
-  public static final String CONFIG_VIEWFS_DEFAULT_MOUNT_TABLE = "default";
-  
-  /**
-   * Config variable full prefix for the default mount table.
-   */
-  public static final String CONFIG_VIEWFS_PREFIX_DEFAULT_MOUNT_TABLE = 
-          CONFIG_VIEWFS_PREFIX + "." + CONFIG_VIEWFS_DEFAULT_MOUNT_TABLE;
-  
-  /**
-   * Config variable for specifying a simple link
-   */
-  String CONFIG_VIEWFS_LINK = "link";
 
-  /**
-   * Config variable for specifying a fallback for link mount points.
-   */
-  String CONFIG_VIEWFS_LINK_FALLBACK = "linkFallback";
+    /**
+     * Prefix for the config variable prefix for the ViewFs mount-table
+     */
+    public static final String CONFIG_VIEWFS_PREFIX = "fs.viewfs.mounttable";
 
-  /**
-   * Config variable for specifying a merge link
-   */
-  String CONFIG_VIEWFS_LINK_MERGE = "linkMerge";
+    /**
+     * Prefix for the home dir for the mount table - if not specified
+     * then the hadoop default value (/user) is used.
+     */
+    public static final String CONFIG_VIEWFS_HOMEDIR = "homedir";
 
-  /**
-   * Config variable for specifying an nfly link. Nfly writes to multiple
-   * locations, and allows reads from the closest one.
-   */
-  String CONFIG_VIEWFS_LINK_NFLY = "linkNfly";
+    /**
+     * Config variable name for the default mount table.
+     */
+    public static final String CONFIG_VIEWFS_DEFAULT_MOUNT_TABLE = "default";
 
-  /**
-   * Config variable for specifying a merge of the root of the mount-table
-   *  with the root of another file system. 
-   */
-  String CONFIG_VIEWFS_LINK_MERGE_SLASH = "linkMergeSlash";
+    /**
+     * Config variable full prefix for the default mount table.
+     */
+    public static final String CONFIG_VIEWFS_PREFIX_DEFAULT_MOUNT_TABLE = CONFIG_VIEWFS_PREFIX + "." + CONFIG_VIEWFS_DEFAULT_MOUNT_TABLE;
 
-  FsPermission PERMISSION_555 = new FsPermission((short) 0555);
+    /**
+     * Config variable for specifying a simple link
+     */
+    String CONFIG_VIEWFS_LINK = "link";
 
-  String CONFIG_VIEWFS_RENAME_STRATEGY = "fs.viewfs.rename.strategy";
+    /**
+     * Config variable for specifying a fallback for link mount points.
+     */
+    String CONFIG_VIEWFS_LINK_FALLBACK = "linkFallback";
 
-  /**
-   * Enable ViewFileSystem to cache all children filesystems in inner cache.
-   */
-  String CONFIG_VIEWFS_ENABLE_INNER_CACHE = "fs.viewfs.enable.inner.cache";
+    /**
+     * Config variable for specifying a merge link
+     */
+    String CONFIG_VIEWFS_LINK_MERGE = "linkMerge";
 
-  boolean CONFIG_VIEWFS_ENABLE_INNER_CACHE_DEFAULT = true;
+    /**
+     * Config variable for specifying an nfly link. Nfly writes to multiple
+     * locations, and allows reads from the closest one.
+     */
+    String CONFIG_VIEWFS_LINK_NFLY = "linkNfly";
+
+    /**
+     * Config variable for specifying a merge of the root of the mount-table
+     *  with the root of another file system.
+     */
+    String CONFIG_VIEWFS_LINK_MERGE_SLASH = "linkMergeSlash";
+
+    FsPermission PERMISSION_555 = new FsPermission((short) 0555);
+
+    String CONFIG_VIEWFS_RENAME_STRATEGY = "fs.viewfs.rename.strategy";
+
+    /**
+     * Enable ViewFileSystem to cache all children filesystems in inner cache.
+     */
+    String CONFIG_VIEWFS_ENABLE_INNER_CACHE = "fs.viewfs.enable.inner.cache";
+
+    boolean CONFIG_VIEWFS_ENABLE_INNER_CACHE_DEFAULT = true;
 }

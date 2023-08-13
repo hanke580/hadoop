@@ -15,7 +15,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.hadoop.service;
 
 import org.apache.hadoop.test.GenericTestUtils.LogCapturer;
@@ -26,9 +25,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.PrintWriter;
-
 import static org.apache.hadoop.test.GenericTestUtils.LogCapturer.captureLogs;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
@@ -42,23 +39,19 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class TestServiceOperations {
 
-  @Mock
-  private Service service;
+    @Mock
+    private Service service;
 
-  @Mock
-  private RuntimeException e;
+    @Mock
+    private RuntimeException e;
 
-  @Test
-  public void testStopQuietlyWhenServiceStopThrowsException() throws Exception {
-    Logger logger = LoggerFactory.getLogger(TestServiceOperations.class);
-    LogCapturer logCapturer = captureLogs(logger);
-    doThrow(e).when(service).stop();
-
-    ServiceOperations.stopQuietly(logger, service);
-
-    assertThat(logCapturer.getOutput(),
-        containsString("When stopping the service " + service.getName()));
-    verify(e, times(1)).printStackTrace(Mockito.any(PrintWriter.class));
-  }
-
+    @Test
+    public void testStopQuietlyWhenServiceStopThrowsException() throws Exception {
+        Logger logger = LoggerFactory.getLogger(TestServiceOperations.class);
+        LogCapturer logCapturer = captureLogs(logger);
+        doThrow(e).when(service).stop();
+        ServiceOperations.stopQuietly(logger, service);
+        assertThat(logCapturer.getOutput(), containsString("When stopping the service " + service.getName()));
+        verify(e, times(1)).printStackTrace(Mockito.any(PrintWriter.class));
+    }
 }

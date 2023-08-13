@@ -21,79 +21,77 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.io.ByteArrayInputStream;
 import java.io.EOFException;
 import java.io.IOException;
-
 import org.junit.Before;
 import org.junit.Test;
 
 public class TestDecompressorStream {
-  private static final String TEST_STRING =
-      "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-  private ByteArrayInputStream bytesIn;
-  private Decompressor decompressor;
-  private DecompressorStream decompressorStream;
+    private static final String TEST_STRING = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-  @Before
-  public void setUp() throws IOException {
-    bytesIn = new ByteArrayInputStream(TEST_STRING.getBytes());
-    decompressor = new FakeDecompressor();
-    decompressorStream =
-        new DecompressorStream(bytesIn, decompressor, 20, 13);
-  }
+    private ByteArrayInputStream bytesIn;
 
-  @Test
-  public void testReadOneByte() throws IOException {
-    for (int i = 0; i < TEST_STRING.length(); ++i) {
-      assertThat(decompressorStream.read(), is((int) TEST_STRING.charAt(i)));
-    }
-    try {
-      int ret = decompressorStream.read();
-      fail("Not reachable but got ret " + ret);
-    } catch (EOFException e) {
-      // Expect EOF exception
-    }
-  }
+    private Decompressor decompressor;
 
-  @Test
-  public void testReadBuffer() throws IOException {
-    // 32 buf.length < 52 TEST_STRING.length()
-    byte[] buf = new byte[32];
-    int bytesToRead = TEST_STRING.length();
-    int i = 0;
-    while (bytesToRead > 0) {
-      int n = Math.min(bytesToRead, buf.length);
-      int bytesRead = decompressorStream.read(buf, 0, n);
-      assertTrue(bytesRead > 0 && bytesRead <= n);
-      assertThat(new String(buf, 0, bytesRead),
-          is(TEST_STRING.substring(i, i + bytesRead)));
-      bytesToRead = bytesToRead - bytesRead;
-      i = i + bytesRead;
-    }
-    try {
-      int ret = decompressorStream.read(buf, 0, buf.length);
-      fail("Not reachable but got ret " + ret);
-    } catch (EOFException e) {
-      // Expect EOF exception
-    }
-  }
+    private DecompressorStream decompressorStream;
 
-  @Test
-  public void testSkip() throws IOException {
-    assertThat(decompressorStream.skip(12), is(12L));
-    assertThat(decompressorStream.read(), is((int)TEST_STRING.charAt(12)));
-    assertThat(decompressorStream.read(), is((int)TEST_STRING.charAt(13)));
-    assertThat(decompressorStream.read(), is((int)TEST_STRING.charAt(14)));
-    assertThat(decompressorStream.skip(10), is(10L));
-    assertThat(decompressorStream.read(), is((int)TEST_STRING.charAt(25)));
-    try {
-      long ret = decompressorStream.skip(1000);
-      fail("Not reachable but got ret " + ret);
-    } catch (EOFException e) {
-      // Expect EOF exception
+    @Before
+    public void setUp() throws IOException {
+        bytesIn = new ByteArrayInputStream(TEST_STRING.getBytes());
+        decompressor = new FakeDecompressor();
+        decompressorStream = new DecompressorStream(bytesIn, decompressor, 20, 13);
     }
-  }
+
+    @Test
+    public void testReadOneByte() throws IOException {
+        for (int i = 0; i < TEST_STRING.length(); ++i) {
+            assertThat(decompressorStream.read(), is((int) TEST_STRING.charAt(i)));
+        }
+        try {
+            int ret = decompressorStream.read();
+            fail("Not reachable but got ret " + ret);
+        } catch (EOFException e) {
+            // Expect EOF exception
+        }
+    }
+
+    @Test
+    public void testReadBuffer() throws IOException {
+        // 32 buf.length < 52 TEST_STRING.length()
+        byte[] buf = new byte[32];
+        int bytesToRead = TEST_STRING.length();
+        int i = 0;
+        while (bytesToRead > 0) {
+            int n = Math.min(bytesToRead, buf.length);
+            int bytesRead = decompressorStream.read(buf, 0, n);
+            assertTrue(bytesRead > 0 && bytesRead <= n);
+            assertThat(new String(buf, 0, bytesRead), is(TEST_STRING.substring(i, i + bytesRead)));
+            bytesToRead = bytesToRead - bytesRead;
+            i = i + bytesRead;
+        }
+        try {
+            int ret = decompressorStream.read(buf, 0, buf.length);
+            fail("Not reachable but got ret " + ret);
+        } catch (EOFException e) {
+            // Expect EOF exception
+        }
+    }
+
+    @Test
+    public void testSkip() throws IOException {
+        assertThat(decompressorStream.skip(12), is(12L));
+        assertThat(decompressorStream.read(), is((int) TEST_STRING.charAt(12)));
+        assertThat(decompressorStream.read(), is((int) TEST_STRING.charAt(13)));
+        assertThat(decompressorStream.read(), is((int) TEST_STRING.charAt(14)));
+        assertThat(decompressorStream.skip(10), is(10L));
+        assertThat(decompressorStream.read(), is((int) TEST_STRING.charAt(25)));
+        try {
+            long ret = decompressorStream.skip(1000);
+            fail("Not reachable but got ret " + ret);
+        } catch (EOFException e) {
+            // Expect EOF exception
+        }
+    }
 }

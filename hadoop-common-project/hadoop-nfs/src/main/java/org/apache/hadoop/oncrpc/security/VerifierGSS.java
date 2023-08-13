@@ -19,23 +19,22 @@ package org.apache.hadoop.oncrpc.security;
 
 import org.apache.hadoop.oncrpc.XDR;
 
-/** Verifier mapped to RPCSEC_GSS. */
+/**
+ * Verifier mapped to RPCSEC_GSS.
+ */
 public class VerifierGSS extends Verifier {
 
-  public VerifierGSS() {
-    super(AuthFlavor.RPCSEC_GSS);
-  }
+    public VerifierGSS() {
+        super(AuthFlavor.RPCSEC_GSS);
+    }
 
-  @Override
-  public void read(XDR xdr) {
-    // TODO Auto-generated method stub
-    
-  }
+    @Override
+    public void read(XDR xdr) {
+        // TODO Auto-generated method stub
+    }
 
-  @Override
-  public void write(XDR xdr) {
-    // TODO Auto-generated method stub
-    
-  }
-
+    @Override
+    public void write(XDR xdr) {
+        // TODO Auto-generated method stub
+    }
 }

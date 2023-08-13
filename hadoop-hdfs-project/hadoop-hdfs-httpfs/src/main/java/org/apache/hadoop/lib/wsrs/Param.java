@@ -15,49 +15,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.lib.wsrs;
 
 import org.apache.hadoop.classification.InterfaceAudience;
-
 import java.text.MessageFormat;
 
 @InterfaceAudience.Private
 public abstract class Param<T> {
-  private String name;
-  protected T value;
 
-  public Param(String name, T defaultValue) {
-    this.name = name;
-    this.value = defaultValue;
-  }
+    private String name;
 
-  public String getName() {
-    return name;
-  }
+    protected T value;
 
-  public T parseParam(String str) {
-    try {
-      value = (str != null && str.trim().length() > 0) ? parse(str) : value;
-    } catch (Exception ex) {
-      throw new IllegalArgumentException(
-        MessageFormat.format("Parameter [{0}], invalid value [{1}], value must be [{2}]",
-                             name, str, getDomain()));
+    public Param(String name, T defaultValue) {
+        this.name = name;
+        this.value = defaultValue;
     }
-    return value;
-  }
 
-  public T value() {
-    return value;
-  }
+    public String getName() {
+        return name;
+    }
 
-  protected abstract String getDomain();
+    public T parseParam(String str) {
+        try {
+            value = (str != null && str.trim().length() > 0) ? parse(str) : value;
+        } catch (Exception ex) {
+            throw new IllegalArgumentException(MessageFormat.format("Parameter [{0}], invalid value [{1}], value must be [{2}]", name, str, getDomain()));
+        }
+        return value;
+    }
 
-  protected abstract T parse(String str) throws Exception;
+    public T value() {
+        return value;
+    }
 
-  @Override
-  public String toString() {
-    return (value != null) ? value.toString() : "NULL";
-  }
+    protected abstract String getDomain();
 
+    protected abstract T parse(String str) throws Exception;
+
+    @Override
+    public String toString() {
+        return (value != null) ? value.toString() : "NULL";
+    }
 }

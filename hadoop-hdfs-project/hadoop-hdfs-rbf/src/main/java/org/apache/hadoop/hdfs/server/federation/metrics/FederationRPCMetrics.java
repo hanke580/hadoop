@@ -19,7 +19,6 @@ package org.apache.hadoop.hdfs.server.federation.metrics;
 
 import static org.apache.hadoop.metrics2.impl.MsInfo.ProcessName;
 import static org.apache.hadoop.metrics2.impl.MsInfo.SessionId;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.server.federation.router.RouterRpcServer;
 import org.apache.hadoop.metrics2.MetricsSystem;
@@ -33,235 +32,241 @@ import org.apache.hadoop.metrics2.lib.MutableRate;
 /**
  * Implementation of the RPC metrics collector.
  */
-@Metrics(name = "RouterRPCActivity", about = "Router RPC Activity",
-    context = "dfs")
+@Metrics(name = "RouterRPCActivity", about = "Router RPC Activity", context = "dfs")
 public class FederationRPCMetrics implements FederationRPCMBean {
 
-  private final MetricsRegistry registry = new MetricsRegistry("router");
+    private final MetricsRegistry registry = new MetricsRegistry("router");
 
-  private RouterRpcServer rpcServer;
+    private RouterRpcServer rpcServer;
 
-  @Metric("Time for the router to process an operation internally")
-  private MutableRate processing;
-  @Metric("Number of operations the Router processed internally")
-  private MutableCounterLong processingOp;
-  @Metric("Time for the Router to proxy an operation to the Namenodes")
-  private MutableRate proxy;
-  @Metric("Number of operations the Router proxied to a Namenode")
-  private MutableCounterLong proxyOp;
+    @Metric("Time for the router to process an operation internally")
+    private MutableRate processing;
 
-  @Metric("Number of operations to fail to reach NN")
-  private MutableCounterLong proxyOpFailureStandby;
-  @Metric("Number of operations to hit a standby NN")
-  private MutableCounterLong proxyOpFailureCommunicate;
-  @Metric("Number of operations to hit a client overloaded Router")
-  private MutableCounterLong proxyOpFailureClientOverloaded;
-  @Metric("Number of operations not implemented")
-  private MutableCounterLong proxyOpNotImplemented;
-  @Metric("Number of operation retries")
-  private MutableCounterLong proxyOpRetries;
-  @Metric("Number of operations to hit no namenodes available")
-  private MutableCounterLong proxyOpNoNamenodes;
+    @Metric("Number of operations the Router processed internally")
+    private MutableCounterLong processingOp;
 
-  @Metric("Failed requests due to State Store unavailable")
-  private MutableCounterLong routerFailureStateStore;
-  @Metric("Failed requests due to read only mount point")
-  private MutableCounterLong routerFailureReadOnly;
-  @Metric("Failed requests due to locked path")
-  private MutableCounterLong routerFailureLocked;
-  @Metric("Failed requests due to safe mode")
-  private MutableCounterLong routerFailureSafemode;
+    @Metric("Time for the Router to proxy an operation to the Namenodes")
+    private MutableRate proxy;
 
-  public FederationRPCMetrics(Configuration conf, RouterRpcServer rpcServer) {
-    this.rpcServer = rpcServer;
+    @Metric("Number of operations the Router proxied to a Namenode")
+    private MutableCounterLong proxyOp;
 
-    registry.tag(SessionId, "RouterRPCSession");
-    registry.tag(ProcessName, "Router");
-  }
+    @Metric("Number of operations to fail to reach NN")
+    private MutableCounterLong proxyOpFailureStandby;
 
-  public static FederationRPCMetrics create(Configuration conf,
-      RouterRpcServer rpcServer) {
-    MetricsSystem ms = DefaultMetricsSystem.instance();
-    return ms.register(FederationRPCMetrics.class.getName(),
-        "HDFS Federation RPC Metrics",
-        new FederationRPCMetrics(conf, rpcServer));
-  }
+    @Metric("Number of operations to hit a standby NN")
+    private MutableCounterLong proxyOpFailureCommunicate;
 
-  /**
-   * Reset the metrics system.
-   */
-  public static void reset() {
-    MetricsSystem ms = DefaultMetricsSystem.instance();
-    ms.unregisterSource(FederationRPCMetrics.class.getName());
-  }
+    @Metric("Number of operations to hit a client overloaded Router")
+    private MutableCounterLong proxyOpFailureClientOverloaded;
 
-  public void incrProxyOpFailureStandby() {
-    proxyOpFailureStandby.incr();
-  }
+    @Metric("Number of operations not implemented")
+    private MutableCounterLong proxyOpNotImplemented;
 
-  @Override
-  public long getProxyOpFailureStandby() {
-    return proxyOpFailureStandby.value();
-  }
+    @Metric("Number of operation retries")
+    private MutableCounterLong proxyOpRetries;
 
-  public void incrProxyOpFailureCommunicate() {
-    proxyOpFailureCommunicate.incr();
-  }
+    @Metric("Number of operations to hit no namenodes available")
+    private MutableCounterLong proxyOpNoNamenodes;
 
-  @Override
-  public long getProxyOpFailureCommunicate() {
-    return proxyOpFailureCommunicate.value();
-  }
+    @Metric("Failed requests due to State Store unavailable")
+    private MutableCounterLong routerFailureStateStore;
 
-  public void incrProxyOpFailureClientOverloaded() {
-    proxyOpFailureClientOverloaded.incr();
-  }
+    @Metric("Failed requests due to read only mount point")
+    private MutableCounterLong routerFailureReadOnly;
 
-  @Override
-  public long getProxyOpFailureClientOverloaded() {
-    return proxyOpFailureClientOverloaded.value();
-  }
+    @Metric("Failed requests due to locked path")
+    private MutableCounterLong routerFailureLocked;
 
-  public void incrProxyOpNotImplemented() {
-    proxyOpNotImplemented.incr();
-  }
+    @Metric("Failed requests due to safe mode")
+    private MutableCounterLong routerFailureSafemode;
 
-  @Override
-  public long getProxyOpNotImplemented() {
-    return proxyOpNotImplemented.value();
-  }
+    public FederationRPCMetrics(Configuration conf, RouterRpcServer rpcServer) {
+        this.rpcServer = rpcServer;
+        registry.tag(SessionId, "RouterRPCSession");
+        registry.tag(ProcessName, "Router");
+    }
 
-  public void incrProxyOpRetries() {
-    proxyOpRetries.incr();
-  }
+    public static FederationRPCMetrics create(Configuration conf, RouterRpcServer rpcServer) {
+        MetricsSystem ms = DefaultMetricsSystem.instance();
+        return ms.register(FederationRPCMetrics.class.getName(), "HDFS Federation RPC Metrics", new FederationRPCMetrics(conf, rpcServer));
+    }
 
-  @Override
-  public long getProxyOpRetries() {
-    return proxyOpRetries.value();
-  }
+    /**
+     * Reset the metrics system.
+     */
+    public static void reset() {
+        MetricsSystem ms = DefaultMetricsSystem.instance();
+        ms.unregisterSource(FederationRPCMetrics.class.getName());
+    }
 
-  public void incrProxyOpNoNamenodes() {
-    proxyOpNoNamenodes.incr();
-  }
+    public void incrProxyOpFailureStandby() {
+        proxyOpFailureStandby.incr();
+    }
 
-  @Override
-  public long getProxyOpNoNamenodes() {
-    return proxyOpNoNamenodes.value();
-  }
+    @Override
+    public long getProxyOpFailureStandby() {
+        return proxyOpFailureStandby.value();
+    }
 
-  public void incrRouterFailureStateStore() {
-    routerFailureStateStore.incr();
-  }
+    public void incrProxyOpFailureCommunicate() {
+        proxyOpFailureCommunicate.incr();
+    }
 
-  @Override
-  public long getRouterFailureStateStoreOps() {
-    return routerFailureStateStore.value();
-  }
+    @Override
+    public long getProxyOpFailureCommunicate() {
+        return proxyOpFailureCommunicate.value();
+    }
 
-  public void incrRouterFailureSafemode() {
-    routerFailureSafemode.incr();
-  }
+    public void incrProxyOpFailureClientOverloaded() {
+        proxyOpFailureClientOverloaded.incr();
+    }
 
-  @Override
-  public long getRouterFailureSafemodeOps() {
-    return routerFailureSafemode.value();
-  }
+    @Override
+    public long getProxyOpFailureClientOverloaded() {
+        return proxyOpFailureClientOverloaded.value();
+    }
 
-  public void incrRouterFailureReadOnly() {
-    routerFailureReadOnly.incr();
-  }
+    public void incrProxyOpNotImplemented() {
+        proxyOpNotImplemented.incr();
+    }
 
-  @Override
-  public long getRouterFailureReadOnlyOps() {
-    return routerFailureReadOnly.value();
-  }
+    @Override
+    public long getProxyOpNotImplemented() {
+        return proxyOpNotImplemented.value();
+    }
 
-  public void incrRouterFailureLocked() {
-    routerFailureLocked.incr();
-  }
+    public void incrProxyOpRetries() {
+        proxyOpRetries.incr();
+    }
 
-  @Override
-  public long getRouterFailureLockedOps() {
-    return routerFailureLocked.value();
-  }
+    @Override
+    public long getProxyOpRetries() {
+        return proxyOpRetries.value();
+    }
 
-  @Override
-  public int getRpcServerCallQueue() {
-    return rpcServer.getServer().getCallQueueLen();
-  }
+    public void incrProxyOpNoNamenodes() {
+        proxyOpNoNamenodes.incr();
+    }
 
-  @Override
-  public int getRpcServerNumOpenConnections() {
-    return rpcServer.getServer().getNumOpenConnections();
-  }
+    @Override
+    public long getProxyOpNoNamenodes() {
+        return proxyOpNoNamenodes.value();
+    }
 
-  @Override
-  public int getRpcClientNumConnections() {
-    return rpcServer.getRPCClient().getNumConnections();
-  }
+    public void incrRouterFailureStateStore() {
+        routerFailureStateStore.incr();
+    }
 
-  @Override
-  public int getRpcClientNumActiveConnections() {
-    return rpcServer.getRPCClient().getNumActiveConnections();
-  }
+    @Override
+    public long getRouterFailureStateStoreOps() {
+        return routerFailureStateStore.value();
+    }
 
-  @Override
-  public int getRpcClientNumCreatingConnections() {
-    return rpcServer.getRPCClient().getNumCreatingConnections();
-  }
+    public void incrRouterFailureSafemode() {
+        routerFailureSafemode.incr();
+    }
 
-  @Override
-  public int getRpcClientNumConnectionPools() {
-    return rpcServer.getRPCClient().getNumConnectionPools();
-  }
+    @Override
+    public long getRouterFailureSafemodeOps() {
+        return routerFailureSafemode.value();
+    }
 
-  @Override
-  public String getRpcClientConnections() {
-    return rpcServer.getRPCClient().getJSON();
-  }
+    public void incrRouterFailureReadOnly() {
+        routerFailureReadOnly.incr();
+    }
 
-  @Override
-  public String getAsyncCallerPool() {
-    return rpcServer.getRPCClient().getAsyncCallerPoolJson();
-  }
+    @Override
+    public long getRouterFailureReadOnlyOps() {
+        return routerFailureReadOnly.value();
+    }
 
-  /**
-   * Add the time to proxy an operation from the moment the Router sends it to
-   * the Namenode until it replied.
-   * @param time Proxy time of an operation in nanoseconds.
-   */
-  public void addProxyTime(long time) {
-    proxy.add(time);
-    proxyOp.incr();
-  }
+    public void incrRouterFailureLocked() {
+        routerFailureLocked.incr();
+    }
 
-  @Override
-  public double getProxyAvg() {
-    return proxy.lastStat().mean();
-  }
+    @Override
+    public long getRouterFailureLockedOps() {
+        return routerFailureLocked.value();
+    }
 
-  @Override
-  public long getProxyOps() {
-    return proxyOp.value();
-  }
+    @Override
+    public int getRpcServerCallQueue() {
+        return rpcServer.getServer().getCallQueueLen();
+    }
 
-  /**
-   * Add the time to process a request in the Router from the time we receive
-   * the call until we send it to the Namenode.
-   * @param time Process time of an operation in nanoseconds.
-   */
-  public void addProcessingTime(long time) {
-    processing.add(time);
-    processingOp.incr();
-  }
+    @Override
+    public int getRpcServerNumOpenConnections() {
+        return rpcServer.getServer().getNumOpenConnections();
+    }
 
-  @Override
-  public double getProcessingAvg() {
-    return processing.lastStat().mean();
-  }
+    @Override
+    public int getRpcClientNumConnections() {
+        return rpcServer.getRPCClient().getNumConnections();
+    }
 
-  @Override
-  public long getProcessingOps() {
-    return processingOp.value();
-  }
+    @Override
+    public int getRpcClientNumActiveConnections() {
+        return rpcServer.getRPCClient().getNumActiveConnections();
+    }
+
+    @Override
+    public int getRpcClientNumCreatingConnections() {
+        return rpcServer.getRPCClient().getNumCreatingConnections();
+    }
+
+    @Override
+    public int getRpcClientNumConnectionPools() {
+        return rpcServer.getRPCClient().getNumConnectionPools();
+    }
+
+    @Override
+    public String getRpcClientConnections() {
+        return rpcServer.getRPCClient().getJSON();
+    }
+
+    @Override
+    public String getAsyncCallerPool() {
+        return rpcServer.getRPCClient().getAsyncCallerPoolJson();
+    }
+
+    /**
+     * Add the time to proxy an operation from the moment the Router sends it to
+     * the Namenode until it replied.
+     * @param time Proxy time of an operation in nanoseconds.
+     */
+    public void addProxyTime(long time) {
+        proxy.add(time);
+        proxyOp.incr();
+    }
+
+    @Override
+    public double getProxyAvg() {
+        return proxy.lastStat().mean();
+    }
+
+    @Override
+    public long getProxyOps() {
+        return proxyOp.value();
+    }
+
+    /**
+     * Add the time to process a request in the Router from the time we receive
+     * the call until we send it to the Namenode.
+     * @param time Process time of an operation in nanoseconds.
+     */
+    public void addProcessingTime(long time) {
+        processing.add(time);
+        processingOp.incr();
+    }
+
+    @Override
+    public double getProcessingAvg() {
+        return processing.lastStat().mean();
+    }
+
+    @Override
+    public long getProcessingOps() {
+        return processingOp.value();
+    }
 }

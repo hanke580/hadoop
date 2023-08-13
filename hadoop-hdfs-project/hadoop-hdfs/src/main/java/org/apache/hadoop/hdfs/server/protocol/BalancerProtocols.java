@@ -22,9 +22,10 @@ import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.apache.hadoop.hdfs.protocol.ClientProtocol;
 import org.apache.hadoop.security.KerberosInfo;
 
-
-/** The full set of protocols used by the Balancer. */
+/**
+ * The full set of protocols used by the Balancer.
+ */
 @InterfaceAudience.Private
-@KerberosInfo(
-    serverPrincipal = DFSConfigKeys.DFS_NAMENODE_KERBEROS_PRINCIPAL_KEY)
-public interface BalancerProtocols extends ClientProtocol, NamenodeProtocol { }
+@KerberosInfo(serverPrincipal = DFSConfigKeys.DFS_NAMENODE_KERBEROS_PRINCIPAL_KEY)
+public interface BalancerProtocols extends ClientProtocol, NamenodeProtocol {
+}

@@ -21,7 +21,6 @@ import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.io.erasurecode.ECBlock;
 import org.apache.hadoop.io.erasurecode.ECChunk;
 import org.apache.hadoop.io.erasurecode.rawcoder.RawErasureEncoder;
-
 import java.io.IOException;
 
 /**
@@ -30,41 +29,42 @@ import java.io.IOException;
  */
 @InterfaceAudience.Private
 public class ErasureEncodingStep implements ErasureCodingStep {
-  private ECBlock[] inputBlocks;
-  private ECBlock[] outputBlocks;
-  private RawErasureEncoder rawEncoder;
 
-  /**
-   * The constructor with all the necessary info.
-   * @param inputBlocks
-   * @param outputBlocks
-   * @param rawEncoder
-   */
-  public ErasureEncodingStep(ECBlock[] inputBlocks, ECBlock[] outputBlocks,
-                             RawErasureEncoder rawEncoder) {
-    this.inputBlocks = inputBlocks;
-    this.outputBlocks = outputBlocks;
-    this.rawEncoder = rawEncoder;
-  }
+    private ECBlock[] inputBlocks;
 
-  @Override
-  public void performCoding(ECChunk[] inputChunks, ECChunk[] outputChunks)
-      throws IOException {
-    rawEncoder.encode(inputChunks, outputChunks);
-  }
+    private ECBlock[] outputBlocks;
 
-  @Override
-  public ECBlock[] getInputBlocks() {
-    return inputBlocks;
-  }
+    private RawErasureEncoder rawEncoder;
 
-  @Override
-  public ECBlock[] getOutputBlocks() {
-    return outputBlocks;
-  }
+    /**
+     * The constructor with all the necessary info.
+     * @param inputBlocks
+     * @param outputBlocks
+     * @param rawEncoder
+     */
+    public ErasureEncodingStep(ECBlock[] inputBlocks, ECBlock[] outputBlocks, RawErasureEncoder rawEncoder) {
+        this.inputBlocks = inputBlocks;
+        this.outputBlocks = outputBlocks;
+        this.rawEncoder = rawEncoder;
+    }
 
-  @Override
-  public void finish() {
-    // do nothing
-  }
+    @Override
+    public void performCoding(ECChunk[] inputChunks, ECChunk[] outputChunks) throws IOException {
+        rawEncoder.encode(inputChunks, outputChunks);
+    }
+
+    @Override
+    public ECBlock[] getInputBlocks() {
+        return inputBlocks;
+    }
+
+    @Override
+    public ECBlock[] getOutputBlocks() {
+        return outputBlocks;
+    }
+
+    @Override
+    public void finish() {
+        // do nothing
+    }
 }

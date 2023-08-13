@@ -27,7 +27,6 @@ import org.apache.hadoop.crypto.key.kms.KMSClientProvider;
 import org.apache.hadoop.crypto.key.kms.KMSRESTConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -41,179 +40,134 @@ import java.util.Map;
  */
 @InterfaceAudience.Private
 public final class KMSUtil {
-  public static final Logger LOG =
-      LoggerFactory.getLogger(KMSUtil.class);
 
-  private KMSUtil() { /* Hidden constructor */ }
+    public static final Logger LOG = LoggerFactory.getLogger(KMSUtil.class);
 
-  /**
-   * Creates a new KeyProvider from the given Configuration
-   * and configuration key name.
-   *
-   * @param conf Configuration
-   * @param configKeyName The configuration key name
-   * @return new KeyProvider, or null if no provider was found.
-   * @throws IOException if the KeyProvider is improperly specified in
-   *                             the Configuration
-   */
-  public static KeyProvider createKeyProvider(final Configuration conf,
-      final String configKeyName) throws IOException {
-    LOG.debug("Creating key provider with config key {}", configKeyName);
-    URI uri = getKeyProviderUri(conf, configKeyName);
-    return (uri != null) ? createKeyProviderFromUri(conf, uri) : null;
-  }
-
-  public static URI getKeyProviderUri(final Configuration conf) {
-    return KMSUtil.getKeyProviderUri(
-        conf, KeyProviderFactory.KEY_PROVIDER_PATH);
-  }
-
-  public static URI getKeyProviderUri(final Configuration conf,
-                                      final String configKeyName) {
-    final String providerUriStr = conf.getTrimmed(configKeyName);
-    // No provider set in conf
-    if (providerUriStr == null || providerUriStr.isEmpty()) {
-      return null;
+    private KMSUtil() {
+        /* Hidden constructor */
     }
-    return URI.create(providerUriStr);
-  }
 
-  public static KeyProvider createKeyProviderFromUri(final Configuration conf,
-      final URI providerUri) throws IOException {
-    KeyProvider keyProvider = KeyProviderFactory.get(providerUri, conf);
-    if (keyProvider == null) {
-      throw new IOException("Could not instantiate KeyProvider for uri: " +
-          providerUri);
+    /**
+     * Creates a new KeyProvider from the given Configuration
+     * and configuration key name.
+     *
+     * @param conf Configuration
+     * @param configKeyName The configuration key name
+     * @return new KeyProvider, or null if no provider was found.
+     * @throws IOException if the KeyProvider is improperly specified in
+     *                             the Configuration
+     */
+    public static KeyProvider createKeyProvider(final Configuration conf, final String configKeyName) throws IOException {
+        LOG.debug("Creating key provider with config key {}", configKeyName);
+        URI uri = getKeyProviderUri(conf, configKeyName);
+        return (uri != null) ? createKeyProviderFromUri(conf, uri) : null;
     }
-    if (keyProvider.isTransient()) {
-      throw new IOException("KeyProvider " + keyProvider.toString()
-          + " was found but it is a transient provider.");
+
+    public static URI getKeyProviderUri(final Configuration conf) {
+        return KMSUtil.getKeyProviderUri(conf, KeyProviderFactory.KEY_PROVIDER_PATH);
     }
-    return keyProvider;
-  }
 
-  @SuppressWarnings("unchecked")
-  public static Map toJSON(KeyProvider.KeyVersion keyVersion) {
-    Map json = new HashMap();
-    if (keyVersion != null) {
-      json.put(KMSRESTConstants.NAME_FIELD,
-          keyVersion.getName());
-      json.put(KMSRESTConstants.VERSION_NAME_FIELD,
-          keyVersion.getVersionName());
-      json.put(KMSRESTConstants.MATERIAL_FIELD,
-          Base64.encodeBase64URLSafeString(
-              keyVersion.getMaterial()));
+    public static URI getKeyProviderUri(final Configuration conf, final String configKeyName) {
+        final String providerUriStr = conf.getTrimmed(configKeyName);
+        // No provider set in conf
+        if (providerUriStr == null || providerUriStr.isEmpty()) {
+            return null;
+        }
+        return URI.create(providerUriStr);
     }
-    return json;
-  }
 
-  @SuppressWarnings("unchecked")
-  public static Map toJSON(EncryptedKeyVersion encryptedKeyVersion) {
-    Map json = new HashMap();
-    if (encryptedKeyVersion != null) {
-      json.put(KMSRESTConstants.VERSION_NAME_FIELD,
-          encryptedKeyVersion.getEncryptionKeyVersionName());
-      json.put(KMSRESTConstants.IV_FIELD, Base64
-          .encodeBase64URLSafeString(encryptedKeyVersion.getEncryptedKeyIv()));
-      json.put(KMSRESTConstants.ENCRYPTED_KEY_VERSION_FIELD,
-          toJSON(encryptedKeyVersion.getEncryptedKeyVersion()));
+    public static KeyProvider createKeyProviderFromUri(final Configuration conf, final URI providerUri) throws IOException {
+        KeyProvider keyProvider = KeyProviderFactory.get(providerUri, conf);
+        if (keyProvider == null) {
+            throw new IOException("Could not instantiate KeyProvider for uri: " + providerUri);
+        }
+        if (keyProvider.isTransient()) {
+            throw new IOException("KeyProvider " + keyProvider.toString() + " was found but it is a transient provider.");
+        }
+        return keyProvider;
     }
-    return json;
-  }
 
-  public static <T> T checkNotNull(T o, String name)
-      throws IllegalArgumentException {
-    if (o == null) {
-      throw new IllegalArgumentException("Parameter '" + name +
-          "' cannot be null");
+    @SuppressWarnings("unchecked")
+    public static Map toJSON(KeyProvider.KeyVersion keyVersion) {
+        Map json = new HashMap();
+        if (keyVersion != null) {
+            json.put(KMSRESTConstants.NAME_FIELD, keyVersion.getName());
+            json.put(KMSRESTConstants.VERSION_NAME_FIELD, keyVersion.getVersionName());
+            json.put(KMSRESTConstants.MATERIAL_FIELD, Base64.encodeBase64URLSafeString(keyVersion.getMaterial()));
+        }
+        return json;
     }
-    return o;
-  }
 
-  public static String checkNotEmpty(String s, String name)
-      throws IllegalArgumentException {
-    checkNotNull(s, name);
-    if (s.isEmpty()) {
-      throw new IllegalArgumentException("Parameter '" + name +
-          "' cannot be empty");
+    @SuppressWarnings("unchecked")
+    public static Map toJSON(EncryptedKeyVersion encryptedKeyVersion) {
+        Map json = new HashMap();
+        if (encryptedKeyVersion != null) {
+            json.put(KMSRESTConstants.VERSION_NAME_FIELD, encryptedKeyVersion.getEncryptionKeyVersionName());
+            json.put(KMSRESTConstants.IV_FIELD, Base64.encodeBase64URLSafeString(encryptedKeyVersion.getEncryptedKeyIv()));
+            json.put(KMSRESTConstants.ENCRYPTED_KEY_VERSION_FIELD, toJSON(encryptedKeyVersion.getEncryptedKeyVersion()));
+        }
+        return json;
     }
-    return s;
-  }
 
-  @SuppressWarnings("rawtypes")
-  public static List<EncryptedKeyVersion>
-      parseJSONEncKeyVersions(String keyName, List valueList) {
-    checkNotNull(valueList, "valueList");
-    List<EncryptedKeyVersion> ekvs = new ArrayList<>(valueList.size());
-    if (!valueList.isEmpty()) {
-      for (Object values : valueList) {
-        Map valueMap = (Map) values;
-        ekvs.add(parseJSONEncKeyVersion(keyName, valueMap));
-      }
+    public static <T> T checkNotNull(T o, String name) throws IllegalArgumentException {
+        if (o == null) {
+            throw new IllegalArgumentException("Parameter '" + name + "' cannot be null");
+        }
+        return o;
     }
-    return ekvs;
-  }
 
-  @SuppressWarnings("unchecked")
-  public static EncryptedKeyVersion parseJSONEncKeyVersion(String keyName,
-      Map valueMap) {
-    checkNotNull(valueMap, "valueMap");
-    String versionName = checkNotNull(
-        (String) valueMap.get(KMSRESTConstants.VERSION_NAME_FIELD),
-        KMSRESTConstants.VERSION_NAME_FIELD);
-
-    byte[] iv = Base64.decodeBase64(checkNotNull(
-        (String) valueMap.get(KMSRESTConstants.IV_FIELD),
-        KMSRESTConstants.IV_FIELD));
-
-    Map encValueMap = checkNotNull((Map)
-            valueMap.get(KMSRESTConstants.ENCRYPTED_KEY_VERSION_FIELD),
-        KMSRESTConstants.ENCRYPTED_KEY_VERSION_FIELD);
-
-    String encVersionName = checkNotNull((String)
-            encValueMap.get(KMSRESTConstants.VERSION_NAME_FIELD),
-        KMSRESTConstants.VERSION_NAME_FIELD);
-
-    byte[] encKeyMaterial = Base64.decodeBase64(checkNotNull((String)
-            encValueMap.get(KMSRESTConstants.MATERIAL_FIELD),
-        KMSRESTConstants.MATERIAL_FIELD));
-
-    return new KMSClientProvider.KMSEncryptedKeyVersion(keyName, versionName,
-        iv, encVersionName, encKeyMaterial);
-  }
-
-  @SuppressWarnings("unchecked")
-  public static KeyProvider.KeyVersion parseJSONKeyVersion(Map valueMap) {
-    checkNotNull(valueMap, "valueMap");
-    KeyProvider.KeyVersion keyVersion = null;
-    if (!valueMap.isEmpty()) {
-      byte[] material =
-          (valueMap.containsKey(KMSRESTConstants.MATERIAL_FIELD)) ?
-              Base64.decodeBase64(
-                  (String) valueMap.get(KMSRESTConstants.MATERIAL_FIELD)) :
-              null;
-      String versionName =
-          (String) valueMap.get(KMSRESTConstants.VERSION_NAME_FIELD);
-      String keyName = (String) valueMap.get(KMSRESTConstants.NAME_FIELD);
-      keyVersion =
-          new KMSClientProvider.KMSKeyVersion(keyName, versionName, material);
+    public static String checkNotEmpty(String s, String name) throws IllegalArgumentException {
+        checkNotNull(s, name);
+        if (s.isEmpty()) {
+            throw new IllegalArgumentException("Parameter '" + name + "' cannot be empty");
+        }
+        return s;
     }
-    return keyVersion;
-  }
 
-  @SuppressWarnings("unchecked")
-  public static KeyProvider.Metadata parseJSONMetadata(Map valueMap) {
-    checkNotNull(valueMap, "valueMap");
-    KeyProvider.Metadata metadata = null;
-    if (!valueMap.isEmpty()) {
-      metadata = new KMSClientProvider.KMSMetadata(
-          (String) valueMap.get(KMSRESTConstants.CIPHER_FIELD),
-          (Integer) valueMap.get(KMSRESTConstants.LENGTH_FIELD),
-          (String) valueMap.get(KMSRESTConstants.DESCRIPTION_FIELD),
-          (Map<String, String>) valueMap.get(KMSRESTConstants.ATTRIBUTES_FIELD),
-          new Date((Long) valueMap.get(KMSRESTConstants.CREATED_FIELD)),
-          (Integer) valueMap.get(KMSRESTConstants.VERSIONS_FIELD));
+    @SuppressWarnings("rawtypes")
+    public static List<EncryptedKeyVersion> parseJSONEncKeyVersions(String keyName, List valueList) {
+        checkNotNull(valueList, "valueList");
+        List<EncryptedKeyVersion> ekvs = new ArrayList<>(valueList.size());
+        if (!valueList.isEmpty()) {
+            for (Object values : valueList) {
+                Map valueMap = (Map) values;
+                ekvs.add(parseJSONEncKeyVersion(keyName, valueMap));
+            }
+        }
+        return ekvs;
     }
-    return metadata;
-  }
+
+    @SuppressWarnings("unchecked")
+    public static EncryptedKeyVersion parseJSONEncKeyVersion(String keyName, Map valueMap) {
+        checkNotNull(valueMap, "valueMap");
+        String versionName = checkNotNull((String) valueMap.get(KMSRESTConstants.VERSION_NAME_FIELD), KMSRESTConstants.VERSION_NAME_FIELD);
+        byte[] iv = Base64.decodeBase64(checkNotNull((String) valueMap.get(KMSRESTConstants.IV_FIELD), KMSRESTConstants.IV_FIELD));
+        Map encValueMap = checkNotNull((Map) valueMap.get(KMSRESTConstants.ENCRYPTED_KEY_VERSION_FIELD), KMSRESTConstants.ENCRYPTED_KEY_VERSION_FIELD);
+        String encVersionName = checkNotNull((String) encValueMap.get(KMSRESTConstants.VERSION_NAME_FIELD), KMSRESTConstants.VERSION_NAME_FIELD);
+        byte[] encKeyMaterial = Base64.decodeBase64(checkNotNull((String) encValueMap.get(KMSRESTConstants.MATERIAL_FIELD), KMSRESTConstants.MATERIAL_FIELD));
+        return new KMSClientProvider.KMSEncryptedKeyVersion(keyName, versionName, iv, encVersionName, encKeyMaterial);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static KeyProvider.KeyVersion parseJSONKeyVersion(Map valueMap) {
+        checkNotNull(valueMap, "valueMap");
+        KeyProvider.KeyVersion keyVersion = null;
+        if (!valueMap.isEmpty()) {
+            byte[] material = (valueMap.containsKey(KMSRESTConstants.MATERIAL_FIELD)) ? Base64.decodeBase64((String) valueMap.get(KMSRESTConstants.MATERIAL_FIELD)) : null;
+            String versionName = (String) valueMap.get(KMSRESTConstants.VERSION_NAME_FIELD);
+            String keyName = (String) valueMap.get(KMSRESTConstants.NAME_FIELD);
+            keyVersion = new KMSClientProvider.KMSKeyVersion(keyName, versionName, material);
+        }
+        return keyVersion;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static KeyProvider.Metadata parseJSONMetadata(Map valueMap) {
+        checkNotNull(valueMap, "valueMap");
+        KeyProvider.Metadata metadata = null;
+        if (!valueMap.isEmpty()) {
+            metadata = new KMSClientProvider.KMSMetadata((String) valueMap.get(KMSRESTConstants.CIPHER_FIELD), (Integer) valueMap.get(KMSRESTConstants.LENGTH_FIELD), (String) valueMap.get(KMSRESTConstants.DESCRIPTION_FIELD), (Map<String, String>) valueMap.get(KMSRESTConstants.ATTRIBUTES_FIELD), new Date((Long) valueMap.get(KMSRESTConstants.CREATED_FIELD)), (Integer) valueMap.get(KMSRESTConstants.VERSIONS_FIELD));
+        }
+        return metadata;
+    }
 }

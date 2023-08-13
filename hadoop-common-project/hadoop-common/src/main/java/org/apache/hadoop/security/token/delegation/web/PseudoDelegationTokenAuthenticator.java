@@ -21,7 +21,6 @@ import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.security.authentication.client.PseudoAuthenticator;
-
 import java.io.IOException;
 
 /**
@@ -35,20 +34,19 @@ import java.io.IOException;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
-public class PseudoDelegationTokenAuthenticator
-    extends DelegationTokenAuthenticator {
+public class PseudoDelegationTokenAuthenticator extends DelegationTokenAuthenticator {
 
-  public PseudoDelegationTokenAuthenticator() {
-    super(new PseudoAuthenticator() {
-      @Override
-      protected String getUserName() {
-        try {
-          return UserGroupInformation.getCurrentUser().getShortUserName();
-        } catch (IOException ex) {
-          throw new RuntimeException(ex);
-        }
-      }
-    });
-  }
+    public PseudoDelegationTokenAuthenticator() {
+        super(new PseudoAuthenticator() {
 
+            @Override
+            protected String getUserName() {
+                try {
+                    return UserGroupInformation.getCurrentUser().getShortUserName();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+    }
 }

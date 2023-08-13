@@ -20,11 +20,9 @@ package org.apache.hadoop.hdfs.server.federation.router;
 import static org.apache.hadoop.hdfs.server.federation.FederationTestUtils.NAMENODES;
 import static org.apache.hadoop.hdfs.server.federation.FederationTestUtils.NAMESERVICES;
 import static org.junit.Assert.assertEquals;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.server.federation.MockResolver;
 import org.apache.hadoop.hdfs.server.federation.MiniRouterDFSCluster;
@@ -44,125 +42,105 @@ import org.junit.rules.TestName;
  */
 public class TestRouterNamenodeHeartbeat {
 
-  private static MiniRouterDFSCluster cluster;
-  private static ActiveNamenodeResolver namenodeResolver;
-  private static List<NamenodeHeartbeatService> services;
+    private static MiniRouterDFSCluster cluster;
 
-  @Rule
-  public TestName name = new TestName();
+    private static ActiveNamenodeResolver namenodeResolver;
 
-  @BeforeClass
-  public static void globalSetUp() throws Exception {
+    private static List<NamenodeHeartbeatService> services;
 
-    cluster = new MiniRouterDFSCluster(true, 2);
+    @Rule
+    public TestName name = new TestName();
 
-    // Start NNs and DNs and wait until ready
-    cluster.startCluster();
-
-    // Mock locator that records the heartbeats
-    List<String> nss = cluster.getNameservices();
-    String ns = nss.get(0);
-    Configuration conf = cluster.generateNamenodeConfiguration(ns);
-    namenodeResolver = new MockResolver(conf);
-    namenodeResolver.setRouterId("testrouter");
-
-    // Create one heartbeat service per NN
-    services = new ArrayList<>();
-    for (NamenodeContext nn : cluster.getNamenodes()) {
-      String nsId = nn.getNameserviceId();
-      String nnId = nn.getNamenodeId();
-      NamenodeHeartbeatService service = new NamenodeHeartbeatService(
-          namenodeResolver, nsId, nnId);
-      service.init(conf);
-      service.start();
-      services.add(service);
-    }
-  }
-
-  @AfterClass
-  public static void tearDown() throws IOException {
-    cluster.shutdown();
-    for (NamenodeHeartbeatService service: services) {
-      service.stop();
-      service.close();
-    }
-  }
-
-  @Test
-  public void testNamenodeHeartbeatService() throws IOException {
-
-    MiniRouterDFSCluster testCluster = new MiniRouterDFSCluster(true, 1);
-    Configuration heartbeatConfig = testCluster.generateNamenodeConfiguration(
-        NAMESERVICES[0]);
-    NamenodeHeartbeatService server = new NamenodeHeartbeatService(
-        namenodeResolver, NAMESERVICES[0], NAMENODES[0]);
-    server.init(heartbeatConfig);
-    assertEquals(STATE.INITED, server.getServiceState());
-    server.start();
-    assertEquals(STATE.STARTED, server.getServiceState());
-    server.stop();
-    assertEquals(STATE.STOPPED, server.getServiceState());
-    server.close();
-  }
-
-  @Test
-  public void testHearbeat() throws InterruptedException, IOException {
-
-    // Set NAMENODE1 to active for all nameservices
-    if (cluster.isHighAvailability()) {
-      for (String ns : cluster.getNameservices()) {
-        cluster.switchToActive(ns, NAMENODES[0]);
-        cluster.switchToStandby(ns, NAMENODES[1]);
-      }
+    @BeforeClass
+    public static void globalSetUp() throws Exception {
+        cluster = new MiniRouterDFSCluster(true, 2);
+        // Start NNs and DNs and wait until ready
+        cluster.startCluster();
+        // Mock locator that records the heartbeats
+        List<String> nss = cluster.getNameservices();
+        String ns = nss.get(0);
+        Configuration conf = cluster.generateNamenodeConfiguration(ns);
+        namenodeResolver = new MockResolver(conf);
+        namenodeResolver.setRouterId("testrouter");
+        // Create one heartbeat service per NN
+        services = new ArrayList<>();
+        for (NamenodeContext nn : cluster.getNamenodes()) {
+            String nsId = nn.getNameserviceId();
+            String nnId = nn.getNamenodeId();
+            NamenodeHeartbeatService service = new NamenodeHeartbeatService(namenodeResolver, nsId, nnId);
+            service.init(conf);
+            service.start();
+            services.add(service);
+        }
     }
 
-    // Wait for heartbeats to record
-    Thread.sleep(5000);
-
-    // Verify the locator has matching NN entries for each NS
-    for (String ns : cluster.getNameservices()) {
-      List<? extends FederationNamenodeContext> nns =
-          namenodeResolver.getNamenodesForNameserviceId(ns);
-
-      // Active
-      FederationNamenodeContext active = nns.get(0);
-      assertEquals(NAMENODES[0], active.getNamenodeId());
-
-      // Standby
-      FederationNamenodeContext standby = nns.get(1);
-      assertEquals(NAMENODES[1], standby.getNamenodeId());
+    @AfterClass
+    public static void tearDown() throws IOException {
+        cluster.shutdown();
+        for (NamenodeHeartbeatService service : services) {
+            service.stop();
+            service.close();
+        }
     }
 
-    // Switch active NNs in 1/2 nameservices
-    List<String> nss = cluster.getNameservices();
-    String failoverNS = nss.get(0);
-    String normalNs = nss.get(1);
+    @Test
+    public void testNamenodeHeartbeatService() throws IOException {
+        MiniRouterDFSCluster testCluster = new MiniRouterDFSCluster(true, 1);
+        Configuration heartbeatConfig = testCluster.generateNamenodeConfiguration(NAMESERVICES[0]);
+        NamenodeHeartbeatService server = new NamenodeHeartbeatService(namenodeResolver, NAMESERVICES[0], NAMENODES[0]);
+        server.init(heartbeatConfig);
+        assertEquals(STATE.INITED, server.getServiceState());
+        server.start();
+        assertEquals(STATE.STARTED, server.getServiceState());
+        server.stop();
+        assertEquals(STATE.STOPPED, server.getServiceState());
+        server.close();
+    }
 
-    cluster.switchToStandby(failoverNS, NAMENODES[0]);
-    cluster.switchToActive(failoverNS, NAMENODES[1]);
-
-    // Wait for heartbeats to record
-    Thread.sleep(5000);
-
-    // Verify the locator has recorded the failover for the failover NS
-    List<? extends FederationNamenodeContext> failoverNSs =
-        namenodeResolver.getNamenodesForNameserviceId(failoverNS);
-    // Active
-    FederationNamenodeContext active = failoverNSs.get(0);
-    assertEquals(NAMENODES[1], active.getNamenodeId());
-
-    // Standby
-    FederationNamenodeContext standby = failoverNSs.get(1);
-    assertEquals(NAMENODES[0], standby.getNamenodeId());
-
-    // Verify the locator has the same records for the other ns
-    List<? extends FederationNamenodeContext> normalNss =
-        namenodeResolver.getNamenodesForNameserviceId(normalNs);
-    // Active
-    active = normalNss.get(0);
-    assertEquals(NAMENODES[0], active.getNamenodeId());
-    // Standby
-    standby = normalNss.get(1);
-    assertEquals(NAMENODES[1], standby.getNamenodeId());
-  }
+    @Test
+    public void testHearbeat() throws InterruptedException, IOException {
+        // Set NAMENODE1 to active for all nameservices
+        if (cluster.isHighAvailability()) {
+            for (String ns : cluster.getNameservices()) {
+                cluster.switchToActive(ns, NAMENODES[0]);
+                cluster.switchToStandby(ns, NAMENODES[1]);
+            }
+        }
+        // Wait for heartbeats to record
+        Thread.sleep(5000);
+        // Verify the locator has matching NN entries for each NS
+        for (String ns : cluster.getNameservices()) {
+            List<? extends FederationNamenodeContext> nns = namenodeResolver.getNamenodesForNameserviceId(ns);
+            // Active
+            FederationNamenodeContext active = nns.get(0);
+            assertEquals(NAMENODES[0], active.getNamenodeId());
+            // Standby
+            FederationNamenodeContext standby = nns.get(1);
+            assertEquals(NAMENODES[1], standby.getNamenodeId());
+        }
+        // Switch active NNs in 1/2 nameservices
+        List<String> nss = cluster.getNameservices();
+        String failoverNS = nss.get(0);
+        String normalNs = nss.get(1);
+        cluster.switchToStandby(failoverNS, NAMENODES[0]);
+        cluster.switchToActive(failoverNS, NAMENODES[1]);
+        // Wait for heartbeats to record
+        Thread.sleep(5000);
+        // Verify the locator has recorded the failover for the failover NS
+        List<? extends FederationNamenodeContext> failoverNSs = namenodeResolver.getNamenodesForNameserviceId(failoverNS);
+        // Active
+        FederationNamenodeContext active = failoverNSs.get(0);
+        assertEquals(NAMENODES[1], active.getNamenodeId());
+        // Standby
+        FederationNamenodeContext standby = failoverNSs.get(1);
+        assertEquals(NAMENODES[0], standby.getNamenodeId());
+        // Verify the locator has the same records for the other ns
+        List<? extends FederationNamenodeContext> normalNss = namenodeResolver.getNamenodesForNameserviceId(normalNs);
+        // Active
+        active = normalNss.get(0);
+        assertEquals(NAMENODES[0], active.getNamenodeId());
+        // Standby
+        standby = normalNss.get(1);
+        assertEquals(NAMENODES[1], standby.getNamenodeId());
+    }
 }

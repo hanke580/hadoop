@@ -19,46 +19,49 @@ package org.apache.hadoop.tracing;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
 @InterfaceAudience.Public
 @InterfaceStability.Stable
 public class SpanReceiverInfo {
-  private final long id;
-  private final String className;
-  final List<ConfigurationPair> configPairs =
-      new ArrayList<ConfigurationPair>();
 
-  static class ConfigurationPair {
-    private final String key;
-    private final String value;
+    private final long id;
 
-    ConfigurationPair(String key, String value) {
-      this.key = key;
-      this.value = value;
+    private final String className;
+
+    final List<ConfigurationPair> configPairs = new ArrayList<ConfigurationPair>();
+
+    static class ConfigurationPair {
+
+        private final String key;
+
+        private final String value;
+
+        ConfigurationPair(String key, String value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public String getValue() {
+            return value;
+        }
     }
 
-    public String getKey() {
-      return key;
+    SpanReceiverInfo(long id, String className) {
+        this.id = id;
+        this.className = className;
     }
 
-    public String getValue() {
-      return value;
+    public long getId() {
+        return id;
     }
-  }
 
-  SpanReceiverInfo(long id, String className) {
-    this.id = id;
-    this.className = className;
-  }
-
-  public long getId() {
-    return id;
-  }
-
-  public String getClassName() {
-    return className;
-  }
+    public String getClassName() {
+        return className;
+    }
 }

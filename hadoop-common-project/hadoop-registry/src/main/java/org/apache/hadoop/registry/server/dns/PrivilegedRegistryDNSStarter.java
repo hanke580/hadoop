@@ -26,7 +26,6 @@ import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import static org.apache.hadoop.registry.client.api.RegistryConstants.DEFAULT_DNS_PORT;
 import static org.apache.hadoop.registry.client.api.RegistryConstants.KEY_DNS_PORT;
 
@@ -35,47 +34,45 @@ import static org.apache.hadoop.registry.client.api.RegistryConstants.KEY_DNS_PO
  * port (e.g. 53).
  */
 public class PrivilegedRegistryDNSStarter implements Daemon {
-  private static final Logger LOG =
-      LoggerFactory.getLogger(PrivilegedRegistryDNSStarter.class);
 
-  private Configuration conf;
-  private RegistryDNS registryDNS;
-  private RegistryDNSServer registryDNSServer;
+    private static final Logger LOG = LoggerFactory.getLogger(PrivilegedRegistryDNSStarter.class);
 
-  @Override
-  public void init(DaemonContext context) throws Exception {
-    String[] args = context.getArguments();
-    StringUtils.startupShutdownMessage(RegistryDNSServer.class, args, LOG);
-    conf = new RegistryConfiguration();
-    new GenericOptionsParser(conf, args);
+    private Configuration conf;
 
-    int port = conf.getInt(KEY_DNS_PORT, DEFAULT_DNS_PORT);
-    if (port < 1 || port > 1023) {
-      throw new RuntimeException("Must start privileged registry DNS server " +
-          "with '" + KEY_DNS_PORT + "' configured to a privileged port.");
+    private RegistryDNS registryDNS;
+
+    private RegistryDNSServer registryDNSServer;
+
+    @Override
+    public void init(DaemonContext context) throws Exception {
+        String[] args = context.getArguments();
+        StringUtils.startupShutdownMessage(RegistryDNSServer.class, args, LOG);
+        conf = new RegistryConfiguration();
+        new GenericOptionsParser(conf, args);
+        int port = conf.getInt(KEY_DNS_PORT, DEFAULT_DNS_PORT);
+        if (port < 1 || port > 1023) {
+            throw new RuntimeException("Must start privileged registry DNS server " + "with '" + KEY_DNS_PORT + "' configured to a privileged port.");
+        }
+        try {
+            registryDNS = (RegistryDNS) DNSOperationsFactory.createInstance(conf);
+            registryDNS.initializeChannels(conf);
+        } catch (Exception e) {
+            LOG.error("Error initializing Registry DNS", e);
+            throw e;
+        }
     }
 
-    try {
-      registryDNS = (RegistryDNS) DNSOperationsFactory.createInstance(conf);
-      registryDNS.initializeChannels(conf);
-    } catch (Exception e) {
-      LOG.error("Error initializing Registry DNS", e);
-      throw e;
+    @Override
+    public void start() throws Exception {
+        registryDNSServer = RegistryDNSServer.launchDNSServer(conf, registryDNS);
     }
-  }
 
-  @Override
-  public void start() throws Exception {
-    registryDNSServer = RegistryDNSServer.launchDNSServer(conf, registryDNS);
-  }
+    @Override
+    public void stop() throws Exception {
+    }
 
-  @Override
-  public void stop() throws Exception {
-  }
-
-  @Override
-  public void destroy() {
-    registryDNSServer.stop();
-  }
-
+    @Override
+    public void destroy() {
+        registryDNSServer.stop();
+    }
 }

@@ -28,76 +28,75 @@ import org.apache.hadoop.util.Timer;
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
 public class AccessTokenTimer {
-  public static final long EXPIRE_BUFFER_MS = 30 * 1000L;
 
-  private final Timer timer;
+    public static final long EXPIRE_BUFFER_MS = 30 * 1000L;
 
-  /**
-   * When the current access token will expire in milliseconds since
-   * epoch.
-   */
-  private long nextRefreshMSSinceEpoch;
+    private final Timer timer;
 
-  public AccessTokenTimer() {
-    this(new Timer());
-  }
+    /**
+     * When the current access token will expire in milliseconds since
+     * epoch.
+     */
+    private long nextRefreshMSSinceEpoch;
 
-  /**
-   *
-   * @param timer Timer instance for unit testing
-   */
-  public AccessTokenTimer(Timer timer) {
-    this.timer = timer;
-    this.nextRefreshMSSinceEpoch = 0;
-  }
+    public AccessTokenTimer() {
+        this(new Timer());
+    }
 
-  /**
-   * Set when the access token will expire as reported by the oauth server,
-   * ie in seconds from now.
-   * @param expiresIn Access time expiration as reported by OAuth server
-   */
-  public void setExpiresIn(String expiresIn) {
-    this.nextRefreshMSSinceEpoch = convertExpiresIn(timer, expiresIn);
-  }
+    /**
+     * @param timer Timer instance for unit testing
+     */
+    public AccessTokenTimer(Timer timer) {
+        this.timer = timer;
+        this.nextRefreshMSSinceEpoch = 0;
+    }
 
-  /**
-   * Set when the access token will expire in milliseconds from epoch,
-   * as required by the WebHDFS configuration.  This is a bit hacky and lame.
-   *
-   * @param expiresInMSSinceEpoch Access time expiration in ms since epoch.
-   */
-  public void setExpiresInMSSinceEpoch(String expiresInMSSinceEpoch){
-    this.nextRefreshMSSinceEpoch = Long.parseLong(expiresInMSSinceEpoch);
-  }
+    /**
+     * Set when the access token will expire as reported by the oauth server,
+     * ie in seconds from now.
+     * @param expiresIn Access time expiration as reported by OAuth server
+     */
+    public void setExpiresIn(String expiresIn) {
+        this.nextRefreshMSSinceEpoch = convertExpiresIn(timer, expiresIn);
+    }
 
-  /**
-   * Get next time we should refresh the token.
-   *
-   * @return Next time since epoch we'll need to refresh the token.
-   */
-  public long getNextRefreshMSSinceEpoch() {
-    return nextRefreshMSSinceEpoch;
-  }
+    /**
+     * Set when the access token will expire in milliseconds from epoch,
+     * as required by the WebHDFS configuration.  This is a bit hacky and lame.
+     *
+     * @param expiresInMSSinceEpoch Access time expiration in ms since epoch.
+     */
+    public void setExpiresInMSSinceEpoch(String expiresInMSSinceEpoch) {
+        this.nextRefreshMSSinceEpoch = Long.parseLong(expiresInMSSinceEpoch);
+    }
 
-  /**
-   * Return true if the current token has expired or will expire within the
-   * EXPIRE_BUFFER_MS (to give ample wiggle room for the call to be made to
-   * the server).
-   */
-  public boolean shouldRefresh() {
-    long lowerLimit = nextRefreshMSSinceEpoch - EXPIRE_BUFFER_MS;
-    long currTime = timer.now();
-    return currTime > lowerLimit;
-  }
+    /**
+     * Get next time we should refresh the token.
+     *
+     * @return Next time since epoch we'll need to refresh the token.
+     */
+    public long getNextRefreshMSSinceEpoch() {
+        return nextRefreshMSSinceEpoch;
+    }
 
-  /**
-   * The expires_in param from OAuth is in seconds-from-now.  Convert to
-   * milliseconds-from-epoch
-   */
-  static Long convertExpiresIn(Timer timer, String expiresInSecs) {
-    long expiresSecs = Long.parseLong(expiresInSecs);
-    long expiresMs = expiresSecs * 1000;
-    return timer.now() + expiresMs;
-  }
+    /**
+     * Return true if the current token has expired or will expire within the
+     * EXPIRE_BUFFER_MS (to give ample wiggle room for the call to be made to
+     * the server).
+     */
+    public boolean shouldRefresh() {
+        long lowerLimit = nextRefreshMSSinceEpoch - EXPIRE_BUFFER_MS;
+        long currTime = timer.now();
+        return currTime > lowerLimit;
+    }
 
+    /**
+     * The expires_in param from OAuth is in seconds-from-now.  Convert to
+     * milliseconds-from-epoch
+     */
+    static Long convertExpiresIn(Timer timer, String expiresInSecs) {
+        long expiresSecs = Long.parseLong(expiresInSecs);
+        long expiresMs = expiresSecs * 1000;
+        return timer.now() + expiresMs;
+    }
 }

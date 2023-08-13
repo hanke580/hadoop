@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * Provides the server-side framework for authentication.
  */
@@ -25,3 +24,4 @@ package org.apache.hadoop.security.authentication.server;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

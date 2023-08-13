@@ -34,55 +34,54 @@ import org.apache.hadoop.io.erasurecode.ErasureCoderOptions;
  *
  * Note, currently only one coding step is supported. Will support complex cases
  * of multiple coding steps.
- *
  */
 @InterfaceAudience.Private
 public interface ErasureCoder extends Configurable {
 
-  /**
-   * The number of data input units for the coding. A unit can be a byte, chunk
-   * or buffer or even a block.
-   * @return count of data input units
-   */
-  int getNumDataUnits();
+    /**
+     * The number of data input units for the coding. A unit can be a byte, chunk
+     * or buffer or even a block.
+     * @return count of data input units
+     */
+    int getNumDataUnits();
 
-  /**
-   * The number of parity output units for the coding. A unit can be a byte,
-   * chunk, buffer or even a block.
-   * @return count of parity output units
-   */
-  int getNumParityUnits();
+    /**
+     * The number of parity output units for the coding. A unit can be a byte,
+     * chunk, buffer or even a block.
+     * @return count of parity output units
+     */
+    int getNumParityUnits();
 
-  /**
-   * The options of erasure coder. This option is passed to
-   * raw erasure coder as it is.
-   * @return erasure coder options
-   */
-  ErasureCoderOptions getOptions();
+    /**
+     * The options of erasure coder. This option is passed to
+     * raw erasure coder as it is.
+     * @return erasure coder options
+     */
+    ErasureCoderOptions getOptions();
 
-  /**
-   * Calculate the encoding or decoding steps given a block blockGroup.
-   *
-   * Note, currently only one coding step is supported. Will support complex
-   * cases of multiple coding steps.
-   *
-   * @param blockGroup the erasure coding block group containing all necessary
-   *                   information for codec calculation
-   */
-  ErasureCodingStep calculateCoding(ECBlockGroup blockGroup);
+    /**
+     * Calculate the encoding or decoding steps given a block blockGroup.
+     *
+     * Note, currently only one coding step is supported. Will support complex
+     * cases of multiple coding steps.
+     *
+     * @param blockGroup the erasure coding block group containing all necessary
+     *                   information for codec calculation
+     */
+    ErasureCodingStep calculateCoding(ECBlockGroup blockGroup);
 
-  /**
-   * Tell if direct or off-heap buffer is preferred or not. It's for callers to
-   * decide how to allocate coding chunk buffers, either on heap or off heap.
-   * It will return false by default.
-   * @return true if direct buffer is preferred for performance consideration,
-   * otherwise false.
-   */
-  boolean preferDirectBuffer();
+    /**
+     * Tell if direct or off-heap buffer is preferred or not. It's for callers to
+     * decide how to allocate coding chunk buffers, either on heap or off heap.
+     * It will return false by default.
+     * @return true if direct buffer is preferred for performance consideration,
+     * otherwise false.
+     */
+    boolean preferDirectBuffer();
 
-  /**
-   * Release the resources if any. Good chance to invoke
-   * RawErasureCoder#release.
-   */
-  void release();
+    /**
+     * Release the resources if any. Good chance to invoke
+     * RawErasureCoder#release.
+     */
+    void release();
 }

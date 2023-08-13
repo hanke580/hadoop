@@ -25,25 +25,20 @@ import org.slf4j.LoggerFactory;
  * This tests write operation of DFS striped file with a random erasure code
  * policy except for the default policy under Datanode failure conditions.
  */
-public class
-    ParameterizedTestDFSStripedOutputStreamWithFailureWithRandomECPolicy extends
-    ParameterizedTestDFSStripedOutputStreamWithFailure {
+public class ParameterizedTestDFSStripedOutputStreamWithFailureWithRandomECPolicy extends ParameterizedTestDFSStripedOutputStreamWithFailure {
 
-  private final ECSchema schema;
+    private final ECSchema schema;
 
-  private static final Logger LOG = LoggerFactory.getLogger(
-      ParameterizedTestDFSStripedOutputStreamWithFailureWithRandomECPolicy
-          .class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(ParameterizedTestDFSStripedOutputStreamWithFailureWithRandomECPolicy.class.getName());
 
-  public ParameterizedTestDFSStripedOutputStreamWithFailureWithRandomECPolicy(
-      int base) {
-    super(base);
-    schema = StripedFileTestUtil.getRandomNonDefaultECPolicy().getSchema();
-    LOG.info(schema.toString());
-  }
+    public ParameterizedTestDFSStripedOutputStreamWithFailureWithRandomECPolicy(int base) {
+        super(base);
+        schema = StripedFileTestUtil.getRandomNonDefaultECPolicy().getSchema();
+        LOG.info(schema.toString());
+    }
 
-  @Override
-  public ECSchema getEcSchema() {
-    return schema;
-  }
+    @Override
+    public ECSchema getEcSchema() {
+        return schema;
+    }
 }

@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.fs;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -29,44 +28,44 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceStability.Stable
 public interface BlockStoragePolicySpi {
 
-  /**
-   * Return the name of the storage policy. Policies are uniquely
-   * identified by name.
-   *
-   * @return the name of the storage policy.
-   */
-  String getName();
+    /**
+     * Return the name of the storage policy. Policies are uniquely
+     * identified by name.
+     *
+     * @return the name of the storage policy.
+     */
+    String getName();
 
-  /**
-   * Return the preferred storage types associated with this policy. These
-   * storage types are used sequentially for successive block replicas.
-   *
-   * @return preferred storage types used for placing block replicas.
-   */
-  StorageType[] getStorageTypes();
+    /**
+     * Return the preferred storage types associated with this policy. These
+     * storage types are used sequentially for successive block replicas.
+     *
+     * @return preferred storage types used for placing block replicas.
+     */
+    StorageType[] getStorageTypes();
 
-  /**
-   * Get the fallback storage types for creating new block replicas. Fallback
-   * storage types are used if the preferred storage types are not available.
-   *
-   * @return fallback storage types for new block replicas..
-   */
-  StorageType[] getCreationFallbacks();
+    /**
+     * Get the fallback storage types for creating new block replicas. Fallback
+     * storage types are used if the preferred storage types are not available.
+     *
+     * @return fallback storage types for new block replicas..
+     */
+    StorageType[] getCreationFallbacks();
 
-  /**
-   * Get the fallback storage types for replicating existing block replicas.
-   * Fallback storage types are used if the preferred storage types are not
-   * available.
-   *
-   * @return fallback storage types for replicating existing block replicas.
-   */
-  StorageType[] getReplicationFallbacks();
+    /**
+     * Get the fallback storage types for replicating existing block replicas.
+     * Fallback storage types are used if the preferred storage types are not
+     * available.
+     *
+     * @return fallback storage types for replicating existing block replicas.
+     */
+    StorageType[] getReplicationFallbacks();
 
-  /**
-   * Returns true if the policy is inherit-only and cannot be changed for
-   * an existing file.
-   *
-   * @return true if the policy is inherit-only.
-   */
-  boolean isCopyOnCreateFile();
+    /**
+     * Returns true if the policy is inherit-only and cannot be changed for
+     * an existing file.
+     *
+     * @return true if the policy is inherit-only.
+     */
+    boolean isCopyOnCreateFile();
 }

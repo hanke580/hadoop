@@ -17,85 +17,88 @@
  */
 package org.apache.hadoop.hdfs.web.resources;
 
-import static org.apache.hadoop.hdfs.client.HdfsClientConfigKeys
-    .DFS_WEBHDFS_ACL_PERMISSION_PATTERN_DEFAULT;
-
+import static org.apache.hadoop.hdfs.client.HdfsClientConfigKeys.DFS_WEBHDFS_ACL_PERMISSION_PATTERN_DEFAULT;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
-
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.hadoop.fs.permission.AclEntry;
 
-/** AclPermission parameter. */
+/**
+ * AclPermission parameter.
+ */
 public class AclPermissionParam extends StringParam {
-  /** Parameter name. */
-  public static final String NAME = "aclspec";
-  /** Default parameter value. */
-  public static final String DEFAULT = "";
 
-  private static Domain DOMAIN = new Domain(NAME,
-      Pattern.compile(DFS_WEBHDFS_ACL_PERMISSION_PATTERN_DEFAULT));
+    /**
+     * Parameter name.
+     */
+    public static final String NAME = "aclspec";
 
-  /**
-   * Constructor.
-   *
-   * @param str a string representation of the parameter value.
-   */
-  public AclPermissionParam(final String str) {
-    super(DOMAIN, str == null || str.equals(DEFAULT) ? null : str);
-  }
+    /**
+     * Default parameter value.
+     */
+    public static final String DEFAULT = "";
 
-  public AclPermissionParam(List<AclEntry> acl) {
-    super(DOMAIN,parseAclSpec(acl).equals(DEFAULT) ? null : parseAclSpec(acl));
-  }
+    private static Domain DOMAIN = new Domain(NAME, Pattern.compile(DFS_WEBHDFS_ACL_PERMISSION_PATTERN_DEFAULT));
 
-  @VisibleForTesting
-  public static Domain getAclPermissionPattern() {
-    return DOMAIN;
-  }
-
-  @VisibleForTesting
-  public static void setAclPermissionPattern(Domain dm) {
-    DOMAIN = dm;
-  }
-
-  public static void setAclPermissionPattern(String pattern) {
-    DOMAIN = new Domain(NAME, Pattern.compile(pattern));
-  }
-
-  @Override
-  public String getName() {
-    return NAME;
-  }
-
-  public List<AclEntry> getAclPermission(boolean includePermission) {
-    final String v = getValue();
-    return (v != null ? AclEntry.parseAclSpec(v, includePermission) : AclEntry
-        .parseAclSpec(DEFAULT, includePermission));
-  }
-
-  /**
-   * @return parse {@code aclEntry} and return aclspec
-   */
-  private static String parseAclSpec(List<AclEntry> aclEntries) {
-    if (aclEntries == null) {
-      return null;
+    /**
+     * Constructor.
+     *
+     * @param str a string representation of the parameter value.
+     */
+    public AclPermissionParam(final String str) {
+        super(DOMAIN, str == null || str.equals(DEFAULT) ? null : str);
     }
-    if (aclEntries.isEmpty()) {
-      return "";
+
+    public AclPermissionParam(List<AclEntry> acl) {
+        super(DOMAIN, parseAclSpec(acl).equals(DEFAULT) ? null : parseAclSpec(acl));
     }
-    if (aclEntries.size() == 1) {
-      AclEntry entry = aclEntries.get(0);
-      return entry == null ? "" : entry.toStringStable();
+
+    @VisibleForTesting
+    public static Domain getAclPermissionPattern() {
+        return DOMAIN;
     }
-    StringBuilder sb = new StringBuilder();
-    Iterator<AclEntry> iter = aclEntries.iterator();
-    sb.append(iter.next().toStringStable());
-    while (iter.hasNext()) {
-      AclEntry entry = iter.next();
-      sb.append(',').append(entry == null ? "" : entry.toStringStable());
+
+    @VisibleForTesting
+    public static void setAclPermissionPattern(Domain dm) {
+        DOMAIN = dm;
     }
-    return sb.toString();
-  }
+
+    public static void setAclPermissionPattern(String pattern) {
+        DOMAIN = new Domain(NAME, Pattern.compile(pattern));
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
+    }
+
+    public List<AclEntry> getAclPermission(boolean includePermission) {
+        final String v = getValue();
+        return (v != null ? AclEntry.parseAclSpec(v, includePermission) : AclEntry.parseAclSpec(DEFAULT, includePermission));
+    }
+
+    /**
+     * @return parse {@code aclEntry} and return aclspec
+     */
+    private static String parseAclSpec(List<AclEntry> aclEntries) {
+        if (aclEntries == null) {
+            return null;
+        }
+        if (aclEntries.isEmpty()) {
+            return "";
+        }
+        if (aclEntries.size() == 1) {
+            AclEntry entry = aclEntries.get(0);
+            return entry == null ? "" : entry.toStringStable();
+        }
+        StringBuilder sb = new StringBuilder();
+        Iterator<AclEntry> iter = aclEntries.iterator();
+        sb.append(iter.next().toStringStable());
+        while (iter.hasNext()) {
+            AclEntry entry = iter.next();
+            sb.append(',').append(entry == null ? "" : entry.toStringStable());
+        }
+        return sb.toString();
+    }
 }

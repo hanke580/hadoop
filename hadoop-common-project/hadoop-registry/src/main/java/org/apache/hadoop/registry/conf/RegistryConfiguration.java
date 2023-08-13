@@ -26,16 +26,16 @@ import org.apache.hadoop.conf.Configuration;
  */
 public class RegistryConfiguration extends Configuration {
 
-  static {
-    Configuration.addDefaultResource("yarn-default.xml");
-    Configuration.addDefaultResource("yarn-site.xml");
-  }
+    static {
+        Configuration.addDefaultResource("yarn-default.xml");
+        Configuration.addDefaultResource("yarn-site.xml");
+    }
 
-  /**
-   * Default constructor which relies on the static method to import the YARN
-   * settings.
-   */
-  public RegistryConfiguration() {
-    super();
-  }
+    /**
+     * Default constructor which relies on the static method to import the YARN
+     * settings.
+     */
+    public RegistryConfiguration() {
+        super();
+    }
 }

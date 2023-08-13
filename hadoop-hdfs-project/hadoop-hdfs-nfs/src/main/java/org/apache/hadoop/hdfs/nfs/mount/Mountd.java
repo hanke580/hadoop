@@ -19,7 +19,6 @@ package org.apache.hadoop.hdfs.nfs.mount;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
-
 import org.apache.hadoop.hdfs.nfs.conf.NfsConfiguration;
 import org.apache.hadoop.mount.MountdBase;
 
@@ -32,14 +31,13 @@ import org.apache.hadoop.mount.MountdBase;
  */
 public class Mountd extends MountdBase {
 
-  public Mountd(NfsConfiguration config, DatagramSocket registrationSocket,
-      boolean allowInsecurePorts) throws IOException {
-    super(new RpcProgramMountd(config, registrationSocket, allowInsecurePorts));
-  }
-  
-  public static void main(String[] args) throws IOException {
-    NfsConfiguration config = new NfsConfiguration();
-    Mountd mountd = new Mountd(config, null, true);
-    mountd.start(true);
-  }
+    public Mountd(NfsConfiguration config, DatagramSocket registrationSocket, boolean allowInsecurePorts) throws IOException {
+        super(new RpcProgramMountd(config, registrationSocket, allowInsecurePorts));
+    }
+
+    public static void main(String[] args) throws IOException {
+        NfsConfiguration config = new NfsConfiguration();
+        Mountd mountd = new Mountd(config, null, true);
+        mountd.start(true);
+    }
 }

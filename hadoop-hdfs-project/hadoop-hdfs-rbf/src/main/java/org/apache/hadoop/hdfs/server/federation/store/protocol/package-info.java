@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * Contains the abstract definitions of the API request and response objects for
  * the various state store APIs. The state store supports multiple interface
@@ -24,8 +23,8 @@
  */
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
-
 package org.apache.hadoop.hdfs.server.federation.store.protocol;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

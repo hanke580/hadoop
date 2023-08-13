@@ -21,7 +21,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.apache.hadoop.classification.InterfaceAudience.Private;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.protocolPB.RouterAdminProtocolPB;
@@ -39,51 +38,41 @@ import org.apache.hadoop.security.UserGroupInformation;
 @Private
 public class RouterClient implements Closeable {
 
-  private final RouterAdminProtocolTranslatorPB proxy;
-  private final UserGroupInformation ugi;
+    private final RouterAdminProtocolTranslatorPB proxy;
 
-  private static RouterAdminProtocolTranslatorPB createRouterProxy(
-      InetSocketAddress address, Configuration conf, UserGroupInformation ugi)
-          throws IOException {
+    private final UserGroupInformation ugi;
 
-    RPC.setProtocolEngine(
-        conf, RouterAdminProtocolPB.class, ProtobufRpcEngine2.class);
+    private static RouterAdminProtocolTranslatorPB createRouterProxy(InetSocketAddress address, Configuration conf, UserGroupInformation ugi) throws IOException {
+        RPC.setProtocolEngine(conf, RouterAdminProtocolPB.class, ProtobufRpcEngine2.class);
+        AtomicBoolean fallbackToSimpleAuth = new AtomicBoolean(false);
+        final long version = RPC.getProtocolVersion(RouterAdminProtocolPB.class);
+        RouterAdminProtocolPB proxy = RPC.getProtocolProxy(RouterAdminProtocolPB.class, version, address, ugi, conf, NetUtils.getDefaultSocketFactory(conf), RPC.getRpcTimeout(conf), null, fallbackToSimpleAuth).getProxy();
+        return new RouterAdminProtocolTranslatorPB(proxy);
+    }
 
-    AtomicBoolean fallbackToSimpleAuth = new AtomicBoolean(false);
-    final long version = RPC.getProtocolVersion(RouterAdminProtocolPB.class);
-    RouterAdminProtocolPB proxy = RPC.getProtocolProxy(
-        RouterAdminProtocolPB.class, version, address, ugi, conf,
-        NetUtils.getDefaultSocketFactory(conf),
-        RPC.getRpcTimeout(conf), null,
-        fallbackToSimpleAuth).getProxy();
+    public RouterClient(InetSocketAddress address, Configuration conf) throws IOException {
+        this.ugi = UserGroupInformation.getCurrentUser();
+        this.proxy = createRouterProxy(address, conf, ugi);
+    }
 
-    return new RouterAdminProtocolTranslatorPB(proxy);
-  }
+    public MountTableManager getMountTableManager() {
+        return proxy;
+    }
 
-  public RouterClient(InetSocketAddress address, Configuration conf)
-      throws IOException {
-    this.ugi = UserGroupInformation.getCurrentUser();
-    this.proxy = createRouterProxy(address, conf, ugi);
-  }
+    public RouterStateManager getRouterStateManager() {
+        return proxy;
+    }
 
-  public MountTableManager getMountTableManager() {
-    return proxy;
-  }
+    public NameserviceManager getNameserviceManager() {
+        return proxy;
+    }
 
-  public RouterStateManager getRouterStateManager() {
-    return proxy;
-  }
+    public RouterGenericManager getRouterGenericManager() {
+        return proxy;
+    }
 
-  public NameserviceManager getNameserviceManager() {
-    return proxy;
-  }
-
-  public RouterGenericManager getRouterGenericManager() {
-    return proxy;
-  }
-
-  @Override
-  public synchronized void close() throws IOException {
-    RPC.stopProxy(proxy);
-  }
+    @Override
+    public synchronized void close() throws IOException {
+        RPC.stopProxy(proxy);
+    }
 }

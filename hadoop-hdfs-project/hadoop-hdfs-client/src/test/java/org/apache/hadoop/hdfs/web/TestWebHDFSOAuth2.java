@@ -38,13 +38,11 @@ import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.TreeMap;
-
 import static org.apache.hadoop.hdfs.client.HdfsClientConfigKeys.ACCESS_TOKEN_PROVIDER_KEY;
 import static org.apache.hadoop.hdfs.client.HdfsClientConfigKeys.OAUTH_CLIENT_ID_KEY;
 import static org.apache.hadoop.hdfs.client.HdfsClientConfigKeys.OAUTH_REFRESH_URL_KEY;
@@ -58,160 +56,89 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
 public class TestWebHDFSOAuth2 {
-  public static final Logger LOG = LoggerFactory.getLogger(
-      TestWebHDFSOAuth2.class);
 
-  private ClientAndServer mockWebHDFS;
-  private ClientAndServer mockOAuthServer;
+    public static final Logger LOG = LoggerFactory.getLogger(TestWebHDFSOAuth2.class);
 
-  public final static int WEBHDFS_PORT = 7552;
-  public final static int OAUTH_PORT = 7553;
+    private ClientAndServer mockWebHDFS;
 
-  public final static Header CONTENT_TYPE_APPLICATION_JSON = new Header("Content-Type", "application/json");
+    private ClientAndServer mockOAuthServer;
 
-  public final static String AUTH_TOKEN = "0123456789abcdef";
-  public final static Header AUTH_TOKEN_HEADER = new Header("AUTHORIZATION", OAuth2ConnectionConfigurator.HEADER + AUTH_TOKEN);
+    public final static int WEBHDFS_PORT = 7552;
 
-  @Before
-  public void startMockOAuthServer() {
-    mockOAuthServer = startClientAndServer(OAUTH_PORT);
-  }
-  @Before
-  public void startMockWebHDFSServer() {
-    System.setProperty("hadoop.home.dir", System.getProperty("user.dir"));
+    public final static int OAUTH_PORT = 7553;
 
-    mockWebHDFS = startClientAndServer(WEBHDFS_PORT);
-  }
+    public final static Header CONTENT_TYPE_APPLICATION_JSON = new Header("Content-Type", "application/json");
 
-  @Test
-  public void listStatusReturnsAsExpected() throws URISyntaxException, IOException {
-    MockServerClient mockWebHDFSServerClient = new MockServerClient("localhost", WEBHDFS_PORT);
-    MockServerClient mockOAuthServerClient = new MockServerClient("localhost", OAUTH_PORT);
+    public final static String AUTH_TOKEN = "0123456789abcdef";
 
-    HttpRequest oauthServerRequest = getOAuthServerMockRequest(mockOAuthServerClient);
+    public final static Header AUTH_TOKEN_HEADER = new Header("AUTHORIZATION", OAuth2ConnectionConfigurator.HEADER + AUTH_TOKEN);
 
-    HttpRequest fileSystemRequest = request()
-        .withMethod("GET")
-        .withPath(WebHdfsFileSystem.PATH_PREFIX + "/test1/test2")
-        .withHeader(AUTH_TOKEN_HEADER);
-
-    try {
-      mockWebHDFSServerClient.when(fileSystemRequest,
-          exactly(1)
-      )
-          .respond(
-              response()
-                  .withStatusCode(HttpStatus.SC_OK)
-                  .withHeaders(
-                      CONTENT_TYPE_APPLICATION_JSON
-                  )
-                  .withBody("{\n" +
-                      "  \"FileStatuses\":\n" +
-                      "  {\n" +
-                      "    \"FileStatus\":\n" +
-                      "    [\n" +
-                      "      {\n" +
-                      "        \"accessTime\"      : 1320171722771,\n" +
-                      "        \"blockSize\"       : 33554432,\n" +
-                      "        \"group\"           : \"supergroup\",\n" +
-                      "        \"length\"          : 24930,\n" +
-                      "        \"modificationTime\": 1320171722771,\n" +
-                      "        \"owner\"           : \"webuser\",\n" +
-                      "        \"pathSuffix\"      : \"a.patch\",\n" +
-                      "        \"permission\"      : \"644\",\n" +
-                      "        \"replication\"     : 1,\n" +
-                      "        \"type\"            : \"FILE\"\n" +
-                      "      },\n" +
-                      "      {\n" +
-                      "        \"accessTime\"      : 0,\n" +
-                      "        \"blockSize\"       : 0,\n" +
-                      "        \"group\"           : \"supergroup\",\n" +
-                      "        \"length\"          : 0,\n" +
-                      "        \"modificationTime\": 1320895981256,\n" +
-                      "        \"owner\"           : \"szetszwo\",\n" +
-                      "        \"pathSuffix\"      : \"bar\",\n" +
-                      "        \"permission\"      : \"711\",\n" +
-                      "        \"replication\"     : 0,\n" +
-                      "        \"type\"            : \"DIRECTORY\"\n" +
-                      "      }\n" +
-                      "    ]\n" +
-                      "  }\n" +
-                      "}\n")
-          );
-
-      FileSystem fs = new WebHdfsFileSystem();
-      Configuration conf = getConfiguration();
-      conf.set(OAUTH_REFRESH_URL_KEY, "http://localhost:" + OAUTH_PORT + "/refresh");
-      conf.set(CredentialBasedAccessTokenProvider.OAUTH_CREDENTIAL_KEY, "credential");
-
-      URI uri = new URI("webhdfs://localhost:" + WEBHDFS_PORT);
-      fs.initialize(uri, conf);
-
-      FileStatus[] ls = fs.listStatus(new Path("/test1/test2"));
-
-      mockOAuthServer.verify(oauthServerRequest);
-      mockWebHDFSServerClient.verify(fileSystemRequest);
-
-      assertEquals(2, ls.length);
-      assertEquals("a.patch", ls[0].getPath().getName());
-      assertEquals("bar", ls[1].getPath().getName());
-
-      fs.close();
-    } finally {
-      mockWebHDFSServerClient.clear(fileSystemRequest);
-      mockOAuthServerClient.clear(oauthServerRequest);
+    @Before
+    public void startMockOAuthServer() {
+        mockOAuthServer = startClientAndServer(OAUTH_PORT);
     }
-  }
 
-  private HttpRequest getOAuthServerMockRequest(MockServerClient mockServerClient) throws IOException {
-    HttpRequest expectedRequest = request()
-        .withMethod("POST")
-        .withPath("/refresh")
-        .withBody("client_secret=credential&grant_type=client_credentials&client_id=MY_CLIENTID");
-    
-    Map<String, Object> map = new TreeMap<>();
-    
-    map.put(EXPIRES_IN, "0987654321");
-    map.put(TOKEN_TYPE, "bearer");
-    map.put(ACCESS_TOKEN, AUTH_TOKEN);
+    @Before
+    public void startMockWebHDFSServer() {
+        System.setProperty("hadoop.home.dir", System.getProperty("user.dir"));
+        mockWebHDFS = startClientAndServer(WEBHDFS_PORT);
+    }
 
-    ObjectMapper mapper = new ObjectMapper();
-    
-    HttpResponse resp = response()
-        .withStatusCode(HttpStatus.SC_OK)
-        .withHeaders(
-            CONTENT_TYPE_APPLICATION_JSON
-        )
-        .withBody(mapper.writeValueAsString(map));
+    @Test
+    public void listStatusReturnsAsExpected() throws URISyntaxException, IOException {
+        MockServerClient mockWebHDFSServerClient = new MockServerClient("localhost", WEBHDFS_PORT);
+        MockServerClient mockOAuthServerClient = new MockServerClient("localhost", OAUTH_PORT);
+        HttpRequest oauthServerRequest = getOAuthServerMockRequest(mockOAuthServerClient);
+        HttpRequest fileSystemRequest = request().withMethod("GET").withPath(WebHdfsFileSystem.PATH_PREFIX + "/test1/test2").withHeader(AUTH_TOKEN_HEADER);
+        try {
+            mockWebHDFSServerClient.when(fileSystemRequest, exactly(1)).respond(response().withStatusCode(HttpStatus.SC_OK).withHeaders(CONTENT_TYPE_APPLICATION_JSON).withBody("{\n" + "  \"FileStatuses\":\n" + "  {\n" + "    \"FileStatus\":\n" + "    [\n" + "      {\n" + "        \"accessTime\"      : 1320171722771,\n" + "        \"blockSize\"       : 33554432,\n" + "        \"group\"           : \"supergroup\",\n" + "        \"length\"          : 24930,\n" + "        \"modificationTime\": 1320171722771,\n" + "        \"owner\"           : \"webuser\",\n" + "        \"pathSuffix\"      : \"a.patch\",\n" + "        \"permission\"      : \"644\",\n" + "        \"replication\"     : 1,\n" + "        \"type\"            : \"FILE\"\n" + "      },\n" + "      {\n" + "        \"accessTime\"      : 0,\n" + "        \"blockSize\"       : 0,\n" + "        \"group\"           : \"supergroup\",\n" + "        \"length\"          : 0,\n" + "        \"modificationTime\": 1320895981256,\n" + "        \"owner\"           : \"szetszwo\",\n" + "        \"pathSuffix\"      : \"bar\",\n" + "        \"permission\"      : \"711\",\n" + "        \"replication\"     : 0,\n" + "        \"type\"            : \"DIRECTORY\"\n" + "      }\n" + "    ]\n" + "  }\n" + "}\n"));
+            FileSystem fs = new WebHdfsFileSystem();
+            Configuration conf = getConfiguration();
+            conf.set(OAUTH_REFRESH_URL_KEY, "http://localhost:" + OAUTH_PORT + "/refresh");
+            conf.set(CredentialBasedAccessTokenProvider.OAUTH_CREDENTIAL_KEY, "credential");
+            URI uri = new URI("webhdfs://localhost:" + WEBHDFS_PORT);
+            fs.initialize(uri, conf);
+            FileStatus[] ls = fs.listStatus(new Path("/test1/test2"));
+            mockOAuthServer.verify(oauthServerRequest);
+            mockWebHDFSServerClient.verify(fileSystemRequest);
+            assertEquals(2, ls.length);
+            assertEquals("a.patch", ls[0].getPath().getName());
+            assertEquals("bar", ls[1].getPath().getName());
+            fs.close();
+        } finally {
+            mockWebHDFSServerClient.clear(fileSystemRequest);
+            mockOAuthServerClient.clear(oauthServerRequest);
+        }
+    }
 
-    mockServerClient
-        .when(expectedRequest, exactly(1))
-        .respond(resp);
+    private HttpRequest getOAuthServerMockRequest(MockServerClient mockServerClient) throws IOException {
+        HttpRequest expectedRequest = request().withMethod("POST").withPath("/refresh").withBody("client_secret=credential&grant_type=client_credentials&client_id=MY_CLIENTID");
+        Map<String, Object> map = new TreeMap<>();
+        map.put(EXPIRES_IN, "0987654321");
+        map.put(TOKEN_TYPE, "bearer");
+        map.put(ACCESS_TOKEN, AUTH_TOKEN);
+        ObjectMapper mapper = new ObjectMapper();
+        HttpResponse resp = response().withStatusCode(HttpStatus.SC_OK).withHeaders(CONTENT_TYPE_APPLICATION_JSON).withBody(mapper.writeValueAsString(map));
+        mockServerClient.when(expectedRequest, exactly(1)).respond(resp);
+        return expectedRequest;
+    }
 
-    return expectedRequest;
-  }
+    public Configuration getConfiguration() {
+        Configuration conf = new Configuration();
+        // Configs for OAuth2
+        conf.setBoolean(HdfsClientConfigKeys.DFS_WEBHDFS_OAUTH_ENABLED_KEY, true);
+        conf.set(OAUTH_CLIENT_ID_KEY, "MY_CLIENTID");
+        conf.set(ACCESS_TOKEN_PROVIDER_KEY, ConfCredentialBasedAccessTokenProvider.class.getName());
+        return conf;
+    }
 
-  public Configuration getConfiguration() {
-    Configuration conf = new Configuration();
+    @After
+    public void stopMockWebHDFSServer() {
+        mockWebHDFS.stop();
+    }
 
-    // Configs for OAuth2
-    conf.setBoolean(HdfsClientConfigKeys.DFS_WEBHDFS_OAUTH_ENABLED_KEY, true);
-    conf.set(OAUTH_CLIENT_ID_KEY, "MY_CLIENTID");
-
-    conf.set(ACCESS_TOKEN_PROVIDER_KEY,
-        ConfCredentialBasedAccessTokenProvider.class.getName());
-
-    return conf;
-
-  }
-
-  @After
-  public void stopMockWebHDFSServer() {
-      mockWebHDFS.stop();
-  }
-
-  @After
-  public void stopMockOAuthServer() {
-    mockOAuthServer.stop();
-  }
+    @After
+    public void stopMockOAuthServer() {
+        mockOAuthServer.stop();
+    }
 }

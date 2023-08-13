@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.metrics2.impl;
 
 import com.google.common.base.Predicate;
@@ -23,7 +22,6 @@ import com.google.common.collect.Iterables;
 import org.apache.hadoop.metrics2.AbstractMetric;
 import org.apache.hadoop.metrics2.MetricsRecord;
 import org.apache.hadoop.metrics2.MetricsTag;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -32,77 +30,62 @@ import static org.junit.Assert.assertNotNull;
  */
 public class MetricsRecords {
 
-  public static void assertTag(MetricsRecord record, String tagName,
-      String expectedValue) {
-    MetricsTag processIdTag = getFirstTagByName(record,
-        tagName);
-    assertNotNull(processIdTag);
-    assertEquals(expectedValue, processIdTag.value());
-  }
-
-  public static void assertMetric(MetricsRecord record,
-      String metricName,
-      Number expectedValue) {
-    AbstractMetric resourceLimitMetric = getFirstMetricByName(
-        record, metricName);
-    assertNotNull(resourceLimitMetric);
-    assertEquals(expectedValue, resourceLimitMetric.value());
-  }
-
-  public static Number getMetricValueByName(MetricsRecord record,
-      String metricName) {
-    AbstractMetric resourceLimitMetric = getFirstMetricByName(
-        record, metricName);
-    assertNotNull(resourceLimitMetric);
-    return resourceLimitMetric.value();
-  }
-
-  public static void assertMetricNotNull(MetricsRecord record,
-      String metricName) {
-    AbstractMetric resourceLimitMetric = getFirstMetricByName(
-        record, metricName);
-    assertNotNull("Metric " + metricName + " doesn't exist",
-        resourceLimitMetric);
-  }
-
-  private static MetricsTag getFirstTagByName(MetricsRecord record, String name) {
-    return Iterables.getFirst(Iterables.filter(record.tags(),
-        new MetricsTagPredicate(name)), null);
-  }
-
-  private static AbstractMetric getFirstMetricByName(
-      MetricsRecord record, String name) {
-    return Iterables.getFirst(
-        Iterables.filter(record.metrics(), new AbstractMetricPredicate(name)),
-        null);
-  }
-
-  private static class MetricsTagPredicate implements Predicate<MetricsTag> {
-    private String tagName;
-
-    public MetricsTagPredicate(String tagName) {
-
-      this.tagName = tagName;
+    public static void assertTag(MetricsRecord record, String tagName, String expectedValue) {
+        MetricsTag processIdTag = getFirstTagByName(record, tagName);
+        assertNotNull(processIdTag);
+        assertEquals(expectedValue, processIdTag.value());
     }
 
-    @Override
-    public boolean apply(MetricsTag input) {
-      return input.name().equals(tagName);
-    }
-  }
-
-  private static class AbstractMetricPredicate
-      implements Predicate<AbstractMetric> {
-    private String metricName;
-
-    public AbstractMetricPredicate(
-        String metricName) {
-      this.metricName = metricName;
+    public static void assertMetric(MetricsRecord record, String metricName, Number expectedValue) {
+        AbstractMetric resourceLimitMetric = getFirstMetricByName(record, metricName);
+        assertNotNull(resourceLimitMetric);
+        assertEquals(expectedValue, resourceLimitMetric.value());
     }
 
-    @Override
-    public boolean apply(AbstractMetric input) {
-      return input.name().equals(metricName);
+    public static Number getMetricValueByName(MetricsRecord record, String metricName) {
+        AbstractMetric resourceLimitMetric = getFirstMetricByName(record, metricName);
+        assertNotNull(resourceLimitMetric);
+        return resourceLimitMetric.value();
     }
-  }
+
+    public static void assertMetricNotNull(MetricsRecord record, String metricName) {
+        AbstractMetric resourceLimitMetric = getFirstMetricByName(record, metricName);
+        assertNotNull("Metric " + metricName + " doesn't exist", resourceLimitMetric);
+    }
+
+    private static MetricsTag getFirstTagByName(MetricsRecord record, String name) {
+        return Iterables.getFirst(Iterables.filter(record.tags(), new MetricsTagPredicate(name)), null);
+    }
+
+    private static AbstractMetric getFirstMetricByName(MetricsRecord record, String name) {
+        return Iterables.getFirst(Iterables.filter(record.metrics(), new AbstractMetricPredicate(name)), null);
+    }
+
+    private static class MetricsTagPredicate implements Predicate<MetricsTag> {
+
+        private String tagName;
+
+        public MetricsTagPredicate(String tagName) {
+            this.tagName = tagName;
+        }
+
+        @Override
+        public boolean apply(MetricsTag input) {
+            return input.name().equals(tagName);
+        }
+    }
+
+    private static class AbstractMetricPredicate implements Predicate<AbstractMetric> {
+
+        private String metricName;
+
+        public AbstractMetricPredicate(String metricName) {
+            this.metricName = metricName;
+        }
+
+        @Override
+        public boolean apply(AbstractMetric input) {
+            return input.name().equals(metricName);
+        }
+    }
 }

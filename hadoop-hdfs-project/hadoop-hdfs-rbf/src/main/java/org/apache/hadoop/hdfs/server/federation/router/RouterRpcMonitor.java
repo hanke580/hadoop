@@ -27,93 +27,92 @@ import org.apache.hadoop.hdfs.server.federation.store.StateStoreService;
  */
 public interface RouterRpcMonitor {
 
-  /**
-   * Initialize the monitor.
-   * @param conf Configuration for the monitor.
-   * @param server RPC server.
-   * @param store State Store.
-   */
-  void init(
-      Configuration conf, RouterRpcServer server, StateStoreService store);
+    /**
+     * Initialize the monitor.
+     * @param conf Configuration for the monitor.
+     * @param server RPC server.
+     * @param store State Store.
+     */
+    void init(Configuration conf, RouterRpcServer server, StateStoreService store);
 
-  /**
-   * Get Router RPC metrics info.
-   * @return The instance of FederationRPCMetrics.
-   */
-  FederationRPCMetrics getRPCMetrics();
+    /**
+     * Get Router RPC metrics info.
+     * @return The instance of FederationRPCMetrics.
+     */
+    FederationRPCMetrics getRPCMetrics();
 
-  /**
-   * Close the monitor.
-   */
-  void close();
+    /**
+     * Close the monitor.
+     */
+    void close();
 
-  /**
-   * Start processing an operation on the Router.
-   */
-  void startOp();
+    /**
+     * Start processing an operation on the Router.
+     */
+    void startOp();
 
-  /**
-   * Start proxying an operation to the Namenode.
-   * @return Id of the thread doing the proxying.
-   */
-  long proxyOp();
+    /**
+     * Start proxying an operation to the Namenode.
+     * @return Id of the thread doing the proxying.
+     */
+    long proxyOp();
 
-  /**
-   * Mark a proxy operation as completed.
-   * @param success If the operation was successful.
-   */
-  void proxyOpComplete(boolean success);
+    /**
+     * Mark a proxy operation as completed.
+     * @param success If the operation was successful.
+     */
+    void proxyOpComplete(boolean success);
 
-  /**
-   * Failed to proxy an operation to a Namenode because it was in standby.
-   */
-  void proxyOpFailureStandby();
+    /**
+     * Failed to proxy an operation to a Namenode because it was in standby.
+     */
+    void proxyOpFailureStandby();
 
-  /**
-   * Failed to proxy an operation to a Namenode because of an unexpected
-   * exception.
-   */
-  void proxyOpFailureCommunicate();
+    /**
+     * Failed to proxy an operation to a Namenode because of an unexpected
+     * exception.
+     */
+    void proxyOpFailureCommunicate();
 
-  /**
-   * Failed to proxy an operation to a Namenode because the client was
-   * overloaded.
-   */
-  void proxyOpFailureClientOverloaded();
+    /**
+     * Failed to proxy an operation to a Namenode because the client was
+     * overloaded.
+     */
+    void proxyOpFailureClientOverloaded();
 
-  /**
-   * Failed to proxy an operation because it is not implemented.
-   */
-  void proxyOpNotImplemented();
+    /**
+     * Failed to proxy an operation because it is not implemented.
+     */
+    void proxyOpNotImplemented();
 
-  /**
-   * Retry to proxy an operation to a Namenode because of an unexpected
-   * exception.
-   */
-  void proxyOpRetries();
+    /**
+     * Retry to proxy an operation to a Namenode because of an unexpected
+     * exception.
+     */
+    void proxyOpRetries();
 
-  /**
-   * Failed to proxy an operation because of no namenodes available.
-   */
-  void proxyOpNoNamenodes();
+    /**
+     * Failed to proxy an operation because of no namenodes available.
+     */
+    void proxyOpNoNamenodes();
 
-  /**
-   * If the Router cannot contact the State Store in an operation.
-   */
-  void routerFailureStateStore();
+    /**
+     * If the Router cannot contact the State Store in an operation.
+     */
+    void routerFailureStateStore();
 
-  /**
-   * If the Router is in safe mode.
-   */
-  void routerFailureSafemode();
+    /**
+     * If the Router is in safe mode.
+     */
+    void routerFailureSafemode();
 
-  /**
-   * If a path is locked.
-   */
-  void routerFailureLocked();
+    /**
+     * If a path is locked.
+     */
+    void routerFailureLocked();
 
-  /**
-   * If a path is in a read only mount point.
-   */
-  void routerFailureReadOnly();
+    /**
+     * If a path is in a read only mount point.
+     */
+    void routerFailureReadOnly();
 }

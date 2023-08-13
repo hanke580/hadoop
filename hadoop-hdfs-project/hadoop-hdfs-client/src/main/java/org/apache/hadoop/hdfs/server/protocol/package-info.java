@@ -19,8 +19,10 @@
  * Package contains classes that allows HDFS to communicate information b/w
  * DataNode and NameNode.
  */
-@InterfaceAudience.LimitedPrivate({"HDFS"})
+@InterfaceAudience.LimitedPrivate({ "HDFS" })
 @InterfaceStability.Evolving
 package org.apache.hadoop.hdfs.server.protocol;
+
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

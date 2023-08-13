@@ -26,12 +26,11 @@ import org.junit.Before;
  */
 public class TestXORRawCoderInteroperable2 extends TestXORRawCoderBase {
 
-  @Before
-  public void setup() {
-    Assume.assumeTrue(ErasureCodeNative.isNativeCodeLoaded());
-    this.encoderFactoryClass = NativeXORRawErasureCoderFactory.class;
-    this.decoderFactoryClass = XORRawErasureCoderFactory.class;
-    setAllowDump(true);
-  }
-
+    @Before
+    public void setup() {
+        Assume.assumeTrue(ErasureCodeNative.isNativeCodeLoaded());
+        this.encoderFactoryClass = NativeXORRawErasureCoderFactory.class;
+        this.decoderFactoryClass = XORRawErasureCoderFactory.class;
+        setAllowDump(true);
+    }
 }

@@ -20,7 +20,6 @@ package org.apache.hadoop.tracing;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.fs.CommonConfigurationKeys;
@@ -32,38 +31,38 @@ import org.apache.hadoop.security.KerberosInfo;
 /**
  * Protocol interface that provides tracing.
  */
-@KerberosInfo(
-    serverPrincipal=CommonConfigurationKeys.HADOOP_SECURITY_SERVICE_USER_NAME_KEY)
+@KerberosInfo(serverPrincipal = CommonConfigurationKeys.HADOOP_SECURITY_SERVICE_USER_NAME_KEY)
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
 public interface TraceAdminProtocol {
-  public static final long versionID = 1L;
 
-  /**
-   * List the currently active trace span receivers.
-   * 
-   * @throws IOException        On error.
-   */
-  @Idempotent
-  public SpanReceiverInfo[] listSpanReceivers() throws IOException;
+    public static final long versionID = 1L;
 
-  /**
-   * Add a new trace span receiver.
-   * 
-   * @param desc                The span receiver description.
-   * @return                    The ID of the new trace span receiver.
-   *
-   * @throws IOException        On error.
-   */
-  @AtMostOnce
-  public long addSpanReceiver(SpanReceiverInfo desc) throws IOException;
+    /**
+     * List the currently active trace span receivers.
+     *
+     * @throws IOException        On error.
+     */
+    @Idempotent
+    public SpanReceiverInfo[] listSpanReceivers() throws IOException;
 
-  /**
-   * Remove a trace span receiver.
-   *
-   * @param spanReceiverId      The id of the span receiver to remove.
-   * @throws IOException        On error.
-   */
-  @AtMostOnce
-  public void removeSpanReceiver(long spanReceiverId) throws IOException;
+    /**
+     * Add a new trace span receiver.
+     *
+     * @param desc                The span receiver description.
+     * @return                    The ID of the new trace span receiver.
+     *
+     * @throws IOException        On error.
+     */
+    @AtMostOnce
+    public long addSpanReceiver(SpanReceiverInfo desc) throws IOException;
+
+    /**
+     * Remove a trace span receiver.
+     *
+     * @param spanReceiverId      The id of the span receiver to remove.
+     * @throws IOException        On error.
+     */
+    @AtMostOnce
+    public void removeSpanReceiver(long spanReceiverId) throws IOException;
 }

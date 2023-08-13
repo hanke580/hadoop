@@ -17,50 +17,47 @@
  */
 package org.apache.hadoop.http;
 
-
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.FileNotFoundException;
 
 /**
  * Test webapp loading
  */
 public class TestHttpServerWebapps extends HttpServerFunctionalTest {
-  private static final Logger LOG =
-      LoggerFactory.getLogger(TestHttpServerWebapps.class);
 
-  /**
-   * Test that the test server is loadable on the classpath
-   * @throws Throwable if something went wrong
-   */
-  @Test
-  public void testValidServerResource() throws Throwable {
-    HttpServer2 server = null;
-    try {
-      server = createServer("test");
-    } finally {
-      stop(server);
+    private static final Logger LOG = LoggerFactory.getLogger(TestHttpServerWebapps.class);
+
+    /**
+     * Test that the test server is loadable on the classpath
+     * @throws Throwable if something went wrong
+     */
+    @Test
+    public void testValidServerResource() throws Throwable {
+        HttpServer2 server = null;
+        try {
+            server = createServer("test");
+        } finally {
+            stop(server);
+        }
     }
-  }
 
-  /**
-   * Test that an invalid webapp triggers an exception
-   * @throws Throwable if something went wrong
-   */
-  @Test
-  public void testMissingServerResource() throws Throwable {
-    try {
-      HttpServer2 server = createServer("NoSuchWebapp");
-      //should not have got here.
-      //close the server
-      String serverDescription = server.toString();
-      stop(server);
-      fail("Expected an exception, got " + serverDescription);
-    } catch (FileNotFoundException expected) {
-      LOG.debug("Expected exception " + expected, expected);
+    /**
+     * Test that an invalid webapp triggers an exception
+     * @throws Throwable if something went wrong
+     */
+    @Test
+    public void testMissingServerResource() throws Throwable {
+        try {
+            HttpServer2 server = createServer("NoSuchWebapp");
+            //should not have got here.
+            //close the server
+            String serverDescription = server.toString();
+            stop(server);
+            fail("Expected an exception, got " + serverDescription);
+        } catch (FileNotFoundException expected) {
+            LOG.debug("Expected exception " + expected, expected);
+        }
     }
-  }
-
 }

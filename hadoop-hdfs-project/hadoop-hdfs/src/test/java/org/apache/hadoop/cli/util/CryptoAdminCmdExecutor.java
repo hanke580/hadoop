@@ -21,17 +21,19 @@ import org.apache.hadoop.hdfs.tools.CryptoAdmin;
 import org.apache.hadoop.util.ToolRunner;
 
 public class CryptoAdminCmdExecutor extends CommandExecutor {
-  protected String namenode = null;
-  protected CryptoAdmin admin = null;
 
-  public CryptoAdminCmdExecutor(String namenode, CryptoAdmin admin) {
-    this.namenode = namenode;
-    this.admin = admin;
-  }
+    protected String namenode = null;
 
-  @Override
-  protected int execute(final String cmd) throws Exception {
-    String[] args = getCommandAsArgs(cmd, "NAMENODE", this.namenode);
-    return ToolRunner.run(admin, args);
-  }
+    protected CryptoAdmin admin = null;
+
+    public CryptoAdminCmdExecutor(String namenode, CryptoAdmin admin) {
+        this.namenode = namenode;
+        this.admin = admin;
+    }
+
+    @Override
+    protected int execute(final String cmd) throws Exception {
+        String[] args = getCommandAsArgs(cmd, "NAMENODE", this.namenode);
+        return ToolRunner.run(admin, args);
+    }
 }

@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.test;
 
 import org.junit.Assert;
@@ -24,17 +23,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TestJUnitSetup {
-  public static final Logger LOG =
-      LoggerFactory.getLogger(TestJUnitSetup.class);
 
-  @Test
-  public void testJavaAssert() {
-    try {
-      assert false : "Good! Java assert is on.";
-    } catch(AssertionError ae) {
-      LOG.info("The AssertionError is expected.", ae);
-      return;
+    public static final Logger LOG = LoggerFactory.getLogger(TestJUnitSetup.class);
+
+    @Test
+    public void testJavaAssert() {
+        try {
+            assert false : "Good! Java assert is on.";
+        } catch (AssertionError ae) {
+            LOG.info("The AssertionError is expected.", ae);
+            return;
+        }
+        Assert.fail("Java assert does not work.");
     }
-    Assert.fail("Java assert does not work.");
-  }
 }

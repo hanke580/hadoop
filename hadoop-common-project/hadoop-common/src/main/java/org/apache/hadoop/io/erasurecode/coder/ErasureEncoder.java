@@ -29,63 +29,63 @@ import org.apache.hadoop.io.erasurecode.ErasureCoderOptions;
  * It implements the {@link ErasureCoder} interface.
  */
 @InterfaceAudience.Private
-public abstract class ErasureEncoder extends Configured
-    implements ErasureCoder {
+public abstract class ErasureEncoder extends Configured implements ErasureCoder {
 
-  private final int numDataUnits;
-  private final int numParityUnits;
-  private final ErasureCoderOptions options;
+    private final int numDataUnits;
 
-  public ErasureEncoder(ErasureCoderOptions options) {
-    this.options = options;
-    this.numDataUnits = options.getNumDataUnits();
-    this.numParityUnits = options.getNumParityUnits();
-  }
+    private final int numParityUnits;
 
-  @Override
-  public ErasureCodingStep calculateCoding(ECBlockGroup blockGroup) {
-    // We may have more than this when considering complicate cases. HADOOP-11550
-    return prepareEncodingStep(blockGroup);
-  }
+    private final ErasureCoderOptions options;
 
-  @Override
-  public int getNumDataUnits() {
-    return numDataUnits;
-  }
+    public ErasureEncoder(ErasureCoderOptions options) {
+        this.options = options;
+        this.numDataUnits = options.getNumDataUnits();
+        this.numParityUnits = options.getNumParityUnits();
+    }
 
-  @Override
-  public int getNumParityUnits() {
-    return numParityUnits;
-  }
+    @Override
+    public ErasureCodingStep calculateCoding(ECBlockGroup blockGroup) {
+        // We may have more than this when considering complicate cases. HADOOP-11550
+        return prepareEncodingStep(blockGroup);
+    }
 
-  @Override
-  public ErasureCoderOptions getOptions() {
-    return options;
-  }
+    @Override
+    public int getNumDataUnits() {
+        return numDataUnits;
+    }
 
-  protected ECBlock[] getInputBlocks(ECBlockGroup blockGroup) {
-    return blockGroup.getDataBlocks();
-  }
+    @Override
+    public int getNumParityUnits() {
+        return numParityUnits;
+    }
 
-  protected ECBlock[] getOutputBlocks(ECBlockGroup blockGroup) {
-    return blockGroup.getParityBlocks();
-  }
+    @Override
+    public ErasureCoderOptions getOptions() {
+        return options;
+    }
 
-  @Override
-  public boolean preferDirectBuffer() {
-    return false;
-  }
+    protected ECBlock[] getInputBlocks(ECBlockGroup blockGroup) {
+        return blockGroup.getDataBlocks();
+    }
 
-  @Override
-  public void release() {
-    // Nothing to do by default
-  }
+    protected ECBlock[] getOutputBlocks(ECBlockGroup blockGroup) {
+        return blockGroup.getParityBlocks();
+    }
 
-  /**
-   * Perform encoding against a block group.
-   * @param blockGroup
-   * @return encoding step for caller to do the real work
-   */
-  protected abstract ErasureCodingStep prepareEncodingStep(
-      ECBlockGroup blockGroup);
+    @Override
+    public boolean preferDirectBuffer() {
+        return false;
+    }
+
+    @Override
+    public void release() {
+        // Nothing to do by default
+    }
+
+    /**
+     * Perform encoding against a block group.
+     * @param blockGroup
+     * @return encoding step for caller to do the real work
+     */
+    protected abstract ErasureCodingStep prepareEncodingStep(ECBlockGroup blockGroup);
 }

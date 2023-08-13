@@ -19,30 +19,29 @@
 package org.apache.hadoop.hdfs.web.resources;
 
 import org.apache.hadoop.fs.CreateFlag;
-
 import java.util.EnumSet;
 
 /**
  * CreateFlag enum.
  */
 public class CreateFlagParam extends EnumSetParam<CreateFlag> {
-  public static final String NAME = "createflag";
 
-  public static final String DEFAULT = "";
+    public static final String NAME = "createflag";
 
-  private static final Domain<CreateFlag> DOMAIN = new Domain<>(
-      NAME, CreateFlag.class);
+    public static final String DEFAULT = "";
 
-  public CreateFlagParam(final EnumSet<CreateFlag> createFlags) {
-    super(DOMAIN, createFlags);
-  }
+    private static final Domain<CreateFlag> DOMAIN = new Domain<>(NAME, CreateFlag.class);
 
-  public CreateFlagParam(final String str) {
-    super(DOMAIN, DOMAIN.parse(str));
-  }
+    public CreateFlagParam(final EnumSet<CreateFlag> createFlags) {
+        super(DOMAIN, createFlags);
+    }
 
-  @Override
-  public String getName() {
-    return NAME;
-  }
+    public CreateFlagParam(final String str) {
+        super(DOMAIN, DOMAIN.parse(str));
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
+    }
 }

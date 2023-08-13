@@ -28,42 +28,42 @@ import org.apache.hadoop.classification.InterfaceAudience;
  * @see FSNamesystemMBean
  * Name Node runtime activity statistic info is reported in
  * @see org.apache.hadoop.hdfs.server.namenode.metrics.NameNodeMetrics
- *
  */
 @InterfaceAudience.Private
 public interface ECBlockGroupsMBean {
-  /**
-   * Return count of erasure coded block groups with low redundancy.
-   */
-  long getLowRedundancyECBlockGroups();
 
-  /**
-   * Return count of erasure coded block groups that are corrupt.
-   */
-  long getCorruptECBlockGroups();
+    /**
+     * Return count of erasure coded block groups with low redundancy.
+     */
+    long getLowRedundancyECBlockGroups();
 
-  /**
-   * Return count of erasure coded block groups that are missing.
-   */
-  long getMissingECBlockGroups();
+    /**
+     * Return count of erasure coded block groups that are corrupt.
+     */
+    long getCorruptECBlockGroups();
 
-  /**
-   * Return total bytes of erasure coded future block groups.
-   */
-  long getBytesInFutureECBlockGroups();
+    /**
+     * Return count of erasure coded block groups that are missing.
+     */
+    long getMissingECBlockGroups();
 
-  /**
-   * Return count of erasure coded blocks that are pending deletion.
-   */
-  long getPendingDeletionECBlocks();
+    /**
+     * Return total bytes of erasure coded future block groups.
+     */
+    long getBytesInFutureECBlockGroups();
 
-  /**
-   * Return total number of erasure coded block groups.
-   */
-  long getTotalECBlockGroups();
+    /**
+     * Return count of erasure coded blocks that are pending deletion.
+     */
+    long getPendingDeletionECBlocks();
 
-  /**
-   * @return the enabled erasure coding policies separated with comma.
-   */
-  String getEnabledEcPolicies();
+    /**
+     * Return total number of erasure coded block groups.
+     */
+    long getTotalECBlockGroups();
+
+    /**
+     * @return the enabled erasure coding policies separated with comma.
+     */
+    String getEnabledEcPolicies();
 }

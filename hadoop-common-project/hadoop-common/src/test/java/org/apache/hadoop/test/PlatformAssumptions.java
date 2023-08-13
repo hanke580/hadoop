@@ -23,25 +23,27 @@ import org.junit.internal.AssumptionViolatedException;
  * JUnit assumptions for the environment (OS).
  */
 public final class PlatformAssumptions {
-  public static final String OS_NAME = System.getProperty("os.name");
-  public static final boolean WINDOWS = OS_NAME.startsWith("Windows");
 
-  private PlatformAssumptions() { }
+    public static final String OS_NAME = System.getProperty("os.name");
 
-  public static void assumeNotWindows() {
-    assumeNotWindows("Expected Unix-like platform but got " + OS_NAME);
-  }
+    public static final boolean WINDOWS = OS_NAME.startsWith("Windows");
 
-  public static void assumeNotWindows(String message) {
-    if (WINDOWS) {
-      throw new AssumptionViolatedException(message);
+    private PlatformAssumptions() {
     }
-  }
 
-  public static void assumeWindows() {
-    if (!WINDOWS) {
-      throw new AssumptionViolatedException(
-          "Expected Windows platform but got " + OS_NAME);
+    public static void assumeNotWindows() {
+        assumeNotWindows("Expected Unix-like platform but got " + OS_NAME);
     }
-  }
+
+    public static void assumeNotWindows(String message) {
+        if (WINDOWS) {
+            throw new AssumptionViolatedException(message);
+        }
+    }
+
+    public static void assumeWindows() {
+        if (!WINDOWS) {
+            throw new AssumptionViolatedException("Expected Windows platform but got " + OS_NAME);
+        }
+    }
 }

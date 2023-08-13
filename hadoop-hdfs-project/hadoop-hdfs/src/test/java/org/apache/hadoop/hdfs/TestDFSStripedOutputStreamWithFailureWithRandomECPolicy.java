@@ -25,21 +25,19 @@ import org.apache.hadoop.io.erasurecode.ECSchema;
  * This tests write operation of DFS striped file with a random erasure code
  * policy except for the default policy under Datanode failure conditions.
  */
-public class TestDFSStripedOutputStreamWithFailureWithRandomECPolicy extends
-    TestDFSStripedOutputStreamWithFailure {
+public class TestDFSStripedOutputStreamWithFailureWithRandomECPolicy extends TestDFSStripedOutputStreamWithFailure {
 
-  private final ECSchema schema;
+    private final ECSchema schema;
 
-  private static final Logger LOG = LoggerFactory.getLogger(
-      TestDFSStripedOutputStreamWithRandomECPolicy.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(TestDFSStripedOutputStreamWithRandomECPolicy.class.getName());
 
-  public TestDFSStripedOutputStreamWithFailureWithRandomECPolicy() {
-    schema = StripedFileTestUtil.getRandomNonDefaultECPolicy().getSchema();
-    LOG.info("{}", schema.toString());
-  }
+    public TestDFSStripedOutputStreamWithFailureWithRandomECPolicy() {
+        schema = StripedFileTestUtil.getRandomNonDefaultECPolicy().getSchema();
+        LOG.info("{}", schema.toString());
+    }
 
-  @Override
-  public ECSchema getEcSchema() {
-    return schema;
-  }
+    @Override
+    public ECSchema getEcSchema() {
+        return schema;
+    }
 }

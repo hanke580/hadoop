@@ -26,15 +26,15 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.tools.DFSAdmin;
 
 public class CLITestCmdDFS extends CLITestCmd {
-  public CLITestCmdDFS(String str, CLICommandTypes type) {
-    super(str, type);
-  }
 
-  @Override
-  public CommandExecutor getExecutor(String tag, Configuration conf)
-      throws IllegalArgumentException {
-    if (getType() instanceof CLICommandDFSAdmin)
-      return new FSCmdExecutor(tag, new DFSAdmin(conf));
-    return super.getExecutor(tag, conf);
-  }
+    public CLITestCmdDFS(String str, CLICommandTypes type) {
+        super(str, type);
+    }
+
+    @Override
+    public CommandExecutor getExecutor(String tag, Configuration conf) throws IllegalArgumentException {
+        if (getType() instanceof CLICommandDFSAdmin)
+            return new FSCmdExecutor(tag, new DFSAdmin(conf));
+        return super.getExecutor(tag, conf);
+    }
 }

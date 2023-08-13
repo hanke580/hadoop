@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.security.authentication.server;
 
 import java.util.Map;
@@ -30,31 +29,26 @@ import org.apache.hadoop.security.authorize.ProxyUsers;
  * {@link ProxyUserAuthenticationFilter} which adds support
  * to perform operations using end user instead of proxy user.
  */
-public class ProxyUserAuthenticationFilterInitializer
-    extends FilterInitializer {
+public class ProxyUserAuthenticationFilterInitializer extends FilterInitializer {
 
-  private String configPrefix;
+    private String configPrefix;
 
-  public ProxyUserAuthenticationFilterInitializer() {
-    this.configPrefix = "hadoop.http.authentication.";
-  }
-
-  protected Map<String, String> createFilterConfig(Configuration conf) {
-    Map<String, String> filterConfig = AuthenticationFilterInitializer
-        .getFilterConfigMap(conf, configPrefix);
-    //Add proxy user configs
-    for (Map.Entry<String, String> entry : conf.getPropsWithPrefix(
-        ProxyUsers.CONF_HADOOP_PROXYUSER).entrySet()) {
-      filterConfig.put("proxyuser" + entry.getKey(), entry.getValue());
+    public ProxyUserAuthenticationFilterInitializer() {
+        this.configPrefix = "hadoop.http.authentication.";
     }
-    return filterConfig;
-  }
 
-  @Override
-  public void initFilter(FilterContainer container, Configuration conf) {
-    Map<String, String> filterConfig = createFilterConfig(conf);
-    container.addFilter("ProxyUserAuthenticationFilter",
-        ProxyUserAuthenticationFilter.class.getName(), filterConfig);
-  }
+    protected Map<String, String> createFilterConfig(Configuration conf) {
+        Map<String, String> filterConfig = AuthenticationFilterInitializer.getFilterConfigMap(conf, configPrefix);
+        //Add proxy user configs
+        for (Map.Entry<String, String> entry : conf.getPropsWithPrefix(ProxyUsers.CONF_HADOOP_PROXYUSER).entrySet()) {
+            filterConfig.put("proxyuser" + entry.getKey(), entry.getValue());
+        }
+        return filterConfig;
+    }
 
+    @Override
+    public void initFilter(FilterContainer container, Configuration conf) {
+        Map<String, String> filterConfig = createFilterConfig(conf);
+        container.addFilter("ProxyUserAuthenticationFilter", ProxyUserAuthenticationFilter.class.getName(), filterConfig);
+    }
 }

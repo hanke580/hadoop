@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.http;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -27,9 +26,11 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
 public final class JettyUtils {
-  public static final String UTF_8 = "charset=utf-8";
-  public static final int HEADER_SIZE = 1024 * 64;
 
-  private JettyUtils() {
-  }
+    public static final String UTF_8 = "charset=utf-8";
+
+    public static final int HEADER_SIZE = 1024 * 64;
+
+    private JettyUtils() {
+    }
 }

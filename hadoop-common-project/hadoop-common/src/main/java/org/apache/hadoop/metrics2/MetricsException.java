@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.metrics2;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -27,30 +26,31 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
 public class MetricsException extends RuntimeException {
-  private static final long serialVersionUID = 1L;
 
-  /**
-   * Construct the exception with a message
-   * @param message for the exception
-   */
-  public MetricsException(String message) {
-    super(message);
-  }
+    private static final long serialVersionUID = 1L;
 
-  /**
-   * Construct the exception with a message and a cause
-   * @param message for the exception
-   * @param cause of the exception
-   */
-  public MetricsException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    /**
+     * Construct the exception with a message
+     * @param message for the exception
+     */
+    public MetricsException(String message) {
+        super(message);
+    }
 
-  /**
-   * Construct the exception with a cause
-   * @param cause of the exception
-   */
-  public MetricsException(Throwable cause) {
-    super(cause);
-  }
+    /**
+     * Construct the exception with a message and a cause
+     * @param message for the exception
+     * @param cause of the exception
+     */
+    public MetricsException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    /**
+     * Construct the exception with a cause
+     * @param cause of the exception
+     */
+    public MetricsException(Throwable cause) {
+        super(cause);
+    }
 }

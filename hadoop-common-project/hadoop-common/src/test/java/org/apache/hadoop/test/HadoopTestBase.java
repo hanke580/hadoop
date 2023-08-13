@@ -18,7 +18,6 @@
 package org.apache.hadoop.test;
 
 import java.util.concurrent.TimeUnit;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -35,74 +34,71 @@ import org.junit.rules.Timeout;
  */
 public abstract class HadoopTestBase extends Assert {
 
-  /**
-   * System property name to set the test timeout: {@value}.
-   */
-  public static final String PROPERTY_TEST_DEFAULT_TIMEOUT =
-      "test.default.timeout";
+    /**
+     * System property name to set the test timeout: {@value}.
+     */
+    public static final String PROPERTY_TEST_DEFAULT_TIMEOUT = "test.default.timeout";
 
-  /**
-   * The default timeout (in milliseconds) if the system property
-   * {@link #PROPERTY_TEST_DEFAULT_TIMEOUT}
-   * is not set: {@value}.
-   */
-  public static final int TEST_DEFAULT_TIMEOUT_VALUE = 100000;
+    /**
+     * The default timeout (in milliseconds) if the system property
+     * {@link #PROPERTY_TEST_DEFAULT_TIMEOUT}
+     * is not set: {@value}.
+     */
+    public static final int TEST_DEFAULT_TIMEOUT_VALUE = 100000;
 
-  /**
-   * The JUnit rule that sets the default timeout for tests.
-   */
-  @Rule
-  public Timeout defaultTimeout = retrieveTestTimeout();
+    /**
+     * The JUnit rule that sets the default timeout for tests.
+     */
+    @Rule
+    public Timeout defaultTimeout = retrieveTestTimeout();
 
-  /**
-   * Retrieve the test timeout from the system property
-   * {@link #PROPERTY_TEST_DEFAULT_TIMEOUT}, falling back to
-   * the value in {@link #TEST_DEFAULT_TIMEOUT_VALUE} if the
-   * property is not defined.
-   * @return the recommended timeout for tests
-   */
-  protected Timeout retrieveTestTimeout() {
-    String propval = System.getProperty(PROPERTY_TEST_DEFAULT_TIMEOUT,
-                                         Integer.toString(
-                                           TEST_DEFAULT_TIMEOUT_VALUE));
-    int millis;
-    try {
-      millis = Integer.parseInt(propval);
-    } catch (NumberFormatException e) {
-      //fall back to the default value, as the property cannot be parsed
-      millis = TEST_DEFAULT_TIMEOUT_VALUE;
+    /**
+     * Retrieve the test timeout from the system property
+     * {@link #PROPERTY_TEST_DEFAULT_TIMEOUT}, falling back to
+     * the value in {@link #TEST_DEFAULT_TIMEOUT_VALUE} if the
+     * property is not defined.
+     * @return the recommended timeout for tests
+     */
+    protected Timeout retrieveTestTimeout() {
+        String propval = System.getProperty(PROPERTY_TEST_DEFAULT_TIMEOUT, Integer.toString(TEST_DEFAULT_TIMEOUT_VALUE));
+        int millis;
+        try {
+            millis = Integer.parseInt(propval);
+        } catch (NumberFormatException e) {
+            //fall back to the default value, as the property cannot be parsed
+            millis = TEST_DEFAULT_TIMEOUT_VALUE;
+        }
+        return new Timeout(millis, TimeUnit.MILLISECONDS);
     }
-    return new Timeout(millis, TimeUnit.MILLISECONDS);
-  }
 
-  /**
-   * The method name.
-   */
-  @Rule
-  public TestName methodName = new TestName();
+    /**
+     * The method name.
+     */
+    @Rule
+    public TestName methodName = new TestName();
 
-  /**
-   * Get the method name; defaults to the value of {@link #methodName}.
-   * Subclasses may wish to override it, which will tune the thread naming.
-   * @return the name of the method.
-   */
-  protected String getMethodName() {
-    return methodName.getMethodName();
-  }
+    /**
+     * Get the method name; defaults to the value of {@link #methodName}.
+     * Subclasses may wish to override it, which will tune the thread naming.
+     * @return the name of the method.
+     */
+    protected String getMethodName() {
+        return methodName.getMethodName();
+    }
 
-  /**
-   * Static initializer names this thread "JUnit".
-   */
-  @BeforeClass
-  public static void nameTestThread() {
-    Thread.currentThread().setName("JUnit");
-  }
+    /**
+     * Static initializer names this thread "JUnit".
+     */
+    @BeforeClass
+    public static void nameTestThread() {
+        Thread.currentThread().setName("JUnit");
+    }
 
-  /**
-   * Before each method, the thread is renamed to match the method name.
-   */
-  @Before
-  public void nameThreadToMethod() {
-    Thread.currentThread().setName("JUnit-" + getMethodName());
-  }
+    /**
+     * Before each method, the thread is renamed to match the method name.
+     */
+    @Before
+    public void nameThreadToMethod() {
+        Thread.currentThread().setName("JUnit-" + getMethodName());
+    }
 }

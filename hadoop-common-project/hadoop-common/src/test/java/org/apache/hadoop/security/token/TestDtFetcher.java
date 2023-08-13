@@ -24,18 +24,17 @@ import org.apache.hadoop.security.token.Token;
 import org.apache.hadoop.security.token.DtFetcher;
 
 public class TestDtFetcher implements DtFetcher {
-  public Text getServiceName() {
-    return TestDtUtilShell.SERVICE_GET;
-  }
 
-  public boolean isTokenRequired() {
-    return true;
-  }
+    public Text getServiceName() {
+        return TestDtUtilShell.SERVICE_GET;
+    }
 
-  public Token<?> addDelegationTokens(Configuration conf,
-      Credentials creds, String renewer, String url) throws Exception {
-    creds.addToken(TestDtUtilShell.MOCK_TOKEN.getService(),
-                   TestDtUtilShell.MOCK_TOKEN);
-    return TestDtUtilShell.MOCK_TOKEN;
-  }
+    public boolean isTokenRequired() {
+        return true;
+    }
+
+    public Token<?> addDelegationTokens(Configuration conf, Credentials creds, String renewer, String url) throws Exception {
+        creds.addToken(TestDtUtilShell.MOCK_TOKEN.getService(), TestDtUtilShell.MOCK_TOKEN);
+        return TestDtUtilShell.MOCK_TOKEN;
+    }
 }

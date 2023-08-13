@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * YARN Registry Client API.
  *
@@ -29,7 +28,6 @@
  *   <li> Classes to assist use of the registry are in
  * {@link org.apache.hadoop.registry.client.binding}</li>
  * </ol>
- *
- *
  */
 package org.apache.hadoop.registry.client.api;
+

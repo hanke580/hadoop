@@ -22,7 +22,6 @@ import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.ProvidedStorageLocation;
 import org.apache.hadoop.hdfs.server.common.FileRegion;
 import org.apache.hadoop.io.retry.Idempotent;
-
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
@@ -37,72 +36,69 @@ import java.util.Optional;
 @InterfaceStability.Unstable
 public interface InMemoryAliasMapProtocol {
 
-  /**
-   * The result of a read from the in-memory aliasmap. It contains the
-   * a list of FileRegions that are returned, along with the next block
-   * from which the read operation must continue.
-   */
-  class IterationResult {
+    /**
+     * The result of a read from the in-memory aliasmap. It contains the
+     * a list of FileRegions that are returned, along with the next block
+     * from which the read operation must continue.
+     */
+    class IterationResult {
 
-    private final List<FileRegion> batch;
-    private final Optional<Block> nextMarker;
+        private final List<FileRegion> batch;
 
-    public IterationResult(List<FileRegion> batch, Optional<Block> nextMarker) {
-      this.batch = batch;
-      this.nextMarker = nextMarker;
+        private final Optional<Block> nextMarker;
+
+        public IterationResult(List<FileRegion> batch, Optional<Block> nextMarker) {
+            this.batch = batch;
+            this.nextMarker = nextMarker;
+        }
+
+        public List<FileRegion> getFileRegions() {
+            return batch;
+        }
+
+        public Optional<Block> getNextBlock() {
+            return nextMarker;
+        }
     }
 
-    public List<FileRegion> getFileRegions() {
-      return batch;
-    }
+    /**
+     * List the next batch of {@link FileRegion}s in the alias map starting from
+     * the given {@code marker}. To retrieve all {@link FileRegion}s stored in the
+     * alias map, multiple calls to this function might be required.
+     * @param marker the next block to get fileregions from.
+     * @return the {@link IterationResult} with a set of
+     * FileRegions and the next marker.
+     * @throws IOException
+     */
+    @Idempotent
+    InMemoryAliasMap.IterationResult list(Optional<Block> marker) throws IOException;
 
-    public Optional<Block> getNextBlock() {
-      return nextMarker;
-    }
-  }
+    /**
+     * Gets the {@link ProvidedStorageLocation} associated with the
+     * specified block.
+     * @param block the block to lookup
+     * @return the associated {@link ProvidedStorageLocation}.
+     * @throws IOException
+     */
+    @Nonnull
+    @Idempotent
+    Optional<ProvidedStorageLocation> read(@Nonnull Block block) throws IOException;
 
-  /**
-   * List the next batch of {@link FileRegion}s in the alias map starting from
-   * the given {@code marker}. To retrieve all {@link FileRegion}s stored in the
-   * alias map, multiple calls to this function might be required.
-   * @param marker the next block to get fileregions from.
-   * @return the {@link IterationResult} with a set of
-   * FileRegions and the next marker.
-   * @throws IOException
-   */
-  @Idempotent
-  InMemoryAliasMap.IterationResult list(Optional<Block> marker)
-      throws IOException;
+    /**
+     * Stores the block and it's associated {@link ProvidedStorageLocation}
+     * in the alias map.
+     * @param block
+     * @param providedStorageLocation
+     * @throws IOException
+     */
+    @Idempotent
+    void write(@Nonnull Block block, @Nonnull ProvidedStorageLocation providedStorageLocation) throws IOException;
 
-  /**
-   * Gets the {@link ProvidedStorageLocation} associated with the
-   * specified block.
-   * @param block the block to lookup
-   * @return the associated {@link ProvidedStorageLocation}.
-   * @throws IOException
-   */
-  @Nonnull
-  @Idempotent
-  Optional<ProvidedStorageLocation> read(@Nonnull Block block)
-      throws IOException;
-
-  /**
-   * Stores the block and it's associated {@link ProvidedStorageLocation}
-   * in the alias map.
-   * @param block
-   * @param providedStorageLocation
-   * @throws IOException
-   */
-  @Idempotent
-  void write(@Nonnull Block block,
-      @Nonnull ProvidedStorageLocation providedStorageLocation)
-      throws IOException;
-
-  /**
-   * Get the associated block pool id.
-   * @return the block pool id associated with the Namenode running
-   * the in-memory alias map.
-   */
-  @Idempotent
-  String getBlockPoolId() throws IOException;
+    /**
+     * Get the associated block pool id.
+     * @return the block pool id associated with the Namenode running
+     * the in-memory alias map.
+     */
+    @Idempotent
+    String getBlockPoolId() throws IOException;
 }

@@ -25,85 +25,87 @@ import java.io.IOException;
  */
 class FakeDecompressor implements Decompressor {
 
-  private boolean finish;
-  private boolean finished;
-  private int nread;
-  private int nwrite;
+    private boolean finish;
 
-  private byte[] userBuf;
-  private int userBufOff;
-  private int userBufLen;
+    private boolean finished;
 
-  @Override
-  public int decompress(byte[] b, int off, int len) throws IOException {
-    int n = Math.min(len, userBufLen);
-    if (userBuf != null && b != null)
-      System.arraycopy(userBuf, userBufOff, b, off, n);
-    userBufOff += n;
-    userBufLen -= n;
-    nwrite += n;
+    private int nread;
 
-    if (finish && userBufLen <= 0)
-      finished = true;
+    private int nwrite;
 
-    return n;
-  }
+    private byte[] userBuf;
 
-  @Override
-  public void end() {
-    // nop
-  }
+    private int userBufOff;
 
-  @Override
-  public boolean finished() {
-    return finished;
-  }
+    private int userBufLen;
 
-  public long getBytesRead() {
-    return nread;
-  }
+    @Override
+    public int decompress(byte[] b, int off, int len) throws IOException {
+        int n = Math.min(len, userBufLen);
+        if (userBuf != null && b != null)
+            System.arraycopy(userBuf, userBufOff, b, off, n);
+        userBufOff += n;
+        userBufLen -= n;
+        nwrite += n;
+        if (finish && userBufLen <= 0)
+            finished = true;
+        return n;
+    }
 
-  public long getBytesWritten() {
-    return nwrite;
-  }
+    @Override
+    public void end() {
+        // nop
+    }
 
-  @Override
-  public boolean needsDictionary() {
-    return false;
-  }
+    @Override
+    public boolean finished() {
+        return finished;
+    }
 
-  @Override
-  public boolean needsInput() {
-    return userBufLen <= 0;
-  }
+    public long getBytesRead() {
+        return nread;
+    }
 
-  @Override
-  public void reset() {
-    finish = false;
-    finished = false;
-    nread = 0;
-    nwrite = 0;
-    userBuf = null;
-    userBufOff = 0;
-    userBufLen = 0;
-  }
+    public long getBytesWritten() {
+        return nwrite;
+    }
 
-  @Override
-  public void setDictionary(byte[] b, int off, int len) {
-    // nop
-  }
+    @Override
+    public boolean needsDictionary() {
+        return false;
+    }
 
-  @Override
-  public void setInput(byte[] b, int off, int len) {
-    nread += len;
-    userBuf = b;
-    userBufOff = off;
-    userBufLen = len;
-  }
+    @Override
+    public boolean needsInput() {
+        return userBufLen <= 0;
+    }
 
-  @Override
-  public int getRemaining() {
-    return 0;
-  }
+    @Override
+    public void reset() {
+        finish = false;
+        finished = false;
+        nread = 0;
+        nwrite = 0;
+        userBuf = null;
+        userBufOff = 0;
+        userBufLen = 0;
+    }
 
+    @Override
+    public void setDictionary(byte[] b, int off, int len) {
+        // nop
+    }
+
+    @Override
+    public void setInput(byte[] b, int off, int len) {
+        nread += len;
+        userBuf = b;
+        userBufOff = off;
+        userBufLen = len;
+    }
+
+    @Override
+    public int getRemaining() {
+        return 0;
+    }
 }

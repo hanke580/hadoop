@@ -18,13 +18,11 @@
 package org.apache.hadoop.hdfs.web;
 
 import java.io.IOException;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-
 import org.apache.hadoop.hdfs.web.resources.DelegationParam;
 import org.apache.hadoop.security.authentication.server.AuthenticationFilter;
 import org.apache.hadoop.security.authentication.server.ProxyUserAuthenticationFilter;
@@ -35,20 +33,16 @@ import org.apache.hadoop.security.authentication.server.ProxyUserAuthenticationF
  */
 public class AuthFilter extends ProxyUserAuthenticationFilter {
 
-  @Override
-  public void doFilter(ServletRequest request, ServletResponse response,
-      FilterChain filterChain) throws IOException, ServletException {
-    final HttpServletRequest httpRequest = ProxyUserAuthenticationFilter.
-        toLowerCase((HttpServletRequest)request);
-    final String tokenString = httpRequest.getParameter(DelegationParam.NAME);
-    if (tokenString != null && httpRequest.getServletPath().startsWith(
-        WebHdfsFileSystem.PATH_PREFIX)) {
-      //Token is present in the url, therefore token will be used for
-      //authentication, bypass kerberos authentication.
-      filterChain.doFilter(httpRequest, response);
-      return;
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+        final HttpServletRequest httpRequest = ProxyUserAuthenticationFilter.toLowerCase((HttpServletRequest) request);
+        final String tokenString = httpRequest.getParameter(DelegationParam.NAME);
+        if (tokenString != null && httpRequest.getServletPath().startsWith(WebHdfsFileSystem.PATH_PREFIX)) {
+            //Token is present in the url, therefore token will be used for
+            //authentication, bypass kerberos authentication.
+            filterChain.doFilter(httpRequest, response);
+            return;
+        }
+        super.doFilter(request, response, filterChain);
     }
-    super.doFilter(request, response, filterChain);
-  }
-
 }

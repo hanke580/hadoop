@@ -19,7 +19,6 @@ package org.apache.hadoop.nfs.nfs3.request;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-
 import org.apache.hadoop.nfs.nfs3.FileHandle;
 import org.apache.hadoop.oncrpc.XDR;
 
@@ -27,36 +26,38 @@ import org.apache.hadoop.oncrpc.XDR;
  * MKDIR3 Request
  */
 public class MKDIR3Request extends RequestWithHandle {
-  private final String name;
-  private final SetAttr3 objAttr;
 
-  public static MKDIR3Request deserialize(XDR xdr) throws IOException {
-    FileHandle handle = readHandle(xdr);
-    String name = xdr.readString();
-    SetAttr3 objAttr = new SetAttr3();
-    objAttr.deserialize(xdr);
-    return new MKDIR3Request(handle, name, objAttr);
-  }
+    private final String name;
 
-  public MKDIR3Request(FileHandle handle, String name, SetAttr3 objAttr) {
-    super(handle);
-    this.name = name;
-    this.objAttr = objAttr;
-  }
+    private final SetAttr3 objAttr;
 
-  public String getName() {
-    return name;
-  }
+    public static MKDIR3Request deserialize(XDR xdr) throws IOException {
+        FileHandle handle = readHandle(xdr);
+        String name = xdr.readString();
+        SetAttr3 objAttr = new SetAttr3();
+        objAttr.deserialize(xdr);
+        return new MKDIR3Request(handle, name, objAttr);
+    }
 
-  public SetAttr3 getObjAttr() {
-    return objAttr;
-  }
+    public MKDIR3Request(FileHandle handle, String name, SetAttr3 objAttr) {
+        super(handle);
+        this.name = name;
+        this.objAttr = objAttr;
+    }
 
-  @Override
-  public void serialize(XDR xdr) {
-    handle.serialize(xdr);
-    xdr.writeInt(name.getBytes(StandardCharsets.UTF_8).length);
-    xdr.writeFixedOpaque(name.getBytes(StandardCharsets.UTF_8));
-    objAttr.serialize(xdr);
-  }
+    public String getName() {
+        return name;
+    }
+
+    public SetAttr3 getObjAttr() {
+        return objAttr;
+    }
+
+    @Override
+    public void serialize(XDR xdr) {
+        handle.serialize(xdr);
+        xdr.writeInt(name.getBytes(StandardCharsets.UTF_8).length);
+        xdr.writeFixedOpaque(name.getBytes(StandardCharsets.UTF_8));
+        objAttr.serialize(xdr);
+    }
 }

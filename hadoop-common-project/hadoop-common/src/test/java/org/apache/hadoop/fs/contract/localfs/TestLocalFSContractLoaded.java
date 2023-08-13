@@ -15,14 +15,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.hadoop.fs.contract.localfs;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.contract.AbstractFSContract;
 import org.apache.hadoop.fs.contract.AbstractFSContractTestBase;
 import org.junit.Test;
-
 import java.net.URL;
 
 /**
@@ -30,24 +28,21 @@ import java.net.URL;
  */
 public class TestLocalFSContractLoaded extends AbstractFSContractTestBase {
 
-  @Override
-  protected AbstractFSContract createContract(Configuration conf) {
-    return new LocalFSContract(conf);
-  }
+    @Override
+    protected AbstractFSContract createContract(Configuration conf) {
+        return new LocalFSContract(conf);
+    }
 
-  @Test
-  public void testContractWorks() throws Throwable {
-    String key = getContract().getConfKey(SUPPORTS_ATOMIC_RENAME);
-    assertNotNull("not set: " + key, getContract().getConf().get(key));
-    assertTrue("not true: " + key,
-               getContract().isSupported(SUPPORTS_ATOMIC_RENAME, false));
-  }
+    @Test
+    public void testContractWorks() throws Throwable {
+        String key = getContract().getConfKey(SUPPORTS_ATOMIC_RENAME);
+        assertNotNull("not set: " + key, getContract().getConf().get(key));
+        assertTrue("not true: " + key, getContract().isSupported(SUPPORTS_ATOMIC_RENAME, false));
+    }
 
-  @Test
-  public void testContractResourceOnClasspath() throws Throwable {
-    URL url = this.getClass()
-                       .getClassLoader()
-                       .getResource(LocalFSContract.CONTRACT_XML);
-    assertNotNull("could not find contract resource", url);
-  }
+    @Test
+    public void testContractResourceOnClasspath() throws Throwable {
+        URL url = this.getClass().getClassLoader().getResource(LocalFSContract.CONTRACT_XML);
+        assertNotNull("could not find contract resource", url);
+    }
 }

@@ -24,7 +24,7 @@ import org.apache.hadoop.hdfs.server.federation.store.driver.StateStoreSerialize
  */
 public abstract class GetNamespaceInfoRequest {
 
-  public static GetNamespaceInfoRequest newInstance() {
-    return StateStoreSerializer.newRecord(GetNamespaceInfoRequest.class);
-  }
+    public static GetNamespaceInfoRequest newInstance() {
+        return StateStoreSerializer.newRecord(GetNamespaceInfoRequest.class);
+    }
 }

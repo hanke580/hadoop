@@ -19,7 +19,6 @@ package org.apache.hadoop.hdfs.server.datanode;
 
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.apache.hadoop.hdfs.HdfsConfiguration;
 import org.apache.hadoop.hdfs.server.datanode.metrics.DataNodePeerMetrics;
@@ -35,58 +34,49 @@ import static org.junit.Assert.assertThat;
  */
 public class TestDataNodePeerMetrics {
 
-  @Test(timeout = 30000)
-  public void testGetSendPacketDownstreamAvgInfo() throws Exception {
-    final int windowSize = 5; // 5s roll over interval
-    final int numWindows = 2; // 2 rolling windows
-    final int iterations = 3;
-    final int numOpsPerIteration = 1000;
-
-    final Configuration conf = new HdfsConfiguration();
-    conf.setBoolean(DFSConfigKeys.DFS_DATANODE_PEER_STATS_ENABLED_KEY, true);
-
-    final DataNodePeerMetrics peerMetrics = DataNodePeerMetrics.create(
-        "Sample-DataNode", conf);
-    MetricsTestHelper.replaceRollingAveragesScheduler(
-        peerMetrics.getSendPacketDownstreamRollingAverages(),
-        numWindows, windowSize, TimeUnit.SECONDS);
-    final long start = Time.monotonicNow();
-    for (int i = 1; i <= iterations; i++) {
-      final String peerAddr = genPeerAddress();
-      for (int j = 1; j <= numOpsPerIteration; j++) {
-        /* simulate to get latency of 1 to 1000 ms */
-        final long latency = ThreadLocalRandom.current().nextLong(1, 1000);
-        peerMetrics.addSendPacketDownstream(peerAddr, latency);
-      }
-
-      /**
-       * Sleep until 1s after the next windowSize seconds interval, to let the
-       * metrics roll over
-       */
-      final long sleep = (start + (windowSize * 1000 * i) + 1000)
-          - Time.monotonicNow();
-      Thread.sleep(sleep);
-
-      /* dump avg info */
-      final String json = peerMetrics.dumpSendPacketDownstreamAvgInfoAsJson();
-
-      /*
+    @Test(timeout = 30000)
+    public void testGetSendPacketDownstreamAvgInfo() throws Exception {
+        // 5s roll over interval
+        final int windowSize = 5;
+        // 2 rolling windows
+        final int numWindows = 2;
+        final int iterations = 3;
+        final int numOpsPerIteration = 1000;
+        final Configuration conf = new HdfsConfiguration();
+        conf.setBoolean(DFSConfigKeys.DFS_DATANODE_PEER_STATS_ENABLED_KEY, true);
+        final DataNodePeerMetrics peerMetrics = DataNodePeerMetrics.create("Sample-DataNode", conf);
+        MetricsTestHelper.replaceRollingAveragesScheduler(peerMetrics.getSendPacketDownstreamRollingAverages(), numWindows, windowSize, TimeUnit.SECONDS);
+        final long start = Time.monotonicNow();
+        for (int i = 1; i <= iterations; i++) {
+            final String peerAddr = genPeerAddress();
+            for (int j = 1; j <= numOpsPerIteration; j++) {
+                /* simulate to get latency of 1 to 1000 ms */
+                final long latency = ThreadLocalRandom.current().nextLong(1, 1000);
+                peerMetrics.addSendPacketDownstream(peerAddr, latency);
+            }
+            /**
+             * Sleep until 1s after the next windowSize seconds interval, to let the
+             * metrics roll over
+             */
+            final long sleep = (start + (windowSize * 1000 * i) + 1000) - Time.monotonicNow();
+            Thread.sleep(sleep);
+            /* dump avg info */
+            final String json = peerMetrics.dumpSendPacketDownstreamAvgInfoAsJson();
+            /*
        * example json:
        * {"[185.164.159.81:9801]RollingAvgTime":504.867,
        *  "[49.236.149.246:9801]RollingAvgTime":504.463,
        *  "[84.125.113.65:9801]RollingAvgTime":497.954}
        */
-      assertThat(json, containsString(peerAddr));
+            assertThat(json, containsString(peerAddr));
+        }
     }
-  }
 
-  /**
-   * Simulates to generate different peer addresses, e.g. [84.125.113.65:9801].
-   */
-  private String genPeerAddress() {
-    final  ThreadLocalRandom r = ThreadLocalRandom.current();
-    return String.format("[%d.%d.%d.%d:9801]",
-        r.nextInt(1, 256), r.nextInt(1, 256),
-        r.nextInt(1, 256), r.nextInt(1, 256));
-  }
+    /**
+     * Simulates to generate different peer addresses, e.g. [84.125.113.65:9801].
+     */
+    private String genPeerAddress() {
+        final ThreadLocalRandom r = ThreadLocalRandom.current();
+        return String.format("[%d.%d.%d.%d:9801]", r.nextInt(1, 256), r.nextInt(1, 256), r.nextInt(1, 256), r.nextInt(1, 256));
+    }
 }

@@ -19,32 +19,28 @@ package org.apache.hadoop.hdfs.server.datanode;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_DATANODE_DATA_DIR_KEY;
 import static org.junit.Assert.assertEquals;
-
 
 /**
  * Test that the {@link SimulatedFSDataset} works correctly when configured
  * with multiple storages.
  */
-public class TestSimulatedFSDatasetWithMultipleStorages
-    extends TestSimulatedFSDataset {
+public class TestSimulatedFSDatasetWithMultipleStorages extends TestSimulatedFSDataset {
 
-  public TestSimulatedFSDatasetWithMultipleStorages() {
-    super(2);
-  }
+    public TestSimulatedFSDatasetWithMultipleStorages() {
+        super(2);
+    }
 
-  @Before
-  public void setUp() throws Exception {
-    super.setUp();
-    conf.set(DFS_DATANODE_DATA_DIR_KEY, "data1,data2");
-  }
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        conf.set(DFS_DATANODE_DATA_DIR_KEY, "data1,data2");
+    }
 
-  @Test
-  public void testMultipleStoragesConfigured() {
-    SimulatedFSDataset fsDataset = getSimulatedFSDataset();
-    assertEquals(2, fsDataset.getStorageReports(bpid).length);
-  }
-
+    @Test
+    public void testMultipleStoragesConfigured() {
+        SimulatedFSDataset fsDataset = getSimulatedFSDataset();
+        assertEquals(2, fsDataset.getStorageReports(bpid).length);
+    }
 }

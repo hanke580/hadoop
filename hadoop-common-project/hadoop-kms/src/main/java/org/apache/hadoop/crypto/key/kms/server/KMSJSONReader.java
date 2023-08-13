@@ -18,9 +18,7 @@
 package org.apache.hadoop.crypto.key.kms.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.apache.hadoop.classification.InterfaceAudience;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -38,20 +36,16 @@ import java.util.Map;
 @Consumes(MediaType.APPLICATION_JSON)
 @InterfaceAudience.Private
 public class KMSJSONReader implements MessageBodyReader<Object> {
-  private static final ObjectMapper MAPPER = new ObjectMapper();
 
-  @Override
-  public boolean isReadable(Class<?> type, Type genericType,
-      Annotation[] annotations, MediaType mediaType) {
-    return type.isAssignableFrom(Map.class) || type
-        .isAssignableFrom(List.class);
-  }
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
-  @Override
-  public Object readFrom(Class<Object> type, Type genericType,
-      Annotation[] annotations, MediaType mediaType,
-      MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
-      throws IOException, WebApplicationException {
-    return MAPPER.readValue(entityStream, type);
-  }
+    @Override
+    public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+        return type.isAssignableFrom(Map.class) || type.isAssignableFrom(List.class);
+    }
+
+    @Override
+    public Object readFrom(Class<Object> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException, WebApplicationException {
+        return MAPPER.readValue(entityStream, type);
+    }
 }

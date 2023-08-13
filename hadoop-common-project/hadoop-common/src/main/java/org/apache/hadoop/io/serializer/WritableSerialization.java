@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.io.serializer;
 
 import java.io.DataInputStream;
@@ -37,90 +36,85 @@ import org.apache.hadoop.util.ReflectionUtils;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
-public class WritableSerialization extends Configured
-	implements Serialization<Writable> {
-  static class WritableDeserializer extends Configured
-  	implements Deserializer<Writable> {
+public class WritableSerialization extends Configured implements Serialization<Writable> {
 
-    private Class<?> writableClass;
-    private DataInputStream dataIn;
-    
-    public WritableDeserializer(Configuration conf, Class<?> c) {
-      setConf(conf);
-      this.writableClass = c;
+    static class WritableDeserializer extends Configured implements Deserializer<Writable> {
+
+        private Class<?> writableClass;
+
+        private DataInputStream dataIn;
+
+        public WritableDeserializer(Configuration conf, Class<?> c) {
+            setConf(conf);
+            this.writableClass = c;
+        }
+
+        @Override
+        public void open(InputStream in) {
+            if (in instanceof DataInputStream) {
+                dataIn = (DataInputStream) in;
+            } else {
+                dataIn = new DataInputStream(in);
+            }
+        }
+
+        @Override
+        public Writable deserialize(Writable w) throws IOException {
+            Writable writable;
+            if (w == null) {
+                writable = (Writable) ReflectionUtils.newInstance(writableClass, getConf());
+            } else {
+                writable = w;
+            }
+            writable.readFields(dataIn);
+            return writable;
+        }
+
+        @Override
+        public void close() throws IOException {
+            dataIn.close();
+        }
     }
-    
+
+    static class WritableSerializer extends Configured implements Serializer<Writable> {
+
+        private DataOutputStream dataOut;
+
+        @Override
+        public void open(OutputStream out) {
+            if (out instanceof DataOutputStream) {
+                dataOut = (DataOutputStream) out;
+            } else {
+                dataOut = new DataOutputStream(out);
+            }
+        }
+
+        @Override
+        public void serialize(Writable w) throws IOException {
+            w.write(dataOut);
+        }
+
+        @Override
+        public void close() throws IOException {
+            dataOut.close();
+        }
+    }
+
+    @InterfaceAudience.Private
     @Override
-    public void open(InputStream in) {
-      if (in instanceof DataInputStream) {
-        dataIn = (DataInputStream) in;
-      } else {
-        dataIn = new DataInputStream(in);
-      }
+    public boolean accept(Class<?> c) {
+        return Writable.class.isAssignableFrom(c);
     }
-    
+
+    @InterfaceAudience.Private
     @Override
-    public Writable deserialize(Writable w) throws IOException {
-      Writable writable;
-      if (w == null) {
-        writable 
-          = (Writable) ReflectionUtils.newInstance(writableClass, getConf());
-      } else {
-        writable = w;
-      }
-      writable.readFields(dataIn);
-      return writable;
+    public Serializer<Writable> getSerializer(Class<Writable> c) {
+        return new WritableSerializer();
     }
 
+    @InterfaceAudience.Private
     @Override
-    public void close() throws IOException {
-      dataIn.close();
+    public Deserializer<Writable> getDeserializer(Class<Writable> c) {
+        return new WritableDeserializer(getConf(), c);
     }
-    
-  }
-  
-  static class WritableSerializer extends Configured implements
-  	Serializer<Writable> {
-    
-    private DataOutputStream dataOut;
-    
-    @Override
-    public void open(OutputStream out) {
-      if (out instanceof DataOutputStream) {
-        dataOut = (DataOutputStream) out;
-      } else {
-        dataOut = new DataOutputStream(out);
-      }
-    }
-
-    @Override
-    public void serialize(Writable w) throws IOException {
-      w.write(dataOut);
-    }
-
-    @Override
-    public void close() throws IOException {
-      dataOut.close();
-    }
-
-  }
-
-  @InterfaceAudience.Private
-  @Override
-  public boolean accept(Class<?> c) {
-    return Writable.class.isAssignableFrom(c);
-  }
-
-  @InterfaceAudience.Private
-  @Override
-  public Serializer<Writable> getSerializer(Class<Writable> c) {
-    return new WritableSerializer();
-  }
-  
-  @InterfaceAudience.Private
-  @Override
-  public Deserializer<Writable> getDeserializer(Class<Writable> c) {
-    return new WritableDeserializer(getConf(), c);
-  }
-
 }

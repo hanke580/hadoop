@@ -26,20 +26,21 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceStability.Evolving
 @InterfaceAudience.Public
 public class CacheDirectiveEntry {
-  private final CacheDirectiveInfo info;
-  private final CacheDirectiveStats stats;
 
-  public CacheDirectiveEntry(CacheDirectiveInfo info,
-      CacheDirectiveStats stats) {
-    this.info = info;
-    this.stats = stats;
-  }
+    private final CacheDirectiveInfo info;
 
-  public CacheDirectiveInfo getInfo() {
-    return info;
-  }
+    private final CacheDirectiveStats stats;
 
-  public CacheDirectiveStats getStats() {
-    return stats;
-  }
+    public CacheDirectiveEntry(CacheDirectiveInfo info, CacheDirectiveStats stats) {
+        this.info = info;
+        this.stats = stats;
+    }
+
+    public CacheDirectiveInfo getInfo() {
+        return info;
+    }
+
+    public CacheDirectiveStats getStats() {
+        return stats;
+    }
 }

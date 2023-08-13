@@ -18,5 +18,7 @@
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
 package org.apache.hadoop.security.http;
+
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

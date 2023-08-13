@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * General helpers for implementing raw erasure coders.
  */
@@ -25,3 +24,4 @@ package org.apache.hadoop.io.erasurecode.rawcoder.util;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

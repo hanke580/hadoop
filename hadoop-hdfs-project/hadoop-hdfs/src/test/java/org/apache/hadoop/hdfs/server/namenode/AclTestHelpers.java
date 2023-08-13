@@ -18,9 +18,7 @@
 package org.apache.hadoop.hdfs.server.namenode;
 
 import static org.junit.Assert.*;
-
 import java.io.IOException;
-
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -38,129 +36,104 @@ import org.apache.hadoop.security.UserGroupInformation;
  */
 public final class AclTestHelpers {
 
-  /**
-   * Create a new AclEntry with scope, type and permission (no name).
-   *
-   * @param scope AclEntryScope scope of the ACL entry
-   * @param type AclEntryType ACL entry type
-   * @param permission FsAction set of permissions in the ACL entry
-   * @return AclEntry new AclEntry
-   */
-  public static AclEntry aclEntry(AclEntryScope scope, AclEntryType type,
-      FsAction permission) {
-    return new AclEntry.Builder()
-      .setScope(scope)
-      .setType(type)
-      .setPermission(permission)
-      .build();
-  }
-
-  /**
-   * Create a new AclEntry with scope, type, name and permission.
-   *
-   * @param scope AclEntryScope scope of the ACL entry
-   * @param type AclEntryType ACL entry type
-   * @param name String optional ACL entry name
-   * @param permission FsAction set of permissions in the ACL entry
-   * @return AclEntry new AclEntry
-   */
-  public static AclEntry aclEntry(AclEntryScope scope, AclEntryType type,
-      String name, FsAction permission) {
-    return new AclEntry.Builder()
-      .setScope(scope)
-      .setType(type)
-      .setName(name)
-      .setPermission(permission)
-      .build();
-  }
-
-  /**
-   * Create a new AclEntry with scope, type and name (no permission).
-   *
-   * @param scope AclEntryScope scope of the ACL entry
-   * @param type AclEntryType ACL entry type
-   * @param name String optional ACL entry name
-   * @return AclEntry new AclEntry
-   */
-  public static AclEntry aclEntry(AclEntryScope scope, AclEntryType type,
-      String name) {
-    return new AclEntry.Builder()
-      .setScope(scope)
-      .setType(type)
-      .setName(name)
-      .build();
-  }
-
-  /**
-   * Create a new AclEntry with scope and type (no name or permission).
-   *
-   * @param scope AclEntryScope scope of the ACL entry
-   * @param type AclEntryType ACL entry type
-   * @return AclEntry new AclEntry
-   */
-  public static AclEntry aclEntry(AclEntryScope scope, AclEntryType type) {
-    return new AclEntry.Builder()
-      .setScope(scope)
-      .setType(type)
-      .build();
-  }
-
-  /**
-   * Asserts that permission is denied to the given fs/user for the given file.
-   *
-   * @param fs FileSystem to check
-   * @param user UserGroupInformation owner of fs
-   * @param pathToCheck Path file to check
-   * @throws Exception if there is an unexpected error
-   */
-  public static void assertFilePermissionDenied(FileSystem fs,
-      UserGroupInformation user, Path pathToCheck) throws Exception {
-    try {
-      DFSTestUtil.readFileBuffer(fs, pathToCheck);
-      fail("expected AccessControlException for user " + user + ", path = " +
-        pathToCheck);
-    } catch (AccessControlException e) {
-      // expected
+    /**
+     * Create a new AclEntry with scope, type and permission (no name).
+     *
+     * @param scope AclEntryScope scope of the ACL entry
+     * @param type AclEntryType ACL entry type
+     * @param permission FsAction set of permissions in the ACL entry
+     * @return AclEntry new AclEntry
+     */
+    public static AclEntry aclEntry(AclEntryScope scope, AclEntryType type, FsAction permission) {
+        return new AclEntry.Builder().setScope(scope).setType(type).setPermission(permission).build();
     }
-  }
 
-  /**
-   * Asserts that permission is granted to the given fs/user for the given file.
-   *
-   * @param fs FileSystem to check
-   * @param user UserGroupInformation owner of fs
-   * @param pathToCheck Path file to check
-   * @throws Exception if there is an unexpected error
-   */
-  public static void assertFilePermissionGranted(FileSystem fs,
-      UserGroupInformation user, Path pathToCheck) throws Exception {
-    try {
-      DFSTestUtil.readFileBuffer(fs, pathToCheck);
-    } catch (AccessControlException e) {
-      fail("expected permission granted for user " + user + ", path = " +
-        pathToCheck);
+    /**
+     * Create a new AclEntry with scope, type, name and permission.
+     *
+     * @param scope AclEntryScope scope of the ACL entry
+     * @param type AclEntryType ACL entry type
+     * @param name String optional ACL entry name
+     * @param permission FsAction set of permissions in the ACL entry
+     * @return AclEntry new AclEntry
+     */
+    public static AclEntry aclEntry(AclEntryScope scope, AclEntryType type, String name, FsAction permission) {
+        return new AclEntry.Builder().setScope(scope).setType(type).setName(name).setPermission(permission).build();
     }
-  }
 
-  public static void assertPermission(FileSystem fs, Path pathToCheck,
-      short perm) throws IOException {
-    assertPermission(fs, pathToCheck, perm, (perm & (1 << 12)) != 0);
-  }
+    /**
+     * Create a new AclEntry with scope, type and name (no permission).
+     *
+     * @param scope AclEntryScope scope of the ACL entry
+     * @param type AclEntryType ACL entry type
+     * @param name String optional ACL entry name
+     * @return AclEntry new AclEntry
+     */
+    public static AclEntry aclEntry(AclEntryScope scope, AclEntryType type, String name) {
+        return new AclEntry.Builder().setScope(scope).setType(type).setName(name).build();
+    }
 
-  /**
-   * Asserts the value of the FsPermission bits on the inode of a specific path.
-   *
-   * @param fs FileSystem to use for check
-   * @param pathToCheck Path inode to check
-   * @param perm short expected permission bits
-   * @throws IOException thrown if there is an I/O error
-   */
-  public static void assertPermission(FileSystem fs, Path pathToCheck,
-      short perm, boolean hasAcl) throws IOException {
-    short filteredPerm = (short)(perm & 01777);
-    FileStatus stat = fs.getFileStatus(pathToCheck);
-    FsPermission fsPermission = stat.getPermission();
-    assertEquals(filteredPerm, fsPermission.toShort());
-    assertEquals(hasAcl, stat.hasAcl());
-  }
+    /**
+     * Create a new AclEntry with scope and type (no name or permission).
+     *
+     * @param scope AclEntryScope scope of the ACL entry
+     * @param type AclEntryType ACL entry type
+     * @return AclEntry new AclEntry
+     */
+    public static AclEntry aclEntry(AclEntryScope scope, AclEntryType type) {
+        return new AclEntry.Builder().setScope(scope).setType(type).build();
+    }
+
+    /**
+     * Asserts that permission is denied to the given fs/user for the given file.
+     *
+     * @param fs FileSystem to check
+     * @param user UserGroupInformation owner of fs
+     * @param pathToCheck Path file to check
+     * @throws Exception if there is an unexpected error
+     */
+    public static void assertFilePermissionDenied(FileSystem fs, UserGroupInformation user, Path pathToCheck) throws Exception {
+        try {
+            DFSTestUtil.readFileBuffer(fs, pathToCheck);
+            fail("expected AccessControlException for user " + user + ", path = " + pathToCheck);
+        } catch (AccessControlException e) {
+            // expected
+        }
+    }
+
+    /**
+     * Asserts that permission is granted to the given fs/user for the given file.
+     *
+     * @param fs FileSystem to check
+     * @param user UserGroupInformation owner of fs
+     * @param pathToCheck Path file to check
+     * @throws Exception if there is an unexpected error
+     */
+    public static void assertFilePermissionGranted(FileSystem fs, UserGroupInformation user, Path pathToCheck) throws Exception {
+        try {
+            DFSTestUtil.readFileBuffer(fs, pathToCheck);
+        } catch (AccessControlException e) {
+            fail("expected permission granted for user " + user + ", path = " + pathToCheck);
+        }
+    }
+
+    public static void assertPermission(FileSystem fs, Path pathToCheck, short perm) throws IOException {
+        assertPermission(fs, pathToCheck, perm, (perm & (1 << 12)) != 0);
+    }
+
+    /**
+     * Asserts the value of the FsPermission bits on the inode of a specific path.
+     *
+     * @param fs FileSystem to use for check
+     * @param pathToCheck Path inode to check
+     * @param perm short expected permission bits
+     * @throws IOException thrown if there is an I/O error
+     */
+    public static void assertPermission(FileSystem fs, Path pathToCheck, short perm, boolean hasAcl) throws IOException {
+        short filteredPerm = (short) (perm & 01777);
+        FileStatus stat = fs.getFileStatus(pathToCheck);
+        FsPermission fsPermission = stat.getPermission();
+        assertEquals(filteredPerm, fsPermission.toShort());
+        assertEquals(hasAcl, stat.hasAcl());
+    }
 }

@@ -18,9 +18,7 @@
 package org.apache.hadoop.hdfs;
 
 import java.util.concurrent.atomic.AtomicLong;
-
 import com.google.common.annotations.VisibleForTesting;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 
 /**
@@ -30,39 +28,47 @@ import org.apache.hadoop.classification.InterfaceAudience;
 @VisibleForTesting
 @InterfaceAudience.Private
 public class DFSClientFaultInjector {
-  private static DFSClientFaultInjector instance = new DFSClientFaultInjector();
-  public static AtomicLong exceptionNum = new AtomicLong(0);
 
-  public static DFSClientFaultInjector get() {
-    return instance;
-  }
-  public static void set(DFSClientFaultInjector instance) {
-    DFSClientFaultInjector.instance = instance;
-  }
+    private static DFSClientFaultInjector instance = new DFSClientFaultInjector();
 
-  public boolean corruptPacket() {
-    return false;
-  }
+    public static AtomicLong exceptionNum = new AtomicLong(0);
 
-  public boolean uncorruptPacket() {
-    return false;
-  }
+    public static DFSClientFaultInjector get() {
+        return instance;
+    }
 
-  public boolean failPacket() {
-    return false;
-  }
+    public static void set(DFSClientFaultInjector instance) {
+        DFSClientFaultInjector.instance = instance;
+    }
 
-  public void startFetchFromDatanode() {}
+    public boolean corruptPacket() {
+        return false;
+    }
 
-  public void fetchFromDatanodeException() {}
+    public boolean uncorruptPacket() {
+        return false;
+    }
 
-  public void readFromDatanodeDelay() {}
+    public boolean failPacket() {
+        return false;
+    }
 
-  public boolean skipRollingRestartWait() {
-    return false;
-  }
+    public void startFetchFromDatanode() {
+    }
 
-  public void sleepBeforeHedgedGet() {}
+    public void fetchFromDatanodeException() {
+    }
 
-  public void delayWhenRenewLeaseTimeout() {}
+    public void readFromDatanodeDelay() {
+    }
+
+    public boolean skipRollingRestartWait() {
+        return false;
+    }
+
+    public void sleepBeforeHedgedGet() {
+    }
+
+    public void delayWhenRenewLeaseTimeout() {
+    }
 }

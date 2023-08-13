@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * The federation state store tracks persistent values that are shared between
  * multiple routers.
@@ -50,11 +49,10 @@
  * org.apache.hadoop.hdfs.server.federation.store.driver.StateStoreDriver
  * StateStoreDriver} to query, update and delete data records.
  */
-
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
-
 package org.apache.hadoop.hdfs.server.federation.store;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

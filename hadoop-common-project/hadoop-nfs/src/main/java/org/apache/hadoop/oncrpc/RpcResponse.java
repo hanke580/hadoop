@@ -18,7 +18,6 @@
 package org.apache.hadoop.oncrpc;
 
 import java.net.SocketAddress;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 
 /**
@@ -27,19 +26,21 @@ import org.jboss.netty.buffer.ChannelBuffer;
  * peer.
  */
 public class RpcResponse {
-  private final ChannelBuffer data;
-  private final SocketAddress remoteAddress;
 
-  public RpcResponse(ChannelBuffer data, SocketAddress remoteAddress) {
-    this.data = data;
-    this.remoteAddress = remoteAddress;
-  }
+    private final ChannelBuffer data;
 
-  public ChannelBuffer data() {
-    return data;
-  }
+    private final SocketAddress remoteAddress;
 
-  public SocketAddress remoteAddress() {
-    return remoteAddress;
-  }
+    public RpcResponse(ChannelBuffer data, SocketAddress remoteAddress) {
+        this.data = data;
+        this.remoteAddress = remoteAddress;
+    }
+
+    public ChannelBuffer data() {
+        return data;
+    }
+
+    public SocketAddress remoteAddress() {
+        return remoteAddress;
+    }
 }

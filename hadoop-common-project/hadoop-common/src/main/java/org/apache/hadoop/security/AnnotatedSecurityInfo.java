@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.security;
 
 import org.apache.hadoop.conf.Configuration;
@@ -26,15 +25,13 @@ import org.apache.hadoop.security.token.TokenInfo;
  */
 public class AnnotatedSecurityInfo extends SecurityInfo {
 
-  @Override
-  public KerberosInfo getKerberosInfo(Class<?> protocol, Configuration conf) {
-    return protocol.getAnnotation(KerberosInfo.class);
-  }
+    @Override
+    public KerberosInfo getKerberosInfo(Class<?> protocol, Configuration conf) {
+        return protocol.getAnnotation(KerberosInfo.class);
+    }
 
-  @Override
-  public TokenInfo getTokenInfo(Class<?> protocol, Configuration conf) {
-    return protocol.getAnnotation(TokenInfo.class);
-  }
-
-  
+    @Override
+    public TokenInfo getTokenInfo(Class<?> protocol, Configuration conf) {
+        return protocol.getAnnotation(TokenInfo.class);
+    }
 }

@@ -18,7 +18,6 @@
 package org.apache.hadoop.mount;
 
 import java.io.IOException;
-
 import org.apache.hadoop.oncrpc.RpcProgram;
 import org.apache.hadoop.oncrpc.SimpleTcpServer;
 import org.apache.hadoop.oncrpc.SimpleUdpServer;
@@ -26,7 +25,6 @@ import org.apache.hadoop.portmap.PortmapMapping;
 import org.apache.hadoop.util.ShutdownHookManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import static org.apache.hadoop.util.ExitUtil.terminate;
 
 /**
@@ -37,99 +35,100 @@ import static org.apache.hadoop.util.ExitUtil.terminate;
  * handle for requested directory and returns it to the client.
  */
 abstract public class MountdBase {
-  public static final Logger LOG = LoggerFactory.getLogger(MountdBase.class);
-  private final RpcProgram rpcProgram;
-  private int udpBoundPort; // Will set after server starts
-  private int tcpBoundPort; // Will set after server starts
 
-  public RpcProgram getRpcProgram() {
-    return rpcProgram;
-  }
+    public static final Logger LOG = LoggerFactory.getLogger(MountdBase.class);
 
-  /**
-   * Constructor
-   * @param program  rpc server which handles mount request
-   * @throws IOException fail to construct MountdBase
-   */
-  public MountdBase(RpcProgram program) throws IOException {
-    rpcProgram = program;
-  }
+    private final RpcProgram rpcProgram;
 
-  /* Start UDP server */
-  private void startUDPServer() {
-    SimpleUdpServer udpServer = new SimpleUdpServer(rpcProgram.getPort(),
-        rpcProgram, 1);
-    rpcProgram.startDaemons();
-    try {
-      udpServer.run();
-    } catch (Throwable e) {
-      LOG.error("Failed to start the UDP server.", e);
-      if (udpServer.getBoundPort() > 0) {
-        rpcProgram.unregister(PortmapMapping.TRANSPORT_UDP,
-            udpServer.getBoundPort());
-      }
-      udpServer.shutdown();
-      terminate(1, e);
+    // Will set after server starts
+    private int udpBoundPort;
+
+    // Will set after server starts
+    private int tcpBoundPort;
+
+    public RpcProgram getRpcProgram() {
+        return rpcProgram;
     }
-    udpBoundPort = udpServer.getBoundPort();
-  }
 
-  /* Start TCP server */
-  private void startTCPServer() {
-    SimpleTcpServer tcpServer = new SimpleTcpServer(rpcProgram.getPort(),
-        rpcProgram, 1);
-    rpcProgram.startDaemons();
-    try {
-      tcpServer.run();
-    } catch (Throwable e) {
-      LOG.error("Failed to start the TCP server.", e);
-      if (tcpServer.getBoundPort() > 0) {
-        rpcProgram.unregister(PortmapMapping.TRANSPORT_TCP,
-            tcpServer.getBoundPort());
-      }
-      tcpServer.shutdown();
-      terminate(1, e);
+    /**
+     * Constructor
+     * @param program  rpc server which handles mount request
+     * @throws IOException fail to construct MountdBase
+     */
+    public MountdBase(RpcProgram program) throws IOException {
+        rpcProgram = program;
     }
-    tcpBoundPort = tcpServer.getBoundPort();
-  }
 
-  public void start(boolean register) {
-    startUDPServer();
-    startTCPServer();
-    if (register) {
-      ShutdownHookManager.get().addShutdownHook(new Unregister(),
-          SHUTDOWN_HOOK_PRIORITY);
-      try {
-        rpcProgram.register(PortmapMapping.TRANSPORT_UDP, udpBoundPort);
-        rpcProgram.register(PortmapMapping.TRANSPORT_TCP, tcpBoundPort);
-      } catch (Throwable e) {
-        LOG.error("Failed to register the MOUNT service.", e);
-        terminate(1, e);
-      }
+    /* Start UDP server */
+    private void startUDPServer() {
+        SimpleUdpServer udpServer = new SimpleUdpServer(rpcProgram.getPort(), rpcProgram, 1);
+        rpcProgram.startDaemons();
+        try {
+            udpServer.run();
+        } catch (Throwable e) {
+            LOG.error("Failed to start the UDP server.", e);
+            if (udpServer.getBoundPort() > 0) {
+                rpcProgram.unregister(PortmapMapping.TRANSPORT_UDP, udpServer.getBoundPort());
+            }
+            udpServer.shutdown();
+            terminate(1, e);
+        }
+        udpBoundPort = udpServer.getBoundPort();
     }
-  }
 
-  public void stop() {
-    if (udpBoundPort > 0) {
-      rpcProgram.unregister(PortmapMapping.TRANSPORT_UDP, udpBoundPort);
-      udpBoundPort = 0;
+    /* Start TCP server */
+    private void startTCPServer() {
+        SimpleTcpServer tcpServer = new SimpleTcpServer(rpcProgram.getPort(), rpcProgram, 1);
+        rpcProgram.startDaemons();
+        try {
+            tcpServer.run();
+        } catch (Throwable e) {
+            LOG.error("Failed to start the TCP server.", e);
+            if (tcpServer.getBoundPort() > 0) {
+                rpcProgram.unregister(PortmapMapping.TRANSPORT_TCP, tcpServer.getBoundPort());
+            }
+            tcpServer.shutdown();
+            terminate(1, e);
+        }
+        tcpBoundPort = tcpServer.getBoundPort();
     }
-    if (tcpBoundPort > 0) {
-      rpcProgram.unregister(PortmapMapping.TRANSPORT_TCP, tcpBoundPort);
-      tcpBoundPort = 0;
+
+    public void start(boolean register) {
+        startUDPServer();
+        startTCPServer();
+        if (register) {
+            ShutdownHookManager.get().addShutdownHook(new Unregister(), SHUTDOWN_HOOK_PRIORITY);
+            try {
+                rpcProgram.register(PortmapMapping.TRANSPORT_UDP, udpBoundPort);
+                rpcProgram.register(PortmapMapping.TRANSPORT_TCP, tcpBoundPort);
+            } catch (Throwable e) {
+                LOG.error("Failed to register the MOUNT service.", e);
+                terminate(1, e);
+            }
+        }
     }
-  }
 
-  /**
-   * Priority of the mountd shutdown hook.
-   */
-  public static final int SHUTDOWN_HOOK_PRIORITY = 10;
-
-  private class Unregister implements Runnable {
-    @Override
-    public synchronized void run() {
-      stop();
+    public void stop() {
+        if (udpBoundPort > 0) {
+            rpcProgram.unregister(PortmapMapping.TRANSPORT_UDP, udpBoundPort);
+            udpBoundPort = 0;
+        }
+        if (tcpBoundPort > 0) {
+            rpcProgram.unregister(PortmapMapping.TRANSPORT_TCP, tcpBoundPort);
+            tcpBoundPort = 0;
+        }
     }
-  }
 
+    /**
+     * Priority of the mountd shutdown hook.
+     */
+    public static final int SHUTDOWN_HOOK_PRIORITY = 10;
+
+    private class Unregister implements Runnable {
+
+        @Override
+        public synchronized void run() {
+            stop();
+        }
+    }
 }

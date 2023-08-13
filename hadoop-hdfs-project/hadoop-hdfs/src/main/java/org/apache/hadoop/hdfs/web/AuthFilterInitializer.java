@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.web;
 
 import java.util.Map;
@@ -33,37 +32,28 @@ import org.apache.hadoop.security.authentication.server.PseudoAuthenticationHand
  */
 public class AuthFilterInitializer extends FilterInitializer {
 
-  private String configPrefix;
+    private String configPrefix;
 
-  public AuthFilterInitializer() {
-    this.configPrefix = "hadoop.http.authentication.";
-  }
-
-  protected Map<String, String> createFilterConfig(Configuration conf) {
-    Map<String, String> filterConfig = AuthenticationFilterInitializer
-        .getFilterConfigMap(conf, configPrefix);
-
-    for (Map.Entry<String, String> entry : conf.getPropsWithPrefix(
-        ProxyUsers.CONF_HADOOP_PROXYUSER).entrySet()) {
-      filterConfig.put("proxyuser" + entry.getKey(), entry.getValue());
+    public AuthFilterInitializer() {
+        this.configPrefix = "hadoop.http.authentication.";
     }
 
-    if (filterConfig.get("type") == null) {
-      filterConfig.put("type", UserGroupInformation.isSecurityEnabled() ?
-          KerberosAuthenticationHandler.TYPE :
-          PseudoAuthenticationHandler.TYPE);
+    protected Map<String, String> createFilterConfig(Configuration conf) {
+        Map<String, String> filterConfig = AuthenticationFilterInitializer.getFilterConfigMap(conf, configPrefix);
+        for (Map.Entry<String, String> entry : conf.getPropsWithPrefix(ProxyUsers.CONF_HADOOP_PROXYUSER).entrySet()) {
+            filterConfig.put("proxyuser" + entry.getKey(), entry.getValue());
+        }
+        if (filterConfig.get("type") == null) {
+            filterConfig.put("type", UserGroupInformation.isSecurityEnabled() ? KerberosAuthenticationHandler.TYPE : PseudoAuthenticationHandler.TYPE);
+        }
+        //set cookie path
+        filterConfig.put("cookie.path", "/");
+        return filterConfig;
     }
 
-    //set cookie path
-    filterConfig.put("cookie.path", "/");
-    return filterConfig;
-  }
-
-  @Override
-  public void initFilter(FilterContainer container, Configuration conf) {
-    Map<String, String> filterConfig = createFilterConfig(conf);
-    container.addFilter("AuthFilter", AuthFilter.class.getName(),
-        filterConfig);
-  }
-
+    @Override
+    public void initFilter(FilterContainer container, Configuration conf) {
+        Map<String, String> filterConfig = createFilterConfig(conf);
+        container.addFilter("AuthFilter", AuthFilter.class.getName(), filterConfig);
+    }
 }

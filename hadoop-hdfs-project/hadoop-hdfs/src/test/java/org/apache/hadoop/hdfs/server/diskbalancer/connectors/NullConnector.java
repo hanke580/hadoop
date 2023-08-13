@@ -17,7 +17,6 @@
 package org.apache.hadoop.hdfs.server.diskbalancer.connectors;
 
 import org.apache.hadoop.hdfs.server.diskbalancer.datamodel.DiskBalancerDataNode;
-
 import java.util.LinkedList;
 import java.util.List;
 
@@ -26,34 +25,35 @@ import java.util.List;
  * and is useful in testing.
  */
 public class NullConnector implements ClusterConnector {
-  private final List<DiskBalancerDataNode> nodes = new LinkedList<>();
 
-  /**
-   * getNodes function returns a list of DiskBalancerDataNodes.
-   *
-   * @return Array of DiskBalancerDataNodes
-   */
-  @Override
-  public List<DiskBalancerDataNode> getNodes() throws Exception {
-    return nodes;
-  }
+    private final List<DiskBalancerDataNode> nodes = new LinkedList<>();
 
-  /**
-   * Returns info about the connector.
-   *
-   * @return String.
-   */
-  @Override
-  public String getConnectorInfo() {
-    return "Null Connector : No persistence, in-memory connector";
-  }
+    /**
+     * getNodes function returns a list of DiskBalancerDataNodes.
+     *
+     * @return Array of DiskBalancerDataNodes
+     */
+    @Override
+    public List<DiskBalancerDataNode> getNodes() throws Exception {
+        return nodes;
+    }
 
-  /**
-   * Allows user to add nodes into this connector.
-   *
-   * @param node - Node to add
-   */
-  public void addNode(DiskBalancerDataNode node) {
-    nodes.add(node);
-  }
+    /**
+     * Returns info about the connector.
+     *
+     * @return String.
+     */
+    @Override
+    public String getConnectorInfo() {
+        return "Null Connector : No persistence, in-memory connector";
+    }
+
+    /**
+     * Allows user to add nodes into this connector.
+     *
+     * @param node - Node to add
+     */
+    public void addNode(DiskBalancerDataNode node) {
+        nodes.add(node);
+    }
 }

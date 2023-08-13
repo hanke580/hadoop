@@ -18,21 +18,19 @@
 package org.apache.hadoop.fs.http.server;
 
 import org.apache.hadoop.security.token.delegation.web.KerberosDelegationTokenAuthenticationHandler;
-
 import javax.servlet.ServletException;
 import java.util.Properties;
 
-public class HttpFSKerberosAuthenticationHandlerForTesting
-  extends KerberosDelegationTokenAuthenticationHandler {
+public class HttpFSKerberosAuthenticationHandlerForTesting extends KerberosDelegationTokenAuthenticationHandler {
 
-  @Override
-  public void init(Properties config) throws ServletException {
-    //NOP overwrite to avoid Kerberos initialization
-    initTokenManager(config);
-  }
+    @Override
+    public void init(Properties config) throws ServletException {
+        //NOP overwrite to avoid Kerberos initialization
+        initTokenManager(config);
+    }
 
-  @Override
-  public void destroy() {
-    //NOP overwrite to avoid Kerberos initialization
-  }
+    @Override
+    public void destroy() {
+        //NOP overwrite to avoid Kerberos initialization
+    }
 }

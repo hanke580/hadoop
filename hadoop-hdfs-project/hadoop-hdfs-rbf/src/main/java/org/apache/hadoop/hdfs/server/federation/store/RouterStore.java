@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.server.federation.store;
 
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.hdfs.server.federation.store.driver.StateStoreDriver;
@@ -41,38 +40,35 @@ import org.apache.hadoop.hdfs.server.federation.store.records.RouterState;
 @InterfaceStability.Evolving
 public abstract class RouterStore extends CachedRecordStore<RouterState> {
 
-  public RouterStore(StateStoreDriver driver) {
-    super(RouterState.class, driver, true);
-  }
+    public RouterStore(StateStoreDriver driver) {
+        super(RouterState.class, driver, true);
+    }
 
-  /**
-   * Fetches the current router state object.
-   *
-   * @param request Fully populated request object.
-   * @return The matching router record or null if none exists.
-   * @throws IOException Throws exception if unable to query the data store or
-   *           if more than one matching record is found.
-   */
-  public abstract GetRouterRegistrationResponse getRouterRegistration(
-      GetRouterRegistrationRequest request) throws IOException;
+    /**
+     * Fetches the current router state object.
+     *
+     * @param request Fully populated request object.
+     * @return The matching router record or null if none exists.
+     * @throws IOException Throws exception if unable to query the data store or
+     *           if more than one matching record is found.
+     */
+    public abstract GetRouterRegistrationResponse getRouterRegistration(GetRouterRegistrationRequest request) throws IOException;
 
-  /**
-   * Fetches all router status objects.
-   *
-   * @param request Fully populated request object.
-   * @return List of Router records present in the data store.
-   * @throws IOException Throws exception if unable to query the data store
-   */
-  public abstract GetRouterRegistrationsResponse getRouterRegistrations(
-      GetRouterRegistrationsRequest request) throws IOException;
+    /**
+     * Fetches all router status objects.
+     *
+     * @param request Fully populated request object.
+     * @return List of Router records present in the data store.
+     * @throws IOException Throws exception if unable to query the data store
+     */
+    public abstract GetRouterRegistrationsResponse getRouterRegistrations(GetRouterRegistrationsRequest request) throws IOException;
 
-  /**
-   * Update the state of this router in the State Store.
-   *
-   * @param request Fully populated request object.
-   * @return True if the update was successfully recorded, false otherwise.
-   * @throws IOException Throws exception if unable to query the data store
-   */
-  public abstract RouterHeartbeatResponse routerHeartbeat(
-      RouterHeartbeatRequest request) throws IOException;
+    /**
+     * Update the state of this router in the State Store.
+     *
+     * @param request Fully populated request object.
+     * @return True if the update was successfully recorded, false otherwise.
+     * @throws IOException Throws exception if unable to query the data store
+     */
+    public abstract RouterHeartbeatResponse routerHeartbeat(RouterHeartbeatRequest request) throws IOException;
 }

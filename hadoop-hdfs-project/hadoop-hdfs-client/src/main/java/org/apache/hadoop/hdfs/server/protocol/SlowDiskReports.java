@@ -20,7 +20,6 @@ package org.apache.hadoop.hdfs.server.protocol;
 import com.google.common.collect.ImmutableMap;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -35,113 +34,103 @@ import java.util.Map;
 @InterfaceAudience.Private
 @InterfaceStability.Unstable
 public final class SlowDiskReports {
-  /**
-   * A map from the DataNode Disk's BasePath to its mean metadata op latency,
-   * mean read io latency and mean write io latency.
-   *
-   * The NameNode must not attempt to interpret the mean latencies
-   * beyond exposing them as a diagnostic. e.g. metrics. Also, comparing
-   * latencies across reports from different DataNodes may not be not
-   * meaningful and must be avoided.
-   */
-  @Nonnull
-  private final Map<String, Map<DiskOp, Double>> slowDisks;
 
-  /**
-   * An object representing a SlowDiskReports with no entries. Should
-   * be used instead of null or creating new objects when there are
-   * no slow peers to report.
-   */
-  public static final SlowDiskReports EMPTY_REPORT =
-      new SlowDiskReports(ImmutableMap.of());
+    /**
+     * A map from the DataNode Disk's BasePath to its mean metadata op latency,
+     * mean read io latency and mean write io latency.
+     *
+     * The NameNode must not attempt to interpret the mean latencies
+     * beyond exposing them as a diagnostic. e.g. metrics. Also, comparing
+     * latencies across reports from different DataNodes may not be not
+     * meaningful and must be avoided.
+     */
+    @Nonnull
+    private final Map<String, Map<DiskOp, Double>> slowDisks;
 
-  private SlowDiskReports(Map<String, Map<DiskOp, Double>> slowDisks) {
-    this.slowDisks = slowDisks;
-  }
+    /**
+     * An object representing a SlowDiskReports with no entries. Should
+     * be used instead of null or creating new objects when there are
+     * no slow peers to report.
+     */
+    public static final SlowDiskReports EMPTY_REPORT = new SlowDiskReports(ImmutableMap.of());
 
-  public static SlowDiskReports create(
-      @Nullable Map<String, Map<DiskOp, Double>> slowDisks) {
-    if (slowDisks == null || slowDisks.isEmpty()) {
-      return EMPTY_REPORT;
-    }
-    return new SlowDiskReports(slowDisks);
-  }
-
-  public Map<String, Map<DiskOp, Double>> getSlowDisks() {
-    return slowDisks;
-  }
-
-  public boolean haveSlowDisks() {
-    return slowDisks.size() > 0;
-  }
-
-  /**
-   * Return true if the two objects represent the same set slow disk
-   * entries. Primarily for unit testing convenience.
-   */
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    private SlowDiskReports(Map<String, Map<DiskOp, Double>> slowDisks) {
+        this.slowDisks = slowDisks;
     }
 
-    if (!(o instanceof SlowDiskReports)) {
-      return false;
+    public static SlowDiskReports create(@Nullable Map<String, Map<DiskOp, Double>> slowDisks) {
+        if (slowDisks == null || slowDisks.isEmpty()) {
+            return EMPTY_REPORT;
+        }
+        return new SlowDiskReports(slowDisks);
     }
 
-    SlowDiskReports that = (SlowDiskReports) o;
-
-    if (this.slowDisks.size() != that.slowDisks.size()) {
-      return false;
+    public Map<String, Map<DiskOp, Double>> getSlowDisks() {
+        return slowDisks;
     }
 
-    if (!this.slowDisks.keySet().containsAll(that.slowDisks.keySet()) ||
-        !that.slowDisks.keySet().containsAll(this.slowDisks.keySet())) {
-      return false;
+    public boolean haveSlowDisks() {
+        return slowDisks.size() > 0;
     }
 
-    boolean areEqual;
-    for (Map.Entry<String, Map<DiskOp, Double>> entry : this.slowDisks
-        .entrySet()) {
-      if (!entry.getValue().equals(that.slowDisks.get(entry.getKey()))) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  @Override
-  public int hashCode() {
-    return slowDisks.hashCode();
-  }
-
-  /**
-   * Lists the types of operations on which disk latencies are measured.
-   */
-  public enum DiskOp {
-    METADATA("MetadataOp"),
-    READ("ReadIO"),
-    WRITE("WriteIO");
-
-    private final String value;
-
-    DiskOp(final String v) {
-      this.value = v;
+    /**
+     * Return true if the two objects represent the same set slow disk
+     * entries. Primarily for unit testing convenience.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof SlowDiskReports)) {
+            return false;
+        }
+        SlowDiskReports that = (SlowDiskReports) o;
+        if (this.slowDisks.size() != that.slowDisks.size()) {
+            return false;
+        }
+        if (!this.slowDisks.keySet().containsAll(that.slowDisks.keySet()) || !that.slowDisks.keySet().containsAll(this.slowDisks.keySet())) {
+            return false;
+        }
+        boolean areEqual;
+        for (Map.Entry<String, Map<DiskOp, Double>> entry : this.slowDisks.entrySet()) {
+            if (!entry.getValue().equals(that.slowDisks.get(entry.getKey()))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
-    public String toString() {
-      return value;
+    public int hashCode() {
+        return slowDisks.hashCode();
     }
 
-    public static DiskOp fromValue(final String value) {
-      for (DiskOp as : DiskOp.values()) {
-        if (as.value.equals(value)) {
-          return as;
+    /**
+     * Lists the types of operations on which disk latencies are measured.
+     */
+    public enum DiskOp {
+
+        METADATA("MetadataOp"), READ("ReadIO"), WRITE("WriteIO");
+
+        private final String value;
+
+        DiskOp(final String v) {
+            this.value = v;
         }
-      }
-      return null;
+
+        @Override
+        public String toString() {
+            return value;
+        }
+
+        public static DiskOp fromValue(final String value) {
+            for (DiskOp as : DiskOp.values()) {
+                if (as.value.equals(value)) {
+                    return as;
+                }
+            }
+            return null;
+        }
     }
-  }
 }

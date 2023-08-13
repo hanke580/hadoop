@@ -18,9 +18,7 @@
 package org.apache.hadoop.hdfs.server.federation.store.driver;
 
 import static org.apache.hadoop.hdfs.server.federation.store.FederationStateStoreTestUtils.getStateStoreConfiguration;
-
 import java.io.IOException;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.server.federation.store.driver.impl.StateStoreFileImpl;
 import org.junit.Before;
@@ -32,45 +30,39 @@ import org.junit.Test;
  */
 public class TestStateStoreFile extends TestStateStoreDriverBase {
 
-  @BeforeClass
-  public static void setupCluster() throws Exception {
-    Configuration conf = getStateStoreConfiguration(StateStoreFileImpl.class);
-    getStateStore(conf);
-  }
+    @BeforeClass
+    public static void setupCluster() throws Exception {
+        Configuration conf = getStateStoreConfiguration(StateStoreFileImpl.class);
+        getStateStore(conf);
+    }
 
-  @Before
-  public void startup() throws IOException {
-    removeAll(getStateStoreDriver());
-  }
+    @Before
+    public void startup() throws IOException {
+        removeAll(getStateStoreDriver());
+    }
 
-  @Test
-  public void testInsert()
-      throws IllegalArgumentException, IllegalAccessException, IOException {
-    testInsert(getStateStoreDriver());
-  }
+    @Test
+    public void testInsert() throws IllegalArgumentException, IllegalAccessException, IOException {
+        testInsert(getStateStoreDriver());
+    }
 
-  @Test
-  public void testUpdate()
-      throws IllegalArgumentException, ReflectiveOperationException,
-      IOException, SecurityException {
-    testPut(getStateStoreDriver());
-  }
+    @Test
+    public void testUpdate() throws IllegalArgumentException, ReflectiveOperationException, IOException, SecurityException {
+        testPut(getStateStoreDriver());
+    }
 
-  @Test
-  public void testDelete()
-      throws IllegalArgumentException, IllegalAccessException, IOException {
-    testRemove(getStateStoreDriver());
-  }
+    @Test
+    public void testDelete() throws IllegalArgumentException, IllegalAccessException, IOException {
+        testRemove(getStateStoreDriver());
+    }
 
-  @Test
-  public void testFetchErrors()
-      throws IllegalArgumentException, IllegalAccessException, IOException {
-    testFetchErrors(getStateStoreDriver());
-  }
+    @Test
+    public void testFetchErrors() throws IllegalArgumentException, IllegalAccessException, IOException {
+        testFetchErrors(getStateStoreDriver());
+    }
 
-  @Test
-  public void testMetrics()
-      throws IllegalArgumentException, IllegalAccessException, IOException {
-    testMetrics(getStateStoreDriver());
-  }
+    @Test
+    public void testMetrics() throws IllegalArgumentException, IllegalAccessException, IOException {
+        testMetrics(getStateStoreDriver());
+    }
 }

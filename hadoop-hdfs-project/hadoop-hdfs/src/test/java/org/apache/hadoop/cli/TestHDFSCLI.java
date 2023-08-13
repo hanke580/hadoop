@@ -15,11 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.cli;
 
 import static org.junit.Assert.assertTrue;
-
 import org.apache.hadoop.cli.util.CLICommand;
 import org.apache.hadoop.cli.util.CommandExecutor.Result;
 import org.apache.hadoop.fs.FileSystem;
@@ -34,75 +32,66 @@ import org.junit.Test;
 
 public class TestHDFSCLI extends CLITestHelperDFS {
 
-  protected MiniDFSCluster dfsCluster = null;
-  protected FileSystem fs = null;
-  protected String namenode = null;
-  
-  @Before
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-    conf.setClass(PolicyProvider.POLICY_PROVIDER_CONFIG,
-        HDFSPolicyProvider.class, PolicyProvider.class);
-    
-    // Many of the tests expect a replication value of 1 in the output
-    conf.setInt(DFSConfigKeys.DFS_REPLICATION_KEY, 1);
+    protected MiniDFSCluster dfsCluster = null;
 
-    // Build racks and hosts configuration to test dfsAdmin -printTopology
-    String [] racks =  {"/rack1", "/rack1", "/rack2", "/rack2",
-                        "/rack2", "/rack3", "/rack4", "/rack4" };
-    String [] hosts = {"host1", "host2", "host3", "host4",
-                       "host5", "host6", "host7", "host8" };
-    dfsCluster = new MiniDFSCluster.Builder(conf).numDataNodes(8)
-                                                 .racks(racks)
-                                                 .hosts(hosts)
-                                                 .build();
-    dfsCluster.waitClusterUp();
-    namenode = conf.get(DFSConfigKeys.FS_DEFAULT_NAME_KEY, "file:///");
-    
-    username = System.getProperty("user.name");
+    protected FileSystem fs = null;
 
-    fs = dfsCluster.getFileSystem();
-    assertTrue("Not a HDFS: "+fs.getUri(),
-               fs instanceof DistributedFileSystem);
-  }
+    protected String namenode = null;
 
-  @Override
-  protected String getTestFile() {
-    return "testHDFSConf.xml";
-  }
-  
-  @After
-  @Override
-  public void tearDown() throws Exception {
-    if (fs != null) {
-      fs.close();
-      fs = null;
+    @Before
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        conf.setClass(PolicyProvider.POLICY_PROVIDER_CONFIG, HDFSPolicyProvider.class, PolicyProvider.class);
+        // Many of the tests expect a replication value of 1 in the output
+        conf.setInt(DFSConfigKeys.DFS_REPLICATION_KEY, 1);
+        // Build racks and hosts configuration to test dfsAdmin -printTopology
+        String[] racks = { "/rack1", "/rack1", "/rack2", "/rack2", "/rack2", "/rack3", "/rack4", "/rack4" };
+        String[] hosts = { "host1", "host2", "host3", "host4", "host5", "host6", "host7", "host8" };
+        dfsCluster = new MiniDFSCluster.Builder(conf).numDataNodes(8).racks(racks).hosts(hosts).build();
+        dfsCluster.waitClusterUp();
+        namenode = conf.get(DFSConfigKeys.FS_DEFAULT_NAME_KEY, "file:///");
+        username = System.getProperty("user.name");
+        fs = dfsCluster.getFileSystem();
+        assertTrue("Not a HDFS: " + fs.getUri(), fs instanceof DistributedFileSystem);
     }
-    if (dfsCluster != null) {
-      dfsCluster.shutdown();
-      dfsCluster = null;
-    }
-    Thread.sleep(2000);
-    super.tearDown();
-  }
 
-  @Override
-  protected String expandCommand(final String cmd) {
-    String expCmd = cmd;
-    expCmd = expCmd.replaceAll("NAMENODE", namenode);
-    expCmd = super.expandCommand(expCmd);
-    return expCmd;
-  }
-  
-  @Override
-  protected Result execute(CLICommand cmd) throws Exception {
-    return cmd.getExecutor(namenode, conf).executeCommand(cmd.getCmd());
-  }
-  
-  @Test
-  @Override
-  public void testAll () {
-    super.testAll();
-  }
+    @Override
+    protected String getTestFile() {
+        return "testHDFSConf.xml";
+    }
+
+    @After
+    @Override
+    public void tearDown() throws Exception {
+        if (fs != null) {
+            fs.close();
+            fs = null;
+        }
+        if (dfsCluster != null) {
+            dfsCluster.shutdown();
+            dfsCluster = null;
+        }
+        Thread.sleep(2000);
+        super.tearDown();
+    }
+
+    @Override
+    protected String expandCommand(final String cmd) {
+        String expCmd = cmd;
+        expCmd = expCmd.replaceAll("NAMENODE", namenode);
+        expCmd = super.expandCommand(expCmd);
+        return expCmd;
+    }
+
+    @Override
+    protected Result execute(CLICommand cmd) throws Exception {
+        return cmd.getExecutor(namenode, conf).executeCommand(cmd.getCmd());
+    }
+
+    @Test
+    @Override
+    public void testAll() {
+        super.testAll();
+    }
 }

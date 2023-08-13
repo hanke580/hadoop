@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.ipc;
 
 import org.apache.hadoop.conf.Configuration;
@@ -24,26 +23,25 @@ import org.apache.hadoop.conf.Configuration;
  * No op default RPC scheduler.
  */
 public class DefaultRpcScheduler implements RpcScheduler {
-  @Override
-  public int getPriorityLevel(Schedulable obj) {
-    return 0;
-  }
 
-  @Override
-  public boolean shouldBackOff(Schedulable obj) {
-    return false;
-  }
+    @Override
+    public int getPriorityLevel(Schedulable obj) {
+        return 0;
+    }
 
-  @Override
-  public void addResponseTime(String callName, Schedulable schedulable,
-      ProcessingDetails details) {
-  }
+    @Override
+    public boolean shouldBackOff(Schedulable obj) {
+        return false;
+    }
 
-  public DefaultRpcScheduler(int priorityLevels, String namespace,
-      Configuration conf) {
-  }
+    @Override
+    public void addResponseTime(String callName, Schedulable schedulable, ProcessingDetails details) {
+    }
 
-  @Override
-  public void stop() {
-  }
+    public DefaultRpcScheduler(int priorityLevels, String namespace, Configuration conf) {
+    }
+
+    @Override
+    public void stop() {
+    }
 }

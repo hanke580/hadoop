@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.registry.client.exceptions;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -32,17 +31,16 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
 public class NoChildrenForEphemeralsException extends RegistryIOException {
-  public NoChildrenForEphemeralsException(String path, Throwable cause) {
-    super(path, cause);
-  }
 
-  public NoChildrenForEphemeralsException(String path, String error) {
-    super(path, error);
-  }
+    public NoChildrenForEphemeralsException(String path, Throwable cause) {
+        super(path, cause);
+    }
 
-  public NoChildrenForEphemeralsException(String path,
-      String error,
-      Throwable cause) {
-    super(path, error, cause);
-  }
+    public NoChildrenForEphemeralsException(String path, String error) {
+        super(path, error);
+    }
+
+    public NoChildrenForEphemeralsException(String path, String error, Throwable cause) {
+        super(path, error, cause);
+    }
 }

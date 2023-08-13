@@ -19,17 +19,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.security.authentication.client.AuthenticationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 
@@ -61,150 +58,120 @@ import com.google.common.base.Splitter;
  */
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
-public class MultiSchemeAuthenticationHandler implements
-    CompositeAuthenticationHandler {
-  private static Logger logger = LoggerFactory
-      .getLogger(MultiSchemeAuthenticationHandler.class);
-  public static final String SCHEMES_PROPERTY =
-      "multi-scheme-auth-handler.schemes";
-  public static final String AUTH_HANDLER_PROPERTY =
-      "multi-scheme-auth-handler.schemes.%s.handler";
-  private static final Splitter STR_SPLITTER = Splitter.on(',').trimResults()
-      .omitEmptyStrings();
+public class MultiSchemeAuthenticationHandler implements CompositeAuthenticationHandler {
 
-  private final Map<String, AuthenticationHandler> schemeToAuthHandlerMapping =
-      new HashMap<>();
-  private final Collection<String> types = new HashSet<>();
-  private final String authType;
+    private static Logger logger = LoggerFactory.getLogger(MultiSchemeAuthenticationHandler.class);
 
-  /**
-   * Constant that identifies the authentication mechanism.
-   */
-  public static final String TYPE = "multi-scheme";
+    public static final String SCHEMES_PROPERTY = "multi-scheme-auth-handler.schemes";
 
-  public MultiSchemeAuthenticationHandler() {
-    this(TYPE);
-  }
+    public static final String AUTH_HANDLER_PROPERTY = "multi-scheme-auth-handler.schemes.%s.handler";
 
-  public MultiSchemeAuthenticationHandler(String authType) {
-    this.authType = authType;
-  }
+    private static final Splitter STR_SPLITTER = Splitter.on(',').trimResults().omitEmptyStrings();
 
-  @Override
-  public String getType() {
-    return authType;
-  }
+    private final Map<String, AuthenticationHandler> schemeToAuthHandlerMapping = new HashMap<>();
 
-  /**
-   * This method returns the token types supported by this authentication
-   * handler.
-   *
-   * @return the token types supported by this authentication handler.
-   */
-  @Override
-  public Collection<String> getTokenTypes() {
-    return types;
-  }
+    private final Collection<String> types = new HashSet<>();
 
-  @Override
-  public void init(Properties config) throws ServletException {
-    // Useful for debugging purpose.
-    for (Map.Entry prop : config.entrySet()) {
-      logger.info("{} : {}", prop.getKey(), prop.getValue());
+    private final String authType;
+
+    /**
+     * Constant that identifies the authentication mechanism.
+     */
+    public static final String TYPE = "multi-scheme";
+
+    public MultiSchemeAuthenticationHandler() {
+        this(TYPE);
     }
 
-    this.types.clear();
-
-    String schemesProperty =
-        Preconditions.checkNotNull(config.getProperty(SCHEMES_PROPERTY),
-            "%s system property is not specified.", SCHEMES_PROPERTY);
-    for (String scheme : STR_SPLITTER.split(schemesProperty)) {
-      scheme = AuthenticationHandlerUtil.checkAuthScheme(scheme);
-      if (schemeToAuthHandlerMapping.containsKey(scheme)) {
-        throw new IllegalArgumentException("Handler is already specified for "
-            + scheme + " authentication scheme.");
-      }
-
-      String authHandlerPropName =
-          String.format(AUTH_HANDLER_PROPERTY, scheme).toLowerCase();
-      String authHandlerName = config.getProperty(authHandlerPropName);
-      Preconditions.checkNotNull(authHandlerName,
-          "No auth handler configured for scheme %s.", scheme);
-
-      String authHandlerClassName =
-          AuthenticationHandlerUtil
-              .getAuthenticationHandlerClassName(authHandlerName);
-      AuthenticationHandler handler =
-          initializeAuthHandler(authHandlerClassName, config);
-      schemeToAuthHandlerMapping.put(scheme, handler);
-      types.add(handler.getType());
+    public MultiSchemeAuthenticationHandler(String authType) {
+        this.authType = authType;
     }
-    logger.info("Successfully initialized MultiSchemeAuthenticationHandler");
-  }
 
-  protected AuthenticationHandler initializeAuthHandler(
-      String authHandlerClassName, Properties config) throws ServletException {
-    try {
-      Preconditions.checkNotNull(authHandlerClassName);
-      logger.debug("Initializing Authentication handler of type "
-          + authHandlerClassName);
-      Class<?> klass =
-          Thread.currentThread().getContextClassLoader()
-              .loadClass(authHandlerClassName);
-      AuthenticationHandler authHandler =
-          (AuthenticationHandler) klass.newInstance();
-      authHandler.init(config);
-      logger.info("Successfully initialized Authentication handler of type "
-          + authHandlerClassName);
-      return authHandler;
-    } catch (ClassNotFoundException | InstantiationException
-        | IllegalAccessException ex) {
-      logger.error("Failed to initialize authentication handler "
-          + authHandlerClassName, ex);
-      throw new ServletException(ex);
+    @Override
+    public String getType() {
+        return authType;
     }
-  }
 
-  @Override
-  public void destroy() {
-    for (AuthenticationHandler handler : schemeToAuthHandlerMapping.values()) {
-      handler.destroy();
+    /**
+     * This method returns the token types supported by this authentication
+     * handler.
+     *
+     * @return the token types supported by this authentication handler.
+     */
+    @Override
+    public Collection<String> getTokenTypes() {
+        return types;
     }
-  }
 
-  @Override
-  public boolean managementOperation(AuthenticationToken token,
-      HttpServletRequest request, HttpServletResponse response)
-      throws IOException, AuthenticationException {
-    return true;
-  }
-
-  @Override
-  public AuthenticationToken authenticate(HttpServletRequest request,
-      HttpServletResponse response)
-          throws IOException, AuthenticationException {
-    String authorization =
-        request.getHeader(HttpConstants.AUTHORIZATION_HEADER);
-    if (authorization != null) {
-      for (Map.Entry<String, AuthenticationHandler> entry :
-          schemeToAuthHandlerMapping.entrySet()) {
-        if (AuthenticationHandlerUtil.matchAuthScheme(
-            entry.getKey(), authorization)) {
-          AuthenticationToken token =
-              entry.getValue().authenticate(request, response);
-          logger.trace("Token generated with type {}", token.getType());
-          return token;
+    @Override
+    public void init(Properties config) throws ServletException {
+        // Useful for debugging purpose.
+        for (Map.Entry prop : config.entrySet()) {
+            logger.info("{} : {}", prop.getKey(), prop.getValue());
         }
-      }
+        this.types.clear();
+        String schemesProperty = Preconditions.checkNotNull(config.getProperty(SCHEMES_PROPERTY), "%s system property is not specified.", SCHEMES_PROPERTY);
+        for (String scheme : STR_SPLITTER.split(schemesProperty)) {
+            scheme = AuthenticationHandlerUtil.checkAuthScheme(scheme);
+            if (schemeToAuthHandlerMapping.containsKey(scheme)) {
+                throw new IllegalArgumentException("Handler is already specified for " + scheme + " authentication scheme.");
+            }
+            String authHandlerPropName = String.format(AUTH_HANDLER_PROPERTY, scheme).toLowerCase();
+            String authHandlerName = config.getProperty(authHandlerPropName);
+            Preconditions.checkNotNull(authHandlerName, "No auth handler configured for scheme %s.", scheme);
+            String authHandlerClassName = AuthenticationHandlerUtil.getAuthenticationHandlerClassName(authHandlerName);
+            AuthenticationHandler handler = initializeAuthHandler(authHandlerClassName, config);
+            schemeToAuthHandlerMapping.put(scheme, handler);
+            types.add(handler.getType());
+        }
+        logger.info("Successfully initialized MultiSchemeAuthenticationHandler");
     }
 
-    // Handle the case when (authorization == null) or an invalid authorization
-    // header (e.g. a header value without the scheme name).
-    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-    for (String scheme : schemeToAuthHandlerMapping.keySet()) {
-      response.addHeader(HttpConstants.WWW_AUTHENTICATE_HEADER, scheme);
+    protected AuthenticationHandler initializeAuthHandler(String authHandlerClassName, Properties config) throws ServletException {
+        try {
+            Preconditions.checkNotNull(authHandlerClassName);
+            logger.debug("Initializing Authentication handler of type " + authHandlerClassName);
+            Class<?> klass = Thread.currentThread().getContextClassLoader().loadClass(authHandlerClassName);
+            AuthenticationHandler authHandler = (AuthenticationHandler) klass.newInstance();
+            authHandler.init(config);
+            logger.info("Successfully initialized Authentication handler of type " + authHandlerClassName);
+            return authHandler;
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+            logger.error("Failed to initialize authentication handler " + authHandlerClassName, ex);
+            throw new ServletException(ex);
+        }
     }
 
-    return null;
-  }
+    @Override
+    public void destroy() {
+        for (AuthenticationHandler handler : schemeToAuthHandlerMapping.values()) {
+            handler.destroy();
+        }
+    }
+
+    @Override
+    public boolean managementOperation(AuthenticationToken token, HttpServletRequest request, HttpServletResponse response) throws IOException, AuthenticationException {
+        return true;
+    }
+
+    @Override
+    public AuthenticationToken authenticate(HttpServletRequest request, HttpServletResponse response) throws IOException, AuthenticationException {
+        String authorization = request.getHeader(HttpConstants.AUTHORIZATION_HEADER);
+        if (authorization != null) {
+            for (Map.Entry<String, AuthenticationHandler> entry : schemeToAuthHandlerMapping.entrySet()) {
+                if (AuthenticationHandlerUtil.matchAuthScheme(entry.getKey(), authorization)) {
+                    AuthenticationToken token = entry.getValue().authenticate(request, response);
+                    logger.trace("Token generated with type {}", token.getType());
+                    return token;
+                }
+            }
+        }
+        // Handle the case when (authorization == null) or an invalid authorization
+        // header (e.g. a header value without the scheme name).
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        for (String scheme : schemeToAuthHandlerMapping.keySet()) {
+            response.addHeader(HttpConstants.WWW_AUTHENTICATE_HEADER, scheme);
+        }
+        return null;
+    }
 }

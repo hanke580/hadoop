@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * Registry client services
  * <p>
@@ -24,3 +23,4 @@
  * API.
  */
 package org.apache.hadoop.registry.client.impl;
+

@@ -21,9 +21,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.List;
-
 import javax.net.SocketFactory;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.conf.Configuration;
@@ -42,7 +40,6 @@ import org.apache.hadoop.ipc.RpcClientUtil;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.apache.hadoop.thirdparty.protobuf.RpcController;
 import org.apache.hadoop.thirdparty.protobuf.ServiceException;
 
@@ -53,94 +50,70 @@ import org.apache.hadoop.thirdparty.protobuf.ServiceException;
  */
 @InterfaceAudience.Private
 @InterfaceStability.Stable
-public class ReconfigurationProtocolTranslatorPB implements
-    ProtocolMetaInterface, ReconfigurationProtocol, ProtocolTranslator,
-    Closeable {
-  public static final Logger LOG = LoggerFactory
-      .getLogger(ReconfigurationProtocolTranslatorPB.class);
+public class ReconfigurationProtocolTranslatorPB implements ProtocolMetaInterface, ReconfigurationProtocol, ProtocolTranslator, Closeable {
 
-  private static final RpcController NULL_CONTROLLER = null;
-  private static final StartReconfigurationRequestProto VOID_START_RECONFIG =
-      StartReconfigurationRequestProto.newBuilder().build();
+    public static final Logger LOG = LoggerFactory.getLogger(ReconfigurationProtocolTranslatorPB.class);
 
-  private static final ListReconfigurablePropertiesRequestProto
-      VOID_LIST_RECONFIGURABLE_PROPERTIES =
-      ListReconfigurablePropertiesRequestProto.newBuilder().build();
+    private static final RpcController NULL_CONTROLLER = null;
 
-  private static final GetReconfigurationStatusRequestProto
-      VOID_GET_RECONFIG_STATUS =
-      GetReconfigurationStatusRequestProto.newBuilder().build();
+    private static final StartReconfigurationRequestProto VOID_START_RECONFIG = StartReconfigurationRequestProto.newBuilder().build();
 
-  private final ReconfigurationProtocolPB rpcProxy;
+    private static final ListReconfigurablePropertiesRequestProto VOID_LIST_RECONFIGURABLE_PROPERTIES = ListReconfigurablePropertiesRequestProto.newBuilder().build();
 
-  public ReconfigurationProtocolTranslatorPB(InetSocketAddress addr,
-      UserGroupInformation ticket, Configuration conf, SocketFactory factory)
-      throws IOException {
-    rpcProxy = createReconfigurationProtocolProxy(addr, ticket, conf, factory,
-        0);
-  }
+    private static final GetReconfigurationStatusRequestProto VOID_GET_RECONFIG_STATUS = GetReconfigurationStatusRequestProto.newBuilder().build();
 
-  static ReconfigurationProtocolPB createReconfigurationProtocolProxy(
-      InetSocketAddress addr, UserGroupInformation ticket, Configuration conf,
-      SocketFactory factory, int socketTimeout) throws IOException {
-    RPC.setProtocolEngine(conf, ReconfigurationProtocolPB.class,
-        ProtobufRpcEngine2.class);
-    return RPC.getProxy(ReconfigurationProtocolPB.class,
-        RPC.getProtocolVersion(ReconfigurationProtocolPB.class),
-        addr, ticket, conf, factory, socketTimeout);
-  }
+    private final ReconfigurationProtocolPB rpcProxy;
 
-  @Override
-  public void close() throws IOException {
-    RPC.stopProxy(rpcProxy);
-  }
-
-  @Override
-  public Object getUnderlyingProxyObject() {
-    return rpcProxy;
-  }
-
-  @Override
-  public void startReconfiguration() throws IOException {
-    try {
-      rpcProxy.startReconfiguration(NULL_CONTROLLER, VOID_START_RECONFIG);
-    } catch (ServiceException e) {
-      throw ProtobufHelper.getRemoteException(e);
+    public ReconfigurationProtocolTranslatorPB(InetSocketAddress addr, UserGroupInformation ticket, Configuration conf, SocketFactory factory) throws IOException {
+        rpcProxy = createReconfigurationProtocolProxy(addr, ticket, conf, factory, 0);
     }
-  }
 
-  @Override
-  public ReconfigurationTaskStatus getReconfigurationStatus()
-      throws IOException {
-    try {
-      return ReconfigurationProtocolUtils.getReconfigurationStatus(
-          rpcProxy
-          .getReconfigurationStatus(
-              NULL_CONTROLLER,
-              VOID_GET_RECONFIG_STATUS));
-    } catch (ServiceException e) {
-      throw ProtobufHelper.getRemoteException(e);
+    static ReconfigurationProtocolPB createReconfigurationProtocolProxy(InetSocketAddress addr, UserGroupInformation ticket, Configuration conf, SocketFactory factory, int socketTimeout) throws IOException {
+        RPC.setProtocolEngine(conf, ReconfigurationProtocolPB.class, ProtobufRpcEngine2.class);
+        return RPC.getProxy(ReconfigurationProtocolPB.class, RPC.getProtocolVersion(ReconfigurationProtocolPB.class), addr, ticket, conf, factory, socketTimeout);
     }
-  }
 
-  @Override
-  public List<String> listReconfigurableProperties() throws IOException {
-    ListReconfigurablePropertiesResponseProto response;
-    try {
-      response = rpcProxy.listReconfigurableProperties(NULL_CONTROLLER,
-          VOID_LIST_RECONFIGURABLE_PROPERTIES);
-      return response.getNameList();
-    } catch (ServiceException e) {
-      throw ProtobufHelper.getRemoteException(e);
+    @Override
+    public void close() throws IOException {
+        RPC.stopProxy(rpcProxy);
     }
-  }
 
-  @Override
-  public boolean isMethodSupported(String methodName) throws IOException {
-    return RpcClientUtil.isMethodSupported(rpcProxy,
-        ReconfigurationProtocolPB.class,
-        RPC.RpcKind.RPC_PROTOCOL_BUFFER,
-        RPC.getProtocolVersion(ReconfigurationProtocolPB.class),
-        methodName);
-  }
+    @Override
+    public Object getUnderlyingProxyObject() {
+        return rpcProxy;
+    }
+
+    @Override
+    public void startReconfiguration() throws IOException {
+        try {
+            rpcProxy.startReconfiguration(NULL_CONTROLLER, VOID_START_RECONFIG);
+        } catch (ServiceException e) {
+            throw ProtobufHelper.getRemoteException(e);
+        }
+    }
+
+    @Override
+    public ReconfigurationTaskStatus getReconfigurationStatus() throws IOException {
+        try {
+            return ReconfigurationProtocolUtils.getReconfigurationStatus(rpcProxy.getReconfigurationStatus(NULL_CONTROLLER, VOID_GET_RECONFIG_STATUS));
+        } catch (ServiceException e) {
+            throw ProtobufHelper.getRemoteException(e);
+        }
+    }
+
+    @Override
+    public List<String> listReconfigurableProperties() throws IOException {
+        ListReconfigurablePropertiesResponseProto response;
+        try {
+            response = rpcProxy.listReconfigurableProperties(NULL_CONTROLLER, VOID_LIST_RECONFIGURABLE_PROPERTIES);
+            return response.getNameList();
+        } catch (ServiceException e) {
+            throw ProtobufHelper.getRemoteException(e);
+        }
+    }
+
+    @Override
+    public boolean isMethodSupported(String methodName) throws IOException {
+        return RpcClientUtil.isMethodSupported(rpcProxy, ReconfigurationProtocolPB.class, RPC.RpcKind.RPC_PROTOCOL_BUFFER, RPC.getProtocolVersion(ReconfigurationProtocolPB.class), methodName);
+    }
 }

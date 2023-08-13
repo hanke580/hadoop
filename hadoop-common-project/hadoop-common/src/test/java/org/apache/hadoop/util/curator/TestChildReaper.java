@@ -28,10 +28,8 @@ import org.apache.zookeeper.data.Stat;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import java.net.BindException;
 import java.util.Random;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -40,170 +38,125 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Curator's BaseClassForTests).  This is to ensure that the ChildReaper
  * class we modified is still correct.
  */
-public class TestChildReaper
-{
-  protected TestingServer server;
+public class TestChildReaper {
 
-  @Before
-  public void setup() throws Exception {
-    while(this.server == null) {
-      try {
-        this.server = new TestingServer();
-      } catch (BindException var2) {
-        System.err.println("Getting bind exception - retrying to allocate server");
-        this.server = null;
-      }
-    }
-  }
+    protected TestingServer server;
 
-  @After
-  public void teardown() throws Exception {
-    this.server.close();
-    this.server = null;
-  }
-
-  @Test
-  public void     testSomeNodes() throws Exception
-  {
-
-    Timing                  timing = new Timing();
-    ChildReaper             reaper = null;
-    CuratorFramework        client = CuratorFrameworkFactory.newClient(server.getConnectString(), timing.session(), timing.connection(), new RetryOneTime(1));
-    try
-    {
-      client.start();
-
-      Random              r = new Random();
-      int                 nonEmptyNodes = 0;
-      for ( int i = 0; i < 10; ++i )
-      {
-        client.create().creatingParentsIfNeeded().forPath("/test/" + Integer.toString(i));
-        if ( r.nextBoolean() )
-        {
-          client.create().forPath("/test/" + Integer.toString(i) + "/foo");
-          ++nonEmptyNodes;
+    @Before
+    public void setup() throws Exception {
+        while (this.server == null) {
+            try {
+                this.server = new TestingServer();
+            } catch (BindException var2) {
+                System.err.println("Getting bind exception - retrying to allocate server");
+                this.server = null;
+            }
         }
-      }
-
-      reaper = new ChildReaper(client, "/test", Reaper.Mode.REAP_UNTIL_DELETE, 1);
-      reaper.start();
-
-      timing.forWaiting().sleepABit();
-
-      Stat    stat = client.checkExists().forPath("/test");
-      assertThat(stat.getNumChildren()).isEqualTo(nonEmptyNodes);
     }
-    finally
-    {
-      CloseableUtils.closeQuietly(reaper);
-      CloseableUtils.closeQuietly(client);
+
+    @After
+    public void teardown() throws Exception {
+        this.server.close();
+        this.server = null;
     }
-  }
 
-  @Test
-  public void     testSimple() throws Exception
-  {
-    Timing                  timing = new Timing();
-    ChildReaper             reaper = null;
-    CuratorFramework        client = CuratorFrameworkFactory.newClient(server.getConnectString(), timing.session(), timing.connection(), new RetryOneTime(1));
-    try
-    {
-      client.start();
-
-      for ( int i = 0; i < 10; ++i )
-      {
-        client.create().creatingParentsIfNeeded().forPath("/test/" + Integer.toString(i));
-      }
-
-      reaper = new ChildReaper(client, "/test", Reaper.Mode.REAP_UNTIL_DELETE, 1);
-      reaper.start();
-
-      timing.forWaiting().sleepABit();
-
-      Stat    stat = client.checkExists().forPath("/test");
-      assertThat(stat.getNumChildren()).isZero();
+    @Test
+    public void testSomeNodes() throws Exception {
+        Timing timing = new Timing();
+        ChildReaper reaper = null;
+        CuratorFramework client = CuratorFrameworkFactory.newClient(server.getConnectString(), timing.session(), timing.connection(), new RetryOneTime(1));
+        try {
+            client.start();
+            Random r = new Random();
+            int nonEmptyNodes = 0;
+            for (int i = 0; i < 10; ++i) {
+                client.create().creatingParentsIfNeeded().forPath("/test/" + Integer.toString(i));
+                if (r.nextBoolean()) {
+                    client.create().forPath("/test/" + Integer.toString(i) + "/foo");
+                    ++nonEmptyNodes;
+                }
+            }
+            reaper = new ChildReaper(client, "/test", Reaper.Mode.REAP_UNTIL_DELETE, 1);
+            reaper.start();
+            timing.forWaiting().sleepABit();
+            Stat stat = client.checkExists().forPath("/test");
+            assertThat(stat.getNumChildren()).isEqualTo(nonEmptyNodes);
+        } finally {
+            CloseableUtils.closeQuietly(reaper);
+            CloseableUtils.closeQuietly(client);
+        }
     }
-    finally
-    {
-      CloseableUtils.closeQuietly(reaper);
-      CloseableUtils.closeQuietly(client);
+
+    @Test
+    public void testSimple() throws Exception {
+        Timing timing = new Timing();
+        ChildReaper reaper = null;
+        CuratorFramework client = CuratorFrameworkFactory.newClient(server.getConnectString(), timing.session(), timing.connection(), new RetryOneTime(1));
+        try {
+            client.start();
+            for (int i = 0; i < 10; ++i) {
+                client.create().creatingParentsIfNeeded().forPath("/test/" + Integer.toString(i));
+            }
+            reaper = new ChildReaper(client, "/test", Reaper.Mode.REAP_UNTIL_DELETE, 1);
+            reaper.start();
+            timing.forWaiting().sleepABit();
+            Stat stat = client.checkExists().forPath("/test");
+            assertThat(stat.getNumChildren()).isZero();
+        } finally {
+            CloseableUtils.closeQuietly(reaper);
+            CloseableUtils.closeQuietly(client);
+        }
     }
-  }
 
-  @Test
-  public void     testMultiPath() throws Exception
-  {
-    Timing                  timing = new Timing();
-    ChildReaper             reaper = null;
-    CuratorFramework        client = CuratorFrameworkFactory.newClient(server.getConnectString(), timing.session(), timing.connection(), new RetryOneTime(1));
-    try
-    {
-      client.start();
-
-      for ( int i = 0; i < 10; ++i )
-      {
-        client.create().creatingParentsIfNeeded().forPath("/test1/" + Integer.toString(i));
-        client.create().creatingParentsIfNeeded().forPath("/test2/" + Integer.toString(i));
-        client.create().creatingParentsIfNeeded().forPath("/test3/" + Integer.toString(i));
-      }
-
-      reaper = new ChildReaper(client, "/test2", Reaper.Mode.REAP_UNTIL_DELETE, 1);
-      reaper.start();
-      reaper.addPath("/test1");
-
-      timing.forWaiting().sleepABit();
-
-      Stat    stat = client.checkExists().forPath("/test1");
-      assertThat(stat.getNumChildren()).isZero();
-      stat = client.checkExists().forPath("/test2");
-      assertThat(stat.getNumChildren()).isZero();
-      stat = client.checkExists().forPath("/test3");
-      assertThat(stat.getNumChildren()).isEqualTo(10);
+    @Test
+    public void testMultiPath() throws Exception {
+        Timing timing = new Timing();
+        ChildReaper reaper = null;
+        CuratorFramework client = CuratorFrameworkFactory.newClient(server.getConnectString(), timing.session(), timing.connection(), new RetryOneTime(1));
+        try {
+            client.start();
+            for (int i = 0; i < 10; ++i) {
+                client.create().creatingParentsIfNeeded().forPath("/test1/" + Integer.toString(i));
+                client.create().creatingParentsIfNeeded().forPath("/test2/" + Integer.toString(i));
+                client.create().creatingParentsIfNeeded().forPath("/test3/" + Integer.toString(i));
+            }
+            reaper = new ChildReaper(client, "/test2", Reaper.Mode.REAP_UNTIL_DELETE, 1);
+            reaper.start();
+            reaper.addPath("/test1");
+            timing.forWaiting().sleepABit();
+            Stat stat = client.checkExists().forPath("/test1");
+            assertThat(stat.getNumChildren()).isZero();
+            stat = client.checkExists().forPath("/test2");
+            assertThat(stat.getNumChildren()).isZero();
+            stat = client.checkExists().forPath("/test3");
+            assertThat(stat.getNumChildren()).isEqualTo(10);
+        } finally {
+            CloseableUtils.closeQuietly(reaper);
+            CloseableUtils.closeQuietly(client);
+        }
     }
-    finally
-    {
-      CloseableUtils.closeQuietly(reaper);
-      CloseableUtils.closeQuietly(client);
+
+    @Test
+    public void testNamespace() throws Exception {
+        Timing timing = new Timing();
+        ChildReaper reaper = null;
+        CuratorFramework client = CuratorFrameworkFactory.builder().connectString(server.getConnectString()).sessionTimeoutMs(timing.session()).connectionTimeoutMs(timing.connection()).retryPolicy(new RetryOneTime(1)).namespace("foo").build();
+        try {
+            client.start();
+            for (int i = 0; i < 10; ++i) {
+                client.create().creatingParentsIfNeeded().forPath("/test/" + Integer.toString(i));
+            }
+            reaper = new ChildReaper(client, "/test", Reaper.Mode.REAP_UNTIL_DELETE, 1);
+            reaper.start();
+            timing.forWaiting().sleepABit();
+            Stat stat = client.checkExists().forPath("/test");
+            assertThat(stat.getNumChildren()).isZero();
+            stat = client.usingNamespace(null).checkExists().forPath("/foo/test");
+            assertThat(stat).isNotNull();
+            assertThat(stat.getNumChildren()).isZero();
+        } finally {
+            CloseableUtils.closeQuietly(reaper);
+            CloseableUtils.closeQuietly(client);
+        }
     }
-  }
-
-  @Test
-  public void     testNamespace() throws Exception
-  {
-    Timing                  timing = new Timing();
-    ChildReaper             reaper = null;
-    CuratorFramework        client = CuratorFrameworkFactory.builder()
-        .connectString(server.getConnectString())
-        .sessionTimeoutMs(timing.session())
-        .connectionTimeoutMs(timing.connection())
-        .retryPolicy(new RetryOneTime(1))
-        .namespace("foo")
-        .build();
-    try
-    {
-      client.start();
-
-      for ( int i = 0; i < 10; ++i )
-      {
-        client.create().creatingParentsIfNeeded().forPath("/test/" + Integer.toString(i));
-      }
-
-      reaper = new ChildReaper(client, "/test", Reaper.Mode.REAP_UNTIL_DELETE, 1);
-      reaper.start();
-
-      timing.forWaiting().sleepABit();
-
-      Stat    stat = client.checkExists().forPath("/test");
-      assertThat(stat.getNumChildren()).isZero();
-
-      stat = client.usingNamespace(null).checkExists().forPath("/foo/test");
-      assertThat(stat).isNotNull();
-      assertThat(stat.getNumChildren()).isZero();
-    }
-    finally
-    {
-      CloseableUtils.closeQuietly(reaper);
-      CloseableUtils.closeQuietly(client);
-    }
-  }
 }

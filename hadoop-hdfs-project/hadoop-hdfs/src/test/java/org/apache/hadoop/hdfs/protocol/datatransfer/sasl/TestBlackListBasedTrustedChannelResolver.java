@@ -20,7 +20,6 @@ package org.apache.hadoop.hdfs.protocol.datatransfer.sasl;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -38,52 +37,45 @@ import org.junit.Test;
  */
 public class TestBlackListBasedTrustedChannelResolver {
 
-  private final static String FILE_NAME = "blacklistfile.txt";
-  private File blacklistFile;
-  private final static String BLACK_LISTED = "127.0.0.1\n216.58.216.174\n";
-  private BlackListBasedTrustedChannelResolver resolver;
+    private final static String FILE_NAME = "blacklistfile.txt";
 
-  @Before
-  public void setup() {
-    blacklistFile = new File(GenericTestUtils.getTestDir(), FILE_NAME);
-    resolver
-        = new BlackListBasedTrustedChannelResolver();
-    try {
-      FileUtils.write(blacklistFile, BLACK_LISTED);
-    } catch (IOException e) {
-      fail("Setup for TestBlackListBasedTrustedChannelResolver failed.");
+    private File blacklistFile;
+
+    private final static String BLACK_LISTED = "127.0.0.1\n216.58.216.174\n";
+
+    private BlackListBasedTrustedChannelResolver resolver;
+
+    @Before
+    public void setup() {
+        blacklistFile = new File(GenericTestUtils.getTestDir(), FILE_NAME);
+        resolver = new BlackListBasedTrustedChannelResolver();
+        try {
+            FileUtils.write(blacklistFile, BLACK_LISTED);
+        } catch (IOException e) {
+            fail("Setup for TestBlackListBasedTrustedChannelResolver failed.");
+        }
     }
-  }
 
-  @After
-  public void cleanUp() {
-    FileUtils.deleteQuietly(blacklistFile);
-  }
+    @After
+    public void cleanUp() {
+        FileUtils.deleteQuietly(blacklistFile);
+    }
 
-  @Test
-  public void testBlackListIpClient() throws IOException {
-    Configuration conf = new Configuration();
-    FileUtils.write(blacklistFile,
-        InetAddress.getLocalHost().getHostAddress(), true);
-    conf.set(BlackListBasedTrustedChannelResolver
-            .DFS_DATATRANSFER_CLIENT_FIXED_BLACK_LIST_FILE,
-        blacklistFile.getAbsolutePath());
+    @Test
+    public void testBlackListIpClient() throws IOException {
+        Configuration conf = new Configuration();
+        FileUtils.write(blacklistFile, InetAddress.getLocalHost().getHostAddress(), true);
+        conf.set(BlackListBasedTrustedChannelResolver.DFS_DATATRANSFER_CLIENT_FIXED_BLACK_LIST_FILE, blacklistFile.getAbsolutePath());
+        resolver.setConf(conf);
+        assertFalse(resolver.isTrusted());
+    }
 
-    resolver.setConf(conf);
-    assertFalse(resolver.isTrusted());
-
-  }
-
-  @Test
-  public void testBlackListIpServer() throws UnknownHostException {
-    Configuration conf = new Configuration();
-    conf.set(BlackListBasedTrustedChannelResolver
-            .DFS_DATATRANSFER_SERVER_FIXED_BLACK_LIST_FILE,
-        blacklistFile.getAbsolutePath());
-
-    resolver.setConf(conf);
-    assertTrue(resolver.isTrusted());
-    assertFalse(resolver.isTrusted(InetAddress
-        .getByName("216.58.216.174")));
-  }
+    @Test
+    public void testBlackListIpServer() throws UnknownHostException {
+        Configuration conf = new Configuration();
+        conf.set(BlackListBasedTrustedChannelResolver.DFS_DATATRANSFER_SERVER_FIXED_BLACK_LIST_FILE, blacklistFile.getAbsolutePath());
+        resolver.setConf(conf);
+        assertTrue(resolver.isTrusted());
+        assertFalse(resolver.isTrusted(InetAddress.getByName("216.58.216.174")));
+    }
 }

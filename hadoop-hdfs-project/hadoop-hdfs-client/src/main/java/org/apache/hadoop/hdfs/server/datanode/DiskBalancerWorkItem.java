@@ -16,7 +16,6 @@
  * limitations under the License.
  *
  */
-
 package org.apache.hadoop.hdfs.server.datanode;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -25,7 +24,6 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.common.base.Preconditions;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
-
 import java.io.IOException;
 
 /**
@@ -35,256 +33,262 @@ import java.io.IOException;
 @InterfaceStability.Unstable
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class DiskBalancerWorkItem {
-  private static final ObjectMapper MAPPER = new ObjectMapper();
-  private static final ObjectReader READER =
-      new ObjectMapper().readerFor(DiskBalancerWorkItem.class);
 
-  private  long startTime;
-  private long secondsElapsed;
-  private long bytesToCopy;
-  private long bytesCopied;
-  private long errorCount;
-  private String errMsg;
-  private long blocksCopied;
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
-  private long maxDiskErrors;
-  private long tolerancePercent;
-  private long bandwidth;
+    private static final ObjectReader READER = new ObjectMapper().readerFor(DiskBalancerWorkItem.class);
 
-  /**
-   * Empty constructor for Json serialization.
-   */
-  public DiskBalancerWorkItem() {
+    private long startTime;
 
-  }
+    private long secondsElapsed;
 
+    private long bytesToCopy;
 
-  /**
-   * Constructs a DiskBalancerWorkItem.
-   *
-   * @param bytesToCopy - Total bytes to copy from a disk
-   * @param bytesCopied - Copied So far.
-   */
-  public DiskBalancerWorkItem(long bytesToCopy, long bytesCopied) {
-    this.bytesToCopy = bytesToCopy;
-    this.bytesCopied = bytesCopied;
-  }
+    private long bytesCopied;
 
-  /**
-   * Reads a DiskBalancerWorkItem Object from a Json String.
-   *
-   * @param json - Json String.
-   * @return DiskBalancerWorkItem Object
-   * @throws IOException
-   */
-  public static DiskBalancerWorkItem parseJson(String json) throws IOException {
-    Preconditions.checkNotNull(json);
-    return READER.readValue(json);
-  }
+    private long errorCount;
 
-  /**
-   * Gets the error message.
-   */
-  public String getErrMsg() {
-    return errMsg;
-  }
+    private String errMsg;
 
-  /**
-   * Sets the error message.
-   *
-   * @param errMsg - Msg.
-   */
-  public void setErrMsg(String errMsg) {
-    this.errMsg = errMsg;
-  }
+    private long blocksCopied;
 
-  /**
-   * Returns the number of errors encountered.
-   *
-   * @return long
-   */
-  public long getErrorCount() {
-    return errorCount;
-  }
+    private long maxDiskErrors;
 
-  /**
-   * Incs Error Count.
-   */
-  public void incErrorCount() {
-    this.errorCount++;
-  }
+    private long tolerancePercent;
 
-  /**
-   * Returns bytes copied so far.
-   *
-   * @return long
-   */
-  public long getBytesCopied() {
-    return bytesCopied;
-  }
+    private long bandwidth;
 
-  /**
-   * Sets bytes copied so far.
-   *
-   * @param bytesCopied - long
-   */
-  public void setBytesCopied(long bytesCopied) {
-    this.bytesCopied = bytesCopied;
-  }
+    /**
+     * Empty constructor for Json serialization.
+     */
+    public DiskBalancerWorkItem() {
+    }
 
-  /**
-   * Increments bytesCopied by delta.
-   *
-   * @param delta - long
-   */
-  public void incCopiedSoFar(long delta) {
-    this.bytesCopied += delta;
-  }
+    /**
+     * Constructs a DiskBalancerWorkItem.
+     *
+     * @param bytesToCopy - Total bytes to copy from a disk
+     * @param bytesCopied - Copied So far.
+     */
+    public DiskBalancerWorkItem(long bytesToCopy, long bytesCopied) {
+        this.bytesToCopy = bytesToCopy;
+        this.bytesCopied = bytesCopied;
+    }
 
-  /**
-   * Returns bytes to copy.
-   *
-   * @return - long
-   */
-  public long getBytesToCopy() {
-    return bytesToCopy;
-  }
+    /**
+     * Reads a DiskBalancerWorkItem Object from a Json String.
+     *
+     * @param json - Json String.
+     * @return DiskBalancerWorkItem Object
+     * @throws IOException
+     */
+    public static DiskBalancerWorkItem parseJson(String json) throws IOException {
+        Preconditions.checkNotNull(json);
+        return READER.readValue(json);
+    }
 
-  /**
-   * Returns number of blocks copied for this DiskBalancerWorkItem.
-   *
-   * @return long count of blocks.
-   */
-  public long getBlocksCopied() {
-    return blocksCopied;
-  }
+    /**
+     * Gets the error message.
+     */
+    public String getErrMsg() {
+        return errMsg;
+    }
 
-  /**
-   * increments the number of blocks copied.
-   */
-  public void incBlocksCopied() {
-    blocksCopied++;
-  }
+    /**
+     * Sets the error message.
+     *
+     * @param errMsg - Msg.
+     */
+    public void setErrMsg(String errMsg) {
+        this.errMsg = errMsg;
+    }
 
-  /**
-   * returns a serialized json string.
-   *
-   * @return String - json
-   * @throws IOException
-   */
-  public String toJson() throws IOException {
-    return MAPPER.writeValueAsString(this);
-  }
+    /**
+     * Returns the number of errors encountered.
+     *
+     * @return long
+     */
+    public long getErrorCount() {
+        return errorCount;
+    }
 
-  /**
-   * Sets the Error counts for this step.
-   *
-   * @param errorCount long.
-   */
-  public void setErrorCount(long errorCount) {
-    this.errorCount = errorCount;
-  }
+    /**
+     * Incs Error Count.
+     */
+    public void incErrorCount() {
+        this.errorCount++;
+    }
 
-  /**
-   * Number of blocks copied so far.
-   *
-   * @param blocksCopied Blocks copied.
-   */
-  public void setBlocksCopied(long blocksCopied) {
-    this.blocksCopied = blocksCopied;
-  }
+    /**
+     * Returns bytes copied so far.
+     *
+     * @return long
+     */
+    public long getBytesCopied() {
+        return bytesCopied;
+    }
 
-  /**
-   * Gets maximum disk errors to tolerate before we fail this copy step.
-   *
-   * @return long.
-   */
-  public long getMaxDiskErrors() {
-    return maxDiskErrors;
-  }
+    /**
+     * Sets bytes copied so far.
+     *
+     * @param bytesCopied - long
+     */
+    public void setBytesCopied(long bytesCopied) {
+        this.bytesCopied = bytesCopied;
+    }
 
-  /**
-   * Sets maximum disk errors to tolerate before we fail this copy step.
-   *
-   * @param maxDiskErrors long
-   */
-  public void setMaxDiskErrors(long maxDiskErrors) {
-    this.maxDiskErrors = maxDiskErrors;
-  }
+    /**
+     * Increments bytesCopied by delta.
+     *
+     * @param delta - long
+     */
+    public void incCopiedSoFar(long delta) {
+        this.bytesCopied += delta;
+    }
 
-  /**
-   * Allowed deviation from ideal storage in percentage.
-   *
-   * @return long
-   */
-  public long getTolerancePercent() {
-    return tolerancePercent;
-  }
+    /**
+     * Returns bytes to copy.
+     *
+     * @return - long
+     */
+    public long getBytesToCopy() {
+        return bytesToCopy;
+    }
 
-  /**
-   * Sets the tolerance percentage.
-   *
-   * @param tolerancePercent - tolerance.
-   */
-  public void setTolerancePercent(long tolerancePercent) {
-    this.tolerancePercent = tolerancePercent;
-  }
+    /**
+     * Returns number of blocks copied for this DiskBalancerWorkItem.
+     *
+     * @return long count of blocks.
+     */
+    public long getBlocksCopied() {
+        return blocksCopied;
+    }
 
-  /**
-   * Max disk bandwidth to use. MB per second.
-   *
-   * @return - long.
-   */
-  public long getBandwidth() {
-    return bandwidth;
-  }
+    /**
+     * increments the number of blocks copied.
+     */
+    public void incBlocksCopied() {
+        blocksCopied++;
+    }
 
-  /**
-   * Sets max disk bandwidth to use, in MBs per second.
-   *
-   * @param bandwidth - long.
-   */
-  public void setBandwidth(long bandwidth) {
-    this.bandwidth = bandwidth;
-  }
+    /**
+     * returns a serialized json string.
+     *
+     * @return String - json
+     * @throws IOException
+     */
+    public String toJson() throws IOException {
+        return MAPPER.writeValueAsString(this);
+    }
 
+    /**
+     * Sets the Error counts for this step.
+     *
+     * @param errorCount long.
+     */
+    public void setErrorCount(long errorCount) {
+        this.errorCount = errorCount;
+    }
 
-  /**
-   * Records the Start time of execution.
-   * @return startTime
-   */
-  public long getStartTime() {
-    return startTime;
-  }
+    /**
+     * Number of blocks copied so far.
+     *
+     * @param blocksCopied Blocks copied.
+     */
+    public void setBlocksCopied(long blocksCopied) {
+        this.blocksCopied = blocksCopied;
+    }
 
-  /**
-   * Sets the Start time.
-   * @param startTime  - Time stamp for start of execution.
-   */
-  public void setStartTime(long startTime) {
-    this.startTime = startTime;
-  }
+    /**
+     * Gets maximum disk errors to tolerate before we fail this copy step.
+     *
+     * @return long.
+     */
+    public long getMaxDiskErrors() {
+        return maxDiskErrors;
+    }
 
-  /**
-   * Gets the number of seconds elapsed from the start time.
-   *
-   * The reason why we have this is of time skews. The client's current time
-   * may not match with the server time stamp, hence the elapsed second
-   * cannot be computed from only startTime.
-   *
-   * @return seconds elapsed from start time.
-   */
-  public long getSecondsElapsed() {
-    return secondsElapsed;
-  }
+    /**
+     * Sets maximum disk errors to tolerate before we fail this copy step.
+     *
+     * @param maxDiskErrors long
+     */
+    public void setMaxDiskErrors(long maxDiskErrors) {
+        this.maxDiskErrors = maxDiskErrors;
+    }
 
-  /**
-   * Sets number of seconds elapsed.
-   *
-   * This is updated whenever we update the other counters.
-   * @param secondsElapsed  - seconds elapsed.
-   */
-  public void setSecondsElapsed(long secondsElapsed) {
-    this.secondsElapsed = secondsElapsed;
-  }
+    /**
+     * Allowed deviation from ideal storage in percentage.
+     *
+     * @return long
+     */
+    public long getTolerancePercent() {
+        return tolerancePercent;
+    }
+
+    /**
+     * Sets the tolerance percentage.
+     *
+     * @param tolerancePercent - tolerance.
+     */
+    public void setTolerancePercent(long tolerancePercent) {
+        this.tolerancePercent = tolerancePercent;
+    }
+
+    /**
+     * Max disk bandwidth to use. MB per second.
+     *
+     * @return - long.
+     */
+    public long getBandwidth() {
+        return bandwidth;
+    }
+
+    /**
+     * Sets max disk bandwidth to use, in MBs per second.
+     *
+     * @param bandwidth - long.
+     */
+    public void setBandwidth(long bandwidth) {
+        this.bandwidth = bandwidth;
+    }
+
+    /**
+     * Records the Start time of execution.
+     * @return startTime
+     */
+    public long getStartTime() {
+        return startTime;
+    }
+
+    /**
+     * Sets the Start time.
+     * @param startTime  - Time stamp for start of execution.
+     */
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
+
+    /**
+     * Gets the number of seconds elapsed from the start time.
+     *
+     * The reason why we have this is of time skews. The client's current time
+     * may not match with the server time stamp, hence the elapsed second
+     * cannot be computed from only startTime.
+     *
+     * @return seconds elapsed from start time.
+     */
+    public long getSecondsElapsed() {
+        return secondsElapsed;
+    }
+
+    /**
+     * Sets number of seconds elapsed.
+     *
+     * This is updated whenever we update the other counters.
+     * @param secondsElapsed  - seconds elapsed.
+     */
+    public void setSecondsElapsed(long secondsElapsed) {
+        this.secondsElapsed = secondsElapsed;
+    }
 }

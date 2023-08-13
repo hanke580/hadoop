@@ -31,10 +31,8 @@ import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_NAMENODE_KEYTAB_FILE_KEY;
 import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_SERVER_HTTPS_KEYSTORE_RESOURCE_KEY;
 import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_WEB_AUTHENTICATION_KERBEROS_PRINCIPAL_KEY;
 import static org.junit.Assert.*;
-
 import java.io.File;
 import java.util.Properties;
-
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.hdfs.HdfsConfiguration;
@@ -49,96 +47,96 @@ import org.junit.BeforeClass;
 
 public abstract class SaslDataTransferTestCase {
 
-  private static File baseDir;
-  private static String keystoresDir;
-  private static String sslConfDir;
-  private static String hdfsPrincipal;
-  private static String userPrincipal;
-  private static MiniKdc kdc;
-  private static String hdfsKeytab;
-  private static String userKeyTab;
-  private static String spnegoPrincipal;
+    private static File baseDir;
 
-  public static String getUserKeyTab() {
-    return userKeyTab;
-  }
+    private static String keystoresDir;
 
-  public static String getUserPrincipal() {
-    return userPrincipal;
-  }
+    private static String sslConfDir;
 
-  public static String getHdfsPrincipal() {
-    return hdfsPrincipal;
-  }
+    private static String hdfsPrincipal;
 
-  public static String getHdfsKeytab() {
-    return hdfsKeytab;
-  }
+    private static String userPrincipal;
 
-  @BeforeClass
-  public static void initKdc() throws Exception {
-    baseDir = GenericTestUtils
-        .getTestDir(SaslDataTransferTestCase.class.getSimpleName());
-    FileUtil.fullyDelete(baseDir);
-    assertTrue(baseDir.mkdirs());
+    private static MiniKdc kdc;
 
-    Properties kdcConf = MiniKdc.createConf();
-    kdc = new MiniKdc(kdcConf, baseDir);
-    kdc.start();
+    private static String hdfsKeytab;
 
-    String userName = RandomStringUtils.randomAlphabetic(8);
-    File userKeytabFile = new File(baseDir, userName + ".keytab");
-    userKeyTab = userKeytabFile.getAbsolutePath();
-    kdc.createPrincipal(userKeytabFile, userName + "/localhost");
-    userPrincipal = userName + "/localhost@" + kdc.getRealm();
+    private static String userKeyTab;
 
-    String superUserName = "hdfs";
-    File hdfsKeytabFile = new File(baseDir, superUserName + ".keytab");
-    hdfsKeytab = hdfsKeytabFile.getAbsolutePath();
-    kdc.createPrincipal(hdfsKeytabFile, superUserName + "/localhost", "HTTP/localhost");
-    hdfsPrincipal = superUserName + "/localhost@" + kdc.getRealm();
-    spnegoPrincipal = "HTTP/localhost@" + kdc.getRealm();
-  }
+    private static String spnegoPrincipal;
 
-  @AfterClass
-  public static void shutdownKdc() throws Exception {
-    if (kdc != null) {
-      kdc.stop();
+    public static String getUserKeyTab() {
+        return userKeyTab;
     }
-    FileUtil.fullyDelete(baseDir);
-    KeyStoreTestUtil.cleanupSSLConfig(keystoresDir, sslConfDir);
-  }
 
-  /**
-   * Creates configuration for starting a secure cluster.
-   *
-   * @param dataTransferProtection supported QOPs
-   * @return configuration for starting a secure cluster
-   * @throws Exception if there is any failure
-   */
-  protected HdfsConfiguration createSecureConfig(
-      String dataTransferProtection) throws Exception {
-    HdfsConfiguration conf = new HdfsConfiguration();
-    SecurityUtil.setAuthenticationMethod(AuthenticationMethod.KERBEROS, conf);
-    conf.set(DFS_NAMENODE_KERBEROS_PRINCIPAL_KEY, hdfsPrincipal);
-    conf.set(DFS_NAMENODE_KEYTAB_FILE_KEY, hdfsKeytab);
-    conf.set(DFS_DATANODE_KERBEROS_PRINCIPAL_KEY, hdfsPrincipal);
-    conf.set(DFS_DATANODE_KEYTAB_FILE_KEY, hdfsKeytab);
-    conf.set(DFS_WEB_AUTHENTICATION_KERBEROS_PRINCIPAL_KEY, spnegoPrincipal);
-    conf.setBoolean(DFS_BLOCK_ACCESS_TOKEN_ENABLE_KEY, true);
-    conf.set(DFS_DATA_TRANSFER_PROTECTION_KEY, dataTransferProtection);
-    conf.set(DFS_HTTP_POLICY_KEY, HttpConfig.Policy.HTTPS_ONLY.name());
-    conf.set(DFS_NAMENODE_HTTPS_ADDRESS_KEY, "localhost:0");
-    conf.set(DFS_DATANODE_HTTPS_ADDRESS_KEY, "localhost:0");
-    conf.setInt(IPC_CLIENT_CONNECT_MAX_RETRIES_ON_SASL_KEY, 10);
+    public static String getUserPrincipal() {
+        return userPrincipal;
+    }
 
-    keystoresDir = baseDir.getAbsolutePath();
-    sslConfDir = KeyStoreTestUtil.getClasspathDir(this.getClass());
-    KeyStoreTestUtil.setupSSLConfig(keystoresDir, sslConfDir, conf, false);
-    conf.set(DFS_CLIENT_HTTPS_KEYSTORE_RESOURCE_KEY,
-        KeyStoreTestUtil.getClientSSLConfigFileName());
-    conf.set(DFS_SERVER_HTTPS_KEYSTORE_RESOURCE_KEY,
-        KeyStoreTestUtil.getServerSSLConfigFileName());
-    return conf;
-  }
+    public static String getHdfsPrincipal() {
+        return hdfsPrincipal;
+    }
+
+    public static String getHdfsKeytab() {
+        return hdfsKeytab;
+    }
+
+    @BeforeClass
+    public static void initKdc() throws Exception {
+        baseDir = GenericTestUtils.getTestDir(SaslDataTransferTestCase.class.getSimpleName());
+        FileUtil.fullyDelete(baseDir);
+        assertTrue(baseDir.mkdirs());
+        Properties kdcConf = MiniKdc.createConf();
+        kdc = new MiniKdc(kdcConf, baseDir);
+        kdc.start();
+        String userName = RandomStringUtils.randomAlphabetic(8);
+        File userKeytabFile = new File(baseDir, userName + ".keytab");
+        userKeyTab = userKeytabFile.getAbsolutePath();
+        kdc.createPrincipal(userKeytabFile, userName + "/localhost");
+        userPrincipal = userName + "/localhost@" + kdc.getRealm();
+        String superUserName = "hdfs";
+        File hdfsKeytabFile = new File(baseDir, superUserName + ".keytab");
+        hdfsKeytab = hdfsKeytabFile.getAbsolutePath();
+        kdc.createPrincipal(hdfsKeytabFile, superUserName + "/localhost", "HTTP/localhost");
+        hdfsPrincipal = superUserName + "/localhost@" + kdc.getRealm();
+        spnegoPrincipal = "HTTP/localhost@" + kdc.getRealm();
+    }
+
+    @AfterClass
+    public static void shutdownKdc() throws Exception {
+        if (kdc != null) {
+            kdc.stop();
+        }
+        FileUtil.fullyDelete(baseDir);
+        KeyStoreTestUtil.cleanupSSLConfig(keystoresDir, sslConfDir);
+    }
+
+    /**
+     * Creates configuration for starting a secure cluster.
+     *
+     * @param dataTransferProtection supported QOPs
+     * @return configuration for starting a secure cluster
+     * @throws Exception if there is any failure
+     */
+    protected HdfsConfiguration createSecureConfig(String dataTransferProtection) throws Exception {
+        HdfsConfiguration conf = new HdfsConfiguration();
+        SecurityUtil.setAuthenticationMethod(AuthenticationMethod.KERBEROS, conf);
+        conf.set(DFS_NAMENODE_KERBEROS_PRINCIPAL_KEY, hdfsPrincipal);
+        conf.set(DFS_NAMENODE_KEYTAB_FILE_KEY, hdfsKeytab);
+        conf.set(DFS_DATANODE_KERBEROS_PRINCIPAL_KEY, hdfsPrincipal);
+        conf.set(DFS_DATANODE_KEYTAB_FILE_KEY, hdfsKeytab);
+        conf.set(DFS_WEB_AUTHENTICATION_KERBEROS_PRINCIPAL_KEY, spnegoPrincipal);
+        conf.setBoolean(DFS_BLOCK_ACCESS_TOKEN_ENABLE_KEY, true);
+        conf.set(DFS_DATA_TRANSFER_PROTECTION_KEY, dataTransferProtection);
+        conf.set(DFS_HTTP_POLICY_KEY, HttpConfig.Policy.HTTPS_ONLY.name());
+        conf.set(DFS_NAMENODE_HTTPS_ADDRESS_KEY, "localhost:0");
+        conf.set(DFS_DATANODE_HTTPS_ADDRESS_KEY, "localhost:0");
+        conf.setInt(IPC_CLIENT_CONNECT_MAX_RETRIES_ON_SASL_KEY, 10);
+        keystoresDir = baseDir.getAbsolutePath();
+        sslConfDir = KeyStoreTestUtil.getClasspathDir(this.getClass());
+        KeyStoreTestUtil.setupSSLConfig(keystoresDir, sslConfDir, conf, false);
+        conf.set(DFS_CLIENT_HTTPS_KEYSTORE_RESOURCE_KEY, KeyStoreTestUtil.getClientSSLConfigFileName());
+        conf.set(DFS_SERVER_HTTPS_KEYSTORE_RESOURCE_KEY, KeyStoreTestUtil.getServerSSLConfigFileName());
+        return conf;
+    }
 }

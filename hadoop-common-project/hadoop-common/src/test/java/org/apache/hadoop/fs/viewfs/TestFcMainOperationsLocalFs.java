@@ -17,37 +17,34 @@
  */
 package org.apache.hadoop.fs.viewfs;
 
-
 import org.apache.hadoop.fs.FileContext;
 import org.apache.hadoop.fs.FileContextMainOperationsBaseTest;
 import org.apache.hadoop.fs.Path;
-
 import org.junit.After;
 import org.junit.Before;
 
+public class TestFcMainOperationsLocalFs extends FileContextMainOperationsBaseTest {
 
-public class TestFcMainOperationsLocalFs  extends 
-  FileContextMainOperationsBaseTest {
+    FileContext fclocal;
 
-  FileContext fclocal;
-  Path targetOfTests;
+    Path targetOfTests;
 
-  @Override
-  @Before
-  public void setUp() throws Exception {
-    fc = ViewFsTestSetup.setupForViewFsLocalFs(fileContextTestHelper);
-    super.setUp();
-  }
-  
-  @Override
-  @After
-  public void tearDown() throws Exception {
-    super.tearDown();
-    ViewFsTestSetup.tearDownForViewFsLocalFs(fileContextTestHelper);
-  }
-  
-  @Override
-  protected boolean listCorruptedBlocksSupported() {
-    return false;
-  }
+    @Override
+    @Before
+    public void setUp() throws Exception {
+        fc = ViewFsTestSetup.setupForViewFsLocalFs(fileContextTestHelper);
+        super.setUp();
+    }
+
+    @Override
+    @After
+    public void tearDown() throws Exception {
+        super.tearDown();
+        ViewFsTestSetup.tearDownForViewFsLocalFs(fileContextTestHelper);
+    }
+
+    @Override
+    protected boolean listCorruptedBlocksSupported() {
+        return false;
+    }
 }

@@ -18,7 +18,6 @@
 package org.apache.hadoop.nfs.nfs3.response;
 
 import java.io.IOException;
-
 import org.apache.hadoop.nfs.nfs3.FileHandle;
 import org.apache.hadoop.nfs.nfs3.Nfs3FileAttributes;
 import org.apache.hadoop.nfs.nfs3.Nfs3Status;
@@ -29,49 +28,53 @@ import org.apache.hadoop.oncrpc.security.Verifier;
  * LOOKUP3 Response
  */
 public class LOOKUP3Response extends NFS3Response {
-  private final FileHandle fileHandle;
-  private final Nfs3FileAttributes postOpObjAttr; // Can be null
-  private final Nfs3FileAttributes postOpDirAttr; // Can be null
 
-  public LOOKUP3Response(int status) {
-    this(status, null, new Nfs3FileAttributes(), new Nfs3FileAttributes());
-  }
+    private final FileHandle fileHandle;
 
-  public LOOKUP3Response(int status, FileHandle fileHandle,
-      Nfs3FileAttributes postOpObjAttr, Nfs3FileAttributes postOpDirAttributes) {
-    super(status);
-    this.fileHandle = fileHandle;
-    this.postOpObjAttr = postOpObjAttr;
-    this.postOpDirAttr = postOpDirAttributes;
-  }
+    // Can be null
+    private final Nfs3FileAttributes postOpObjAttr;
 
-  public LOOKUP3Response(XDR xdr) throws IOException {
-    super(-1);
-    fileHandle = new FileHandle();
-    status = xdr.readInt();
-    Nfs3FileAttributes objAttr = null;
-    if (status == Nfs3Status.NFS3_OK) {
-      if (!fileHandle.deserialize(xdr)) {
-        throw new IOException("can't deserialize file handle");
-      }
-      objAttr = xdr.readBoolean() ? Nfs3FileAttributes.deserialize(xdr) : null;
-    }
-    postOpObjAttr = objAttr;
-    postOpDirAttr = xdr.readBoolean() ? Nfs3FileAttributes.deserialize(xdr)
-        : null;
-  }
+    // Can be null
+    private final Nfs3FileAttributes postOpDirAttr;
 
-  @Override
-  public XDR serialize(XDR out, int xid, Verifier verifier) {
-    super.serialize(out, xid, verifier);
-    if (this.status == Nfs3Status.NFS3_OK) {
-      fileHandle.serialize(out);
-      out.writeBoolean(true); // Attribute follows
-      postOpObjAttr.serialize(out);
+    public LOOKUP3Response(int status) {
+        this(status, null, new Nfs3FileAttributes(), new Nfs3FileAttributes());
     }
 
-    out.writeBoolean(true); // Attribute follows
-    postOpDirAttr.serialize(out);
-    return out;
-  }
+    public LOOKUP3Response(int status, FileHandle fileHandle, Nfs3FileAttributes postOpObjAttr, Nfs3FileAttributes postOpDirAttributes) {
+        super(status);
+        this.fileHandle = fileHandle;
+        this.postOpObjAttr = postOpObjAttr;
+        this.postOpDirAttr = postOpDirAttributes;
+    }
+
+    public LOOKUP3Response(XDR xdr) throws IOException {
+        super(-1);
+        fileHandle = new FileHandle();
+        status = xdr.readInt();
+        Nfs3FileAttributes objAttr = null;
+        if (status == Nfs3Status.NFS3_OK) {
+            if (!fileHandle.deserialize(xdr)) {
+                throw new IOException("can't deserialize file handle");
+            }
+            objAttr = xdr.readBoolean() ? Nfs3FileAttributes.deserialize(xdr) : null;
+        }
+        postOpObjAttr = objAttr;
+        postOpDirAttr = xdr.readBoolean() ? Nfs3FileAttributes.deserialize(xdr) : null;
+    }
+
+    @Override
+    public XDR serialize(XDR out, int xid, Verifier verifier) {
+        super.serialize(out, xid, verifier);
+        if (this.status == Nfs3Status.NFS3_OK) {
+            fileHandle.serialize(out);
+            // Attribute follows
+            out.writeBoolean(true);
+            postOpObjAttr.serialize(out);
+        }
+        // Attribute follows
+        out.writeBoolean(true);
+        postOpDirAttr.serialize(out);
+        return out;
+    }
 }

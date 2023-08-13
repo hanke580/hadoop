@@ -31,13 +31,9 @@ import org.apache.hadoop.hdfs.protocol.proto.ReconfigurationProtocolProtos.Recon
  * Note: This extends the protocolbuffer service based interface to
  * add annotations required for security.
  */
-@KerberosInfo(serverPrincipal =
-    CommonConfigurationKeys.HADOOP_SECURITY_SERVICE_USER_NAME_KEY)
-@ProtocolInfo(
-    protocolName = "org.apache.hadoop.hdfs.protocol.ReconfigurationProtocol",
-    protocolVersion = 1)
+@KerberosInfo(serverPrincipal = CommonConfigurationKeys.HADOOP_SECURITY_SERVICE_USER_NAME_KEY)
+@ProtocolInfo(protocolName = "org.apache.hadoop.hdfs.protocol.ReconfigurationProtocol", protocolVersion = 1)
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
-public interface ReconfigurationProtocolPB extends
-    ReconfigurationProtocolService.BlockingInterface {
+public interface ReconfigurationProtocolPB extends ReconfigurationProtocolService.BlockingInterface {
 }

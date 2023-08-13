@@ -33,19 +33,14 @@ import org.apache.hadoop.io.erasurecode.rawcoder.RawErasureEncoder;
 @InterfaceAudience.Private
 public class XORErasureEncoder extends ErasureEncoder {
 
-  public XORErasureEncoder(ErasureCoderOptions options) {
-    super(options);
-  }
+    public XORErasureEncoder(ErasureCoderOptions options) {
+        super(options);
+    }
 
-  @Override
-  protected ErasureCodingStep prepareEncodingStep(
-      final ECBlockGroup blockGroup) {
-    RawErasureEncoder rawEncoder = CodecUtil.createRawEncoder(getConf(),
-        ErasureCodeConstants.XOR_CODEC_NAME, getOptions());
-
-    ECBlock[] inputBlocks = getInputBlocks(blockGroup);
-
-    return new ErasureEncodingStep(inputBlocks,
-        getOutputBlocks(blockGroup), rawEncoder);
-  }
+    @Override
+    protected ErasureCodingStep prepareEncodingStep(final ECBlockGroup blockGroup) {
+        RawErasureEncoder rawEncoder = CodecUtil.createRawEncoder(getConf(), ErasureCodeConstants.XOR_CODEC_NAME, getOptions());
+        ECBlock[] inputBlocks = getInputBlocks(blockGroup);
+        return new ErasureEncodingStep(inputBlocks, getOutputBlocks(blockGroup), rawEncoder);
+    }
 }

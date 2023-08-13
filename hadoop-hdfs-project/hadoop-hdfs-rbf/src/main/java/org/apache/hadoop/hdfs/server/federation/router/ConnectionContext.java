@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.server.federation.router;
 
 import java.net.InetSocketAddress;
-
 import org.apache.hadoop.hdfs.NameNodeProxiesClient.ProxyAndInfo;
 import org.apache.hadoop.ipc.RPC;
 
@@ -36,94 +35,96 @@ import org.apache.hadoop.ipc.RPC;
  */
 public class ConnectionContext {
 
-  /** Client for the connection. */
-  private final ProxyAndInfo<?> client;
-  /** How many threads are using this connection. */
-  private int numThreads = 0;
-  /** If the connection is closed. */
-  private boolean closed = false;
+    /**
+     * Client for the connection.
+     */
+    private final ProxyAndInfo<?> client;
 
+    /**
+     * How many threads are using this connection.
+     */
+    private int numThreads = 0;
 
-  public ConnectionContext(ProxyAndInfo<?> connection) {
-    this.client = connection;
-  }
+    /**
+     * If the connection is closed.
+     */
+    private boolean closed = false;
 
-  /**
-   * Check if the connection is active.
-   *
-   * @return True if the connection is active.
-   */
-  public synchronized boolean isActive() {
-    return this.numThreads > 0;
-  }
-
-  /**
-   * Check if the connection is closed.
-   *
-   * @return If the connection is closed.
-   */
-  public synchronized boolean isClosed() {
-    return this.closed;
-  }
-
-  /**
-   * Check if the connection can be used. It checks if the connection is used by
-   * another thread or already closed.
-   *
-   * @return True if the connection can be used.
-   */
-  public synchronized boolean isUsable() {
-    return !isActive() && !isClosed();
-  }
-
-  /**
-   * Get the connection client.
-   *
-   * @return Connection client.
-   */
-  public synchronized ProxyAndInfo<?> getClient() {
-    this.numThreads++;
-    return this.client;
-  }
-
-  /**
-   * Release this connection. If the connection was closed, close the proxy.
-   * Otherwise, mark the connection as not used by us anymore.
-   */
-  public synchronized void release() {
-    if (--this.numThreads == 0 && this.closed) {
-      close();
+    public ConnectionContext(ProxyAndInfo<?> connection) {
+        this.client = connection;
     }
-  }
 
-  /**
-   * We will not use this connection anymore. If it's not being used, we close
-   * it. Otherwise, we let release() do it once we are done with it.
-   */
-  public synchronized void close() {
-    this.closed = true;
-    if (this.numThreads == 0) {
-      Object proxy = this.client.getProxy();
-      // Nobody should be using this anymore so it should close right away
-      RPC.stopProxy(proxy);
+    /**
+     * Check if the connection is active.
+     *
+     * @return True if the connection is active.
+     */
+    public synchronized boolean isActive() {
+        return this.numThreads > 0;
     }
-  }
 
-  @Override
-  public String toString() {
-    InetSocketAddress addr = this.client.getAddress();
-    Object proxy = this.client.getProxy();
-    Class<?> clazz = proxy.getClass();
-
-    StringBuilder sb = new StringBuilder();
-    sb.append(clazz.getSimpleName())
-        .append("@")
-        .append(addr)
-        .append("x")
-        .append(numThreads);
-    if (closed) {
-      sb.append("[CLOSED]");
+    /**
+     * Check if the connection is closed.
+     *
+     * @return If the connection is closed.
+     */
+    public synchronized boolean isClosed() {
+        return this.closed;
     }
-    return sb.toString();
-  }
+
+    /**
+     * Check if the connection can be used. It checks if the connection is used by
+     * another thread or already closed.
+     *
+     * @return True if the connection can be used.
+     */
+    public synchronized boolean isUsable() {
+        return !isActive() && !isClosed();
+    }
+
+    /**
+     * Get the connection client.
+     *
+     * @return Connection client.
+     */
+    public synchronized ProxyAndInfo<?> getClient() {
+        this.numThreads++;
+        return this.client;
+    }
+
+    /**
+     * Release this connection. If the connection was closed, close the proxy.
+     * Otherwise, mark the connection as not used by us anymore.
+     */
+    public synchronized void release() {
+        if (--this.numThreads == 0 && this.closed) {
+            close();
+        }
+    }
+
+    /**
+     * We will not use this connection anymore. If it's not being used, we close
+     * it. Otherwise, we let release() do it once we are done with it.
+     */
+    public synchronized void close() {
+        this.closed = true;
+        if (this.numThreads == 0) {
+            Object proxy = this.client.getProxy();
+            // Nobody should be using this anymore so it should close right away
+            RPC.stopProxy(proxy);
+        }
+    }
+
+    @Override
+    public String toString() {
+        InetSocketAddress addr = this.client.getAddress();
+        Object proxy = this.client.getProxy();
+        Class<?> clazz = proxy.getClass();
+        StringBuilder sb = new StringBuilder();
+        sb.append(clazz.getSimpleName()).append("@").append(addr).append("x").append(numThreads);
+        if (closed) {
+            sb.append("[CLOSED]");
+        }
+        return sb.toString();
+    }
 }

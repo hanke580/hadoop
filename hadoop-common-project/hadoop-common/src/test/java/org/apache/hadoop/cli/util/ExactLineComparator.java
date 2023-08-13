@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.cli.util;
 
 import java.util.StringTokenizer;
@@ -25,20 +24,17 @@ import java.util.StringTokenizer;
  *
  * This comparator searches for an exact line as 'expected'
  * in the string 'actual' and returns true if found
- *
  */
 public class ExactLineComparator extends ComparatorBase {
 
-  @Override
-  public boolean compare(String actual, String expected) {
-    boolean success = false;
-    StringTokenizer tokenizer = new StringTokenizer(actual, "\n\r");
-    while (tokenizer.hasMoreTokens() && !success) {
-      String actualToken = tokenizer.nextToken();
-      success = actualToken.equals(expected);
+    @Override
+    public boolean compare(String actual, String expected) {
+        boolean success = false;
+        StringTokenizer tokenizer = new StringTokenizer(actual, "\n\r");
+        while (tokenizer.hasMoreTokens() && !success) {
+            String actualToken = tokenizer.nextToken();
+            success = actualToken.equals(expected);
+        }
+        return success;
     }
-
-    return success;
-  }
-
 }

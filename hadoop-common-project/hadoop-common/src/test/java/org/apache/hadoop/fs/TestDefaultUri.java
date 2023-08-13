@@ -21,12 +21,9 @@ import static org.apache.hadoop.fs.FileSystem.FS_DEFAULT_NAME_KEY;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-
 import java.io.IOException;
 import java.net.URI;
-
 import org.apache.hadoop.conf.Configuration;
-
 import org.junit.Test;
 import static org.apache.hadoop.test.LambdaTestUtils.*;
 
@@ -34,70 +31,65 @@ import static org.apache.hadoop.test.LambdaTestUtils.*;
  * Test default URI related APIs in {@link FileSystem}.
  */
 public class TestDefaultUri {
-  private Configuration conf = new Configuration();
 
-  @Test
-  public void tetGetDefaultUri() {
-    conf.set(FS_DEFAULT_NAME_KEY, "hdfs://nn_host");
-    URI uri = FileSystem.getDefaultUri(conf);
-    assertThat(uri.getScheme(), is("hdfs"));
-    assertThat(uri.getAuthority(), is("nn_host"));
-  }
+    private Configuration conf = new Configuration();
 
-  @Test
-  public void tetGetDefaultUriWithPort() {
-    conf.set(FS_DEFAULT_NAME_KEY, "hdfs://nn_host:5432");
-    URI uri = FileSystem.getDefaultUri(conf);
-    assertThat(uri.getScheme(), is("hdfs"));
-    assertThat(uri.getAuthority(), is("nn_host:5432"));
-  }
+    @Test
+    public void tetGetDefaultUri() {
+        conf.set(FS_DEFAULT_NAME_KEY, "hdfs://nn_host");
+        URI uri = FileSystem.getDefaultUri(conf);
+        assertThat(uri.getScheme(), is("hdfs"));
+        assertThat(uri.getAuthority(), is("nn_host"));
+    }
 
-  @Test
-  public void tetGetDefaultUriTrailingSlash() {
-    conf.set(FS_DEFAULT_NAME_KEY, "hdfs://nn_host/");
-    URI uri = FileSystem.getDefaultUri(conf);
-    assertThat(uri.getScheme(), is("hdfs"));
-    assertThat(uri.getAuthority(), is("nn_host"));
-  }
+    @Test
+    public void tetGetDefaultUriWithPort() {
+        conf.set(FS_DEFAULT_NAME_KEY, "hdfs://nn_host:5432");
+        URI uri = FileSystem.getDefaultUri(conf);
+        assertThat(uri.getScheme(), is("hdfs"));
+        assertThat(uri.getAuthority(), is("nn_host:5432"));
+    }
 
-  @Test
-  public void tetGetDefaultUriNoScheme() {
-    conf.set(FS_DEFAULT_NAME_KEY, "nn_host");
-    URI uri = FileSystem.getDefaultUri(conf);
-    assertThat(uri.getScheme(), is("hdfs"));
-    assertThat(uri.getAuthority(), is("nn_host"));
-  }
+    @Test
+    public void tetGetDefaultUriTrailingSlash() {
+        conf.set(FS_DEFAULT_NAME_KEY, "hdfs://nn_host/");
+        URI uri = FileSystem.getDefaultUri(conf);
+        assertThat(uri.getScheme(), is("hdfs"));
+        assertThat(uri.getAuthority(), is("nn_host"));
+    }
 
-  @Test
-  public void tetGetDefaultUriNoSchemeTrailingSlash() throws Exception {
-    conf.set(FS_DEFAULT_NAME_KEY, "nn_host/");
-    intercept(IllegalArgumentException.class,
-        "No scheme in default FS",
-        () -> FileSystem.getDefaultUri(conf));
+    @Test
+    public void tetGetDefaultUriNoScheme() {
+        conf.set(FS_DEFAULT_NAME_KEY, "nn_host");
+        URI uri = FileSystem.getDefaultUri(conf);
+        assertThat(uri.getScheme(), is("hdfs"));
+        assertThat(uri.getAuthority(), is("nn_host"));
+    }
 
-  }
+    @Test
+    public void tetGetDefaultUriNoSchemeTrailingSlash() throws Exception {
+        conf.set(FS_DEFAULT_NAME_KEY, "nn_host/");
+        intercept(IllegalArgumentException.class, "No scheme in default FS", () -> FileSystem.getDefaultUri(conf));
+    }
 
-  @Test
-  public void tetFsGet() throws IOException {
-    conf.set(FS_DEFAULT_NAME_KEY, "file:///");
-    FileSystem fs = FileSystem.get(conf);
-    assertThat(fs, instanceOf(LocalFileSystem.class));
-  }
+    @Test
+    public void tetFsGet() throws IOException {
+        conf.set(FS_DEFAULT_NAME_KEY, "file:///");
+        FileSystem fs = FileSystem.get(conf);
+        assertThat(fs, instanceOf(LocalFileSystem.class));
+    }
 
-  @Test
-  public void tetFsGetNoScheme() throws Exception {
-    // Bare host name or address indicates hdfs scheme
-    conf.set(FS_DEFAULT_NAME_KEY, "nn_host");
-    intercept(UnsupportedFileSystemException.class, "hdfs",
-        () -> FileSystem.get(conf));
-  }
+    @Test
+    public void tetFsGetNoScheme() throws Exception {
+        // Bare host name or address indicates hdfs scheme
+        conf.set(FS_DEFAULT_NAME_KEY, "nn_host");
+        intercept(UnsupportedFileSystemException.class, "hdfs", () -> FileSystem.get(conf));
+    }
 
-  @Test
-  public void tetFsGetNoSchemeTrailingSlash() throws Exception {
-    // Bare host name or address with trailing slash is invalid
-    conf.set(FS_DEFAULT_NAME_KEY, "nn_host/");
-    intercept(IllegalArgumentException.class,
-        "No scheme in default FS",
-        () -> FileSystem.get(conf));
-  }
+    @Test
+    public void tetFsGetNoSchemeTrailingSlash() throws Exception {
+        // Bare host name or address with trailing slash is invalid
+        conf.set(FS_DEFAULT_NAME_KEY, "nn_host/");
+        intercept(IllegalArgumentException.class, "No scheme in default FS", () -> FileSystem.get(conf));
+    }
 }

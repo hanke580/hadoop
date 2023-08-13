@@ -26,14 +26,15 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.tools.ECAdmin;
 
 public class CLITestCmdErasureCoding extends CLITestCmd {
-  public CLITestCmdErasureCoding(String str, CLICommandTypes type) {
-    super(str, type);
-  }
 
-  @Override
-  public CommandExecutor getExecutor(String tag, Configuration conf) throws IllegalArgumentException {
-    if (getType() instanceof CLICommandErasureCodingCli)
-      return new ErasureCodingCliCmdExecutor(tag, new ECAdmin(conf));
-    return super.getExecutor(tag, conf);
-  }
+    public CLITestCmdErasureCoding(String str, CLICommandTypes type) {
+        super(str, type);
+    }
+
+    @Override
+    public CommandExecutor getExecutor(String tag, Configuration conf) throws IllegalArgumentException {
+        if (getType() instanceof CLICommandErasureCodingCli)
+            return new ErasureCodingCliCmdExecutor(tag, new ECAdmin(conf));
+        return super.getExecutor(tag, conf);
+    }
 }

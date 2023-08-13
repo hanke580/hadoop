@@ -24,24 +24,24 @@ import org.apache.hadoop.hdfs.client.HdfsClientConfigKeys;
  * End-to-end tests for COMPOSITE_CRC combine mode.
  */
 public class TestFileChecksumCompositeCrc extends TestFileChecksum {
-  @Override
-  protected void customizeConf(Configuration conf) {
-    conf.set(
-        HdfsClientConfigKeys.DFS_CHECKSUM_COMBINE_MODE_KEY, "COMPOSITE_CRC");
-  }
 
-  @Override
-  protected boolean expectComparableStripedAndReplicatedFiles() {
-    return true;
-  }
+    @Override
+    protected void customizeConf(Configuration conf) {
+        conf.set(HdfsClientConfigKeys.DFS_CHECKSUM_COMBINE_MODE_KEY, "COMPOSITE_CRC");
+    }
 
-  @Override
-  protected boolean expectComparableDifferentBlockSizeReplicatedFiles() {
-    return true;
-  }
+    @Override
+    protected boolean expectComparableStripedAndReplicatedFiles() {
+        return true;
+    }
 
-  @Override
-  protected boolean expectSupportForSingleFileMixedBytesPerChecksum() {
-    return true;
-  }
+    @Override
+    protected boolean expectComparableDifferentBlockSizeReplicatedFiles() {
+        return true;
+    }
+
+    @Override
+    protected boolean expectSupportForSingleFileMixedBytesPerChecksum() {
+        return true;
+    }
 }

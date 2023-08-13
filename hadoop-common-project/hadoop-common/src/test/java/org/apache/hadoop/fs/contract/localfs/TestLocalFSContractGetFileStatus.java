@@ -15,19 +15,16 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.hadoop.fs.contract.localfs;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.contract.AbstractContractGetFileStatusTest;
 import org.apache.hadoop.fs.contract.AbstractFSContract;
 
-public class TestLocalFSContractGetFileStatus extends
-    AbstractContractGetFileStatusTest {
+public class TestLocalFSContractGetFileStatus extends AbstractContractGetFileStatusTest {
 
-  @Override
-  protected AbstractFSContract createContract(Configuration conf) {
-    return new LocalFSContract(conf);
-  }
-
+    @Override
+    protected AbstractFSContract createContract(Configuration conf) {
+        return new LocalFSContract(conf);
+    }
 }

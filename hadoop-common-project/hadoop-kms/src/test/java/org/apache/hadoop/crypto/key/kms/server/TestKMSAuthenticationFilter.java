@@ -19,13 +19,10 @@ package org.apache.hadoop.crypto.key.kms.server;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.crypto.key.kms.KMSDelegationToken;
-import org.apache.hadoop.security.token.delegation.web
-    .DelegationTokenAuthenticationHandler;
-import org.apache.hadoop.security.token.delegation.web
-    .PseudoDelegationTokenAuthenticationHandler;
+import org.apache.hadoop.security.token.delegation.web.DelegationTokenAuthenticationHandler;
+import org.apache.hadoop.security.token.delegation.web.PseudoDelegationTokenAuthenticationHandler;
 import org.junit.Test;
 import java.util.Properties;
-
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -33,16 +30,12 @@ import static org.junit.Assert.assertEquals;
  */
 public class TestKMSAuthenticationFilter {
 
-  @Test public void testConfiguration() throws Exception {
-    Configuration conf = new Configuration();
-    conf.set("hadoop.kms.authentication.type", "simple");
-
-    Properties prop = new KMSAuthenticationFilter().getKMSConfiguration(conf);
-    assertEquals(prop.getProperty(KMSAuthenticationFilter.AUTH_TYPE),
-        PseudoDelegationTokenAuthenticationHandler.class.getName());
-    assertEquals(
-        prop.getProperty(DelegationTokenAuthenticationHandler.TOKEN_KIND),
-        KMSDelegationToken.TOKEN_KIND_STR);
-  }
+    @Test
+    public void testConfiguration() throws Exception {
+        Configuration conf = new Configuration();
+        conf.set("hadoop.kms.authentication.type", "simple");
+        Properties prop = new KMSAuthenticationFilter().getKMSConfiguration(conf);
+        assertEquals(prop.getProperty(KMSAuthenticationFilter.AUTH_TYPE), PseudoDelegationTokenAuthenticationHandler.class.getName());
+        assertEquals(prop.getProperty(DelegationTokenAuthenticationHandler.TOKEN_KIND), KMSDelegationToken.TOKEN_KIND_STR);
+    }
 }
-

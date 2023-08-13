@@ -18,12 +18,9 @@
 package org.apache.hadoop.hdfs;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hdfs.server.blockmanagement
-    .DatanodeAdminBackoffMonitor;
-import org.apache.hadoop.hdfs.server.blockmanagement
-    .DatanodeAdminMonitorInterface;
+import org.apache.hadoop.hdfs.server.blockmanagement.DatanodeAdminBackoffMonitor;
+import org.apache.hadoop.hdfs.server.blockmanagement.DatanodeAdminMonitorInterface;
 import org.junit.Test;
-
 import java.io.IOException;
 
 /**
@@ -31,21 +28,19 @@ import java.io.IOException;
  * works by sub-classing the original decommission tests and then setting the
  * config to enable the alternative monitor version.
  */
-
 public class TestDecommissionWithBackoffMonitor extends TestDecommission {
 
-  @Override
-  public void setup() throws IOException {
-    super.setup();
-    Configuration conf = getConf();
-    conf.setClass(DFSConfigKeys.DFS_NAMENODE_DECOMMISSION_MONITOR_CLASS,
-        DatanodeAdminBackoffMonitor.class, DatanodeAdminMonitorInterface.class);
-  }
+    @Override
+    public void setup() throws IOException {
+        super.setup();
+        Configuration conf = getConf();
+        conf.setClass(DFSConfigKeys.DFS_NAMENODE_DECOMMISSION_MONITOR_CLASS, DatanodeAdminBackoffMonitor.class, DatanodeAdminMonitorInterface.class);
+    }
 
-  @Override
-  @Test
-  public void testBlocksPerInterval() {
-    // This test is not valid in the decommission monitor V2 so
-    // effectively commenting it out by overriding and having it do nothing.
-  }
+    @Override
+    @Test
+    public void testBlocksPerInterval() {
+        // This test is not valid in the decommission monitor V2 so
+        // effectively commenting it out by overriding and having it do nothing.
+    }
 }

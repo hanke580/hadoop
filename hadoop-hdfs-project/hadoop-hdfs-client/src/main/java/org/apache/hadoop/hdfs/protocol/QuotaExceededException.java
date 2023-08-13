@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.protocol;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -37,28 +36,35 @@ import org.apache.hadoop.fs.ClusterStorageCapacityExceededException;
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
 public class QuotaExceededException extends ClusterStorageCapacityExceededException {
-  protected static final long serialVersionUID = 1L;
-  protected String pathName=null;
-  protected long quota; // quota
-  protected long count; // actual value
 
-  protected QuotaExceededException() {}
+    protected static final long serialVersionUID = 1L;
 
-  protected QuotaExceededException(String msg) {
-    super(msg);
-  }
+    protected String pathName = null;
 
-  protected QuotaExceededException(long quota, long count) {
-    this.quota = quota;
-    this.count = count;
-  }
+    // quota
+    protected long quota;
 
-  public void setPathName(String path) {
-    this.pathName = path;
-  }
+    // actual value
+    protected long count;
 
-  @Override
-  public String getMessage() {
-    return super.getMessage();
-  }
+    protected QuotaExceededException() {
+    }
+
+    protected QuotaExceededException(String msg) {
+        super(msg);
+    }
+
+    protected QuotaExceededException(long quota, long count) {
+        this.quota = quota;
+        this.count = count;
+    }
+
+    public void setPathName(String path) {
+        this.pathName = path;
+    }
+
+    @Override
+    public String getMessage() {
+        return super.getMessage();
+    }
 }

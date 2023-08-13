@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.ipc;
 
 import java.io.IOException;
@@ -25,9 +24,10 @@ import java.io.IOException;
  * connection cannot be established.
  */
 public class IpcException extends IOException {
-  private static final long serialVersionUID = 1L;
 
-  public IpcException(final String err) {
-    super(err);
-  }
+    private static final long serialVersionUID = 1L;
+
+    public IpcException(final String err) {
+        super(err);
+    }
 }

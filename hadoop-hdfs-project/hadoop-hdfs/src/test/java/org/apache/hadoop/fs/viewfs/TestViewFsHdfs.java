@@ -17,12 +17,9 @@
  */
 package org.apache.hadoop.fs.viewfs;
 
-
 import java.io.IOException;
 import java.net.URISyntaxException;
-
 import javax.security.auth.login.LoginException;
-
 import org.apache.hadoop.fs.FileContext;
 import org.apache.hadoop.fs.FileContextTestHelper;
 import org.apache.hadoop.fs.Path;
@@ -36,54 +33,49 @@ import org.junit.BeforeClass;
 
 public class TestViewFsHdfs extends ViewFsBaseTest {
 
-  private static MiniDFSCluster cluster;
-  private static final HdfsConfiguration CONF = new HdfsConfiguration();
-  private static FileContext fc;
-  
-  @Override
-  protected FileContextTestHelper createFileContextHelper() {
-    return new FileContextTestHelper("/tmp/TestViewFsHdfs");
-  }
+    private static MiniDFSCluster cluster;
 
+    private static final HdfsConfiguration CONF = new HdfsConfiguration();
 
-  @BeforeClass
-  public static void clusterSetupAtBegining() throws IOException,
-      LoginException, URISyntaxException {
-    SupportsBlocks = true;
-    CONF.setBoolean(
-        DFSConfigKeys.DFS_NAMENODE_DELEGATION_TOKEN_ALWAYS_USE_KEY, true);
+    private static FileContext fc;
 
-    cluster = new MiniDFSCluster.Builder(CONF).numDataNodes(2).build();
-    cluster.waitClusterUp();
-    fc = FileContext.getFileContext(cluster.getURI(0), CONF);
-    Path defaultWorkingDirectory = fc.makeQualified( new Path("/user/" + 
-        UserGroupInformation.getCurrentUser().getShortUserName()));
-    fc.mkdir(defaultWorkingDirectory, FileContext.DEFAULT_PERM, true);
-  }
-
-      
-  @AfterClass
-  public static void ClusterShutdownAtEnd() throws Exception {
-    if (cluster != null) {
-      cluster.shutdown();
+    @Override
+    protected FileContextTestHelper createFileContextHelper() {
+        return new FileContextTestHelper("/tmp/TestViewFsHdfs");
     }
-  }
 
-  @Override
-  @Before
-  public void setUp() throws Exception {
-    // create the test root on local_fs
-    fcTarget = fc;
-    super.setUp();
-  }
-  
-  /**
-   * This overrides the default implementation since hdfs does have delegation
-   * tokens.
-   */
-  @Override
-  int getExpectedDelegationTokenCount() {
-    return 8;
-  }
- 
+    @BeforeClass
+    public static void clusterSetupAtBegining() throws IOException, LoginException, URISyntaxException {
+        SupportsBlocks = true;
+        CONF.setBoolean(DFSConfigKeys.DFS_NAMENODE_DELEGATION_TOKEN_ALWAYS_USE_KEY, true);
+        cluster = new MiniDFSCluster.Builder(CONF).numDataNodes(2).build();
+        cluster.waitClusterUp();
+        fc = FileContext.getFileContext(cluster.getURI(0), CONF);
+        Path defaultWorkingDirectory = fc.makeQualified(new Path("/user/" + UserGroupInformation.getCurrentUser().getShortUserName()));
+        fc.mkdir(defaultWorkingDirectory, FileContext.DEFAULT_PERM, true);
+    }
+
+    @AfterClass
+    public static void ClusterShutdownAtEnd() throws Exception {
+        if (cluster != null) {
+            cluster.shutdown();
+        }
+    }
+
+    @Override
+    @Before
+    public void setUp() throws Exception {
+        // create the test root on local_fs
+        fcTarget = fc;
+        super.setUp();
+    }
+
+    /**
+     * This overrides the default implementation since hdfs does have delegation
+     * tokens.
+     */
+    @Override
+    int getExpectedDelegationTokenCount() {
+        return 8;
+    }
 }

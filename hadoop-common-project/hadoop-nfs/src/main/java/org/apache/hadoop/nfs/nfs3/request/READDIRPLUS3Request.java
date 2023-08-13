@@ -18,7 +18,6 @@
 package org.apache.hadoop.nfs.nfs3.request;
 
 import java.io.IOException;
-
 import org.apache.hadoop.nfs.nfs3.FileHandle;
 import org.apache.hadoop.oncrpc.XDR;
 
@@ -26,52 +25,54 @@ import org.apache.hadoop.oncrpc.XDR;
  * READDIRPLUS3 Request
  */
 public class READDIRPLUS3Request extends RequestWithHandle {
-  private final long cookie;
-  private final long cookieVerf;
-  private final int dirCount;
-  private final int maxCount;
 
-  public static READDIRPLUS3Request deserialize(XDR xdr) throws IOException {
-    FileHandle handle = readHandle(xdr);
-    long cookie = xdr.readHyper();
-    long cookieVerf = xdr.readHyper();
-    int dirCount = xdr.readInt();
-    int maxCount = xdr.readInt();
-    return new READDIRPLUS3Request(handle, cookie, cookieVerf, dirCount,
-        maxCount);
-  }
+    private final long cookie;
 
-  public READDIRPLUS3Request(FileHandle handle, long cookie, long cookieVerf,
-      int dirCount, int maxCount) {
-    super(handle);
-    this.cookie = cookie;
-    this.cookieVerf = cookieVerf;
-    this.dirCount = dirCount;
-    this.maxCount = maxCount;
-  }
-  
-  public long getCookie() {
-    return this.cookie;
-  }
+    private final long cookieVerf;
 
-  public long getCookieVerf() {
-    return this.cookieVerf;
-  }
+    private final int dirCount;
 
-  public int getDirCount() {
-    return dirCount;
-  }
+    private final int maxCount;
 
-  public int getMaxCount() {
-    return maxCount;
-  }
+    public static READDIRPLUS3Request deserialize(XDR xdr) throws IOException {
+        FileHandle handle = readHandle(xdr);
+        long cookie = xdr.readHyper();
+        long cookieVerf = xdr.readHyper();
+        int dirCount = xdr.readInt();
+        int maxCount = xdr.readInt();
+        return new READDIRPLUS3Request(handle, cookie, cookieVerf, dirCount, maxCount);
+    }
 
-  @Override
-  public void serialize(XDR xdr) {
-    handle.serialize(xdr);
-    xdr.writeLongAsHyper(cookie);
-    xdr.writeLongAsHyper(cookieVerf);
-    xdr.writeInt(dirCount);
-    xdr.writeInt(maxCount);
-  }
+    public READDIRPLUS3Request(FileHandle handle, long cookie, long cookieVerf, int dirCount, int maxCount) {
+        super(handle);
+        this.cookie = cookie;
+        this.cookieVerf = cookieVerf;
+        this.dirCount = dirCount;
+        this.maxCount = maxCount;
+    }
+
+    public long getCookie() {
+        return this.cookie;
+    }
+
+    public long getCookieVerf() {
+        return this.cookieVerf;
+    }
+
+    public int getDirCount() {
+        return dirCount;
+    }
+
+    public int getMaxCount() {
+        return maxCount;
+    }
+
+    @Override
+    public void serialize(XDR xdr) {
+        handle.serialize(xdr);
+        xdr.writeLongAsHyper(cookie);
+        xdr.writeLongAsHyper(cookieVerf);
+        xdr.writeInt(dirCount);
+        xdr.writeInt(maxCount);
+    }
 }

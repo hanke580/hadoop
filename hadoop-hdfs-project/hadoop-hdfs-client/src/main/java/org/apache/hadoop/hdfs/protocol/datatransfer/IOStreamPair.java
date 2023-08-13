@@ -21,7 +21,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.io.IOUtils;
 
@@ -30,17 +29,19 @@ import org.apache.hadoop.io.IOUtils;
  */
 @InterfaceAudience.Private
 public class IOStreamPair implements Closeable {
-  public final InputStream in;
-  public final OutputStream out;
 
-  public IOStreamPair(InputStream in, OutputStream out) {
-    this.in = in;
-    this.out = out;
-  }
+    public final InputStream in;
 
-  @Override
-  public void close() throws IOException {
-    IOUtils.closeStream(in);
-    IOUtils.closeStream(out);
-  }
+    public final OutputStream out;
+
+    public IOStreamPair(InputStream in, OutputStream out) {
+        this.in = in;
+        this.out = out;
+    }
+
+    @Override
+    public void close() throws IOException {
+        IOUtils.closeStream(in);
+        IOUtils.closeStream(out);
+    }
 }

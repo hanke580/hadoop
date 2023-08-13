@@ -15,17 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.io;
 
 import java.io.DataOutput;
 import java.io.DataInput;
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
-/** A base class for Writables that provides version checking.
+/**
+ * A base class for Writables that provides version checking.
  *
  * <p>This is useful when a class may evolve, so that instances written by the
  * old version of the class may still be processed by the new version.  To
@@ -36,22 +35,24 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceStability.Stable
 public abstract class VersionedWritable implements Writable {
 
-  /** Return the version number of the current implementation. */
-  public abstract byte getVersion();
-    
-  // javadoc from Writable
-  @Override
-  public void write(DataOutput out) throws IOException {
-    out.writeByte(getVersion());                  // store version
-  }
+    /**
+     * Return the version number of the current implementation.
+     */
+    public abstract byte getVersion();
 
-  // javadoc from Writable
-  @Override
-  public void readFields(DataInput in) throws IOException {
-    byte version = in.readByte();                 // read version
-    if (version != getVersion())
-      throw new VersionMismatchException(getVersion(), version);
-  }
+    // javadoc from Writable
+    @Override
+    public void write(DataOutput out) throws IOException {
+        // store version
+        out.writeByte(getVersion());
+    }
 
-    
+    // javadoc from Writable
+    @Override
+    public void readFields(DataInput in) throws IOException {
+        // read version
+        byte version = in.readByte();
+        if (version != getVersion())
+            throw new VersionMismatchException(getVersion(), version);
+    }
 }

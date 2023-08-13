@@ -15,14 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.fs;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URI;
 import java.util.Iterator;
-
 import org.apache.commons.logging.Log;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.viewfs.ConfigUtil;
@@ -30,53 +28,54 @@ import org.junit.Test;
 
 public class TestFilterFs {
 
-  private static final Log LOG = FileSystem.LOG;
+    private static final Log LOG = FileSystem.LOG;
 
-  public static class DontCheck {
-    public void checkScheme(URI uri, String supportedScheme) { }
-    public Iterator<FileStatus> listStatusIterator(Path f) {
-      return null;
-    }
-    public Iterator<LocatedFileStatus> listLocatedStatus(final Path f) {
-      return null;
-    }
-  }
+    public static class DontCheck {
 
-  @Test
-  public void testFilterFileSystem() throws Exception {
-    for (Method m : AbstractFileSystem.class.getDeclaredMethods()) {
-      if (Modifier.isStatic(m.getModifiers()))
-        continue;
-      if (Modifier.isPrivate(m.getModifiers()))
-        continue;
-      if (Modifier.isFinal(m.getModifiers()))
-        continue;
-      
-      try {
-        DontCheck.class.getMethod(m.getName(), m.getParameterTypes());
-        LOG.info("Skipping " + m);
-      } catch (NoSuchMethodException exc) {
-        LOG.info("Testing " + m);
-        try{
-          FilterFs.class.getDeclaredMethod(m.getName(), m.getParameterTypes());
+        public void checkScheme(URI uri, String supportedScheme) {
         }
-        catch(NoSuchMethodException exc2){
-          LOG.error("FilterFileSystem doesn't implement " + m);
-          throw exc2;
-        }
-      }
-    }
-  }
-  
-  // Test that FilterFs will accept an AbstractFileSystem to be filtered which
-  // has an optional authority, such as ViewFs
-  @Test
-  public void testFilteringWithNonrequiredAuthority() throws Exception {
-    Configuration conf = new Configuration();
-    ConfigUtil.addLink(conf, "custom", "/mnt", URI.create("file:///"));
-    FileContext fc =
-        FileContext.getFileContext(URI.create("viewfs://custom/"), conf);
-    new FilterFs(fc.getDefaultFileSystem()) {};
-  }
 
+        public Iterator<FileStatus> listStatusIterator(Path f) {
+            return null;
+        }
+
+        public Iterator<LocatedFileStatus> listLocatedStatus(final Path f) {
+            return null;
+        }
+    }
+
+    @Test
+    public void testFilterFileSystem() throws Exception {
+        for (Method m : AbstractFileSystem.class.getDeclaredMethods()) {
+            if (Modifier.isStatic(m.getModifiers()))
+                continue;
+            if (Modifier.isPrivate(m.getModifiers()))
+                continue;
+            if (Modifier.isFinal(m.getModifiers()))
+                continue;
+            try {
+                DontCheck.class.getMethod(m.getName(), m.getParameterTypes());
+                LOG.info("Skipping " + m);
+            } catch (NoSuchMethodException exc) {
+                LOG.info("Testing " + m);
+                try {
+                    FilterFs.class.getDeclaredMethod(m.getName(), m.getParameterTypes());
+                } catch (NoSuchMethodException exc2) {
+                    LOG.error("FilterFileSystem doesn't implement " + m);
+                    throw exc2;
+                }
+            }
+        }
+    }
+
+    // Test that FilterFs will accept an AbstractFileSystem to be filtered which
+    // has an optional authority, such as ViewFs
+    @Test
+    public void testFilteringWithNonrequiredAuthority() throws Exception {
+        Configuration conf = new Configuration();
+        ConfigUtil.addLink(conf, "custom", "/mnt", URI.create("file:///"));
+        FileContext fc = FileContext.getFileContext(URI.create("viewfs://custom/"), conf);
+        new FilterFs(fc.getDefaultFileSystem()) {
+        };
+    }
 }

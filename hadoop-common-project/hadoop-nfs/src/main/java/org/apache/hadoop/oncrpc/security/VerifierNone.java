@@ -18,24 +18,25 @@
 package org.apache.hadoop.oncrpc.security;
 
 import org.apache.hadoop.oncrpc.XDR;
-
 import com.google.common.base.Preconditions;
 
-/** Verifier used by AUTH_NONE. */
+/**
+ * Verifier used by AUTH_NONE.
+ */
 public class VerifierNone extends Verifier {
 
-  public VerifierNone() {
-    super(AuthFlavor.AUTH_NONE);
-  }
+    public VerifierNone() {
+        super(AuthFlavor.AUTH_NONE);
+    }
 
-  @Override
-  public void read(XDR xdr) {
-    int length = xdr.readInt();
-    Preconditions.checkState(length == 0);
-  }
+    @Override
+    public void read(XDR xdr) {
+        int length = xdr.readInt();
+        Preconditions.checkState(length == 0);
+    }
 
-  @Override
-  public void write(XDR xdr) {
-    xdr.writeInt(0);
-  }
+    @Override
+    public void write(XDR xdr) {
+        xdr.writeInt(0);
+    }
 }

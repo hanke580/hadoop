@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -39,7 +38,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.test;
 
 import java.lang.reflect.Field;
@@ -51,63 +49,58 @@ import java.lang.reflect.Field;
  */
 @Deprecated
 public abstract class Whitebox {
-  /**
-   * Get the field of the target object.
-   * @param target target object
-   * @param field field name
-   * @return the field of the object
-   */
-  public static Object getInternalState(Object target, String field) {
-    Class<?> c = target.getClass();
-    try {
-      Field f = getFieldFromHierarchy(c, field);
-      f.setAccessible(true);
-      return f.get(target);
-    } catch (Exception e) {
-      throw new RuntimeException(
-          "Unable to set internal state on a private field.", e);
-    }
-  }
 
-  /**
-   * Set the field of the target object.
-   * @param target target object
-   * @param field field name
-   * @param value value to set
-   */
-  public static void setInternalState(
-      Object target, String field, Object value) {
-    Class<?> c = target.getClass();
-    try {
-      Field f = getFieldFromHierarchy(c, field);
-      f.setAccessible(true);
-      f.set(target, value);
-    } catch (Exception e) {
-      throw new RuntimeException(
-          "Unable to set internal state on a private field.", e);
+    /**
+     * Get the field of the target object.
+     * @param target target object
+     * @param field field name
+     * @return the field of the object
+     */
+    public static Object getInternalState(Object target, String field) {
+        Class<?> c = target.getClass();
+        try {
+            Field f = getFieldFromHierarchy(c, field);
+            f.setAccessible(true);
+            return f.get(target);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to set internal state on a private field.", e);
+        }
     }
-  }
 
-  private static Field getFieldFromHierarchy(Class<?> clazz, String field) {
-    Field f = getField(clazz, field);
-    while (f == null && clazz != Object.class) {
-      clazz = clazz.getSuperclass();
-      f = getField(clazz, field);
+    /**
+     * Set the field of the target object.
+     * @param target target object
+     * @param field field name
+     * @param value value to set
+     */
+    public static void setInternalState(Object target, String field, Object value) {
+        Class<?> c = target.getClass();
+        try {
+            Field f = getFieldFromHierarchy(c, field);
+            f.setAccessible(true);
+            f.set(target, value);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to set internal state on a private field.", e);
+        }
     }
-    if (f == null) {
-      throw new RuntimeException(
-          "You want me to set value to this field: '" + field +
-          "' on this class: '" + clazz.getSimpleName() +
-          "' but this field is not declared withing hierarchy of this class!");
-    }
-    return f;
-  }
 
-  private static Field getField(Class<?> clazz, String field) {
-    try {
-      return clazz.getDeclaredField(field);
-    } catch (NoSuchFieldException e) {
-      return null;
+    private static Field getFieldFromHierarchy(Class<?> clazz, String field) {
+        Field f = getField(clazz, field);
+        while (f == null && clazz != Object.class) {
+            clazz = clazz.getSuperclass();
+            f = getField(clazz, field);
+        }
+        if (f == null) {
+            throw new RuntimeException("You want me to set value to this field: '" + field + "' on this class: '" + clazz.getSimpleName() + "' but this field is not declared withing hierarchy of this class!");
+        }
+        return f;
     }
-  }
+
+    private static Field getField(Class<?> clazz, String field) {
+        try {
+            return clazz.getDeclaredField(field);
+        } catch (NoSuchFieldException e) {
+            return null;
+        }
+    }
 }

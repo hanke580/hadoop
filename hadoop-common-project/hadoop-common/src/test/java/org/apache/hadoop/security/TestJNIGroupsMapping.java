@@ -16,9 +16,9 @@
  * limitations under the License.
  */
 package org.apache.hadoop.security;
+
 import static org.junit.Assume.assumeTrue;
 import static org.junit.Assert.*;
-
 import java.util.Arrays;
 import java.util.List;
 import org.apache.hadoop.security.GroupMappingServiceProvider;
@@ -29,43 +29,36 @@ import org.apache.hadoop.util.NativeCodeLoader;
 import org.junit.Before;
 import org.junit.Test;
 
-
-
 public class TestJNIGroupsMapping {
-  
-  @Before
-  public void isNativeCodeLoaded() {
-    assumeTrue(NativeCodeLoader.isNativeCodeLoaded());
-  }
-  
-  @Test
-  public void testJNIGroupsMapping() throws Exception {
-    //for the user running the test, check whether the 
-    //ShellBasedUnixGroupsMapping and the JniBasedUnixGroupsMapping
-    //return the same groups
-    String user = UserGroupInformation.getCurrentUser().getShortUserName();
-    testForUser(user);
-    //check for a dummy non-existent user (both the implementations should
-    //return an empty list
-    testForUser("fooBarBaz1234DoesNotExist");
-  }
-  private void testForUser(String user) throws Exception {
-    GroupMappingServiceProvider g = new ShellBasedUnixGroupsMapping();
-    List<String> shellBasedGroups = g.getGroups(user);
-    g = new JniBasedUnixGroupsMapping();
-    List<String> jniBasedGroups = g.getGroups(user);
-    
-    String[] shellBasedGroupsArray = shellBasedGroups.toArray(new String[0]);
-    Arrays.sort(shellBasedGroupsArray);
-    String[] jniBasedGroupsArray = jniBasedGroups.toArray(new String[0]);
-    Arrays.sort(jniBasedGroupsArray);
-    
-    if (!Arrays.equals(shellBasedGroupsArray, jniBasedGroupsArray)) {
-      fail("Groups returned by " + 
-          ShellBasedUnixGroupsMapping.class.getCanonicalName() + 
-          " and " +
-          JniBasedUnixGroupsMapping.class.getCanonicalName() + 
-          " didn't match for " + user);
+
+    @Before
+    public void isNativeCodeLoaded() {
+        assumeTrue(NativeCodeLoader.isNativeCodeLoaded());
     }
-  }
+
+    @Test
+    public void testJNIGroupsMapping() throws Exception {
+        //for the user running the test, check whether the
+        //ShellBasedUnixGroupsMapping and the JniBasedUnixGroupsMapping
+        //return the same groups
+        String user = UserGroupInformation.getCurrentUser().getShortUserName();
+        testForUser(user);
+        //check for a dummy non-existent user (both the implementations should
+        //return an empty list
+        testForUser("fooBarBaz1234DoesNotExist");
+    }
+
+    private void testForUser(String user) throws Exception {
+        GroupMappingServiceProvider g = new ShellBasedUnixGroupsMapping();
+        List<String> shellBasedGroups = g.getGroups(user);
+        g = new JniBasedUnixGroupsMapping();
+        List<String> jniBasedGroups = g.getGroups(user);
+        String[] shellBasedGroupsArray = shellBasedGroups.toArray(new String[0]);
+        Arrays.sort(shellBasedGroupsArray);
+        String[] jniBasedGroupsArray = jniBasedGroups.toArray(new String[0]);
+        Arrays.sort(jniBasedGroupsArray);
+        if (!Arrays.equals(shellBasedGroupsArray, jniBasedGroupsArray)) {
+            fail("Groups returned by " + ShellBasedUnixGroupsMapping.class.getCanonicalName() + " and " + JniBasedUnixGroupsMapping.class.getCanonicalName() + " didn't match for " + user);
+        }
+    }
 }

@@ -15,13 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.fs.contract.rawlocal;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.contract.localfs.LocalFSContract;
-
 import java.io.File;
 import java.io.IOException;
 
@@ -30,23 +28,24 @@ import java.io.IOException;
  * before checksumming is added around it.
  */
 public class RawlocalFSContract extends LocalFSContract {
-  public RawlocalFSContract(Configuration conf) {
-    super(conf);
-  }
 
-  public static final String RAW_CONTRACT_XML = "contract/rawlocal.xml";
+    public RawlocalFSContract(Configuration conf) {
+        super(conf);
+    }
 
-  @Override
-  protected String getContractXml() {
-    return RAW_CONTRACT_XML;
-  }
+    public static final String RAW_CONTRACT_XML = "contract/rawlocal.xml";
 
-  @Override
-  protected FileSystem getLocalFS() throws IOException {
-    return FileSystem.getLocal(getConf()).getRawFileSystem();
-  }
+    @Override
+    protected String getContractXml() {
+        return RAW_CONTRACT_XML;
+    }
 
-  public File getTestDirectory() {
-    return new File(getTestDataDir());
-  }
+    @Override
+    protected FileSystem getLocalFS() throws IOException {
+        return FileSystem.getLocal(getConf()).getRawFileSystem();
+    }
+
+    public File getTestDirectory() {
+        return new File(getTestDataDir());
+    }
 }

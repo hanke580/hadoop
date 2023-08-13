@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.protocol.datatransfer;
 
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.hdfs.protocol.ExtendedBlock;
@@ -45,96 +44,63 @@ import org.apache.htrace.core.Tracer;
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
 public abstract class DataTransferProtoUtil {
-  static BlockConstructionStage fromProto(
-      OpWriteBlockProto.BlockConstructionStage stage) {
-    return BlockConstructionStage.valueOf(stage.name());
-  }
 
-  static OpWriteBlockProto.BlockConstructionStage toProto(
-      BlockConstructionStage stage) {
-    return OpWriteBlockProto.BlockConstructionStage.valueOf(stage.name());
-  }
-
-  public static ChecksumProto toProto(DataChecksum checksum) {
-    ChecksumTypeProto type = PBHelperClient.convert(checksum.getChecksumType());
-    // ChecksumType#valueOf never returns null
-    return ChecksumProto.newBuilder()
-      .setBytesPerChecksum(checksum.getBytesPerChecksum())
-      .setType(type)
-      .build();
-  }
-
-  public static DataChecksum fromProto(ChecksumProto proto) {
-    if (proto == null) {
-      return null;
+    static BlockConstructionStage fromProto(OpWriteBlockProto.BlockConstructionStage stage) {
+        return BlockConstructionStage.valueOf(stage.name());
     }
 
-    int bytesPerChecksum = proto.getBytesPerChecksum();
-    DataChecksum.Type type = PBHelperClient.convert(proto.getType());
-    return DataChecksum.newDataChecksum(type, bytesPerChecksum);
-  }
-
-  static ClientOperationHeaderProto buildClientHeader(ExtendedBlock blk,
-      String client, Token<BlockTokenIdentifier> blockToken) {
-    return ClientOperationHeaderProto.newBuilder()
-      .setBaseHeader(buildBaseHeader(blk, blockToken))
-      .setClientName(client)
-      .build();
-  }
-
-  static BaseHeaderProto buildBaseHeader(ExtendedBlock blk,
-      Token<BlockTokenIdentifier> blockToken) {
-    BaseHeaderProto.Builder builder =  BaseHeaderProto.newBuilder()
-        .setBlock(PBHelperClient.convert(blk))
-        .setToken(PBHelperClient.convert(blockToken));
-    SpanId spanId = Tracer.getCurrentSpanId();
-    if (spanId.isValid()) {
-      builder.setTraceInfo(DataTransferTraceInfoProto.newBuilder()
-          .setTraceId(spanId.getHigh())
-          .setParentId(spanId.getLow()));
+    static OpWriteBlockProto.BlockConstructionStage toProto(BlockConstructionStage stage) {
+        return OpWriteBlockProto.BlockConstructionStage.valueOf(stage.name());
     }
-    return builder.build();
-  }
 
-  public static SpanId fromProto(DataTransferTraceInfoProto proto) {
-    if ((proto != null) && proto.hasTraceId() &&
-          proto.hasParentId()) {
-      return new SpanId(proto.getTraceId(), proto.getParentId());
+    public static ChecksumProto toProto(DataChecksum checksum) {
+        ChecksumTypeProto type = PBHelperClient.convert(checksum.getChecksumType());
+        // ChecksumType#valueOf never returns null
+        return ChecksumProto.newBuilder().setBytesPerChecksum(checksum.getBytesPerChecksum()).setType(type).build();
     }
-    return null;
-  }
 
-  public static void checkBlockOpStatus(
-          BlockOpResponseProto response,
-          String logInfo) throws IOException {
-    checkBlockOpStatus(response, logInfo, false);
-  }
-
-  public static void checkBlockOpStatus(BlockOpResponseProto response,
-      String logInfo, boolean checkBlockPinningErr) throws IOException {
-    if (response.getStatus() != Status.SUCCESS) {
-      if (response.getStatus() == Status.ERROR_ACCESS_TOKEN) {
-        throw new InvalidBlockTokenException(
-          "Got access token error"
-          + ", status message " + response.getMessage()
-          + ", " + logInfo
-        );
-      } else if (checkBlockPinningErr
-          && response.getStatus() == Status.ERROR_BLOCK_PINNED) {
-        throw new BlockPinningException(
-            "Got error"
-            + ", status=" + response.getStatus().name()
-            + ", status message " + response.getMessage()
-            + ", " + logInfo
-          );
-      } else {
-        throw new IOException(
-          "Got error"
-          + ", status=" + response.getStatus().name()
-          + ", status message " + response.getMessage()
-          + ", " + logInfo
-        );
-      }
+    public static DataChecksum fromProto(ChecksumProto proto) {
+        if (proto == null) {
+            return null;
+        }
+        int bytesPerChecksum = proto.getBytesPerChecksum();
+        DataChecksum.Type type = PBHelperClient.convert(proto.getType());
+        return DataChecksum.newDataChecksum(type, bytesPerChecksum);
     }
-  }
+
+    static ClientOperationHeaderProto buildClientHeader(ExtendedBlock blk, String client, Token<BlockTokenIdentifier> blockToken) {
+        return ClientOperationHeaderProto.newBuilder().setBaseHeader(buildBaseHeader(blk, blockToken)).setClientName(client).build();
+    }
+
+    static BaseHeaderProto buildBaseHeader(ExtendedBlock blk, Token<BlockTokenIdentifier> blockToken) {
+        BaseHeaderProto.Builder builder = BaseHeaderProto.newBuilder().setBlock(PBHelperClient.convert(blk)).setToken(PBHelperClient.convert(blockToken));
+        SpanId spanId = Tracer.getCurrentSpanId();
+        if (spanId.isValid()) {
+            builder.setTraceInfo(DataTransferTraceInfoProto.newBuilder().setTraceId(spanId.getHigh()).setParentId(spanId.getLow()));
+        }
+        return builder.build();
+    }
+
+    public static SpanId fromProto(DataTransferTraceInfoProto proto) {
+        if ((proto != null) && proto.hasTraceId() && proto.hasParentId()) {
+            return new SpanId(proto.getTraceId(), proto.getParentId());
+        }
+        return null;
+    }
+
+    public static void checkBlockOpStatus(BlockOpResponseProto response, String logInfo) throws IOException {
+        checkBlockOpStatus(response, logInfo, false);
+    }
+
+    public static void checkBlockOpStatus(BlockOpResponseProto response, String logInfo, boolean checkBlockPinningErr) throws IOException {
+        if (response.getStatus() != Status.SUCCESS) {
+            if (response.getStatus() == Status.ERROR_ACCESS_TOKEN) {
+                throw new InvalidBlockTokenException("Got access token error" + ", status message " + response.getMessage() + ", " + logInfo);
+            } else if (checkBlockPinningErr && response.getStatus() == Status.ERROR_BLOCK_PINNED) {
+                throw new BlockPinningException("Got error" + ", status=" + response.getStatus().name() + ", status message " + response.getMessage() + ", " + logInfo);
+            } else {
+                throw new IOException("Got error" + ", status=" + response.getStatus().name() + ", status message " + response.getMessage() + ", " + logInfo);
+            }
+        }
+    }
 }

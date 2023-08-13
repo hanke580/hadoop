@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.server.federation.router;
 
 import org.apache.hadoop.conf.TestConfigurationFieldsBase;
-
 import java.util.HashSet;
 
 /**
@@ -32,20 +31,18 @@ import java.util.HashSet;
  * for how this class works.
  */
 public class TestRBFConfigFields extends TestConfigurationFieldsBase {
-  @Override
-  public void initializeMemberVariables() {
-    xmlFilename = "hdfs-rbf-default.xml";
-    configurationClasses = new Class[] {RBFConfigKeys.class};
 
-    // Set error modes
-    errorIfMissingConfigProps = true;
-    errorIfMissingXmlProps = true;
-
-    // Initialize used variables
-    configurationPropsToSkipCompare = new HashSet<String>();
-
-    // Allocate
-    xmlPropsToSkipCompare = new HashSet<String>();
-    xmlPrefixToSkipCompare = new HashSet<String>();
-  }
+    @Override
+    public void initializeMemberVariables() {
+        xmlFilename = "hdfs-rbf-default.xml";
+        configurationClasses = new Class[] { RBFConfigKeys.class };
+        // Set error modes
+        errorIfMissingConfigProps = true;
+        errorIfMissingXmlProps = true;
+        // Initialize used variables
+        configurationPropsToSkipCompare = new HashSet<String>();
+        // Allocate
+        xmlPropsToSkipCompare = new HashSet<String>();
+        xmlPrefixToSkipCompare = new HashSet<String>();
+    }
 }

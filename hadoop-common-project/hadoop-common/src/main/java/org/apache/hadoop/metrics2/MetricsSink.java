@@ -15,11 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.metrics2;
 
 import java.io.Closeable;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
@@ -35,14 +33,15 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
 public interface MetricsSink extends MetricsPlugin {
-  /**
-   * Put a metrics record in the sink
-   * @param record  the record to put
-   */
-  void putMetrics(MetricsRecord record);
 
-  /**
-   * Flush any buffered metrics
-   */
-  void flush();
+    /**
+     * Put a metrics record in the sink
+     * @param record  the record to put
+     */
+    void putMetrics(MetricsRecord record);
+
+    /**
+     * Flush any buffered metrics
+     */
+    void flush();
 }

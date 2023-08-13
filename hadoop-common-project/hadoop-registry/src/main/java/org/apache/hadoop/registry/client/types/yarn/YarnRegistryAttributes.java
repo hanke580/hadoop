@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.registry.client.types.yarn;
 
 /**
@@ -23,20 +22,25 @@ package org.apache.hadoop.registry.client.types.yarn;
  */
 public final class YarnRegistryAttributes {
 
-  /**
-   * Hidden constructor.
-   */
-  private YarnRegistryAttributes() {
-  }
+    /**
+     * Hidden constructor.
+     */
+    private YarnRegistryAttributes() {
+    }
 
-  /**
-   * ID. For containers: container ID. For application instances,
-   * application ID.
-   */
-  public static final String YARN_ID = "yarn:id";
-  public static final String YARN_PERSISTENCE = "yarn:persistence";
-  public static final String YARN_PATH = "yarn:path";
-  public static final String YARN_HOSTNAME = "yarn:hostname";
-  public static final String YARN_IP = "yarn:ip";
-  public static final String YARN_COMPONENT = "yarn:component";
+    /**
+     * ID. For containers: container ID. For application instances,
+     * application ID.
+     */
+    public static final String YARN_ID = "yarn:id";
+
+    public static final String YARN_PERSISTENCE = "yarn:persistence";
+
+    public static final String YARN_PATH = "yarn:path";
+
+    public static final String YARN_HOSTNAME = "yarn:hostname";
+
+    public static final String YARN_IP = "yarn:ip";
+
+    public static final String YARN_COMPONENT = "yarn:component";
 }

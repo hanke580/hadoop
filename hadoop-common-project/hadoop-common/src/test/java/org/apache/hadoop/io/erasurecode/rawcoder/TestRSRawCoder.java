@@ -24,10 +24,10 @@ import org.junit.Before;
  */
 public class TestRSRawCoder extends TestRSRawCoderBase {
 
-  @Before
-  public void setup() {
-    this.encoderFactoryClass = RSRawErasureCoderFactory.class;
-    this.decoderFactoryClass = RSRawErasureCoderFactory.class;
-    setAllowDump(false);
-  }
+    @Before
+    public void setup() {
+        this.encoderFactoryClass = RSRawErasureCoderFactory.class;
+        this.decoderFactoryClass = RSRawErasureCoderFactory.class;
+        setAllowDump(false);
+    }
 }

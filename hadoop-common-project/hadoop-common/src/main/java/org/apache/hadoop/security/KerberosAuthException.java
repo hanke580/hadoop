@@ -18,7 +18,6 @@
 package org.apache.hadoop.security;
 
 import static org.apache.hadoop.security.UGIExceptionMessages.*;
-
 import java.io.IOException;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
@@ -32,87 +31,102 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
 public class KerberosAuthException extends IOException {
-  static final long serialVersionUID = 31L;
 
-  private String user;
-  private String principal;
-  private String keytabFile;
-  private String ticketCacheFile;
-  private String initialMessage;
+    static final long serialVersionUID = 31L;
 
-  public KerberosAuthException(String msg) {
-    super(msg);
-  }
+    private String user;
 
-  public KerberosAuthException(Throwable cause) {
-    super(cause);
-  }
+    private String principal;
 
-  public KerberosAuthException(String initialMsg, Throwable cause) {
-    this(cause);
-    initialMessage = initialMsg;
-  }
+    private String keytabFile;
 
-  public void setUser(final String u) {
-    user = u;
-  }
+    private String ticketCacheFile;
 
-  public void setPrincipal(final String p) {
-    principal = p;
-  }
+    private String initialMessage;
 
-  public void setKeytabFile(final String k) {
-    keytabFile = k;
-  }
-
-  public void setTicketCacheFile(final String t) {
-    ticketCacheFile = t;
-  }
-
-  /** @return The initial message, or null if not set. */
-  public String getInitialMessage() {
-    return initialMessage;
-  }
-
-  /** @return The keytab file path, or null if not set. */
-  public String getKeytabFile() {
-    return keytabFile;
-  }
-
-  /** @return The principal, or null if not set. */
-  public String getPrincipal() {
-    return principal;
-  }
-
-  /** @return The ticket cache file path, or null if not set. */
-  public String getTicketCacheFile() {
-    return ticketCacheFile;
-  }
-
-  /** @return The user, or null if not set. */
-  public String getUser() {
-    return user;
-  }
-
-  @Override
-  public String getMessage() {
-    final StringBuilder sb = new StringBuilder();
-    if (initialMessage != null) {
-      sb.append(initialMessage);
+    public KerberosAuthException(String msg) {
+        super(msg);
     }
-    if (user != null) {
-      sb.append(FOR_USER + user);
+
+    public KerberosAuthException(Throwable cause) {
+        super(cause);
     }
-    if (principal != null) {
-      sb.append(FOR_PRINCIPAL + principal);
+
+    public KerberosAuthException(String initialMsg, Throwable cause) {
+        this(cause);
+        initialMessage = initialMsg;
     }
-    if (keytabFile != null) {
-      sb.append(FROM_KEYTAB + keytabFile);
+
+    public void setUser(final String u) {
+        user = u;
     }
-    if (ticketCacheFile != null) {
-      sb.append(USING_TICKET_CACHE_FILE+ ticketCacheFile);
+
+    public void setPrincipal(final String p) {
+        principal = p;
     }
-    sb.append(" " + super.getMessage());
-    return sb.toString();
-  }
+
+    public void setKeytabFile(final String k) {
+        keytabFile = k;
+    }
+
+    public void setTicketCacheFile(final String t) {
+        ticketCacheFile = t;
+    }
+
+    /**
+     * @return The initial message, or null if not set.
+     */
+    public String getInitialMessage() {
+        return initialMessage;
+    }
+
+    /**
+     * @return The keytab file path, or null if not set.
+     */
+    public String getKeytabFile() {
+        return keytabFile;
+    }
+
+    /**
+     * @return The principal, or null if not set.
+     */
+    public String getPrincipal() {
+        return principal;
+    }
+
+    /**
+     * @return The ticket cache file path, or null if not set.
+     */
+    public String getTicketCacheFile() {
+        return ticketCacheFile;
+    }
+
+    /**
+     * @return The user, or null if not set.
+     */
+    public String getUser() {
+        return user;
+    }
+
+    @Override
+    public String getMessage() {
+        final StringBuilder sb = new StringBuilder();
+        if (initialMessage != null) {
+            sb.append(initialMessage);
+        }
+        if (user != null) {
+            sb.append(FOR_USER + user);
+        }
+        if (principal != null) {
+            sb.append(FOR_PRINCIPAL + principal);
+        }
+        if (keytabFile != null) {
+            sb.append(FROM_KEYTAB + keytabFile);
+        }
+        if (ticketCacheFile != null) {
+            sb.append(USING_TICKET_CACHE_FILE + ticketCacheFile);
+        }
+        sb.append(" " + super.getMessage());
+        return sb.toString();
+    }
 }

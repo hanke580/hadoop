@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.protocol;
 
 import org.junit.Test;
-
 import static org.apache.hadoop.hdfs.protocol.SystemErasureCodingPolicies.RS_6_3_POLICY_ID;
 import static org.apache.hadoop.hdfs.protocol.ErasureCodingPolicyState.DISABLED;
 import static org.apache.hadoop.hdfs.protocol.ErasureCodingPolicyState.ENABLED;
@@ -32,41 +31,34 @@ import static org.junit.Assert.fail;
  */
 public class TestErasureCodingPolicyInfo {
 
-  @Test
-  public void testPolicyAndStateCantBeNull() {
-    try {
-      new ErasureCodingPolicyInfo(null);
-      fail("Null policy should fail");
-    } catch (NullPointerException expected) {
+    @Test
+    public void testPolicyAndStateCantBeNull() {
+        try {
+            new ErasureCodingPolicyInfo(null);
+            fail("Null policy should fail");
+        } catch (NullPointerException expected) {
+        }
+        try {
+            new ErasureCodingPolicyInfo(SystemErasureCodingPolicies.getByID(RS_6_3_POLICY_ID), null);
+            fail("Null policy state should fail");
+        } catch (NullPointerException expected) {
+        }
     }
 
-    try {
-      new ErasureCodingPolicyInfo(SystemErasureCodingPolicies
-          .getByID(RS_6_3_POLICY_ID), null);
-      fail("Null policy state should fail");
-    } catch (NullPointerException expected) {
+    @Test
+    public void testStates() {
+        ErasureCodingPolicyInfo info = new ErasureCodingPolicyInfo(SystemErasureCodingPolicies.getByID(RS_6_3_POLICY_ID));
+        info.setState(ENABLED);
+        assertFalse(info.isDisabled());
+        assertTrue(info.isEnabled());
+        assertFalse(info.isRemoved());
+        info.setState(REMOVED);
+        assertFalse(info.isDisabled());
+        assertFalse(info.isEnabled());
+        assertTrue(info.isRemoved());
+        info.setState(DISABLED);
+        assertTrue(info.isDisabled());
+        assertFalse(info.isEnabled());
+        assertFalse(info.isRemoved());
     }
-  }
-
-  @Test
-  public void testStates() {
-    ErasureCodingPolicyInfo info =
-        new ErasureCodingPolicyInfo(SystemErasureCodingPolicies
-          .getByID(RS_6_3_POLICY_ID));
-
-    info.setState(ENABLED);
-    assertFalse(info.isDisabled());
-    assertTrue(info.isEnabled());
-    assertFalse(info.isRemoved());
-
-    info.setState(REMOVED);
-    assertFalse(info.isDisabled());
-    assertFalse(info.isEnabled());
-    assertTrue(info.isRemoved());
-
-    info.setState(DISABLED);
-    assertTrue(info.isDisabled());
-    assertFalse(info.isEnabled());
-    assertFalse(info.isRemoved());
-  }
 }

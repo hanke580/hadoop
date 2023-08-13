@@ -26,13 +26,11 @@ import org.junit.Before;
  */
 public class TestRSRawCoderInteroperable2 extends TestRSRawCoderBase {
 
-  @Before
-  public void setup() {
-    Assume.assumeTrue(ErasureCodeNative.isNativeCodeLoaded());
-
-    this.encoderFactoryClass = NativeRSRawErasureCoderFactory.class;
-    this.decoderFactoryClass = RSRawErasureCoderFactory.class;
-    setAllowDump(true);
-  }
-
+    @Before
+    public void setup() {
+        Assume.assumeTrue(ErasureCodeNative.isNativeCodeLoaded());
+        this.encoderFactoryClass = NativeRSRawErasureCoderFactory.class;
+        this.decoderFactoryClass = RSRawErasureCoderFactory.class;
+        setAllowDump(true);
+    }
 }

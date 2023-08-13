@@ -20,7 +20,6 @@ package org.apache.hadoop.ipc;
 import org.apache.hadoop.ipc.metrics.RetryCacheMetrics;
 import org.apache.hadoop.metrics2.MetricsRecordBuilder;
 import org.junit.Test;
-
 import static org.apache.hadoop.test.MetricsAsserts.assertCounter;
 import static org.apache.hadoop.test.MetricsAsserts.getMetrics;
 import static org.mockito.Mockito.*;
@@ -29,31 +28,27 @@ import static org.mockito.Mockito.*;
  * Tests for {@link RetryCacheMetrics}
  */
 public class TestRetryCacheMetrics {
-  static final String cacheName = "NameNodeRetryCache";
 
-  @Test
-  public void testNames() {
-    RetryCache cache = mock(RetryCache.class);
-    when(cache.getCacheName()).thenReturn(cacheName);
+    static final String cacheName = "NameNodeRetryCache";
 
-    RetryCacheMetrics metrics = RetryCacheMetrics.create(cache);
+    @Test
+    public void testNames() {
+        RetryCache cache = mock(RetryCache.class);
+        when(cache.getCacheName()).thenReturn(cacheName);
+        RetryCacheMetrics metrics = RetryCacheMetrics.create(cache);
+        metrics.incrCacheHit();
+        metrics.incrCacheCleared();
+        metrics.incrCacheCleared();
+        metrics.incrCacheUpdated();
+        metrics.incrCacheUpdated();
+        metrics.incrCacheUpdated();
+        checkMetrics(1, 2, 3);
+    }
 
-    metrics.incrCacheHit();
-
-    metrics.incrCacheCleared();
-    metrics.incrCacheCleared();
-
-    metrics.incrCacheUpdated();
-    metrics.incrCacheUpdated();
-    metrics.incrCacheUpdated();
-
-    checkMetrics(1, 2, 3);
-  }
-
-  private void checkMetrics(long hit, long cleared, long updated) {
-    MetricsRecordBuilder rb = getMetrics("RetryCache." + cacheName);
-    assertCounter("CacheHit", hit, rb);
-    assertCounter("CacheCleared", cleared, rb);
-    assertCounter("CacheUpdated", updated, rb);
-  }
+    private void checkMetrics(long hit, long cleared, long updated) {
+        MetricsRecordBuilder rb = getMetrics("RetryCache." + cacheName);
+        assertCounter("CacheHit", hit, rb);
+        assertCounter("CacheCleared", cleared, rb);
+        assertCounter("CacheUpdated", updated, rb);
+    }
 }

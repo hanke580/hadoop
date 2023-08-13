@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * This package provides the administrative APIs for HDFS.
  */
@@ -25,3 +24,4 @@ package org.apache.hadoop.hdfs.client;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

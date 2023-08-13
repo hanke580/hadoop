@@ -25,11 +25,12 @@ import org.slf4j.event.Level;
  * Test {@link MiniRPCBenchmark}
  */
 public class TestMiniRPCBenchmark {
-  @Test
-  public void testSimple() throws Exception {
-    Configuration conf = new Configuration();
-    conf.set("hadoop.security.authentication", "simple");
-    MiniRPCBenchmark mb = new MiniRPCBenchmark(Level.DEBUG);
-    mb.runMiniBenchmark(conf, 10, null, null);
-  }
+
+    @Test
+    public void testSimple() throws Exception {
+        Configuration conf = new Configuration();
+        conf.set("hadoop.security.authentication", "simple");
+        MiniRPCBenchmark mb = new MiniRPCBenchmark(Level.DEBUG);
+        mb.runMiniBenchmark(conf, 10, null, null);
+    }
 }

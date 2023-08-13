@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * This package provides access to JMX primarily through the
  * {@link org.apache.hadoop.jmx.JMXJsonServlet} class.
@@ -23,3 +22,4 @@
 package org.apache.hadoop.jmx;
 
 import org.apache.hadoop.classification.InterfaceAudience;
+

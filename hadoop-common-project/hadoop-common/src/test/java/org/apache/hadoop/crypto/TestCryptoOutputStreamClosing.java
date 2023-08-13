@@ -18,9 +18,7 @@
 package org.apache.hadoop.crypto;
 
 import java.io.OutputStream;
-
 import org.apache.hadoop.conf.Configuration;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.mockito.Mockito.*;
@@ -29,29 +27,27 @@ import static org.mockito.Mockito.*;
  * To test proper closing of underlying stream of CryptoOutputStream.
  */
 public class TestCryptoOutputStreamClosing {
-  private static CryptoCodec codec;
 
-  @BeforeClass
-  public static void init() throws Exception {
-    codec = CryptoCodec.getInstance(new Configuration());
-  }
+    private static CryptoCodec codec;
 
-  @Test
-  public void testOutputStreamClosing() throws Exception {
-    OutputStream outputStream = mock(OutputStream.class);
-    CryptoOutputStream cos = new CryptoOutputStream(outputStream, codec,
-        new byte[16], new byte[16], 0L, true);
-    cos.close();
-    verify(outputStream).close();
-  }
+    @BeforeClass
+    public static void init() throws Exception {
+        codec = CryptoCodec.getInstance(new Configuration());
+    }
 
-  @Test
-  public void testOutputStreamNotClosing() throws Exception {
-    OutputStream outputStream = mock(OutputStream.class);
-    CryptoOutputStream cos = new CryptoOutputStream(outputStream, codec,
-        new byte[16], new byte[16], 0L, false);
-    cos.close();
-    verify(outputStream, never()).close();
-  }
+    @Test
+    public void testOutputStreamClosing() throws Exception {
+        OutputStream outputStream = mock(OutputStream.class);
+        CryptoOutputStream cos = new CryptoOutputStream(outputStream, codec, new byte[16], new byte[16], 0L, true);
+        cos.close();
+        verify(outputStream).close();
+    }
 
+    @Test
+    public void testOutputStreamNotClosing() throws Exception {
+        OutputStream outputStream = mock(OutputStream.class);
+        CryptoOutputStream cos = new CryptoOutputStream(outputStream, codec, new byte[16], new byte[16], 0L, false);
+        cos.close();
+        verify(outputStream, never()).close();
+    }
 }

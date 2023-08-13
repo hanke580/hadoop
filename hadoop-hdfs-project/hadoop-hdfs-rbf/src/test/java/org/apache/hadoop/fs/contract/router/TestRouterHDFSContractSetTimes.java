@@ -15,7 +15,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.hadoop.fs.contract.router;
 
 import org.apache.hadoop.conf.Configuration;
@@ -23,27 +22,25 @@ import org.apache.hadoop.fs.contract.AbstractContractSetTimesTest;
 import org.apache.hadoop.fs.contract.AbstractFSContract;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-
 import java.io.IOException;
 
 /**
  * Test set times operations on the Router-based FS.
  */
-public class TestRouterHDFSContractSetTimes
-    extends AbstractContractSetTimesTest {
+public class TestRouterHDFSContractSetTimes extends AbstractContractSetTimesTest {
 
-  @BeforeClass
-  public static void createCluster() throws IOException {
-    RouterHDFSContract.createCluster();
-  }
+    @BeforeClass
+    public static void createCluster() throws IOException {
+        RouterHDFSContract.createCluster();
+    }
 
-  @AfterClass
-  public static void teardownCluster() throws IOException {
-    RouterHDFSContract.destroyCluster();
-  }
+    @AfterClass
+    public static void teardownCluster() throws IOException {
+        RouterHDFSContract.destroyCluster();
+    }
 
-  @Override
-  protected AbstractFSContract createContract(Configuration conf) {
-    return new RouterHDFSContract(conf);
-  }
+    @Override
+    protected AbstractFSContract createContract(Configuration conf) {
+        return new RouterHDFSContract(conf);
+    }
 }

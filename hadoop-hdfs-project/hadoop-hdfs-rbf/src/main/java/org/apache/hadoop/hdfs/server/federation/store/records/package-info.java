@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * Contains the abstract definitions of the state store data records. The state
  * store supports multiple multiple data records.
@@ -29,8 +28,8 @@
  */
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
-
 package org.apache.hadoop.hdfs.server.federation.store.records;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

@@ -22,12 +22,12 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceStability.Unstable
 @VisibleForTesting
 public class StringSignerSecretProviderCreator {
-  /**
-   * @return a new StringSignerSecretProvider
-   * @throws Exception
-   */
-  public static StringSignerSecretProvider newStringSignerSecretProvider()
-      throws Exception {
-    return new StringSignerSecretProvider();
-  }
+
+    /**
+     * @return a new StringSignerSecretProvider
+     * @throws Exception
+     */
+    public static StringSignerSecretProvider newStringSignerSecretProvider() throws Exception {
+        return new StringSignerSecretProvider();
+    }
 }

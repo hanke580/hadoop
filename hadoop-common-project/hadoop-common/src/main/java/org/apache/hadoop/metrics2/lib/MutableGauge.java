@@ -15,11 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.metrics2.lib;
 
 import static com.google.common.base.Preconditions.*;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.metrics2.MetricsInfo;
@@ -30,23 +28,24 @@ import org.apache.hadoop.metrics2.MetricsInfo;
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
 public abstract class MutableGauge extends MutableMetric {
-  private final MetricsInfo info;
 
-  protected MutableGauge(MetricsInfo info) {
-    this.info = checkNotNull(info, "metric info");
-  }
+    private final MetricsInfo info;
 
-  protected MetricsInfo info() {
-    return info;
-  }
+    protected MutableGauge(MetricsInfo info) {
+        this.info = checkNotNull(info, "metric info");
+    }
 
-  /**
-   * Increment the value of the metric by 1
-   */
-  public abstract void incr();
+    protected MetricsInfo info() {
+        return info;
+    }
 
-  /**
-   * Decrement the value of the metric by 1
-   */
-  public abstract void decr();
+    /**
+     * Increment the value of the metric by 1
+     */
+    public abstract void incr();
+
+    /**
+     * Decrement the value of the metric by 1
+     */
+    public abstract void decr();
 }

@@ -20,7 +20,6 @@ package org.apache.hadoop.test;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-
 /**
  * Annotation for {@link HTestCase} subclasses to indicate that the test method
  * requires a FileSystemAccess cluster.

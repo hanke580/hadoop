@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.lib.wsrs;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -23,17 +22,17 @@ import org.apache.hadoop.classification.InterfaceAudience;
 @InterfaceAudience.Private
 public abstract class ByteParam extends Param<Byte> {
 
-  public ByteParam(String name, Byte defaultValue) {
-    super(name, defaultValue);
-  }
+    public ByteParam(String name, Byte defaultValue) {
+        super(name, defaultValue);
+    }
 
-  @Override
-  protected Byte parse(String str) throws Exception {
-    return Byte.parseByte(str);
-  }
+    @Override
+    protected Byte parse(String str) throws Exception {
+        return Byte.parseByte(str);
+    }
 
-  @Override
-  protected String getDomain() {
-    return "a byte";
-  }
+    @Override
+    protected String getDomain() {
+        return "a byte";
+    }
 }

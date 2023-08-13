@@ -18,7 +18,6 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import java.io.*;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -28,80 +27,81 @@ import java.nio.file.Paths;
  */
 public class TestFsUrlConnectionPath {
 
-  private static final String CURRENT = Paths.get("").toAbsolutePath()
-      .toString();
-  private static final String ABSOLUTE_PATH = "file:" + CURRENT + "/abs.txt";
-  private static final String RELATIVE_PATH = "file:relative.txt";
-  private static final String ABSOLUTE_PATH_W_SPACE = "file:"
-      + CURRENT + "/abs 1.txt";
-  private static final String RELATIVE_PATH_W_SPACE = "file:relative 1.txt";
-  private static final String ABSOLUTE_PATH_W_ENCODED_SPACE =
-      "file:" + CURRENT + "/abs%201.txt";
-  private static final String RELATIVE_PATH_W_ENCODED_SPACE =
-      "file:relative%201.txt";
-  private static final String DATA = "data";
-  private static final Configuration CONFIGURATION = new Configuration();
+    private static final String CURRENT = Paths.get("").toAbsolutePath().toString();
 
+    private static final String ABSOLUTE_PATH = "file:" + CURRENT + "/abs.txt";
 
-  @BeforeClass
-  public static void initialize() throws IOException{
-    write(ABSOLUTE_PATH.substring(5), DATA);
-    write(RELATIVE_PATH.substring(5), DATA);
-    write(ABSOLUTE_PATH_W_SPACE.substring(5), DATA);
-    write(RELATIVE_PATH_W_SPACE.substring(5), DATA);
-    URL.setURLStreamHandlerFactory(new FsUrlStreamHandlerFactory());
-  }
+    private static final String RELATIVE_PATH = "file:relative.txt";
 
-  @AfterClass
-  public static void cleanup(){
-    delete(ABSOLUTE_PATH.substring(5));
-    delete(RELATIVE_PATH.substring(5));
-    delete(ABSOLUTE_PATH_W_SPACE.substring(5));
-    delete(RELATIVE_PATH_W_SPACE.substring(5));
-  }
+    private static final String ABSOLUTE_PATH_W_SPACE = "file:" + CURRENT + "/abs 1.txt";
 
-  public static void delete(String path){
-    File file = new File(path);
-    file.delete();
-  }
+    private static final String RELATIVE_PATH_W_SPACE = "file:relative 1.txt";
 
-  public static void write(String path, String data) throws IOException{
-    File file = new File(path);
-    file.createNewFile();
-    FileWriter fw = new FileWriter(file);
-    fw.write(data);
-    fw.close();
-  }
+    private static final String ABSOLUTE_PATH_W_ENCODED_SPACE = "file:" + CURRENT + "/abs%201.txt";
 
-  public static int readStream(String path) throws Exception{
-    URL url = new URL(path);
-    InputStream is = url.openStream();
-    return is.available();
-  }
+    private static final String RELATIVE_PATH_W_ENCODED_SPACE = "file:relative%201.txt";
 
+    private static final String DATA = "data";
 
-  @Test
-  public void testAbsolutePath() throws Exception{
-    int length = readStream(ABSOLUTE_PATH);
-    Assert.assertTrue(length > 1);
-  }
+    private static final Configuration CONFIGURATION = new Configuration();
 
-  @Test
-  public void testRelativePath() throws Exception{
-    int length = readStream(RELATIVE_PATH);
-    Assert.assertTrue(length > 1);
-  }
+    @BeforeClass
+    public static void initialize() throws IOException {
+        write(ABSOLUTE_PATH.substring(5), DATA);
+        write(RELATIVE_PATH.substring(5), DATA);
+        write(ABSOLUTE_PATH_W_SPACE.substring(5), DATA);
+        write(RELATIVE_PATH_W_SPACE.substring(5), DATA);
+        URL.setURLStreamHandlerFactory(new FsUrlStreamHandlerFactory());
+    }
 
-  @Test
-  public void testAbsolutePathWithSpace() throws Exception{
-    int length = readStream(ABSOLUTE_PATH_W_ENCODED_SPACE);
-    Assert.assertTrue(length > 1);
-  }
+    @AfterClass
+    public static void cleanup() {
+        delete(ABSOLUTE_PATH.substring(5));
+        delete(RELATIVE_PATH.substring(5));
+        delete(ABSOLUTE_PATH_W_SPACE.substring(5));
+        delete(RELATIVE_PATH_W_SPACE.substring(5));
+    }
 
-  @Test
-  public void testRelativePathWithSpace() throws Exception{
-    int length = readStream(RELATIVE_PATH_W_ENCODED_SPACE);
-    Assert.assertTrue(length > 1);
-  }
+    public static void delete(String path) {
+        File file = new File(path);
+        file.delete();
+    }
 
+    public static void write(String path, String data) throws IOException {
+        File file = new File(path);
+        file.createNewFile();
+        FileWriter fw = new FileWriter(file);
+        fw.write(data);
+        fw.close();
+    }
+
+    public static int readStream(String path) throws Exception {
+        URL url = new URL(path);
+        InputStream is = url.openStream();
+        return is.available();
+    }
+
+    @Test
+    public void testAbsolutePath() throws Exception {
+        int length = readStream(ABSOLUTE_PATH);
+        Assert.assertTrue(length > 1);
+    }
+
+    @Test
+    public void testRelativePath() throws Exception {
+        int length = readStream(RELATIVE_PATH);
+        Assert.assertTrue(length > 1);
+    }
+
+    @Test
+    public void testAbsolutePathWithSpace() throws Exception {
+        int length = readStream(ABSOLUTE_PATH_W_ENCODED_SPACE);
+        Assert.assertTrue(length > 1);
+    }
+
+    @Test
+    public void testRelativePathWithSpace() throws Exception {
+        int length = readStream(RELATIVE_PATH_W_ENCODED_SPACE);
+        Assert.assertTrue(length > 1);
+    }
 }

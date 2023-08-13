@@ -15,7 +15,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.hadoop.service;
 
 import org.apache.hadoop.classification.InterfaceAudience.Public;
@@ -31,97 +30,94 @@ import org.apache.hadoop.util.ExitCodeProvider;
  */
 @Public
 @Evolving
-public class ServiceStateException extends RuntimeException implements
-    ExitCodeProvider {
+public class ServiceStateException extends RuntimeException implements ExitCodeProvider {
 
-  private static final long serialVersionUID = 1110000352259232646L;
+    private static final long serialVersionUID = 1110000352259232646L;
 
-  /**
-   * Exit code.
-   */
-  private int exitCode ;
+    /**
+     * Exit code.
+     */
+    private int exitCode;
 
-  /**
-   * Instantiate
-   * @param message error message
-   */
-  public ServiceStateException(String message) {
-    this(message, null);
-  }
-
-  /**
-   * Instantiate with a message and cause; if the cause has an exit code
-   * then it is used, otherwise the generic
-   * {@link LauncherExitCodes#EXIT_SERVICE_LIFECYCLE_EXCEPTION} exit code
-   * is used.
-   * @param message exception message
-   * @param cause optional inner cause
-   */
-  public ServiceStateException(String message, Throwable cause) {
-    super(message, cause);
-    if(cause instanceof ExitCodeProvider) {
-      this.exitCode = ((ExitCodeProvider) cause).getExitCode();
-    } else {
-      this.exitCode = LauncherExitCodes.EXIT_SERVICE_LIFECYCLE_EXCEPTION;
+    /**
+     * Instantiate
+     * @param message error message
+     */
+    public ServiceStateException(String message) {
+        this(message, null);
     }
-  }
 
-  /**
-   * Instantiate, using the specified exit code as the exit code
-   * of the exception, irrespetive of any exit code supplied by any inner
-   * cause.
-   *
-   * @param exitCode exit code to declare
-   * @param message exception message
-   * @param cause inner cause
-   */
-  public ServiceStateException(int exitCode,
-      String message,
-      Throwable cause) {
-    this(message, cause);
-    this.exitCode =  exitCode;
-  }
-
-  public ServiceStateException(Throwable cause) {
-    super(cause);
-  }
-
-  @Override
-  public int getExitCode() {
-    return exitCode;
-  }
-
-  /**
-   * Convert any exception into a {@link RuntimeException}.
-   * All other exception types are wrapped in a new instance of
-   * {@code ServiceStateException}.
-   * @param fault exception or throwable
-   * @return a {@link RuntimeException} to rethrow
-   */
-  public static RuntimeException convert(Throwable fault) {
-    if (fault instanceof RuntimeException) {
-      return (RuntimeException) fault;
-    } else {
-      return new ServiceStateException(fault);
+    /**
+     * Instantiate with a message and cause; if the cause has an exit code
+     * then it is used, otherwise the generic
+     * {@link LauncherExitCodes#EXIT_SERVICE_LIFECYCLE_EXCEPTION} exit code
+     * is used.
+     * @param message exception message
+     * @param cause optional inner cause
+     */
+    public ServiceStateException(String message, Throwable cause) {
+        super(message, cause);
+        if (cause instanceof ExitCodeProvider) {
+            this.exitCode = ((ExitCodeProvider) cause).getExitCode();
+        } else {
+            this.exitCode = LauncherExitCodes.EXIT_SERVICE_LIFECYCLE_EXCEPTION;
+        }
     }
-  }
 
-  /**
-   * Convert any exception into a {@link RuntimeException}.
-   * If the caught exception is already of that type, it is typecast to a
-   * {@link RuntimeException} and returned.
-   *
-   * All other exception types are wrapped in a new instance of
-   * {@code ServiceStateException}.
-   * @param text text to use if a new exception is created
-   * @param fault exception or throwable
-   * @return a {@link RuntimeException} to rethrow
-   */
-  public static RuntimeException convert(String text, Throwable fault) {
-    if (fault instanceof RuntimeException) {
-      return (RuntimeException) fault;
-    } else {
-      return new ServiceStateException(text, fault);
+    /**
+     * Instantiate, using the specified exit code as the exit code
+     * of the exception, irrespetive of any exit code supplied by any inner
+     * cause.
+     *
+     * @param exitCode exit code to declare
+     * @param message exception message
+     * @param cause inner cause
+     */
+    public ServiceStateException(int exitCode, String message, Throwable cause) {
+        this(message, cause);
+        this.exitCode = exitCode;
     }
-  }
+
+    public ServiceStateException(Throwable cause) {
+        super(cause);
+    }
+
+    @Override
+    public int getExitCode() {
+        return exitCode;
+    }
+
+    /**
+     * Convert any exception into a {@link RuntimeException}.
+     * All other exception types are wrapped in a new instance of
+     * {@code ServiceStateException}.
+     * @param fault exception or throwable
+     * @return a {@link RuntimeException} to rethrow
+     */
+    public static RuntimeException convert(Throwable fault) {
+        if (fault instanceof RuntimeException) {
+            return (RuntimeException) fault;
+        } else {
+            return new ServiceStateException(fault);
+        }
+    }
+
+    /**
+     * Convert any exception into a {@link RuntimeException}.
+     * If the caught exception is already of that type, it is typecast to a
+     * {@link RuntimeException} and returned.
+     *
+     * All other exception types are wrapped in a new instance of
+     * {@code ServiceStateException}.
+     * @param text text to use if a new exception is created
+     * @param fault exception or throwable
+     * @return a {@link RuntimeException} to rethrow
+     */
+    public static RuntimeException convert(String text, Throwable fault) {
+        if (fault instanceof RuntimeException) {
+            return (RuntimeException) fault;
+        } else {
+            return new ServiceStateException(text, fault);
+        }
+    }
 }

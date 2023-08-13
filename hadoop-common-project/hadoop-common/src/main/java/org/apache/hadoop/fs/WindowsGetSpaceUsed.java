@@ -15,35 +15,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.fs;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
-
 import java.io.IOException;
 
 /**
  * Class to tell the size of a path on windows.
  * Rather than shelling out, on windows this uses DUHelper.getFolderUsage
  */
-@InterfaceAudience.LimitedPrivate({"HDFS", "MapReduce"})
+@InterfaceAudience.LimitedPrivate({ "HDFS", "MapReduce" })
 @InterfaceStability.Evolving
 public class WindowsGetSpaceUsed extends CachingGetSpaceUsed {
 
-  public WindowsGetSpaceUsed(CachingGetSpaceUsed.Builder builder)
-      throws IOException {
-    super(builder.getPath(),
-        builder.getInterval(),
-        builder.getJitter(),
-        builder.getInitialUsed());
-  }
+    public WindowsGetSpaceUsed(CachingGetSpaceUsed.Builder builder) throws IOException {
+        super(builder.getPath(), builder.getInterval(), builder.getJitter(), builder.getInitialUsed());
+    }
 
-  /**
-   * Override to hook in DUHelper class.
-   */
-  @Override
-  protected void refresh() {
-    used.set(DUHelper.getFolderUsage(getDirPath()));
-  }
+    /**
+     * Override to hook in DUHelper class.
+     */
+    @Override
+    protected void refresh() {
+        used.set(DUHelper.getFolderUsage(getDirPath()));
+    }
 }

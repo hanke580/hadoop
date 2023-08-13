@@ -30,11 +30,11 @@ import org.apache.hadoop.hdfs.protocol.HdfsConstants;
  * {@link FileSystem#concat(Path, Path[])}.
  */
 public class DFSMultipartUploaderFactory extends MultipartUploaderFactory {
-  protected MultipartUploader createMultipartUploader(FileSystem fs,
-      Configuration conf) {
-    if (fs.getScheme().equals(HdfsConstants.HDFS_URI_SCHEME)) {
-      return new FileSystemMultipartUploader(fs);
+
+    protected MultipartUploader createMultipartUploader(FileSystem fs, Configuration conf) {
+        if (fs.getScheme().equals(HdfsConstants.HDFS_URI_SCHEME)) {
+            return new FileSystemMultipartUploader(fs);
+        }
+        return null;
     }
-    return null;
-  }
 }

@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * Protobuf implementations of FederationProtocolBase request/response objects
  * used by state store APIs. Each state store API is defined in the
@@ -27,3 +26,4 @@ package org.apache.hadoop.hdfs.server.federation.store.protocol.impl.pb;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

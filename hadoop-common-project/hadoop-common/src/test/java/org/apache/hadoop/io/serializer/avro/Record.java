@@ -15,28 +15,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.io.serializer.avro;
 
 public class Record {
-  public int x = 7;
 
-  @Override
-  public int hashCode() {
-    return x;
-  }
+    public int x = 7;
 
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    final Record other = (Record) obj;
-    if (x != other.x)
-      return false;
-    return true;
-  }
+    @Override
+    public int hashCode() {
+        return x;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final Record other = (Record) obj;
+        if (x != other.x)
+            return false;
+        return true;
+    }
 }

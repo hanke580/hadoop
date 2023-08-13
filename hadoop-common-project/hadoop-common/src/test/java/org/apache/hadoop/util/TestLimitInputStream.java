@@ -15,60 +15,53 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.util;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Random;
-
 import org.junit.Test;
-
 import org.apache.hadoop.test.HadoopTestBase;
-
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 public class TestLimitInputStream extends HadoopTestBase {
-  static class RandomInputStream extends InputStream {
-    private Random rn = new Random(0);
 
-    @Override
-    public int read() { return rn.nextInt(); }
-  }
+    static class RandomInputStream extends InputStream {
 
-  @Test
-  public void testRead() throws IOException {
-    try (LimitInputStream limitInputStream =
-      new LimitInputStream(new RandomInputStream(), 0)) {
-      assertEquals("Reading byte after reaching limit should return -1", -1,
-          limitInputStream.read());
-    }
-    try (LimitInputStream limitInputStream =
-      new LimitInputStream(new RandomInputStream(), 4)) {
-      assertEquals("Incorrect byte returned", new Random(0).nextInt(),
-          limitInputStream.read());
-    }
-  }
+        private Random rn = new Random(0);
 
-  @Test(expected = IOException.class)
-  public void testResetWithoutMark() throws IOException {
-    try (LimitInputStream limitInputStream =
-      new LimitInputStream(new RandomInputStream(), 128)) {
-      limitInputStream.reset();
+        @Override
+        public int read() {
+            return rn.nextInt();
+        }
     }
-  }
 
-  @Test
-  public void testReadBytes() throws IOException {
-    try (LimitInputStream limitInputStream =
-      new LimitInputStream(new RandomInputStream(), 128)) {
-      Random r = new Random(0);
-      byte[] data = new byte[4];
-      byte[] expected = { (byte) r.nextInt(), (byte) r.nextInt(),
-                          (byte) r.nextInt(), (byte) r.nextInt() };
-      limitInputStream.read(data, 0, 4);
-      assertArrayEquals("Incorrect bytes returned", expected, data);
+    @Test
+    public void testRead() throws IOException {
+        try (LimitInputStream limitInputStream = new LimitInputStream(new RandomInputStream(), 0)) {
+            assertEquals("Reading byte after reaching limit should return -1", -1, limitInputStream.read());
+        }
+        try (LimitInputStream limitInputStream = new LimitInputStream(new RandomInputStream(), 4)) {
+            assertEquals("Incorrect byte returned", new Random(0).nextInt(), limitInputStream.read());
+        }
     }
-  }
+
+    @Test(expected = IOException.class)
+    public void testResetWithoutMark() throws IOException {
+        try (LimitInputStream limitInputStream = new LimitInputStream(new RandomInputStream(), 128)) {
+            limitInputStream.reset();
+        }
+    }
+
+    @Test
+    public void testReadBytes() throws IOException {
+        try (LimitInputStream limitInputStream = new LimitInputStream(new RandomInputStream(), 128)) {
+            Random r = new Random(0);
+            byte[] data = new byte[4];
+            byte[] expected = { (byte) r.nextInt(), (byte) r.nextInt(), (byte) r.nextInt(), (byte) r.nextInt() };
+            limitInputStream.read(data, 0, 4);
+            assertArrayEquals("Incorrect bytes returned", expected, data);
+        }
+    }
 }

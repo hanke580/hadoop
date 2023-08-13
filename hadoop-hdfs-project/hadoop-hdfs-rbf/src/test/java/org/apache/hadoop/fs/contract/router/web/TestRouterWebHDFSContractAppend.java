@@ -11,7 +11,6 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License. See accompanying LICENSE file.
  */
-
 package org.apache.hadoop.fs.contract.router.web;
 
 import org.apache.hadoop.conf.Configuration;
@@ -19,27 +18,25 @@ import org.apache.hadoop.fs.contract.AbstractContractAppendTest;
 import org.apache.hadoop.fs.contract.AbstractFSContract;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-
 import java.io.IOException;
 
 /**
  * Test append operations on a Router WebHDFS FS.
  */
-public class TestRouterWebHDFSContractAppend
-    extends AbstractContractAppendTest {
+public class TestRouterWebHDFSContractAppend extends AbstractContractAppendTest {
 
-  @BeforeClass
-  public static void createCluster() throws IOException {
-    RouterWebHDFSContract.createCluster();
-  }
+    @BeforeClass
+    public static void createCluster() throws IOException {
+        RouterWebHDFSContract.createCluster();
+    }
 
-  @AfterClass
-  public static void teardownCluster() throws IOException {
-    RouterWebHDFSContract.destroyCluster();
-  }
+    @AfterClass
+    public static void teardownCluster() throws IOException {
+        RouterWebHDFSContract.destroyCluster();
+    }
 
-  @Override
-  protected AbstractFSContract createContract(Configuration conf) {
-    return new RouterWebHDFSContract(conf);
-  }
+    @Override
+    protected AbstractFSContract createContract(Configuration conf) {
+        return new RouterWebHDFSContract(conf);
+    }
 }

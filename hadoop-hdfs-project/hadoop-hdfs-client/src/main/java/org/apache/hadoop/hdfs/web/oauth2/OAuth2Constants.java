@@ -28,19 +28,31 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
 public final class OAuth2Constants {
-  private OAuth2Constants() { /** Private constructor. **/ }
 
-  public static final MediaType URLENCODED
-      = MediaType.parse("application/x-www-form-urlencoded; charset=utf-8");
+    private OAuth2Constants() {
+        /**
+         * Private constructor. *
+         */
+    }
 
-  /* Constants for OAuth protocol */
-  public static final String ACCESS_TOKEN = "access_token";
-  public static final String BEARER = "bearer";
-  public static final String CLIENT_CREDENTIALS = "client_credentials";
-  public static final String CLIENT_ID = "client_id";
-  public static final String CLIENT_SECRET = "client_secret";
-  public static final String EXPIRES_IN = "expires_in";
-  public static final String GRANT_TYPE = "grant_type";
-  public static final String REFRESH_TOKEN = "refresh_token";
-  public static final String TOKEN_TYPE = "token_type";
+    public static final MediaType URLENCODED = MediaType.parse("application/x-www-form-urlencoded; charset=utf-8");
+
+    /* Constants for OAuth protocol */
+    public static final String ACCESS_TOKEN = "access_token";
+
+    public static final String BEARER = "bearer";
+
+    public static final String CLIENT_CREDENTIALS = "client_credentials";
+
+    public static final String CLIENT_ID = "client_id";
+
+    public static final String CLIENT_SECRET = "client_secret";
+
+    public static final String EXPIRES_IN = "expires_in";
+
+    public static final String GRANT_TYPE = "grant_type";
+
+    public static final String REFRESH_TOKEN = "refresh_token";
+
+    public static final String TOKEN_TYPE = "token_type";
 }

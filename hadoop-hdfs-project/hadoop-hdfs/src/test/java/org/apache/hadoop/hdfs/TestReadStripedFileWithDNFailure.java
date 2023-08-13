@@ -26,11 +26,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-
 import static org.apache.hadoop.hdfs.ReadStripedFileWithDecodingHelper.BLOCK_SIZE;
 import static org.apache.hadoop.hdfs.ReadStripedFileWithDecodingHelper.FILE_LENGTHS;
 import static org.apache.hadoop.hdfs.ReadStripedFileWithDecodingHelper.NUM_DATA_UNITS;
@@ -43,65 +41,63 @@ import static org.apache.hadoop.hdfs.ReadStripedFileWithDecodingHelper.tearDownC
  */
 @RunWith(Parameterized.class)
 public class TestReadStripedFileWithDNFailure {
-  static final Logger LOG =
-      LoggerFactory.getLogger(TestReadStripedFileWithDNFailure.class);
 
-  private static MiniDFSCluster cluster;
-  private static DistributedFileSystem dfs;
+    static final Logger LOG = LoggerFactory.getLogger(TestReadStripedFileWithDNFailure.class);
 
-  @Rule
-  public Timeout globalTimeout = new Timeout(300000);
+    private static MiniDFSCluster cluster;
 
-  @BeforeClass
-  public static void setup() throws IOException {
-    cluster = initializeCluster();
-    dfs = cluster.getFileSystem();
-  }
+    private static DistributedFileSystem dfs;
 
-  @AfterClass
-  public static void tearDown() throws IOException {
-    tearDownCluster(cluster);
-  }
+    @Rule
+    public Timeout globalTimeout = new Timeout(300000);
 
-  @Parameterized.Parameters
-  public static Collection<Object[]> getParameters() {
-    ArrayList<Object[]> params = new ArrayList<>();
-    for (int fileLength : FILE_LENGTHS) {
-      for (int i = 0; i < NUM_PARITY_UNITS; i++) {
-        params.add(new Object[] {fileLength, i+1});
-      }
+    @BeforeClass
+    public static void setup() throws IOException {
+        cluster = initializeCluster();
+        dfs = cluster.getFileSystem();
     }
-    return params;
-  }
 
-  private int fileLength;
-  private int dnFailureNum;
-
-  public TestReadStripedFileWithDNFailure(int fileLength, int dnFailureNum) {
-    this.fileLength = fileLength;
-    this.dnFailureNum = dnFailureNum;
-  }
-
-  /**
-   * Shutdown tolerable number of Datanode before reading.
-   * Verify the decoding works correctly.
-   */
-  @Test
-  public void testReadWithDNFailure() throws Exception {
-    try {
-      // setup a new cluster with no dead datanode
-      setup();
-      ReadStripedFileWithDecodingHelper.testReadWithDNFailure(cluster,
-          dfs, fileLength, dnFailureNum);
-    } catch (IOException ioe) {
-      String fileType = fileLength < (BLOCK_SIZE * NUM_DATA_UNITS) ?
-          "smallFile" : "largeFile";
-      LOG.error("Failed to read file with DN failure:"
-          + " fileType = " + fileType
-          + ", dnFailureNum = " + dnFailureNum);
-    } finally {
-      // tear down the cluster
-      tearDown();
+    @AfterClass
+    public static void tearDown() throws IOException {
+        tearDownCluster(cluster);
     }
-  }
+
+    @Parameterized.Parameters
+    public static Collection<Object[]> getParameters() {
+        ArrayList<Object[]> params = new ArrayList<>();
+        for (int fileLength : FILE_LENGTHS) {
+            for (int i = 0; i < NUM_PARITY_UNITS; i++) {
+                params.add(new Object[] { fileLength, i + 1 });
+            }
+        }
+        return params;
+    }
+
+    private int fileLength;
+
+    private int dnFailureNum;
+
+    public TestReadStripedFileWithDNFailure(int fileLength, int dnFailureNum) {
+        this.fileLength = fileLength;
+        this.dnFailureNum = dnFailureNum;
+    }
+
+    /**
+     * Shutdown tolerable number of Datanode before reading.
+     * Verify the decoding works correctly.
+     */
+    @Test
+    public void testReadWithDNFailure() throws Exception {
+        try {
+            // setup a new cluster with no dead datanode
+            setup();
+            ReadStripedFileWithDecodingHelper.testReadWithDNFailure(cluster, dfs, fileLength, dnFailureNum);
+        } catch (IOException ioe) {
+            String fileType = fileLength < (BLOCK_SIZE * NUM_DATA_UNITS) ? "smallFile" : "largeFile";
+            LOG.error("Failed to read file with DN failure:" + " fileType = " + fileType + ", dnFailureNum = " + dnFailureNum);
+        } finally {
+            // tear down the cluster
+            tearDown();
+        }
+    }
 }

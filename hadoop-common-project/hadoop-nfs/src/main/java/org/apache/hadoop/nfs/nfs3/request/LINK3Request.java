@@ -19,7 +19,6 @@ package org.apache.hadoop.nfs.nfs3.request;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-
 import org.apache.hadoop.nfs.nfs3.FileHandle;
 import org.apache.hadoop.oncrpc.XDR;
 
@@ -27,37 +26,37 @@ import org.apache.hadoop.oncrpc.XDR;
  * LINK3 Request
  */
 public class LINK3Request extends RequestWithHandle {
-  private final FileHandle fromDirHandle;
-  private final String fromName;
 
-  public LINK3Request(FileHandle handle, FileHandle fromDirHandle,
-      String fromName) {
-    super(handle);
-    this.fromDirHandle = fromDirHandle;
-    this.fromName = fromName;
-  }
+    private final FileHandle fromDirHandle;
 
-  public static LINK3Request deserialize(XDR xdr) throws IOException {
-    FileHandle handle = readHandle(xdr);
-    FileHandle fromDirHandle = readHandle(xdr);
-    String fromName = xdr.readString();
-    return new LINK3Request(handle, fromDirHandle, fromName);
-  }
+    private final String fromName;
 
-  public FileHandle getFromDirHandle() {
-    return fromDirHandle;
-  }
+    public LINK3Request(FileHandle handle, FileHandle fromDirHandle, String fromName) {
+        super(handle);
+        this.fromDirHandle = fromDirHandle;
+        this.fromName = fromName;
+    }
 
-  public String getFromName() {
-    return fromName;
-  }
+    public static LINK3Request deserialize(XDR xdr) throws IOException {
+        FileHandle handle = readHandle(xdr);
+        FileHandle fromDirHandle = readHandle(xdr);
+        String fromName = xdr.readString();
+        return new LINK3Request(handle, fromDirHandle, fromName);
+    }
 
-  @Override
-  public void serialize(XDR xdr) {
-    handle.serialize(xdr);
-    fromDirHandle.serialize(xdr);
-    xdr.writeInt(fromName.length());
-    xdr.writeFixedOpaque(fromName.getBytes(StandardCharsets.UTF_8),
-        fromName.length());
-  }
+    public FileHandle getFromDirHandle() {
+        return fromDirHandle;
+    }
+
+    public String getFromName() {
+        return fromName;
+    }
+
+    @Override
+    public void serialize(XDR xdr) {
+        handle.serialize(xdr);
+        fromDirHandle.serialize(xdr);
+        xdr.writeInt(fromName.length());
+        xdr.writeFixedOpaque(fromName.getBytes(StandardCharsets.UTF_8), fromName.length());
+    }
 }

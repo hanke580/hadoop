@@ -18,7 +18,6 @@
 package org.apache.hadoop.fs;
 
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
@@ -33,14 +32,14 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Public
 @InterfaceStability.Stable
 public class InvalidPathHandleException extends IOException {
-  private static final long serialVersionUID = 0xcd8ac329L;
 
-  public InvalidPathHandleException(String str) {
-    super(str);
-  }
+    private static final long serialVersionUID = 0xcd8ac329L;
 
-  public InvalidPathHandleException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    public InvalidPathHandleException(String str) {
+        super(str);
+    }
 
+    public InvalidPathHandleException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

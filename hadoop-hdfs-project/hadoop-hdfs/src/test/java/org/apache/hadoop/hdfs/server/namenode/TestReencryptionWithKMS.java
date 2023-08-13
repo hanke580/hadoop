@@ -27,70 +27,68 @@ import org.apache.hadoop.fs.Path;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.Writer;
 import java.util.UUID;
-
 import static org.junit.Assert.assertTrue;
 
 /**
  * Test class for re-encryption with minikms.
  */
-public class TestReencryptionWithKMS extends TestReencryption{
+public class TestReencryptionWithKMS extends TestReencryption {
 
-  private MiniKMS miniKMS;
-  private String kmsDir;
+    private MiniKMS miniKMS;
 
-  @Override
-  protected String getKeyProviderURI() {
-    return KMSClientProvider.SCHEME_NAME + "://" +
-        miniKMS.getKMSUrl().toExternalForm().replace("://", "@");
-  }
+    private String kmsDir;
 
-  @Before
-  public void setup() throws Exception {
-    kmsDir = "target/test-classes/" + UUID.randomUUID().toString();
-    final File dir = new File(kmsDir);
-    assertTrue(dir.mkdirs());
-    MiniKMS.Builder miniKMSBuilder = new MiniKMS.Builder();
-    miniKMS = miniKMSBuilder.setKmsConfDir(dir).build();
-    miniKMS.start();
-    super.setup();
-  }
-
-  @After
-  public void teardown() {
-    super.teardown();
-    if (miniKMS != null) {
-      miniKMS.stop();
+    @Override
+    protected String getKeyProviderURI() {
+        return KMSClientProvider.SCHEME_NAME + "://" + miniKMS.getKMSUrl().toExternalForm().replace("://", "@");
     }
-  }
 
-  @Override
-  protected void setProvider() {
-  }
-
-  @Test
-  public void testReencryptionKMSACLs() throws Exception {
-    final Path aclPath = new Path(kmsDir, KMSConfiguration.KMS_ACLS_XML);
-    final Configuration acl = new Configuration(false);
-    acl.addResource(aclPath);
-    // should not require any of the get ACLs.
-    acl.set(KMSACLs.Type.GET.getBlacklistConfigKey(), "*");
-    acl.set(KMSACLs.Type.GET_KEYS.getBlacklistConfigKey(), "*");
-    final File kmsAcl = new File(aclPath.toString());
-    assertTrue(kmsAcl.exists());
-    try (Writer writer = new FileWriter(kmsAcl)) {
-      acl.writeXml(writer);
+    @Before
+    public void setup() throws Exception {
+        kmsDir = "target/test-classes/" + UUID.randomUUID().toString();
+        final File dir = new File(kmsDir);
+        assertTrue(dir.mkdirs());
+        MiniKMS.Builder miniKMSBuilder = new MiniKMS.Builder();
+        miniKMS = miniKMSBuilder.setKmsConfDir(dir).build();
+        miniKMS.start();
+        super.setup();
     }
-    KMSWebApp.getACLs().run();
-    testReencryptionBasic();
-  }
 
-  @Override
-  protected void rollKey(final String keyName) throws Exception {
-    dfsAdmin.getKeyProvider().rollNewVersion(keyName);
-  }
+    @After
+    public void teardown() {
+        super.teardown();
+        if (miniKMS != null) {
+            miniKMS.stop();
+        }
+    }
+
+    @Override
+    protected void setProvider() {
+    }
+
+    @Test
+    public void testReencryptionKMSACLs() throws Exception {
+        final Path aclPath = new Path(kmsDir, KMSConfiguration.KMS_ACLS_XML);
+        final Configuration acl = new Configuration(false);
+        acl.addResource(aclPath);
+        // should not require any of the get ACLs.
+        acl.set(KMSACLs.Type.GET.getBlacklistConfigKey(), "*");
+        acl.set(KMSACLs.Type.GET_KEYS.getBlacklistConfigKey(), "*");
+        final File kmsAcl = new File(aclPath.toString());
+        assertTrue(kmsAcl.exists());
+        try (Writer writer = new FileWriter(kmsAcl)) {
+            acl.writeXml(writer);
+        }
+        KMSWebApp.getACLs().run();
+        testReencryptionBasic();
+    }
+
+    @Override
+    protected void rollKey(final String keyName) throws Exception {
+        dfsAdmin.getKeyProvider().rollNewVersion(keyName);
+    }
 }

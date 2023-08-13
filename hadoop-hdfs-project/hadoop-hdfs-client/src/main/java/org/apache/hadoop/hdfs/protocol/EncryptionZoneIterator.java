@@ -15,11 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.protocol;
 
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.fs.BatchedRemoteIterator;
@@ -32,28 +30,27 @@ import org.apache.htrace.core.Tracer;
  */
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
-public class EncryptionZoneIterator
-    extends BatchedRemoteIterator<Long, EncryptionZone> {
+public class EncryptionZoneIterator extends BatchedRemoteIterator<Long, EncryptionZone> {
 
-  private final ClientProtocol namenode;
-  private final Tracer tracer;
+    private final ClientProtocol namenode;
 
-  public EncryptionZoneIterator(ClientProtocol namenode, Tracer tracer) {
-    super((long) 0);
-    this.namenode = namenode;
-    this.tracer = tracer;
-  }
+    private final Tracer tracer;
 
-  @Override
-  public BatchedEntries<EncryptionZone> makeRequest(Long prevId)
-      throws IOException {
-    try (TraceScope ignored = tracer.newScope("listEncryptionZones")) {
-      return namenode.listEncryptionZones(prevId);
+    public EncryptionZoneIterator(ClientProtocol namenode, Tracer tracer) {
+        super((long) 0);
+        this.namenode = namenode;
+        this.tracer = tracer;
     }
-  }
 
-  @Override
-  public Long elementToPrevKey(EncryptionZone entry) {
-    return entry.getId();
-  }
+    @Override
+    public BatchedEntries<EncryptionZone> makeRequest(Long prevId) throws IOException {
+        try (TraceScope ignored = tracer.newScope("listEncryptionZones")) {
+            return namenode.listEncryptionZones(prevId);
+        }
+    }
+
+    @Override
+    public Long elementToPrevKey(EncryptionZone entry) {
+        return entry.getId();
+    }
 }

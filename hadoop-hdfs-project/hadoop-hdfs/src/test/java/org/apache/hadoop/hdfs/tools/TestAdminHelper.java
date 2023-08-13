@@ -25,26 +25,15 @@ import org.junit.Test;
  */
 public class TestAdminHelper {
 
-  @Test
-  public void prettifyExceptionWithNpe() {
-    String pretty = AdminHelper.prettifyException(new NullPointerException());
-    Assert.assertTrue(
-        "Prettified exception message doesn't contain the required exception "
-            + "message",
-        pretty.startsWith("NullPointerException at org.apache.hadoop.hdfs.tools"
-            + ".TestAdminHelper.prettifyExceptionWithNpe"));
-  }
+    @Test
+    public void prettifyExceptionWithNpe() {
+        String pretty = AdminHelper.prettifyException(new NullPointerException());
+        Assert.assertTrue("Prettified exception message doesn't contain the required exception " + "message", pretty.startsWith("NullPointerException at org.apache.hadoop.hdfs.tools" + ".TestAdminHelper.prettifyExceptionWithNpe"));
+    }
 
-  @Test
-  public void prettifyException() {
-
-    String pretty = AdminHelper.prettifyException(
-        new IllegalArgumentException("Something is wrong",
-            new IllegalArgumentException("Something is illegal")));
-
-    Assert.assertEquals(
-        "IllegalArgumentException: Something is wrong",
-        pretty);
-
-  }
+    @Test
+    public void prettifyException() {
+        String pretty = AdminHelper.prettifyException(new IllegalArgumentException("Something is wrong", new IllegalArgumentException("Something is illegal")));
+        Assert.assertEquals("IllegalArgumentException: Something is wrong", pretty);
+    }
 }

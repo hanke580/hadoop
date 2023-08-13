@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-
 import com.google.common.base.Preconditions;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.fs.StorageType;
@@ -29,7 +28,6 @@ import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.BlockType;
 import org.apache.hadoop.hdfs.server.common.HdfsServerConstants.BlockUCState;
 import org.apache.hadoop.util.LightWeightGSet;
-
 import static org.apache.hadoop.hdfs.server.namenode.INodeId.INVALID_INODE_ID;
 
 /**
@@ -39,300 +37,294 @@ import static org.apache.hadoop.hdfs.server.namenode.INodeId.INVALID_INODE_ID;
  * block group, are stored.
  */
 @InterfaceAudience.Private
-public abstract class BlockInfo extends Block
-    implements LightWeightGSet.LinkedElement {
+public abstract class BlockInfo extends Block implements LightWeightGSet.LinkedElement {
 
-  public static final BlockInfo[] EMPTY_ARRAY = {};
+    public static final BlockInfo[] EMPTY_ARRAY = {};
 
-  /**
-   * Replication factor.
-   */
-  private short replication;
+    /**
+     * Replication factor.
+     */
+    private short replication;
 
-  /**
-   * Block collection ID.
-   */
-  private volatile long bcId;
+    /**
+     * Block collection ID.
+     */
+    private volatile long bcId;
 
-  /** For implementing {@link LightWeightGSet.LinkedElement} interface. */
-  private LightWeightGSet.LinkedElement nextLinkedElement;
+    /**
+     * For implementing {@link LightWeightGSet.LinkedElement} interface.
+     */
+    private LightWeightGSet.LinkedElement nextLinkedElement;
 
+    // Storages this block is replicated on
+    protected DatanodeStorageInfo[] storages;
 
-  // Storages this block is replicated on
-  protected DatanodeStorageInfo[] storages;
+    private BlockUnderConstructionFeature uc;
 
-  private BlockUnderConstructionFeature uc;
+    /**
+     * Construct an entry for blocksmap
+     * @param size the block's replication factor, or the total number of blocks
+     *             in the block group
+     */
+    public BlockInfo(short size) {
+        this.storages = new DatanodeStorageInfo[size];
+        this.bcId = INVALID_INODE_ID;
+        this.replication = isStriped() ? 0 : size;
+    }
 
-  /**
-   * Construct an entry for blocksmap
-   * @param size the block's replication factor, or the total number of blocks
-   *             in the block group
-   */
-  public BlockInfo(short size) {
-    this.storages = new DatanodeStorageInfo[size];
-    this.bcId = INVALID_INODE_ID;
-    this.replication = isStriped() ? 0 : size;
-  }
+    public BlockInfo(Block blk, short size) {
+        super(blk);
+        this.storages = new DatanodeStorageInfo[size];
+        this.bcId = INVALID_INODE_ID;
+        this.replication = isStriped() ? 0 : size;
+    }
 
-  public BlockInfo(Block blk, short size) {
-    super(blk);
-    this.storages = new DatanodeStorageInfo[size];
-    this.bcId = INVALID_INODE_ID;
-    this.replication = isStriped() ? 0 : size;
-  }
+    public short getReplication() {
+        return replication;
+    }
 
-  public short getReplication() {
-    return replication;
-  }
+    public void setReplication(short repl) {
+        this.replication = repl;
+    }
 
-  public void setReplication(short repl) {
-    this.replication = repl;
-  }
+    public long getBlockCollectionId() {
+        return bcId;
+    }
 
-  public long getBlockCollectionId() {
-    return bcId;
-  }
+    public void setBlockCollectionId(long id) {
+        this.bcId = id;
+    }
 
-  public void setBlockCollectionId(long id) {
-    this.bcId = id;
-  }
+    public void delete() {
+        setBlockCollectionId(INVALID_INODE_ID);
+    }
 
-  public void delete() {
-    setBlockCollectionId(INVALID_INODE_ID);
-  }
+    public boolean isDeleted() {
+        return bcId == INVALID_INODE_ID;
+    }
 
-  public boolean isDeleted() {
-    return bcId == INVALID_INODE_ID;
-  }
+    public Iterator<DatanodeStorageInfo> getStorageInfos() {
+        return new Iterator<DatanodeStorageInfo>() {
 
-  public Iterator<DatanodeStorageInfo> getStorageInfos() {
-    return new Iterator<DatanodeStorageInfo>() {
+            private int index = 0;
 
-      private int index = 0;
+            @Override
+            public boolean hasNext() {
+                while (index < storages.length && storages[index] == null) {
+                    index++;
+                }
+                return index < storages.length;
+            }
 
-      @Override
-      public boolean hasNext() {
-        while (index < storages.length && storages[index] == null) {
-          index++;
+            @Override
+            public DatanodeStorageInfo next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+                return storages[index++];
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException("Sorry. can't remove.");
+            }
+        };
+    }
+
+    public DatanodeDescriptor getDatanode(int index) {
+        DatanodeStorageInfo storage = getStorageInfo(index);
+        return storage == null ? null : storage.getDatanodeDescriptor();
+    }
+
+    DatanodeStorageInfo getStorageInfo(int index) {
+        assert this.storages != null : "BlockInfo is not initialized";
+        return storages[index];
+    }
+
+    void setStorageInfo(int index, DatanodeStorageInfo storage) {
+        assert this.storages != null : "BlockInfo is not initialized";
+        this.storages[index] = storage;
+    }
+
+    public int getCapacity() {
+        assert this.storages != null : "BlockInfo is not initialized";
+        return storages.length;
+    }
+
+    /**
+     * Count the number of data-nodes the block currently belongs to (i.e., NN
+     * has received block reports from the DN).
+     */
+    public abstract int numNodes();
+
+    /**
+     * Add a {@link DatanodeStorageInfo} location for a block
+     * @param storage The storage to add
+     * @param reportedBlock The block reported from the datanode. This is only
+     *                      used by erasure coded blocks, this block's id contains
+     *                      information indicating the index of the block in the
+     *                      corresponding block group.
+     */
+    abstract boolean addStorage(DatanodeStorageInfo storage, Block reportedBlock);
+
+    /**
+     * Remove {@link DatanodeStorageInfo} location for a block
+     */
+    abstract boolean removeStorage(DatanodeStorageInfo storage);
+
+    public abstract boolean isStriped();
+
+    public abstract BlockType getBlockType();
+
+    /**
+     * @return true if there is no datanode storage associated with the block
+     */
+    abstract boolean hasNoStorage();
+
+    /**
+     * Checks whether this block has a Provided replica.
+     * @return true if this block has a replica on Provided storage.
+     */
+    abstract boolean isProvided();
+
+    /**
+     * Find specified DatanodeStorageInfo.
+     * @return DatanodeStorageInfo or null if not found.
+     */
+    DatanodeStorageInfo findStorageInfo(DatanodeDescriptor dn) {
+        int len = getCapacity();
+        DatanodeStorageInfo providedStorageInfo = null;
+        for (int idx = 0; idx < len; idx++) {
+            DatanodeStorageInfo cur = getStorageInfo(idx);
+            if (cur != null) {
+                if (cur.getStorageType() == StorageType.PROVIDED) {
+                    // if block resides on provided storage, only match the storage ids
+                    if (dn.getStorageInfo(cur.getStorageID()) != null) {
+                        // do not return here as we have to check the other
+                        // DatanodeStorageInfos for this block which could be local
+                        providedStorageInfo = cur;
+                    }
+                } else if (cur.getDatanodeDescriptor() == dn) {
+                    return cur;
+                }
+            }
         }
-        return index < storages.length;
-      }
+        return providedStorageInfo;
+    }
 
-      @Override
-      public DatanodeStorageInfo next() {
-        if (!hasNext()) {
-          throw new NoSuchElementException();
+    /**
+     * Find specified DatanodeStorageInfo.
+     * @return index or -1 if not found.
+     */
+    int findStorageInfo(DatanodeStorageInfo storageInfo) {
+        int len = getCapacity();
+        for (int idx = 0; idx < len; idx++) {
+            DatanodeStorageInfo cur = getStorageInfo(idx);
+            if (cur == storageInfo) {
+                return idx;
+            }
         }
-        return storages[index++];
-      }
+        return -1;
+    }
 
-      @Override
-      public void remove() {
-        throw new UnsupportedOperationException("Sorry. can't remove.");
-      }
-    };
-  }
+    @Override
+    public int hashCode() {
+        // Super implementation is sufficient
+        return super.hashCode();
+    }
 
-  public DatanodeDescriptor getDatanode(int index) {
-    DatanodeStorageInfo storage = getStorageInfo(index);
-    return storage == null ? null : storage.getDatanodeDescriptor();
-  }
+    @Override
+    public boolean equals(Object obj) {
+        // Sufficient to rely on super's implementation
+        return (this == obj) || super.equals(obj);
+    }
 
-  DatanodeStorageInfo getStorageInfo(int index) {
-    assert this.storages != null : "BlockInfo is not initialized";
-    return storages[index];
-  }
+    @Override
+    public LightWeightGSet.LinkedElement getNext() {
+        return nextLinkedElement;
+    }
 
-  void setStorageInfo(int index, DatanodeStorageInfo storage) {
-    assert this.storages != null : "BlockInfo is not initialized";
-    this.storages[index] = storage;
-  }
+    @Override
+    public void setNext(LightWeightGSet.LinkedElement next) {
+        this.nextLinkedElement = next;
+    }
 
-  public int getCapacity() {
-    assert this.storages != null : "BlockInfo is not initialized";
-    return storages.length;
-  }
+    /* UnderConstruction Feature related */
+    public BlockUnderConstructionFeature getUnderConstructionFeature() {
+        return uc;
+    }
 
-  /**
-   * Count the number of data-nodes the block currently belongs to (i.e., NN
-   * has received block reports from the DN).
-   */
-  public abstract int numNodes();
+    public BlockUCState getBlockUCState() {
+        return uc == null ? BlockUCState.COMPLETE : uc.getBlockUCState();
+    }
 
-  /**
-   * Add a {@link DatanodeStorageInfo} location for a block
-   * @param storage The storage to add
-   * @param reportedBlock The block reported from the datanode. This is only
-   *                      used by erasure coded blocks, this block's id contains
-   *                      information indicating the index of the block in the
-   *                      corresponding block group.
-   */
-  abstract boolean addStorage(DatanodeStorageInfo storage, Block reportedBlock);
+    /**
+     * Is this block complete?
+     *
+     * @return true if the state of the block is {@link BlockUCState#COMPLETE}
+     */
+    public boolean isComplete() {
+        return getBlockUCState().equals(BlockUCState.COMPLETE);
+    }
 
-  /**
-   * Remove {@link DatanodeStorageInfo} location for a block
-   */
-  abstract boolean removeStorage(DatanodeStorageInfo storage);
+    public boolean isUnderRecovery() {
+        return getBlockUCState().equals(BlockUCState.UNDER_RECOVERY);
+    }
 
-  public abstract boolean isStriped();
+    public final boolean isCompleteOrCommitted() {
+        final BlockUCState state = getBlockUCState();
+        return state.equals(BlockUCState.COMPLETE) || state.equals(BlockUCState.COMMITTED);
+    }
 
-  public abstract BlockType getBlockType();
-
-  /** @return true if there is no datanode storage associated with the block */
-  abstract boolean hasNoStorage();
-
-  /**
-   * Checks whether this block has a Provided replica.
-   * @return true if this block has a replica on Provided storage.
-   */
-  abstract boolean isProvided();
-
-  /**
-   * Find specified DatanodeStorageInfo.
-   * @return DatanodeStorageInfo or null if not found.
-   */
-  DatanodeStorageInfo findStorageInfo(DatanodeDescriptor dn) {
-    int len = getCapacity();
-    DatanodeStorageInfo providedStorageInfo = null;
-    for(int idx = 0; idx < len; idx++) {
-      DatanodeStorageInfo cur = getStorageInfo(idx);
-      if(cur != null) {
-        if (cur.getStorageType() == StorageType.PROVIDED) {
-          // if block resides on provided storage, only match the storage ids
-          if (dn.getStorageInfo(cur.getStorageID()) != null) {
-            // do not return here as we have to check the other
-            // DatanodeStorageInfos for this block which could be local
-            providedStorageInfo = cur;
-          }
-        } else if (cur.getDatanodeDescriptor() == dn) {
-          return cur;
+    /**
+     * Add/Update the under construction feature.
+     */
+    public void convertToBlockUnderConstruction(BlockUCState s, DatanodeStorageInfo[] targets) {
+        if (isComplete()) {
+            uc = new BlockUnderConstructionFeature(this, s, targets, this.getBlockType());
+        } else {
+            // the block is already under construction
+            uc.setBlockUCState(s);
+            uc.setExpectedLocations(this, targets, this.getBlockType());
         }
-      }
     }
-    return providedStorageInfo;
-  }
 
-  /**
-   * Find specified DatanodeStorageInfo.
-   * @return index or -1 if not found.
-   */
-  int findStorageInfo(DatanodeStorageInfo storageInfo) {
-    int len = getCapacity();
-    for(int idx = 0; idx < len; idx++) {
-      DatanodeStorageInfo cur = getStorageInfo(idx);
-      if (cur == storageInfo) {
-        return idx;
-      }
+    /**
+     * Convert an under construction block to complete.
+     */
+    void convertToCompleteBlock() {
+        assert getBlockUCState() != BlockUCState.COMPLETE : "Trying to convert a COMPLETE block";
+        uc = null;
     }
-    return -1;
-  }
 
-  @Override
-  public int hashCode() {
-    // Super implementation is sufficient
-    return super.hashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    // Sufficient to rely on super's implementation
-    return (this == obj) || super.equals(obj);
-  }
-
-  @Override
-  public LightWeightGSet.LinkedElement getNext() {
-    return nextLinkedElement;
-  }
-
-  @Override
-  public void setNext(LightWeightGSet.LinkedElement next) {
-    this.nextLinkedElement = next;
-  }
-
-  /* UnderConstruction Feature related */
-
-  public BlockUnderConstructionFeature getUnderConstructionFeature() {
-    return uc;
-  }
-
-  public BlockUCState getBlockUCState() {
-    return uc == null ? BlockUCState.COMPLETE : uc.getBlockUCState();
-  }
-
-  /**
-   * Is this block complete?
-   *
-   * @return true if the state of the block is {@link BlockUCState#COMPLETE}
-   */
-  public boolean isComplete() {
-    return getBlockUCState().equals(BlockUCState.COMPLETE);
-  }
-
-  public boolean isUnderRecovery() {
-    return getBlockUCState().equals(BlockUCState.UNDER_RECOVERY);
-  }
-
-  public final boolean isCompleteOrCommitted() {
-    final BlockUCState state = getBlockUCState();
-    return state.equals(BlockUCState.COMPLETE) ||
-        state.equals(BlockUCState.COMMITTED);
-  }
-
-  /**
-   * Add/Update the under construction feature.
-   */
-  public void convertToBlockUnderConstruction(BlockUCState s,
-      DatanodeStorageInfo[] targets) {
-    if (isComplete()) {
-      uc = new BlockUnderConstructionFeature(this, s, targets,
-          this.getBlockType());
-    } else {
-      // the block is already under construction
-      uc.setBlockUCState(s);
-      uc.setExpectedLocations(this, targets, this.getBlockType());
+    /**
+     * Process the recorded replicas. When about to commit or finish the
+     * pipeline recovery sort out bad replicas.
+     * @param genStamp  The final generation stamp for the block.
+     * @return staleReplica's List.
+     */
+    public List<ReplicaUnderConstruction> setGenerationStampAndVerifyReplicas(long genStamp) {
+        Preconditions.checkState(uc != null && !isComplete());
+        // Set the generation stamp for the block.
+        setGenerationStamp(genStamp);
+        return uc.getStaleReplicas(genStamp);
     }
-  }
 
-  /**
-   * Convert an under construction block to complete.
-   */
-  void convertToCompleteBlock() {
-    assert getBlockUCState() != BlockUCState.COMPLETE :
-        "Trying to convert a COMPLETE block";
-    uc = null;
-  }
-
-  /**
-   * Process the recorded replicas. When about to commit or finish the
-   * pipeline recovery sort out bad replicas.
-   * @param genStamp  The final generation stamp for the block.
-   * @return staleReplica's List.
-   */
-  public List<ReplicaUnderConstruction> setGenerationStampAndVerifyReplicas(
-      long genStamp) {
-    Preconditions.checkState(uc != null && !isComplete());
-    // Set the generation stamp for the block.
-    setGenerationStamp(genStamp);
-
-    return uc.getStaleReplicas(genStamp);
-  }
-
-  /**
-   * Commit block's length and generation stamp as reported by the client.
-   * Set block state to {@link BlockUCState#COMMITTED}.
-   * @param block - contains client reported block length and generation
-   * @return staleReplica's List.
-   * @throws IOException if block ids are inconsistent.
-   */
-  List<ReplicaUnderConstruction> commitBlock(Block block) throws IOException {
-    if (getBlockId() != block.getBlockId()) {
-      throw new IOException("Trying to commit inconsistent block: id = "
-          + block.getBlockId() + ", expected id = " + getBlockId());
+    /**
+     * Commit block's length and generation stamp as reported by the client.
+     * Set block state to {@link BlockUCState#COMMITTED}.
+     * @param block - contains client reported block length and generation
+     * @return staleReplica's List.
+     * @throws IOException if block ids are inconsistent.
+     */
+    List<ReplicaUnderConstruction> commitBlock(Block block) throws IOException {
+        if (getBlockId() != block.getBlockId()) {
+            throw new IOException("Trying to commit inconsistent block: id = " + block.getBlockId() + ", expected id = " + getBlockId());
+        }
+        Preconditions.checkState(!isComplete());
+        uc.commit();
+        this.setNumBytes(block.getNumBytes());
+        // Sort out invalid replicas.
+        return setGenerationStampAndVerifyReplicas(block.getGenerationStamp());
     }
-    Preconditions.checkState(!isComplete());
-    uc.commit();
-    this.setNumBytes(block.getNumBytes());
-    // Sort out invalid replicas.
-    return setGenerationStampAndVerifyReplicas(block.getGenerationStamp());
-  }
 }

@@ -16,10 +16,8 @@
  */
 package org.apache.hadoop.security;
 
-
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
-
 import org.apache.hadoop.http.HttpServer2;
 import org.apache.hadoop.security.authentication.server.AuthenticationFilter;
 import org.apache.hadoop.conf.Configuration;
@@ -28,49 +26,36 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-
 import java.util.Map;
 
 public class TestAuthenticationFilter {
 
-  @SuppressWarnings("unchecked")
-  @Test
-  public void testConfiguration() throws Exception {
-    Configuration conf = new Configuration();
-    conf.set("hadoop.http.authentication.foo", "bar");
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testConfiguration() throws Exception {
+        Configuration conf = new Configuration();
+        conf.set("hadoop.http.authentication.foo", "bar");
+        conf.set(HttpServer2.BIND_ADDRESS, "barhost");
+        FilterContainer container = Mockito.mock(FilterContainer.class);
+        Mockito.doAnswer(new Answer() {
 
-    conf.set(HttpServer2.BIND_ADDRESS, "barhost");
-    
-    FilterContainer container = Mockito.mock(FilterContainer.class);
-    Mockito.doAnswer(
-      new Answer() {
-        @Override
-        public Object answer(InvocationOnMock invocationOnMock)
-          throws Throwable {
-          Object[] args = invocationOnMock.getArguments();
-
-          assertEquals("authentication", args[0]);
-
-          assertEquals(AuthenticationFilter.class.getName(), args[1]);
-
-          Map<String, String> conf = (Map<String, String>) args[2];
-          assertEquals("/", conf.get("cookie.path"));
-
-          assertEquals("simple", conf.get("type"));
-          assertEquals("36000", conf.get("token.validity"));
-          assertNull(conf.get("cookie.domain"));
-          assertEquals("true", conf.get("simple.anonymous.allowed"));
-          assertEquals("HTTP/barhost@LOCALHOST",
-                       conf.get("kerberos.principal"));
-          assertEquals(System.getProperty("user.home") +
-                       "/hadoop.keytab", conf.get("kerberos.keytab"));
-          assertEquals("bar", conf.get("foo"));
-
-          return null;
-        }
-      }).when(container).addFilter(any(), any(), any());
-
-    new AuthenticationFilterInitializer().initFilter(container, conf);
-  }
-
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                Object[] args = invocationOnMock.getArguments();
+                assertEquals("authentication", args[0]);
+                assertEquals(AuthenticationFilter.class.getName(), args[1]);
+                Map<String, String> conf = (Map<String, String>) args[2];
+                assertEquals("/", conf.get("cookie.path"));
+                assertEquals("simple", conf.get("type"));
+                assertEquals("36000", conf.get("token.validity"));
+                assertNull(conf.get("cookie.domain"));
+                assertEquals("true", conf.get("simple.anonymous.allowed"));
+                assertEquals("HTTP/barhost@LOCALHOST", conf.get("kerberos.principal"));
+                assertEquals(System.getProperty("user.home") + "/hadoop.keytab", conf.get("kerberos.keytab"));
+                assertEquals("bar", conf.get("foo"));
+                return null;
+            }
+        }).when(container).addFilter(any(), any(), any());
+        new AuthenticationFilterInitializer().initFilter(container, conf);
+    }
 }

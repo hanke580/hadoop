@@ -19,42 +19,41 @@ package org.apache.hadoop.nfs.nfs3.request;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-
 import org.apache.hadoop.nfs.nfs3.FileHandle;
 import org.apache.hadoop.oncrpc.XDR;
-
 import com.google.common.annotations.VisibleForTesting;
 
 /**
  * LOOKUP3 Request
  */
 public class LOOKUP3Request extends RequestWithHandle {
-  private String name;
 
-  public LOOKUP3Request(FileHandle handle, String name) {
-    super(handle);
-    this.name = name;
-  }
-  
-  public static LOOKUP3Request deserialize(XDR xdr) throws IOException {
-    FileHandle handle = readHandle(xdr);
-    String name = xdr.readString();
-    return new LOOKUP3Request(handle, name);
-  }
+    private String name;
 
-  public String getName() {
-    return this.name;
-  }
+    public LOOKUP3Request(FileHandle handle, String name) {
+        super(handle);
+        this.name = name;
+    }
 
-  public void setName(String name) {
-    this.name = name;
-  }
+    public static LOOKUP3Request deserialize(XDR xdr) throws IOException {
+        FileHandle handle = readHandle(xdr);
+        String name = xdr.readString();
+        return new LOOKUP3Request(handle, name);
+    }
 
-  @Override
-  @VisibleForTesting
-  public void serialize(XDR xdr) {
-    handle.serialize(xdr);
-    xdr.writeInt(name.getBytes(StandardCharsets.UTF_8).length);
-    xdr.writeFixedOpaque(name.getBytes(StandardCharsets.UTF_8));
-  }
+    public String getName() {
+        return this.name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    @VisibleForTesting
+    public void serialize(XDR xdr) {
+        handle.serialize(xdr);
+        xdr.writeInt(name.getBytes(StandardCharsets.UTF_8).length);
+        xdr.writeFixedOpaque(name.getBytes(StandardCharsets.UTF_8));
+    }
 }

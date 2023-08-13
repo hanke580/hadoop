@@ -18,9 +18,7 @@
 package org.apache.hadoop.hdfs.server.federation.router;
 
 import static org.apache.hadoop.util.Time.now;
-
 import java.util.concurrent.TimeUnit;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.server.federation.store.StateStoreService;
 import org.apache.hadoop.util.Time;
@@ -37,149 +35,144 @@ import org.slf4j.LoggerFactory;
  */
 public class RouterSafemodeService extends PeriodicService {
 
-  private static final Logger LOG =
-      LoggerFactory.getLogger(RouterSafemodeService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RouterSafemodeService.class);
 
-  /** Router to manage safe mode. */
-  private final Router router;
+    /**
+     * Router to manage safe mode.
+     */
+    private final Router router;
 
-  /**
-   * If we are in safe mode, fail requests as if a standby NN.
-   * Router can enter safe mode in two different ways:
-   * <ul>
-   * <li>Upon start up: router enters this mode after service start, and will
-   * exit after certain time threshold.
-   * <li>Via admin command:
-   * <ul>
-   * <li>Router enters this mode via admin command:
-   * dfsrouteradmin -safemode enter
-   * <li>And exit after admin command:
-   * dfsrouteradmin -safemode leave
-   * </ul>
-   * </ul>
-   */
+    /**
+     * If we are in safe mode, fail requests as if a standby NN.
+     * Router can enter safe mode in two different ways:
+     * <ul>
+     * <li>Upon start up: router enters this mode after service start, and will
+     * exit after certain time threshold.
+     * <li>Via admin command:
+     * <ul>
+     * <li>Router enters this mode via admin command:
+     * dfsrouteradmin -safemode enter
+     * <li>And exit after admin command:
+     * dfsrouteradmin -safemode leave
+     * </ul>
+     * </ul>
+     */
+    /**
+     * Whether Router is in safe mode
+     */
+    private volatile boolean safeMode;
 
-  /** Whether Router is in safe mode */
-  private volatile boolean safeMode;
+    /**
+     * Whether the Router safe mode is set manually (i.e., via Router admin)
+     */
+    private volatile boolean isSafeModeSetManually;
 
-  /** Whether the Router safe mode is set manually (i.e., via Router admin) */
-  private volatile boolean isSafeModeSetManually;
+    /**
+     * Interval in ms to wait post startup before allowing RPC requests.
+     */
+    private long startupInterval;
 
-  /** Interval in ms to wait post startup before allowing RPC requests. */
-  private long startupInterval;
-  /** Interval in ms after which the State Store cache is too stale. */
-  private long staleInterval;
-  /** Start time in ms of this service. */
-  private long startupTime;
+    /**
+     * Interval in ms after which the State Store cache is too stale.
+     */
+    private long staleInterval;
 
-  /** The time the Router enters safe mode in milliseconds. */
-  private long enterSafeModeTime = now();
+    /**
+     * Start time in ms of this service.
+     */
+    private long startupTime;
 
+    /**
+     * The time the Router enters safe mode in milliseconds.
+     */
+    private long enterSafeModeTime = now();
 
-  /**
-   * Create a new Cache update service.
-   *
-   * @param router Router containing the cache.
-   */
-  public RouterSafemodeService(Router router) {
-    super(RouterSafemodeService.class.getSimpleName());
-    this.router = router;
-  }
-
-  /**
-   * Return whether the current Router is in safe mode.
-   */
-  boolean isInSafeMode() {
-    return this.safeMode;
-  }
-
-  /**
-   * Set the flag to indicate that the safe mode for this Router is set manually
-   * via the Router admin command.
-   */
-  void setManualSafeMode(boolean mode) {
-    this.safeMode = mode;
-    this.isSafeModeSetManually = mode;
-  }
-
-  /**
-   * Enter safe mode.
-   */
-  private void enter() {
-    LOG.info("Entering safe mode");
-    enterSafeModeTime = now();
-    safeMode = true;
-    router.updateRouterState(RouterServiceState.SAFEMODE);
-  }
-
-  /**
-   * Leave safe mode.
-   */
-  private void leave() {
-    // Cache recently updated, leave safemode
-    long timeInSafemode = now() - enterSafeModeTime;
-    LOG.info("Leaving safe mode after {} milliseconds", timeInSafemode);
-    RouterMetrics routerMetrics = router.getRouterMetrics();
-    if (routerMetrics == null) {
-      LOG.error("The Router metrics are not enabled");
-    } else {
-      routerMetrics.setSafeModeTime(timeInSafemode);
+    /**
+     * Create a new Cache update service.
+     *
+     * @param router Router containing the cache.
+     */
+    public RouterSafemodeService(Router router) {
+        super(RouterSafemodeService.class.getSimpleName());
+        this.router = router;
     }
-    safeMode = false;
-    router.updateRouterState(RouterServiceState.RUNNING);
-  }
 
-  @Override
-  protected void serviceInit(Configuration conf) throws Exception {
-
-    // Use same interval as cache update service
-    this.setIntervalMs(conf.getTimeDuration(
-        RBFConfigKeys.DFS_ROUTER_CACHE_TIME_TO_LIVE_MS,
-        RBFConfigKeys.DFS_ROUTER_CACHE_TIME_TO_LIVE_MS_DEFAULT,
-        TimeUnit.MILLISECONDS));
-
-    this.startupInterval = conf.getTimeDuration(
-        RBFConfigKeys.DFS_ROUTER_SAFEMODE_EXTENSION,
-        RBFConfigKeys.DFS_ROUTER_SAFEMODE_EXTENSION_DEFAULT,
-        TimeUnit.MILLISECONDS);
-    LOG.info("Leave startup safe mode after {} ms", this.startupInterval);
-
-    this.staleInterval = conf.getTimeDuration(
-        RBFConfigKeys.DFS_ROUTER_SAFEMODE_EXPIRATION,
-        RBFConfigKeys.DFS_ROUTER_SAFEMODE_EXPIRATION_DEFAULT,
-        TimeUnit.MILLISECONDS);
-    LOG.info("Enter safe mode after {} ms without reaching the State Store",
-        this.staleInterval);
-
-    this.startupTime = Time.now();
-
-    // Initializing the RPC server in safe mode, it will disable it later
-    enter();
-
-    super.serviceInit(conf);
-  }
-
-  @Override
-  public void periodicInvoke() {
-    long now = Time.now();
-    long delta = now - startupTime;
-    if (delta < startupInterval) {
-      LOG.info("Delaying safemode exit for {} milliseconds...",
-          this.startupInterval - delta);
-      return;
+    /**
+     * Return whether the current Router is in safe mode.
+     */
+    boolean isInSafeMode() {
+        return this.safeMode;
     }
-    StateStoreService stateStore = router.getStateStore();
-    long cacheUpdateTime = stateStore.getCacheUpdateTime();
-    boolean isCacheStale = (now - cacheUpdateTime) > this.staleInterval;
 
-    // Always update to indicate our cache was updated
-    if (isCacheStale) {
-      if (!safeMode) {
+    /**
+     * Set the flag to indicate that the safe mode for this Router is set manually
+     * via the Router admin command.
+     */
+    void setManualSafeMode(boolean mode) {
+        this.safeMode = mode;
+        this.isSafeModeSetManually = mode;
+    }
+
+    /**
+     * Enter safe mode.
+     */
+    private void enter() {
+        LOG.info("Entering safe mode");
+        enterSafeModeTime = now();
+        safeMode = true;
+        router.updateRouterState(RouterServiceState.SAFEMODE);
+    }
+
+    /**
+     * Leave safe mode.
+     */
+    private void leave() {
+        // Cache recently updated, leave safemode
+        long timeInSafemode = now() - enterSafeModeTime;
+        LOG.info("Leaving safe mode after {} milliseconds", timeInSafemode);
+        RouterMetrics routerMetrics = router.getRouterMetrics();
+        if (routerMetrics == null) {
+            LOG.error("The Router metrics are not enabled");
+        } else {
+            routerMetrics.setSafeModeTime(timeInSafemode);
+        }
+        safeMode = false;
+        router.updateRouterState(RouterServiceState.RUNNING);
+    }
+
+    @Override
+    protected void serviceInit(Configuration conf) throws Exception {
+        // Use same interval as cache update service
+        this.setIntervalMs(conf.getTimeDuration(RBFConfigKeys.DFS_ROUTER_CACHE_TIME_TO_LIVE_MS, RBFConfigKeys.DFS_ROUTER_CACHE_TIME_TO_LIVE_MS_DEFAULT, TimeUnit.MILLISECONDS));
+        this.startupInterval = conf.getTimeDuration(RBFConfigKeys.DFS_ROUTER_SAFEMODE_EXTENSION, RBFConfigKeys.DFS_ROUTER_SAFEMODE_EXTENSION_DEFAULT, TimeUnit.MILLISECONDS);
+        LOG.info("Leave startup safe mode after {} ms", this.startupInterval);
+        this.staleInterval = conf.getTimeDuration(RBFConfigKeys.DFS_ROUTER_SAFEMODE_EXPIRATION, RBFConfigKeys.DFS_ROUTER_SAFEMODE_EXPIRATION_DEFAULT, TimeUnit.MILLISECONDS);
+        LOG.info("Enter safe mode after {} ms without reaching the State Store", this.staleInterval);
+        this.startupTime = Time.now();
+        // Initializing the RPC server in safe mode, it will disable it later
         enter();
-      }
-    } else if (safeMode && !isSafeModeSetManually) {
-      // Cache recently updated, leave safe mode
-      leave();
+        super.serviceInit(conf);
     }
-  }
+
+    @Override
+    public void periodicInvoke() {
+        long now = Time.now();
+        long delta = now - startupTime;
+        if (delta < startupInterval) {
+            LOG.info("Delaying safemode exit for {} milliseconds...", this.startupInterval - delta);
+            return;
+        }
+        StateStoreService stateStore = router.getStateStore();
+        long cacheUpdateTime = stateStore.getCacheUpdateTime();
+        boolean isCacheStale = (now - cacheUpdateTime) > this.staleInterval;
+        // Always update to indicate our cache was updated
+        if (isCacheStale) {
+            if (!safeMode) {
+                enter();
+            }
+        } else if (safeMode && !isSafeModeSetManually) {
+            // Cache recently updated, leave safe mode
+            leave();
+        }
+    }
 }

@@ -18,19 +18,15 @@
 package org.apache.hadoop.hdfs.server.federation.router;
 
 import org.apache.hadoop.hdfs.server.namenode.NameNodeRpcServer;
-
 import static org.junit.Assert.*;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.hadoop.hdfs.protocolPB.RouterPolicyProvider;
 import org.apache.hadoop.hdfs.server.datanode.DataNode;
 import org.apache.hadoop.security.authorize.Service;
-
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -40,7 +36,6 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.Sets;
 
 /**
@@ -53,56 +48,47 @@ import com.google.common.collect.Sets;
  */
 @RunWith(Parameterized.class)
 public class TestRouterPolicyProvider {
-  private static final Logger LOG = LoggerFactory.getLogger(
-      TestRouterPolicyProvider.class);
 
-  private static Set<Class<?>> policyProviderProtocols;
+    private static final Logger LOG = LoggerFactory.getLogger(TestRouterPolicyProvider.class);
 
-  @Rule
-  public TestName testName = new TestName();
+    private static Set<Class<?>> policyProviderProtocols;
 
-  private final Class<?> rpcServerClass;
+    @Rule
+    public TestName testName = new TestName();
 
-  @BeforeClass
-  public static void initialize() {
-    Service[] services = new RouterPolicyProvider().getServices();
-    policyProviderProtocols = new HashSet<>(services.length);
-    for (Service service : services) {
-      policyProviderProtocols.add(service.getProtocol());
+    private final Class<?> rpcServerClass;
+
+    @BeforeClass
+    public static void initialize() {
+        Service[] services = new RouterPolicyProvider().getServices();
+        policyProviderProtocols = new HashSet<>(services.length);
+        for (Service service : services) {
+            policyProviderProtocols.add(service.getProtocol());
+        }
     }
-  }
 
-  public TestRouterPolicyProvider(Class<?> rpcServerClass) {
-    this.rpcServerClass = rpcServerClass;
-  }
-
-  @Parameters(name = "protocolsForServer-{0}")
-  public static List<Class<?>[]> data() {
-    return Arrays.asList(new Class<?>[][] {{RouterRpcServer.class},
-        {NameNodeRpcServer.class}, {DataNode.class},
-        {RouterAdminServer.class}});
-  }
-
-  @Test
-  public void testPolicyProviderForServer() {
-    List<?> ifaces = ClassUtils.getAllInterfaces(rpcServerClass);
-    Set<Class<?>> serverProtocols = new HashSet<>(ifaces.size());
-    for (Object obj : ifaces) {
-      Class<?> iface = (Class<?>) obj;
-      if (iface.getSimpleName().endsWith("Protocol")) {
-        serverProtocols.add(iface);
-      }
+    public TestRouterPolicyProvider(Class<?> rpcServerClass) {
+        this.rpcServerClass = rpcServerClass;
     }
-    LOG.info("Running test {} for RPC server {}.  Found server protocols {} "
-        + "and policy provider protocols {}.", testName.getMethodName(),
-        rpcServerClass.getName(), serverProtocols, policyProviderProtocols);
-    assertFalse("Expected to find at least one protocol in server.",
-        serverProtocols.isEmpty());
-    final Set<Class<?>> differenceSet = Sets.difference(serverProtocols,
-        policyProviderProtocols);
-    assertTrue(String.format(
-        "Following protocols for server %s are not defined in " + "%s: %s",
-        rpcServerClass.getName(), RouterPolicyProvider.class.getName(), Arrays
-            .toString(differenceSet.toArray())), differenceSet.isEmpty());
-  }
+
+    @Parameters(name = "protocolsForServer-{0}")
+    public static List<Class<?>[]> data() {
+        return Arrays.asList(new Class<?>[][] { { RouterRpcServer.class }, { NameNodeRpcServer.class }, { DataNode.class }, { RouterAdminServer.class } });
+    }
+
+    @Test
+    public void testPolicyProviderForServer() {
+        List<?> ifaces = ClassUtils.getAllInterfaces(rpcServerClass);
+        Set<Class<?>> serverProtocols = new HashSet<>(ifaces.size());
+        for (Object obj : ifaces) {
+            Class<?> iface = (Class<?>) obj;
+            if (iface.getSimpleName().endsWith("Protocol")) {
+                serverProtocols.add(iface);
+            }
+        }
+        LOG.info("Running test {} for RPC server {}.  Found server protocols {} " + "and policy provider protocols {}.", testName.getMethodName(), rpcServerClass.getName(), serverProtocols, policyProviderProtocols);
+        assertFalse("Expected to find at least one protocol in server.", serverProtocols.isEmpty());
+        final Set<Class<?>> differenceSet = Sets.difference(serverProtocols, policyProviderProtocols);
+        assertTrue(String.format("Following protocols for server %s are not defined in " + "%s: %s", rpcServerClass.getName(), RouterPolicyProvider.class.getName(), Arrays.toString(differenceSet.toArray())), differenceSet.isEmpty());
+    }
 }

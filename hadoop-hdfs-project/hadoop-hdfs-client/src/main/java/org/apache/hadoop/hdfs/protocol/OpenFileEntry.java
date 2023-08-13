@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.protocol;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -27,32 +26,35 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
 public class OpenFileEntry {
-  private final long id;
-  private final String filePath;
-  private final String clientName;
-  private final String clientMachine;
 
-  public OpenFileEntry(long id, String filePath,
-      String clientName, String clientMachine) {
-    this.id = id;
-    this.filePath = filePath;
-    this.clientName = clientName;
-    this.clientMachine = clientMachine;
-  }
+    private final long id;
 
-  public long getId() {
-    return id;
-  }
+    private final String filePath;
 
-  public String getFilePath() {
-    return filePath;
-  }
+    private final String clientName;
 
-  public String getClientMachine() {
-    return clientMachine;
-  }
+    private final String clientMachine;
 
-  public String getClientName() {
-    return clientName;
-  }
+    public OpenFileEntry(long id, String filePath, String clientName, String clientMachine) {
+        this.id = id;
+        this.filePath = filePath;
+        this.clientName = clientName;
+        this.clientMachine = clientMachine;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public String getClientMachine() {
+        return clientMachine;
+    }
+
+    public String getClientName() {
+        return clientName;
+    }
 }

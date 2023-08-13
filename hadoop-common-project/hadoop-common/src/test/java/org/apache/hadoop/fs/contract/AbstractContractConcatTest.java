@@ -15,15 +15,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.hadoop.fs.contract;
 
 import org.apache.hadoop.fs.Path;
-
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import static org.apache.hadoop.fs.CommonPathCapabilities.FS_CONCAT;
 import static org.apache.hadoop.fs.contract.ContractTestUtils.assertFileHasLength;
 import static org.apache.hadoop.fs.contract.ContractTestUtils.assertHasPathCapabilities;
@@ -36,68 +33,60 @@ import static org.apache.hadoop.test.LambdaTestUtils.intercept;
  * Test concat -if supported
  */
 public abstract class AbstractContractConcatTest extends AbstractFSContractTestBase {
-  private static final Logger LOG =
-      LoggerFactory.getLogger(AbstractContractConcatTest.class);
 
-  private Path testPath;
-  private Path srcFile;
-  private Path zeroByteFile;
-  private Path target;
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractContractConcatTest.class);
 
-  @Override
-  public void setup() throws Exception {
-    super.setup();
-    skipIfUnsupported(SUPPORTS_CONCAT);
+    private Path testPath;
 
-    //delete the test directory
-    testPath = path("test");
-    srcFile = new Path(testPath, "small.txt");
-    zeroByteFile = new Path(testPath, "zero.txt");
-    target = new Path(testPath, "target");
+    private Path srcFile;
 
-    byte[] block = dataset(TEST_FILE_LEN, 0, 255);
-    createFile(getFileSystem(), srcFile, true, block);
-    touch(getFileSystem(), zeroByteFile);
-  }
+    private Path zeroByteFile;
 
-  @Test
-  public void testConcatEmptyFiles() throws Throwable {
-    touch(getFileSystem(), target);
-    handleExpectedException(intercept(Exception.class,
-        () -> getFileSystem().concat(target, new Path[0])));
-  }
+    private Path target;
 
-  @Test
-  public void testConcatMissingTarget() throws Throwable {
-    handleExpectedException(
-        intercept(Exception.class,
-            () -> getFileSystem().concat(target, new Path[]{zeroByteFile})));
-  }
+    @Override
+    public void setup() throws Exception {
+        super.setup();
+        skipIfUnsupported(SUPPORTS_CONCAT);
+        //delete the test directory
+        testPath = path("test");
+        srcFile = new Path(testPath, "small.txt");
+        zeroByteFile = new Path(testPath, "zero.txt");
+        target = new Path(testPath, "target");
+        byte[] block = dataset(TEST_FILE_LEN, 0, 255);
+        createFile(getFileSystem(), srcFile, true, block);
+        touch(getFileSystem(), zeroByteFile);
+    }
 
-  @Test
-  public void testConcatFileOnFile() throws Throwable {
-    byte[] block = dataset(TEST_FILE_LEN, 0, 255);
-    createFile(getFileSystem(), target, false, block);
-    getFileSystem().concat(target,
-                           new Path[] {srcFile});
-    assertFileHasLength(getFileSystem(), target, TEST_FILE_LEN *2);
-    ContractTestUtils.validateFileContent(
-      ContractTestUtils.readDataset(getFileSystem(),
-                                    target, TEST_FILE_LEN * 2),
-      new byte[][]{block, block});
-  }
+    @Test
+    public void testConcatEmptyFiles() throws Throwable {
+        touch(getFileSystem(), target);
+        handleExpectedException(intercept(Exception.class, () -> getFileSystem().concat(target, new Path[0])));
+    }
 
-  @Test
-  public void testConcatOnSelf() throws Throwable {
-    byte[] block = dataset(TEST_FILE_LEN, 0, 255);
-    createFile(getFileSystem(), target, false, block);
-    handleExpectedException(intercept(Exception.class,
-        () -> getFileSystem().concat(target, new Path[]{target})));
-  }
+    @Test
+    public void testConcatMissingTarget() throws Throwable {
+        handleExpectedException(intercept(Exception.class, () -> getFileSystem().concat(target, new Path[] { zeroByteFile })));
+    }
 
-  @Test
-  public void testFileSystemDeclaresCapability() throws Throwable {
-    assertHasPathCapabilities(getFileSystem(), target, FS_CONCAT);
-  }
+    @Test
+    public void testConcatFileOnFile() throws Throwable {
+        byte[] block = dataset(TEST_FILE_LEN, 0, 255);
+        createFile(getFileSystem(), target, false, block);
+        getFileSystem().concat(target, new Path[] { srcFile });
+        assertFileHasLength(getFileSystem(), target, TEST_FILE_LEN * 2);
+        ContractTestUtils.validateFileContent(ContractTestUtils.readDataset(getFileSystem(), target, TEST_FILE_LEN * 2), new byte[][] { block, block });
+    }
 
+    @Test
+    public void testConcatOnSelf() throws Throwable {
+        byte[] block = dataset(TEST_FILE_LEN, 0, 255);
+        createFile(getFileSystem(), target, false, block);
+        handleExpectedException(intercept(Exception.class, () -> getFileSystem().concat(target, new Path[] { target })));
+    }
+
+    @Test
+    public void testFileSystemDeclaresCapability() throws Throwable {
+        assertHasPathCapabilities(getFileSystem(), target, FS_CONCAT);
+    }
 }

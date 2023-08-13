@@ -24,13 +24,13 @@ import java.io.IOException;
  */
 public interface StateStoreCache {
 
-  /**
-   * Load the cache from the State Store. Called by the cache update service
-   * when the data has been reloaded.
-   *
-   * @param force If we force the load.
-   * @return If the cache was loaded successfully.
-   * @throws IOException If there was an error loading the cache.
-   */
-  boolean loadCache(boolean force) throws IOException;
+    /**
+     * Load the cache from the State Store. Called by the cache update service
+     * when the data has been reloaded.
+     *
+     * @param force If we force the load.
+     * @return If the cache was loaded successfully.
+     * @throws IOException If there was an error loading the cache.
+     */
+    boolean loadCache(boolean force) throws IOException;
 }

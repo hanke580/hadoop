@@ -18,9 +18,7 @@
 package org.apache.hadoop.hdfs.server.federation.router;
 
 import static org.apache.hadoop.hdfs.server.federation.FederationTestUtils.NAMENODES;
-
 import java.io.IOException;
-
 import org.apache.hadoop.hdfs.protocol.ClientProtocol;
 import org.apache.hadoop.hdfs.protocol.HdfsConstants.SafeModeAction;
 import org.apache.hadoop.hdfs.server.federation.MiniRouterDFSCluster;
@@ -34,49 +32,46 @@ import org.junit.Test;
  */
 public class TestSafeMode {
 
-  /** Federated HDFS cluster. */
-  private MiniRouterDFSCluster cluster;
+    /**
+     * Federated HDFS cluster.
+     */
+    private MiniRouterDFSCluster cluster;
 
-  @Before
-  public  void setup() throws Exception {
-    cluster = new MiniRouterDFSCluster(true, 2);
-
-    // Start NNs and DNs and wait until ready
-    cluster.startCluster();
-
-    // Start routers with only an RPC service
-    cluster.startRouters();
-
-    // Register and verify all NNs with all routers
-    cluster.registerNamenodes();
-    cluster.waitNamenodeRegistration();
-
-    // Setup the mount table
-    cluster.installMockLocations();
-
-    // Making one Namenodes active per nameservice
-    if (cluster.isHighAvailability()) {
-      for (String ns : cluster.getNameservices()) {
-        cluster.switchToActive(ns, NAMENODES[0]);
-        cluster.switchToStandby(ns, NAMENODES[1]);
-      }
+    @Before
+    public void setup() throws Exception {
+        cluster = new MiniRouterDFSCluster(true, 2);
+        // Start NNs and DNs and wait until ready
+        cluster.startCluster();
+        // Start routers with only an RPC service
+        cluster.startRouters();
+        // Register and verify all NNs with all routers
+        cluster.registerNamenodes();
+        cluster.waitNamenodeRegistration();
+        // Setup the mount table
+        cluster.installMockLocations();
+        // Making one Namenodes active per nameservice
+        if (cluster.isHighAvailability()) {
+            for (String ns : cluster.getNameservices()) {
+                cluster.switchToActive(ns, NAMENODES[0]);
+                cluster.switchToStandby(ns, NAMENODES[1]);
+            }
+        }
+        cluster.waitActiveNamespaces();
     }
-    cluster.waitActiveNamespaces();
-  }
 
-  @After
-  public void teardown() throws IOException {
-    if (cluster != null) {
-      cluster.shutdown();
-      cluster = null;
+    @After
+    public void teardown() throws IOException {
+        if (cluster != null) {
+            cluster.shutdown();
+            cluster = null;
+        }
     }
-  }
 
-  @Test
-  public void testProxySetSafemode() throws Exception {
-    RouterContext routerContext = cluster.getRandomRouter();
-    ClientProtocol routerProtocol = routerContext.getClient().getNamenode();
-    routerProtocol.setSafeMode(SafeModeAction.SAFEMODE_GET, true);
-    routerProtocol.setSafeMode(SafeModeAction.SAFEMODE_GET, false);
-  }
+    @Test
+    public void testProxySetSafemode() throws Exception {
+        RouterContext routerContext = cluster.getRandomRouter();
+        ClientProtocol routerProtocol = routerContext.getClient().getNamenode();
+        routerProtocol.setSafeMode(SafeModeAction.SAFEMODE_GET, true);
+        routerProtocol.setSafeMode(SafeModeAction.SAFEMODE_GET, false);
+    }
 }

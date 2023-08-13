@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.service.launcher.testservices;
 
 import org.apache.hadoop.service.BreakableService;
@@ -26,30 +25,27 @@ import org.apache.hadoop.service.launcher.ServiceLaunchException;
  */
 public class FailureTestService extends BreakableService {
 
-  private final int delay;
+    private final int delay;
 
-  public FailureTestService(boolean failOnInit,
-      boolean failOnStart,
-      boolean failOnStop,
-      int delay) {
-    super(failOnInit, failOnStart, failOnStop);
-    this.delay = delay;
-  }
-
-  @Override
-  protected void serviceStop() throws Exception {
-    if (delay > 0) {
-      Thread.sleep(delay);
+    public FailureTestService(boolean failOnInit, boolean failOnStart, boolean failOnStop, int delay) {
+        super(failOnInit, failOnStart, failOnStop);
+        this.delay = delay;
     }
-    super.serviceStop();
-  }
 
-  @Override
-  protected Exception createFailureException(String action) {
-    return new ServiceLaunchException(getExitCode(), toString());
-  }
+    @Override
+    protected void serviceStop() throws Exception {
+        if (delay > 0) {
+            Thread.sleep(delay);
+        }
+        super.serviceStop();
+    }
 
-  int getExitCode() {
-    return -1;
-  }
+    @Override
+    protected Exception createFailureException(String action) {
+        return new ServiceLaunchException(getExitCode(), toString());
+    }
+
+    int getExitCode() {
+        return -1;
+    }
 }

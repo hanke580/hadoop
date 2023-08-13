@@ -27,21 +27,21 @@ import org.apache.hadoop.hdfs.server.federation.store.driver.StateStoreSerialize
  */
 public abstract class GetRouterRegistrationRequest {
 
-  public static GetRouterRegistrationRequest newInstance() {
-    return StateStoreSerializer.newRecord(GetRouterRegistrationRequest.class);
-  }
+    public static GetRouterRegistrationRequest newInstance() {
+        return StateStoreSerializer.newRecord(GetRouterRegistrationRequest.class);
+    }
 
-  public static GetRouterRegistrationRequest newInstance(String routerId) {
-    GetRouterRegistrationRequest request = newInstance();
-    request.setRouterId(routerId);
-    return request;
-  }
+    public static GetRouterRegistrationRequest newInstance(String routerId) {
+        GetRouterRegistrationRequest request = newInstance();
+        request.setRouterId(routerId);
+        return request;
+    }
 
-  @Public
-  @Unstable
-  public abstract String getRouterId();
+    @Public
+    @Unstable
+    public abstract String getRouterId();
 
-  @Public
-  @Unstable
-  public abstract void setRouterId(String routerId);
+    @Public
+    @Unstable
+    public abstract void setRouterId(String routerId);
 }

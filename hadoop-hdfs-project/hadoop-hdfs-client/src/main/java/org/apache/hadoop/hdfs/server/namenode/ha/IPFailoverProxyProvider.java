@@ -20,7 +20,6 @@ package org.apache.hadoop.hdfs.server.namenode.ha;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.DFSUtilClient;
 import org.apache.hadoop.ipc.RPC;
@@ -41,47 +40,48 @@ import org.apache.hadoop.ipc.RPC;
  *
  * The namenode URI must contain a resolvable host name.
  */
-public class IPFailoverProxyProvider<T> extends
-    AbstractNNFailoverProxyProvider<T> {
-  private final NNProxyInfo<T> nnProxyInfo;
+public class IPFailoverProxyProvider<T> extends AbstractNNFailoverProxyProvider<T> {
 
-  public IPFailoverProxyProvider(Configuration conf, URI uri,
-      Class<T> xface, HAProxyFactory<T> factory) {
-    super(conf, uri, xface, factory);
-    this.nnProxyInfo = new NNProxyInfo<>(DFSUtilClient.getNNAddress(uri));
-  }
+    private final NNProxyInfo<T> nnProxyInfo;
 
-  @Override
-  public synchronized NNProxyInfo<T> getProxy() {
-    // Create a non-ha proxy if not already created.
-    return createProxyIfNeeded(nnProxyInfo);
-  }
-
-  /** Nothing to do for IP failover */
-  @Override
-  public void performFailover(T currentProxy) {
-  }
-
-  /**
-   * Close the proxy,
-   */
-  @Override
-  public synchronized void close() throws IOException {
-    if (nnProxyInfo.proxy == null) {
-      return;
+    public IPFailoverProxyProvider(Configuration conf, URI uri, Class<T> xface, HAProxyFactory<T> factory) {
+        super(conf, uri, xface, factory);
+        this.nnProxyInfo = new NNProxyInfo<>(DFSUtilClient.getNNAddress(uri));
     }
-    if (nnProxyInfo.proxy instanceof Closeable) {
-      ((Closeable)nnProxyInfo.proxy).close();
-    } else {
-      RPC.stopProxy(nnProxyInfo.proxy);
-    }
-  }
 
-  /**
-   * Logical URI is not used for IP failover.
-   */
-  @Override
-  public boolean useLogicalURI() {
-    return false;
-  }
+    @Override
+    public synchronized NNProxyInfo<T> getProxy() {
+        // Create a non-ha proxy if not already created.
+        return createProxyIfNeeded(nnProxyInfo);
+    }
+
+    /**
+     * Nothing to do for IP failover
+     */
+    @Override
+    public void performFailover(T currentProxy) {
+    }
+
+    /**
+     * Close the proxy,
+     */
+    @Override
+    public synchronized void close() throws IOException {
+        if (nnProxyInfo.proxy == null) {
+            return;
+        }
+        if (nnProxyInfo.proxy instanceof Closeable) {
+            ((Closeable) nnProxyInfo.proxy).close();
+        } else {
+            RPC.stopProxy(nnProxyInfo.proxy);
+        }
+    }
+
+    /**
+     * Logical URI is not used for IP failover.
+     */
+    @Override
+    public boolean useLogicalURI() {
+        return false;
+    }
 }

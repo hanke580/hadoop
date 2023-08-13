@@ -27,9 +27,8 @@ import org.apache.hadoop.security.token.delegation.AbstractDelegationTokenIdenti
  */
 public interface TokenVerifier<T extends AbstractDelegationTokenIdentifier> {
 
-  /* Verify delegation token passed through WebHDFS
+    /* Verify delegation token passed through WebHDFS
    * Name node, Router implement this for JspHelper to verify token
    */
-  void verifyToken(T t, byte[] password) throws IOException;
-
+    void verifyToken(T t, byte[] password) throws IOException;
 }

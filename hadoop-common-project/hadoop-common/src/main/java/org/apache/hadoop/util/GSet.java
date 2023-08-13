@@ -18,7 +18,6 @@
 package org.apache.hadoop.util;
 
 import java.util.Collection;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,78 +26,79 @@ import org.slf4j.LoggerFactory;
  * A {@link GSet} is set,
  * which supports the {@link #get(Object)} operation.
  * The {@link #get(Object)} operation uses a key to lookup an element.
- * 
+ *
  * Null element is not supported.
- * 
+ *
  * @param <K> The type of the keys.
  * @param <E> The type of the elements, which must be a subclass of the keys.
  */
 @InterfaceAudience.Private
 public interface GSet<K, E extends K> extends Iterable<E> {
-  Logger LOG = LoggerFactory.getLogger(GSet.class);
 
-  /**
-   * @return The size of this set.
-   */
-  int size();
+    Logger LOG = LoggerFactory.getLogger(GSet.class);
 
-  /**
-   * Does this set contain an element corresponding to the given key?
-   * @param key The given key.
-   * @return true if the given key equals to a stored element.
-   *         Otherwise, return false.
-   * @throws NullPointerException if key == null.
-   */
-  boolean contains(K key);
+    /**
+     * @return The size of this set.
+     */
+    int size();
 
-  /**
-   * Return the stored element which is equal to the given key.
-   * This operation is similar to {@link java.util.Map#get(Object)}.
-   * @param key The given key.
-   * @return The stored element if it exists.
-   *         Otherwise, return null.
-   * @throws NullPointerException if key == null.
-   */
-  E get(K key);
+    /**
+     * Does this set contain an element corresponding to the given key?
+     * @param key The given key.
+     * @return true if the given key equals to a stored element.
+     *         Otherwise, return false.
+     * @throws NullPointerException if key == null.
+     */
+    boolean contains(K key);
 
-  /**
-   * Add/replace an element.
-   * If the element does not exist, add it to the set.
-   * Otherwise, replace the existing element.
-   *
-   * Note that this operation
-   * is similar to {@link java.util.Map#put(Object, Object)}
-   * but is different from {@link java.util.Set#add(Object)}
-   * which does not replace the existing element if there is any.
-   *
-   * @param element The element being put.
-   * @return the previous stored element if there is any.
-   *         Otherwise, return null.
-   * @throws NullPointerException if element == null.
-   */
-  E put(E element);
+    /**
+     * Return the stored element which is equal to the given key.
+     * This operation is similar to {@link java.util.Map#get(Object)}.
+     * @param key The given key.
+     * @return The stored element if it exists.
+     *         Otherwise, return null.
+     * @throws NullPointerException if key == null.
+     */
+    E get(K key);
 
-  /**
-   * Remove the element corresponding to the given key. 
-   * This operation is similar to {@link java.util.Map#remove(Object)}.
-   * @param key The key of the element being removed.
-   * @return If such element exists, return it.
-   *         Otherwise, return null. 
-    * @throws NullPointerException if key == null.
-  */
-  E remove(K key);
+    /**
+     * Add/replace an element.
+     * If the element does not exist, add it to the set.
+     * Otherwise, replace the existing element.
+     *
+     * Note that this operation
+     * is similar to {@link java.util.Map#put(Object, Object)}
+     * but is different from {@link java.util.Set#add(Object)}
+     * which does not replace the existing element if there is any.
+     *
+     * @param element The element being put.
+     * @return the previous stored element if there is any.
+     *         Otherwise, return null.
+     * @throws NullPointerException if element == null.
+     */
+    E put(E element);
 
-  /**
-   * Clear the set.
-   */
-  void clear();
+    /**
+     * Remove the element corresponding to the given key.
+     * This operation is similar to {@link java.util.Map#remove(Object)}.
+     * @param key The key of the element being removed.
+     * @return If such element exists, return it.
+     *         Otherwise, return null.
+     * @throws NullPointerException if key == null.
+     */
+    E remove(K key);
 
-  /**
-   * Returns a {@link Collection} view of the values contained in this set.
-   * The collection is backed by the set, so changes to the set are
-   * reflected in the collection, and vice-versa.
-   *
-   * @return the collection of values.
-   */
-  Collection<E> values();
+    /**
+     * Clear the set.
+     */
+    void clear();
+
+    /**
+     * Returns a {@link Collection} view of the values contained in this set.
+     * The collection is backed by the set, so changes to the set are
+     * reflected in the collection, and vice-versa.
+     *
+     * @return the collection of values.
+     */
+    Collection<E> values();
 }

@@ -24,7 +24,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.authentication.server.AuthenticationFilter;
@@ -43,81 +42,75 @@ import org.junit.rules.Timeout;
  */
 public class TestHttpFSServerWebServer {
 
-  @Rule
-  public Timeout timeout = new Timeout(30000);
-  private HttpFSServerWebServer webServer;
+    @Rule
+    public Timeout timeout = new Timeout(30000);
 
-  @BeforeClass
-  public static void beforeClass() throws Exception {
-    File homeDir = GenericTestUtils.getTestDir();
-    File confDir = new File(homeDir, "etc/hadoop");
-    File logsDir = new File(homeDir, "logs");
-    File tempDir = new File(homeDir, "temp");
-    confDir.mkdirs();
-    logsDir.mkdirs();
-    tempDir.mkdirs();
+    private HttpFSServerWebServer webServer;
 
-    if (Shell.WINDOWS) {
-      File binDir = new File(homeDir, "bin");
-      binDir.mkdirs();
-      File winutils = Shell.getWinUtilsFile();
-      if (winutils.exists()) {
-        FileUtils.copyFileToDirectory(winutils, binDir);
-      }
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        File homeDir = GenericTestUtils.getTestDir();
+        File confDir = new File(homeDir, "etc/hadoop");
+        File logsDir = new File(homeDir, "logs");
+        File tempDir = new File(homeDir, "temp");
+        confDir.mkdirs();
+        logsDir.mkdirs();
+        tempDir.mkdirs();
+        if (Shell.WINDOWS) {
+            File binDir = new File(homeDir, "bin");
+            binDir.mkdirs();
+            File winutils = Shell.getWinUtilsFile();
+            if (winutils.exists()) {
+                FileUtils.copyFileToDirectory(winutils, binDir);
+            }
+        }
+        System.setProperty("hadoop.home.dir", homeDir.getAbsolutePath());
+        System.setProperty("hadoop.log.dir", logsDir.getAbsolutePath());
+        System.setProperty("httpfs.home.dir", homeDir.getAbsolutePath());
+        System.setProperty("httpfs.log.dir", logsDir.getAbsolutePath());
+        System.setProperty("httpfs.config.dir", confDir.getAbsolutePath());
+        FileUtils.writeStringToFile(new File(confDir, "httpfs-signature.secret"), "foo", StandardCharsets.UTF_8);
     }
 
-    System.setProperty("hadoop.home.dir", homeDir.getAbsolutePath());
-    System.setProperty("hadoop.log.dir", logsDir.getAbsolutePath());
-    System.setProperty("httpfs.home.dir", homeDir.getAbsolutePath());
-    System.setProperty("httpfs.log.dir", logsDir.getAbsolutePath());
-    System.setProperty("httpfs.config.dir", confDir.getAbsolutePath());
-    FileUtils.writeStringToFile(new File(confDir, "httpfs-signature.secret"),
-        "foo", StandardCharsets.UTF_8);
-  }
+    @Before
+    public void setUp() throws Exception {
+        Configuration conf = new Configuration();
+        conf.set(HttpFSServerWebServer.HTTP_HOSTNAME_KEY, "localhost");
+        conf.setInt(HttpFSServerWebServer.HTTP_PORT_KEY, 0);
+        conf.set(AuthenticationFilter.SIGNATURE_SECRET_FILE, "httpfs-signature.secret");
+        Configuration sslConf = new Configuration();
+        webServer = new HttpFSServerWebServer(conf, sslConf);
+    }
 
-  @Before
-  public void setUp() throws Exception {
-    Configuration conf = new Configuration();
-    conf.set(HttpFSServerWebServer.HTTP_HOSTNAME_KEY, "localhost");
-    conf.setInt(HttpFSServerWebServer.HTTP_PORT_KEY, 0);
-    conf.set(AuthenticationFilter.SIGNATURE_SECRET_FILE,
-        "httpfs-signature.secret");
-    Configuration sslConf = new Configuration();
-    webServer = new HttpFSServerWebServer(conf, sslConf);
-  }
+    @Test
+    public void testStartStop() throws Exception {
+        webServer.start();
+        String user = HadoopUsersConfTestHelper.getHadoopUsers()[0];
+        URL url = new URL(webServer.getUrl(), MessageFormat.format("/webhdfs/v1/?user.name={0}&op=liststatus", user));
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        Assert.assertEquals(HttpURLConnection.HTTP_OK, conn.getResponseCode());
+        BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        reader.readLine();
+        reader.close();
+        webServer.stop();
+    }
 
-  @Test
-  public void testStartStop() throws Exception {
-    webServer.start();
-    String user = HadoopUsersConfTestHelper.getHadoopUsers()[0];
-    URL url = new URL(webServer.getUrl(), MessageFormat.format(
-        "/webhdfs/v1/?user.name={0}&op=liststatus", user));
-    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-    Assert.assertEquals(HttpURLConnection.HTTP_OK, conn.getResponseCode());
-    BufferedReader reader = new BufferedReader(
-        new InputStreamReader(conn.getInputStream()));
-    reader.readLine();
-    reader.close();
-    webServer.stop();
-  }
+    @Test
+    public void testJustStop() throws Exception {
+        webServer.stop();
+    }
 
-  @Test
-  public void testJustStop() throws Exception {
-    webServer.stop();
-  }
+    @Test
+    public void testDoubleStop() throws Exception {
+        webServer.start();
+        webServer.stop();
+        webServer.stop();
+    }
 
-  @Test
-  public void testDoubleStop() throws Exception {
-    webServer.start();
-    webServer.stop();
-    webServer.stop();
-  }
-
-  @Test
-  public void testDoubleStart() throws Exception {
-    webServer.start();
-    webServer.start();
-    webServer.stop();
-  }
-
+    @Test
+    public void testDoubleStart() throws Exception {
+        webServer.start();
+        webServer.start();
+        webServer.stop();
+    }
 }

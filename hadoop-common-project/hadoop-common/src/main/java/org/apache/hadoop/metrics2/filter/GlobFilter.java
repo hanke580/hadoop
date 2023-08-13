@@ -15,15 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.metrics2.filter;
 
 import org.apache.hadoop.fs.GlobPattern;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
-
 import com.google.re2j.Pattern;
+
 /**
  * A glob pattern filter for metrics.
  *
@@ -33,8 +31,8 @@ import com.google.re2j.Pattern;
 @InterfaceStability.Evolving
 public class GlobFilter extends AbstractPatternFilter {
 
-  @Override
-  protected Pattern compile(String s) {
-    return GlobPattern.compile(s);
-  }
+    @Override
+    protected Pattern compile(String s) {
+        return GlobPattern.compile(s);
+    }
 }

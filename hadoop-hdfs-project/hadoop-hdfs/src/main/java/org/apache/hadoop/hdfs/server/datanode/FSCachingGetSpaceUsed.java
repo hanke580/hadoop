@@ -15,11 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.datanode;
 
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.fs.CachingGetSpaceUsed;
@@ -34,49 +32,51 @@ import org.slf4j.LoggerFactory;
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
 public abstract class FSCachingGetSpaceUsed extends CachingGetSpaceUsed {
-  static final Logger LOG =
-      LoggerFactory.getLogger(FSCachingGetSpaceUsed.class);
 
-  public FSCachingGetSpaceUsed(Builder builder) throws IOException {
-    super(builder);
-  }
+    static final Logger LOG = LoggerFactory.getLogger(FSCachingGetSpaceUsed.class);
 
-  /**
-   * The builder class.
-   */
-  public static class Builder extends GetSpaceUsed.Builder {
-    private FsVolumeImpl volume;
-    private String bpid;
-
-    public FsVolumeImpl getVolume() {
-      return volume;
+    public FSCachingGetSpaceUsed(Builder builder) throws IOException {
+        super(builder);
     }
 
-    public Builder setVolume(FsVolumeImpl fsVolume) {
-      this.volume = fsVolume;
-      return this;
-    }
+    /**
+     * The builder class.
+     */
+    public static class Builder extends GetSpaceUsed.Builder {
 
-    public String getBpid() {
-      return bpid;
-    }
+        private FsVolumeImpl volume;
 
-    public Builder setBpid(String bpid) {
-      this.bpid = bpid;
-      return this;
-    }
+        private String bpid;
 
-    @Override
-    public GetSpaceUsed build() throws IOException {
-      Class clazz = getKlass();
-      if (FSCachingGetSpaceUsed.class.isAssignableFrom(clazz)) {
-        try {
-          setCons(clazz.getConstructor(Builder.class));
-        } catch (NoSuchMethodException e) {
-          throw new RuntimeException(e);
+        public FsVolumeImpl getVolume() {
+            return volume;
         }
-      }
-      return super.build();
+
+        public Builder setVolume(FsVolumeImpl fsVolume) {
+            this.volume = fsVolume;
+            return this;
+        }
+
+        public String getBpid() {
+            return bpid;
+        }
+
+        public Builder setBpid(String bpid) {
+            this.bpid = bpid;
+            return this;
+        }
+
+        @Override
+        public GetSpaceUsed build() throws IOException {
+            Class clazz = getKlass();
+            if (FSCachingGetSpaceUsed.class.isAssignableFrom(clazz)) {
+                try {
+                    setCons(clazz.getConstructor(Builder.class));
+                } catch (NoSuchMethodException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            return super.build();
+        }
     }
-  }
 }

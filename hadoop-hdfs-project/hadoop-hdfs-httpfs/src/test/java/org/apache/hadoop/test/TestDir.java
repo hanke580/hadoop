@@ -17,7 +17,6 @@
  */
 package org.apache.hadoop.test;
 
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 

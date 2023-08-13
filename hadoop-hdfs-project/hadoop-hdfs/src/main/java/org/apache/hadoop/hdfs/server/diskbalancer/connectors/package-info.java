@@ -14,7 +14,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 /**
  * Connectors package is a set of logical connectors that connect
  * to various data sources to read the hadoop cluster information.
@@ -34,3 +33,4 @@
  * ask the diskBalancer Cluster to read data from this source.
  */
 package org.apache.hadoop.hdfs.server.diskbalancer.connectors;
+

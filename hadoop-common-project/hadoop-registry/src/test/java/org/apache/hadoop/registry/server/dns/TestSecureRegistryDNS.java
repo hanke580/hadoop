@@ -20,25 +20,20 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.registry.client.api.RegistryConstants;
 
 /**
- *
  */
 public class TestSecureRegistryDNS extends TestRegistryDNS {
-  @Override protected Configuration createConfiguration() {
-    Configuration conf = super.createConfiguration();
-    conf.setBoolean(RegistryConstants.KEY_DNSSEC_ENABLED, true);
-    conf.set(RegistryConstants.KEY_DNSSEC_PUBLIC_KEY,
-        "AwEAAe1Jev0Az1khlQCvf0nud1/CNHQwwPEu8BNchZthdDxKPVn29yrD "
-            + "CHoAWjwiGsOSw3SzIPrawSbHzyJsjn0oLBhGrH6QedFGnydoxjNsw3m/ "
-            + "SCmOjR/a7LGBAMDFKqFioi4gOyuN66svBeY+/5uw72+0ei9AQ20gqf6q "
-            + "l9Ozs5bV");
-    conf.set(RegistryConstants.KEY_DNSSEC_PRIVATE_KEY_FILE,
-        getClass().getResource("/test.private").getFile());
 
-    return conf;
-  }
+    @Override
+    protected Configuration createConfiguration() {
+        Configuration conf = super.createConfiguration();
+        conf.setBoolean(RegistryConstants.KEY_DNSSEC_ENABLED, true);
+        conf.set(RegistryConstants.KEY_DNSSEC_PUBLIC_KEY, "AwEAAe1Jev0Az1khlQCvf0nud1/CNHQwwPEu8BNchZthdDxKPVn29yrD " + "CHoAWjwiGsOSw3SzIPrawSbHzyJsjn0oLBhGrH6QedFGnydoxjNsw3m/ " + "SCmOjR/a7LGBAMDFKqFioi4gOyuN66svBeY+/5uw72+0ei9AQ20gqf6q " + "l9Ozs5bV");
+        conf.set(RegistryConstants.KEY_DNSSEC_PRIVATE_KEY_FILE, getClass().getResource("/test.private").getFile());
+        return conf;
+    }
 
-  @Override protected boolean isSecure() {
-    return true;
-  }
-
+    @Override
+    protected boolean isSecure() {
+        return true;
+    }
 }

@@ -15,9 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.datanode.fsdataset.impl;
-
 
 import com.google.common.base.Supplier;
 import org.apache.hadoop.fs.CreateFlag;
@@ -30,11 +28,9 @@ import org.apache.hadoop.hdfs.server.datanode.DataNodeTestUtils;
 import org.apache.hadoop.hdfs.server.datanode.fsdataset.FsDatasetSpi;
 import org.apache.hadoop.test.GenericTestUtils;
 import org.junit.Test;
-
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.concurrent.TimeoutException;
-
 import static org.apache.hadoop.fs.CreateFlag.CREATE;
 import static org.apache.hadoop.fs.CreateFlag.LAZY_PERSIST;
 import static org.apache.hadoop.fs.StorageType.DEFAULT;
@@ -48,154 +44,121 @@ import static org.junit.Assert.assertThat;
  */
 public class TestLazyPersistLockedMemory extends LazyPersistTestCase {
 
-  /**
-   * RAM disk present but locked memory is set to zero. Placement should
-   * fall back to disk.
-   */
-  @Test
-  public void testWithNoLockedMemory()
-      throws IOException, TimeoutException, InterruptedException {
-    getClusterBuilder().setNumDatanodes(1)
-                       .setMaxLockedMemory(0).build();
+    /**
+     * RAM disk present but locked memory is set to zero. Placement should
+     * fall back to disk.
+     */
+    @Test
+    public void testWithNoLockedMemory() throws IOException, TimeoutException, InterruptedException {
+        getClusterBuilder().setNumDatanodes(1).setMaxLockedMemory(0).build();
+        final String METHOD_NAME = GenericTestUtils.getMethodName();
+        Path path = new Path("/" + METHOD_NAME + ".dat");
+        makeTestFile(path, BLOCK_SIZE, true);
+        ensureFileReplicasOnStorageType(path, DEFAULT);
+    }
 
-    final String METHOD_NAME = GenericTestUtils.getMethodName();
-    Path path = new Path("/" + METHOD_NAME + ".dat");
-    makeTestFile(path, BLOCK_SIZE, true);
-    ensureFileReplicasOnStorageType(path, DEFAULT);
-  }
+    @Test
+    public void testReservation() throws IOException, TimeoutException, InterruptedException {
+        getClusterBuilder().setNumDatanodes(1).setMaxLockedMemory(BLOCK_SIZE).build();
+        final String METHOD_NAME = GenericTestUtils.getMethodName();
+        final FsDatasetSpi<?> fsd = cluster.getDataNodes().get(0).getFSDataset();
+        // Create a file and ensure the replica in RAM_DISK uses locked memory.
+        Path path = new Path("/" + METHOD_NAME + ".dat");
+        makeTestFile(path, BLOCK_SIZE, true);
+        ensureFileReplicasOnStorageType(path, RAM_DISK);
+        assertThat(fsd.getCacheUsed(), is((long) BLOCK_SIZE));
+    }
 
-  @Test
-  public void testReservation()
-      throws IOException, TimeoutException, InterruptedException {
-    getClusterBuilder().setNumDatanodes(1)
-                       .setMaxLockedMemory(BLOCK_SIZE).build();
-    final String METHOD_NAME = GenericTestUtils.getMethodName();
-    final FsDatasetSpi<?> fsd = cluster.getDataNodes().get(0).getFSDataset();
+    @Test
+    public void testReleaseOnFileDeletion() throws IOException, TimeoutException, InterruptedException {
+        getClusterBuilder().setNumDatanodes(1).setMaxLockedMemory(BLOCK_SIZE).build();
+        final String METHOD_NAME = GenericTestUtils.getMethodName();
+        final FsDatasetSpi<?> fsd = cluster.getDataNodes().get(0).getFSDataset();
+        Path path = new Path("/" + METHOD_NAME + ".dat");
+        makeTestFile(path, BLOCK_SIZE, true);
+        ensureFileReplicasOnStorageType(path, RAM_DISK);
+        assertThat(fsd.getCacheUsed(), is((long) BLOCK_SIZE));
+        // Delete the file and ensure that the locked memory is released.
+        fs.delete(path, false);
+        DataNodeTestUtils.triggerBlockReport(cluster.getDataNodes().get(0));
+        waitForLockedBytesUsed(fsd, 0);
+    }
 
-    // Create a file and ensure the replica in RAM_DISK uses locked memory.
-    Path path = new Path("/" + METHOD_NAME + ".dat");
-    makeTestFile(path, BLOCK_SIZE, true);
-    ensureFileReplicasOnStorageType(path, RAM_DISK);
-    assertThat(fsd.getCacheUsed(), is((long) BLOCK_SIZE));
-  }
+    /**
+     * Verify that locked RAM is released when blocks are evicted from RAM disk.
+     */
+    @Test
+    public void testReleaseOnEviction() throws Exception {
+        getClusterBuilder().setNumDatanodes(1).setMaxLockedMemory(BLOCK_SIZE).setRamDiskReplicaCapacity(BLOCK_SIZE * 2 - 1).build();
+        final String METHOD_NAME = GenericTestUtils.getMethodName();
+        final FsDatasetImpl fsd = (FsDatasetImpl) cluster.getDataNodes().get(0).getFSDataset();
+        Path path1 = new Path("/" + METHOD_NAME + ".01.dat");
+        makeTestFile(path1, BLOCK_SIZE, true);
+        assertThat(fsd.getCacheUsed(), is((long) BLOCK_SIZE));
+        // Wait until the replica is written to persistent storage.
+        waitForMetric("RamDiskBlocksLazyPersisted", 1);
+        // Trigger eviction and verify locked bytes were released.
+        fsd.evictLazyPersistBlocks(Long.MAX_VALUE);
+        verifyRamDiskJMXMetric("RamDiskBlocksEvicted", 1);
+        waitForLockedBytesUsed(fsd, 0);
+    }
 
-  @Test
-  public void testReleaseOnFileDeletion()
-      throws IOException, TimeoutException, InterruptedException {
-    getClusterBuilder().setNumDatanodes(1)
-                       .setMaxLockedMemory(BLOCK_SIZE).build();
-    final String METHOD_NAME = GenericTestUtils.getMethodName();
-    final FsDatasetSpi<?> fsd = cluster.getDataNodes().get(0).getFSDataset();
+    /**
+     * Verify that locked bytes are correctly updated when a block is finalized
+     * at less than its max length.
+     */
+    @Test
+    public void testShortBlockFinalized() throws IOException, TimeoutException, InterruptedException {
+        getClusterBuilder().setNumDatanodes(1).build();
+        final String METHOD_NAME = GenericTestUtils.getMethodName();
+        final FsDatasetSpi<?> fsd = cluster.getDataNodes().get(0).getFSDataset();
+        Path path = new Path("/" + METHOD_NAME + ".dat");
+        makeTestFile(path, 1, true);
+        assertThat(fsd.getCacheUsed(), is(osPageSize));
+        // Delete the file and ensure locked RAM usage goes to zero.
+        fs.delete(path, false);
+        waitForLockedBytesUsed(fsd, 0);
+    }
 
-    Path path = new Path("/" + METHOD_NAME + ".dat");
-    makeTestFile(path, BLOCK_SIZE, true);
-    ensureFileReplicasOnStorageType(path, RAM_DISK);
-    assertThat(fsd.getCacheUsed(), is((long) BLOCK_SIZE));
+    /**
+     * Verify that locked bytes are correctly updated when the client goes
+     * away unexpectedly during a write.
+     */
+    @Test
+    public void testWritePipelineFailure() throws IOException, TimeoutException, InterruptedException {
+        getClusterBuilder().setNumDatanodes(1).build();
+        final String METHOD_NAME = GenericTestUtils.getMethodName();
+        final FsDatasetSpi<?> fsd = cluster.getDataNodes().get(0).getFSDataset();
+        Path path = new Path("/" + METHOD_NAME + ".dat");
+        EnumSet<CreateFlag> createFlags = EnumSet.of(CREATE, LAZY_PERSIST);
+        // Write 1 byte to the file and kill the writer.
+        final FSDataOutputStream fos = fs.create(path, FsPermission.getFileDefault(), createFlags, BUFFER_LENGTH, REPL_FACTOR, BLOCK_SIZE, null);
+        fos.write(new byte[1]);
+        fos.hsync();
+        DFSTestUtil.abortStream((DFSOutputStream) fos.getWrappedStream());
+        waitForLockedBytesUsed(fsd, osPageSize);
+        // Delete the file and ensure locked RAM goes to zero.
+        fs.delete(path, false);
+        DataNodeTestUtils.triggerBlockReport(cluster.getDataNodes().get(0));
+        waitForLockedBytesUsed(fsd, 0);
+    }
 
-    // Delete the file and ensure that the locked memory is released.
-    fs.delete(path, false);
-    DataNodeTestUtils.triggerBlockReport(cluster.getDataNodes().get(0));
-    waitForLockedBytesUsed(fsd, 0);
-  }
+    /**
+     * Wait until used locked byte count goes to the expected value.
+     * @throws TimeoutException after 300 seconds.
+     */
+    private void waitForLockedBytesUsed(final FsDatasetSpi<?> fsd, final long expectedLockedBytes) throws TimeoutException, InterruptedException {
+        GenericTestUtils.waitFor(new Supplier<Boolean>() {
 
-  /**
-   * Verify that locked RAM is released when blocks are evicted from RAM disk.
-   */
-  @Test
-  public void testReleaseOnEviction() throws Exception {
-    getClusterBuilder().setNumDatanodes(1)
-                       .setMaxLockedMemory(BLOCK_SIZE)
-                       .setRamDiskReplicaCapacity(BLOCK_SIZE * 2 - 1)
-                       .build();
-    final String METHOD_NAME = GenericTestUtils.getMethodName();
-    final FsDatasetImpl fsd =
-        (FsDatasetImpl) cluster.getDataNodes().get(0).getFSDataset();
-
-    Path path1 = new Path("/" + METHOD_NAME + ".01.dat");
-    makeTestFile(path1, BLOCK_SIZE, true);
-    assertThat(fsd.getCacheUsed(), is((long) BLOCK_SIZE));
-
-    // Wait until the replica is written to persistent storage.
-    waitForMetric("RamDiskBlocksLazyPersisted", 1);
-
-    // Trigger eviction and verify locked bytes were released.
-    fsd.evictLazyPersistBlocks(Long.MAX_VALUE);
-    verifyRamDiskJMXMetric("RamDiskBlocksEvicted", 1);
-    waitForLockedBytesUsed(fsd, 0);
-  }
-
-  /**
-   * Verify that locked bytes are correctly updated when a block is finalized
-   * at less than its max length.
-   */
-  @Test
-  public void testShortBlockFinalized()
-      throws IOException, TimeoutException, InterruptedException {
-    getClusterBuilder().setNumDatanodes(1).build();
-    final String METHOD_NAME = GenericTestUtils.getMethodName();
-    final FsDatasetSpi<?> fsd = cluster.getDataNodes().get(0).getFSDataset();
-
-    Path path = new Path("/" + METHOD_NAME + ".dat");
-    makeTestFile(path, 1, true);
-    assertThat(fsd.getCacheUsed(), is(osPageSize));
-
-    // Delete the file and ensure locked RAM usage goes to zero.
-    fs.delete(path, false);
-    waitForLockedBytesUsed(fsd, 0);
-  }
-
-  /**
-   * Verify that locked bytes are correctly updated when the client goes
-   * away unexpectedly during a write.
-   */
-  @Test
-  public void testWritePipelineFailure()
-    throws IOException, TimeoutException, InterruptedException {
-    getClusterBuilder().setNumDatanodes(1).build();
-    final String METHOD_NAME = GenericTestUtils.getMethodName();
-    final FsDatasetSpi<?> fsd = cluster.getDataNodes().get(0).getFSDataset();
-
-    Path path = new Path("/" + METHOD_NAME + ".dat");
-
-    EnumSet<CreateFlag> createFlags = EnumSet.of(CREATE, LAZY_PERSIST);
-    // Write 1 byte to the file and kill the writer.
-    final FSDataOutputStream fos =
-        fs.create(path,
-                  FsPermission.getFileDefault(),
-                  createFlags,
-                  BUFFER_LENGTH,
-                  REPL_FACTOR,
-                  BLOCK_SIZE,
-                  null);
-
-    fos.write(new byte[1]);
-    fos.hsync();
-    DFSTestUtil.abortStream((DFSOutputStream) fos.getWrappedStream());
-    waitForLockedBytesUsed(fsd, osPageSize);
-
-    // Delete the file and ensure locked RAM goes to zero.
-    fs.delete(path, false);
-    DataNodeTestUtils.triggerBlockReport(cluster.getDataNodes().get(0));
-    waitForLockedBytesUsed(fsd, 0);
-  }
-
-  /**
-   * Wait until used locked byte count goes to the expected value.
-   * @throws TimeoutException after 300 seconds.
-   */
-  private void waitForLockedBytesUsed(final FsDatasetSpi<?> fsd,
-                                      final long expectedLockedBytes)
-      throws TimeoutException, InterruptedException {
-    GenericTestUtils.waitFor(new Supplier<Boolean>() {
-      @Override
-      public Boolean get() {
-        long cacheUsed = fsd.getCacheUsed();
-        LOG.info("cacheUsed=" + cacheUsed + ", waiting for it to be " + expectedLockedBytes);
-        if (cacheUsed < 0) {
-          throw new IllegalStateException("cacheUsed unpexpectedly negative");
-        }
-        return (cacheUsed == expectedLockedBytes);
-      }
-    }, 1000, 300000);
-  }
+            @Override
+            public Boolean get() {
+                long cacheUsed = fsd.getCacheUsed();
+                LOG.info("cacheUsed=" + cacheUsed + ", waiting for it to be " + expectedLockedBytes);
+                if (cacheUsed < 0) {
+                    throw new IllegalStateException("cacheUsed unpexpectedly negative");
+                }
+                return (cacheUsed == expectedLockedBytes);
+            }
+        }, 1000, 300000);
+    }
 }

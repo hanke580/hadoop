@@ -15,13 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.lib.service.scheduler;
 
 import static org.junit.Assert.assertNotNull;
-
 import java.util.Arrays;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.lib.server.Server;
 import org.apache.hadoop.lib.service.Scheduler;
@@ -34,17 +31,15 @@ import org.junit.Test;
 
 public class TestSchedulerService extends HTestCase {
 
-  @Test
-  @TestDir
-  public void service() throws Exception {
-    String dir = TestDirHelper.getTestDir().getAbsolutePath();
-    Configuration conf = new Configuration(false);
-    conf.set("server.services", StringUtils.join(",", Arrays.asList(InstrumentationService.class.getName(),
-                                                                    SchedulerService.class.getName())));
-    Server server = new Server("server", dir, dir, dir, dir, conf);
-    server.init();
-    assertNotNull(server.get(Scheduler.class));
-    server.destroy();
-  }
-
+    @Test
+    @TestDir
+    public void service() throws Exception {
+        String dir = TestDirHelper.getTestDir().getAbsolutePath();
+        Configuration conf = new Configuration(false);
+        conf.set("server.services", StringUtils.join(",", Arrays.asList(InstrumentationService.class.getName(), SchedulerService.class.getName())));
+        Server server = new Server("server", dir, dir, dir, dir, conf);
+        server.init();
+        assertNotNull(server.get(Scheduler.class));
+        server.destroy();
+    }
 }

@@ -27,43 +27,40 @@ import org.junit.rules.Timeout;
  */
 public class TestXORCoder extends TestErasureCoderBase {
 
-  @Rule
-  public Timeout globalTimeout = new Timeout(300000);
+    @Rule
+    public Timeout globalTimeout = new Timeout(300000);
 
-  @Before
-  public void setup() {
-    this.encoderClass = XORErasureEncoder.class;
-    this.decoderClass = XORErasureDecoder.class;
+    @Before
+    public void setup() {
+        this.encoderClass = XORErasureEncoder.class;
+        this.decoderClass = XORErasureDecoder.class;
+        this.numDataUnits = 10;
+        this.numParityUnits = 1;
+        this.numChunksInBlock = 10;
+    }
 
-    this.numDataUnits = 10;
-    this.numParityUnits = 1;
-    this.numChunksInBlock = 10;
-  }
+    @Test
+    public void testCodingNoDirectBuffer_erasing_p0() {
+        prepare(null, 10, 1, new int[0], new int[] { 0 });
+        /**
+         * Doing twice to test if the coders can be repeatedly reused. This matters
+         * as the underlying coding buffers are shared, which may have bugs.
+         */
+        testCoding(false);
+        testCoding(false);
+    }
 
-  @Test
-  public void testCodingNoDirectBuffer_erasing_p0() {
-    prepare(null, 10, 1, new int[0], new int[] {0});
-
-    /**
-     * Doing twice to test if the coders can be repeatedly reused. This matters
-     * as the underlying coding buffers are shared, which may have bugs.
-     */
-    testCoding(false);
-    testCoding(false);
-  }
-
-  @Test
-  public void testCodingBothBuffers_erasing_d5() {
-    prepare(null, 10, 1, new int[]{5}, new int[0]);
-
-    /**
-     * Doing in mixed buffer usage model to test if the coders can be repeatedly
-     * reused with different buffer usage model. This matters as the underlying
-     * coding buffers are shared, which may have bugs.
-     */
-    testCoding(true);
-    testCoding(false);
-    testCoding(true);
-    testCoding(false);
-  }
+    @Test
+    public void testCodingBothBuffers_erasing_d5() {
+        prepare(null, 10, 1, new int[] { 5 }, new int[0]);
+        /**
+         * Doing in mixed buffer usage model to test if the coders can be repeatedly
+         * reused with different buffer usage model. This matters as the underlying
+         * coding buffers are shared, which may have bugs.
+         */
+        testCoding(true);
+        testCoding(false);
+        testCoding(true);
+        testCoding(false);
+    }
 }

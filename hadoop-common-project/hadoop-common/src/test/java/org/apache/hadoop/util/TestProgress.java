@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.util;
 
 import org.junit.Assert;
@@ -23,22 +22,18 @@ import org.junit.Test;
 
 public class TestProgress {
 
-  @Test
-  public void testSet(){
-    Progress progress = new Progress();
-    progress.set(Float.NaN);
-    Assert.assertEquals(0, progress.getProgress(), 0.0);
-
-    progress.set(Float.NEGATIVE_INFINITY);
-    Assert.assertEquals(0,progress.getProgress(),0.0);
-
-    progress.set(-1);
-    Assert.assertEquals(0,progress.getProgress(),0.0);
-
-    progress.set((float) 1.1);
-    Assert.assertEquals(1,progress.getProgress(),0.0);
-
-    progress.set(Float.POSITIVE_INFINITY);
-    Assert.assertEquals(1,progress.getProgress(),0.0);
-  }
+    @Test
+    public void testSet() {
+        Progress progress = new Progress();
+        progress.set(Float.NaN);
+        Assert.assertEquals(0, progress.getProgress(), 0.0);
+        progress.set(Float.NEGATIVE_INFINITY);
+        Assert.assertEquals(0, progress.getProgress(), 0.0);
+        progress.set(-1);
+        Assert.assertEquals(0, progress.getProgress(), 0.0);
+        progress.set((float) 1.1);
+        Assert.assertEquals(1, progress.getProgress(), 0.0);
+        progress.set(Float.POSITIVE_INFINITY);
+        Assert.assertEquals(1, progress.getProgress(), 0.0);
+    }
 }

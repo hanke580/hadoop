@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * The AliasMap defines mapping of PROVIDED HDFS blocks to data in remote
  * storage systems.
@@ -26,3 +25,4 @@ package org.apache.hadoop.hdfs.server.common.blockaliasmap;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

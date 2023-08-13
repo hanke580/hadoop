@@ -15,12 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.federation.resolver;
 
 import java.io.IOException;
 import java.util.List;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
@@ -45,34 +43,34 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceStability.Evolving
 public interface FileSubclusterResolver {
 
-  /**
-   * Get the destinations for a global path. Results are from the mount table
-   * cache.  If multiple destinations are available, the first result is the
-   * highest priority destination.
-   *
-   * @param path Global path.
-   * @return Location in a destination namespace or null if it does not exist.
-   * @throws IOException Throws exception if the data is not available.
-   */
-  PathLocation getDestinationForPath(String path) throws IOException;
+    /**
+     * Get the destinations for a global path. Results are from the mount table
+     * cache.  If multiple destinations are available, the first result is the
+     * highest priority destination.
+     *
+     * @param path Global path.
+     * @return Location in a destination namespace or null if it does not exist.
+     * @throws IOException Throws exception if the data is not available.
+     */
+    PathLocation getDestinationForPath(String path) throws IOException;
 
-  /**
-   * Get a list of mount points for a path. Results are from the mount table
-   * cache.
-   *
-   * @param path Path to get the mount points under.
-   * @return List of mount points present at this path. Return zero-length
-   *         list if the path is a mount point but there are no mount points
-   *         under the path. Return null if the path is not a mount point
-   *         and there are no mount points under the path.
-   * @throws IOException Throws exception if the data is not available.
-   */
-  List<String> getMountPoints(String path) throws IOException;
+    /**
+     * Get a list of mount points for a path. Results are from the mount table
+     * cache.
+     *
+     * @param path Path to get the mount points under.
+     * @return List of mount points present at this path. Return zero-length
+     *         list if the path is a mount point but there are no mount points
+     *         under the path. Return null if the path is not a mount point
+     *         and there are no mount points under the path.
+     * @throws IOException Throws exception if the data is not available.
+     */
+    List<String> getMountPoints(String path) throws IOException;
 
-  /**
-   * Get the default namespace for the cluster.
-   *
-   * @return Default namespace identifier.
-   */
-  String getDefaultNamespace();
+    /**
+     * Get the default namespace for the cluster.
+     *
+     * @return Default namespace identifier.
+     */
+    String getDefaultNamespace();
 }

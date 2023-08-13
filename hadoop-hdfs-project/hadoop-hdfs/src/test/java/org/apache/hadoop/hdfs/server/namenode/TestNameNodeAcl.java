@@ -26,9 +26,9 @@ import org.junit.BeforeClass;
  */
 public class TestNameNodeAcl extends FSAclBaseTest {
 
-  @BeforeClass
-  public static void init() throws Exception {
-    conf = new Configuration();
-    startCluster();
-  }
+    @BeforeClass
+    public static void init() throws Exception {
+        conf = new Configuration();
+        startCluster();
+    }
 }

@@ -20,11 +20,9 @@ package org.apache.hadoop.hdfs.server.federation.metrics;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import javax.management.StandardMBean;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.server.federation.router.RouterRpcMonitor;
 import org.apache.hadoop.hdfs.server.federation.router.RouterRpcServer;
@@ -32,9 +30,7 @@ import org.apache.hadoop.hdfs.server.federation.store.StateStoreService;
 import org.apache.hadoop.metrics2.util.MBeans;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
 import static org.apache.hadoop.util.Time.monotonicNow;
 
 /**
@@ -43,204 +39,210 @@ import static org.apache.hadoop.util.Time.monotonicNow;
  */
 public class FederationRPCPerformanceMonitor implements RouterRpcMonitor {
 
-  private static final Logger LOG =
-      LoggerFactory.getLogger(FederationRPCPerformanceMonitor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FederationRPCPerformanceMonitor.class);
 
+    /**
+     * Time for an operation to be received in the Router.
+     */
+    private static final ThreadLocal<Long> START_TIME = new ThreadLocal<>();
 
-  /** Time for an operation to be received in the Router. */
-  private static final ThreadLocal<Long> START_TIME = new ThreadLocal<>();
-  /** Time for an operation to be send to the Namenode. */
-  private static final ThreadLocal<Long> PROXY_TIME = new ThreadLocal<>();
+    /**
+     * Time for an operation to be send to the Namenode.
+     */
+    private static final ThreadLocal<Long> PROXY_TIME = new ThreadLocal<>();
 
-  /** Configuration for the performance monitor. */
-  private Configuration conf;
-  /** RPC server for the Router. */
-  private RouterRpcServer server;
-  /** State Store. */
-  private StateStoreService store;
+    /**
+     * Configuration for the performance monitor.
+     */
+    private Configuration conf;
 
-  /** JMX interface to monitor the RPC metrics. */
-  private FederationRPCMetrics metrics;
-  private ObjectName registeredBean;
+    /**
+     * RPC server for the Router.
+     */
+    private RouterRpcServer server;
 
-  /** Thread pool for logging stats. */
-  private ExecutorService executor;
+    /**
+     * State Store.
+     */
+    private StateStoreService store;
 
+    /**
+     * JMX interface to monitor the RPC metrics.
+     */
+    private FederationRPCMetrics metrics;
 
-  @Override
-  public void init(Configuration configuration, RouterRpcServer rpcServer,
-      StateStoreService stateStore) {
+    private ObjectName registeredBean;
 
-    this.conf = configuration;
-    this.server = rpcServer;
-    this.store = stateStore;
+    /**
+     * Thread pool for logging stats.
+     */
+    private ExecutorService executor;
 
-    // Create metrics
-    this.metrics = FederationRPCMetrics.create(conf, server);
-
-    // Create thread pool
-    ThreadFactory threadFactory = new ThreadFactoryBuilder()
-        .setNameFormat("Federation RPC Performance Monitor-%d").build();
-    this.executor = Executors.newFixedThreadPool(1, threadFactory);
-
-    // Adding JMX interface
-    try {
-      StandardMBean bean =
-          new StandardMBean(this.metrics, FederationRPCMBean.class);
-      registeredBean = MBeans.register("Router", "FederationRPC", bean);
-      LOG.info("Registered FederationRPCMBean: {}", registeredBean);
-    } catch (NotCompliantMBeanException e) {
-      throw new RuntimeException("Bad FederationRPCMBean setup", e);
+    @Override
+    public void init(Configuration configuration, RouterRpcServer rpcServer, StateStoreService stateStore) {
+        this.conf = configuration;
+        this.server = rpcServer;
+        this.store = stateStore;
+        // Create metrics
+        this.metrics = FederationRPCMetrics.create(conf, server);
+        // Create thread pool
+        ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("Federation RPC Performance Monitor-%d").build();
+        this.executor = Executors.newFixedThreadPool(1, threadFactory);
+        // Adding JMX interface
+        try {
+            StandardMBean bean = new StandardMBean(this.metrics, FederationRPCMBean.class);
+            registeredBean = MBeans.register("Router", "FederationRPC", bean);
+            LOG.info("Registered FederationRPCMBean: {}", registeredBean);
+        } catch (NotCompliantMBeanException e) {
+            throw new RuntimeException("Bad FederationRPCMBean setup", e);
+        }
     }
-  }
 
-  @Override
-  public void close() {
-    if (registeredBean != null) {
-      MBeans.unregister(registeredBean);
-      registeredBean = null;
+    @Override
+    public void close() {
+        if (registeredBean != null) {
+            MBeans.unregister(registeredBean);
+            registeredBean = null;
+        }
+        if (this.executor != null) {
+            this.executor.shutdown();
+        }
     }
-    if (this.executor != null) {
-      this.executor.shutdown();
+
+    /**
+     * Resets all RPC service performance counters to their defaults.
+     */
+    public void resetPerfCounters() {
+        if (registeredBean != null) {
+            MBeans.unregister(registeredBean);
+            registeredBean = null;
+        }
+        if (metrics != null) {
+            FederationRPCMetrics.reset();
+            metrics = null;
+        }
+        init(conf, server, store);
     }
-  }
 
-  /**
-   * Resets all RPC service performance counters to their defaults.
-   */
-  public void resetPerfCounters() {
-    if (registeredBean != null) {
-      MBeans.unregister(registeredBean);
-      registeredBean = null;
+    @Override
+    public void startOp() {
+        START_TIME.set(monotonicNow());
     }
-    if (metrics != null) {
-      FederationRPCMetrics.reset();
-      metrics = null;
+
+    @Override
+    public long proxyOp() {
+        PROXY_TIME.set(monotonicNow());
+        long processingTime = getProcessingTime();
+        if (metrics != null && processingTime >= 0) {
+            metrics.addProcessingTime(processingTime);
+        }
+        return Thread.currentThread().getId();
     }
-    init(conf, server, store);
-  }
 
-  @Override
-  public void startOp() {
-    START_TIME.set(monotonicNow());
-  }
-
-  @Override
-  public long proxyOp() {
-    PROXY_TIME.set(monotonicNow());
-    long processingTime = getProcessingTime();
-    if (metrics != null && processingTime >= 0) {
-      metrics.addProcessingTime(processingTime);
+    @Override
+    public void proxyOpComplete(boolean success) {
+        if (success) {
+            long proxyTime = getProxyTime();
+            if (metrics != null && proxyTime >= 0) {
+                metrics.addProxyTime(proxyTime);
+            }
+        }
     }
-    return Thread.currentThread().getId();
-  }
 
-  @Override
-  public void proxyOpComplete(boolean success) {
-    if (success) {
-      long proxyTime = getProxyTime();
-      if (metrics != null && proxyTime >= 0) {
-        metrics.addProxyTime(proxyTime);
-      }
+    @Override
+    public void proxyOpFailureStandby() {
+        if (metrics != null) {
+            metrics.incrProxyOpFailureStandby();
+        }
     }
-  }
 
-  @Override
-  public void proxyOpFailureStandby() {
-    if (metrics != null) {
-      metrics.incrProxyOpFailureStandby();
+    @Override
+    public void proxyOpFailureCommunicate() {
+        if (metrics != null) {
+            metrics.incrProxyOpFailureCommunicate();
+        }
     }
-  }
 
-  @Override
-  public void proxyOpFailureCommunicate() {
-    if (metrics != null) {
-      metrics.incrProxyOpFailureCommunicate();
+    @Override
+    public void proxyOpFailureClientOverloaded() {
+        if (metrics != null) {
+            metrics.incrProxyOpFailureClientOverloaded();
+        }
     }
-  }
 
-  @Override
-  public void proxyOpFailureClientOverloaded() {
-    if (metrics != null) {
-      metrics.incrProxyOpFailureClientOverloaded();
+    @Override
+    public void proxyOpNotImplemented() {
+        if (metrics != null) {
+            metrics.incrProxyOpNotImplemented();
+        }
     }
-  }
 
-  @Override
-  public void proxyOpNotImplemented() {
-    if (metrics != null) {
-      metrics.incrProxyOpNotImplemented();
+    @Override
+    public void proxyOpRetries() {
+        if (metrics != null) {
+            metrics.incrProxyOpRetries();
+        }
     }
-  }
 
-  @Override
-  public void proxyOpRetries() {
-    if (metrics != null) {
-      metrics.incrProxyOpRetries();
+    @Override
+    public void proxyOpNoNamenodes() {
+        if (metrics != null) {
+            metrics.incrProxyOpNoNamenodes();
+        }
     }
-  }
 
-  @Override
-  public void proxyOpNoNamenodes() {
-    if (metrics != null) {
-      metrics.incrProxyOpNoNamenodes();
+    @Override
+    public void routerFailureStateStore() {
+        if (metrics != null) {
+            metrics.incrRouterFailureStateStore();
+        }
     }
-  }
 
-  @Override
-  public void routerFailureStateStore() {
-    if (metrics != null) {
-      metrics.incrRouterFailureStateStore();
+    @Override
+    public void routerFailureSafemode() {
+        if (metrics != null) {
+            metrics.incrRouterFailureSafemode();
+        }
     }
-  }
 
-  @Override
-  public void routerFailureSafemode() {
-    if (metrics != null) {
-      metrics.incrRouterFailureSafemode();
+    @Override
+    public void routerFailureReadOnly() {
+        if (metrics != null) {
+            metrics.incrRouterFailureReadOnly();
+        }
     }
-  }
 
-  @Override
-  public void routerFailureReadOnly() {
-    if (metrics != null) {
-      metrics.incrRouterFailureReadOnly();
+    @Override
+    public void routerFailureLocked() {
+        if (metrics != null) {
+            metrics.incrRouterFailureLocked();
+        }
     }
-  }
 
-  @Override
-  public void routerFailureLocked() {
-    if (metrics != null) {
-      metrics.incrRouterFailureLocked();
+    /**
+     * Get time between we receiving the operation and sending it to the Namenode.
+     * @return Processing time in nanoseconds.
+     */
+    private long getProcessingTime() {
+        if (START_TIME.get() != null && START_TIME.get() > 0 && PROXY_TIME.get() != null && PROXY_TIME.get() > 0) {
+            return PROXY_TIME.get() - START_TIME.get();
+        }
+        return -1;
     }
-  }
 
-
-  /**
-   * Get time between we receiving the operation and sending it to the Namenode.
-   * @return Processing time in nanoseconds.
-   */
-  private long getProcessingTime() {
-    if (START_TIME.get() != null && START_TIME.get() > 0 &&
-        PROXY_TIME.get() != null && PROXY_TIME.get() > 0) {
-      return PROXY_TIME.get() - START_TIME.get();
+    /**
+     * Get time between now and when the operation was forwarded to the Namenode.
+     * @return Current proxy time in nanoseconds.
+     */
+    private long getProxyTime() {
+        if (PROXY_TIME.get() != null && PROXY_TIME.get() > 0) {
+            return monotonicNow() - PROXY_TIME.get();
+        }
+        return -1;
     }
-    return -1;
-  }
 
-  /**
-   * Get time between now and when the operation was forwarded to the Namenode.
-   * @return Current proxy time in nanoseconds.
-   */
-  private long getProxyTime() {
-    if (PROXY_TIME.get() != null && PROXY_TIME.get() > 0) {
-      return monotonicNow() - PROXY_TIME.get();
+    @Override
+    public FederationRPCMetrics getRPCMetrics() {
+        return this.metrics;
     }
-    return -1;
-  }
-
-  @Override
-  public FederationRPCMetrics getRPCMetrics() {
-    return this.metrics;
-  }
 }

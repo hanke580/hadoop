@@ -15,16 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.security.ssl;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
-
 import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
@@ -44,167 +41,162 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
-public final class ReloadingX509TrustManager
-  implements X509TrustManager, Runnable {
+public final class ReloadingX509TrustManager implements X509TrustManager, Runnable {
 
-  @VisibleForTesting
-  static final Logger LOG =
-      LoggerFactory.getLogger(ReloadingX509TrustManager.class);
-  @VisibleForTesting
-  static final String RELOAD_ERROR_MESSAGE =
-      "Could not load truststore (keep using existing one) : ";
+    @VisibleForTesting
+    static final Logger LOG = LoggerFactory.getLogger(ReloadingX509TrustManager.class);
 
-  private String type;
-  private File file;
-  private String password;
-  private long lastLoaded;
-  private long reloadInterval;
-  private AtomicReference<X509TrustManager> trustManagerRef;
+    @VisibleForTesting
+    static final String RELOAD_ERROR_MESSAGE = "Could not load truststore (keep using existing one) : ";
 
-  private volatile boolean running;
-  private Thread reloader;
+    private String type;
 
-  /**
-   * Creates a reloadable trustmanager. The trustmanager reloads itself
-   * if the underlying trustore file has changed.
-   *
-   * @param type type of truststore file, typically 'jks'.
-   * @param location local path to the truststore file.
-   * @param password password of the truststore file.
-   * @param reloadInterval interval to check if the truststore file has
-   * changed, in milliseconds.
-   * @throws IOException thrown if the truststore could not be initialized due
-   * to an IO error.
-   * @throws GeneralSecurityException thrown if the truststore could not be
-   * initialized due to a security error.
-   */
-  public ReloadingX509TrustManager(String type, String location,
-                                   String password, long reloadInterval)
-    throws IOException, GeneralSecurityException {
-    this.type = type;
-    file = new File(location);
-    this.password = password;
-    trustManagerRef = new AtomicReference<X509TrustManager>();
-    trustManagerRef.set(loadTrustManager());
-    this.reloadInterval = reloadInterval;
-  }
+    private File file;
 
-  /**
-   * Starts the reloader thread.
-   */
-  public void init() {
-    reloader = new Thread(this, "Truststore reloader thread");
-    reloader.setDaemon(true);
-    running =  true;
-    reloader.start();
-  }
+    private String password;
 
-  /**
-   * Stops the reloader thread.
-   */
-  public void destroy() {
-    running = false;
-    reloader.interrupt();
-  }
+    private long lastLoaded;
 
-  /**
-   * Returns the reload check interval.
-   *
-   * @return the reload check interval, in milliseconds.
-   */
-  public long getReloadInterval() {
-    return reloadInterval;
-  }
+    private long reloadInterval;
 
-  @Override
-  public void checkClientTrusted(X509Certificate[] chain, String authType)
-    throws CertificateException {
-    X509TrustManager tm = trustManagerRef.get();
-    if (tm != null) {
-      tm.checkClientTrusted(chain, authType);
-    } else {
-      throw new CertificateException("Unknown client chain certificate: " +
-                                     chain[0].toString());
-    }
-  }
+    private AtomicReference<X509TrustManager> trustManagerRef;
 
-  @Override
-  public void checkServerTrusted(X509Certificate[] chain, String authType)
-    throws CertificateException {
-    X509TrustManager tm = trustManagerRef.get();
-    if (tm != null) {
-      tm.checkServerTrusted(chain, authType);
-    } else {
-      throw new CertificateException("Unknown server chain certificate: " +
-                                     chain[0].toString());
-    }
-  }
+    private volatile boolean running;
 
-  private static final X509Certificate[] EMPTY = new X509Certificate[0];
-  @Override
-  public X509Certificate[] getAcceptedIssuers() {
-    X509Certificate[] issuers = EMPTY;
-    X509TrustManager tm = trustManagerRef.get();
-    if (tm != null) {
-      issuers = tm.getAcceptedIssuers();
-    }
-    return issuers;
-  }
+    private Thread reloader;
 
-  boolean needsReload() {
-    boolean reload = true;
-    if (file.exists()) {
-      if (file.lastModified() == lastLoaded) {
-        reload = false;
-      }
-    } else {
-      lastLoaded = 0;
-    }
-    return reload;
-  }
-
-  X509TrustManager loadTrustManager()
-  throws IOException, GeneralSecurityException {
-    X509TrustManager trustManager = null;
-    KeyStore ks = KeyStore.getInstance(type);
-    InputStream in = Files.newInputStream(file.toPath());
-    try {
-      ks.load(in, (password == null) ? null : password.toCharArray());
-      lastLoaded = file.lastModified();
-      LOG.debug("Loaded truststore '" + file + "'");
-    } finally {
-      in.close();
+    /**
+     * Creates a reloadable trustmanager. The trustmanager reloads itself
+     * if the underlying trustore file has changed.
+     *
+     * @param type type of truststore file, typically 'jks'.
+     * @param location local path to the truststore file.
+     * @param password password of the truststore file.
+     * @param reloadInterval interval to check if the truststore file has
+     * changed, in milliseconds.
+     * @throws IOException thrown if the truststore could not be initialized due
+     * to an IO error.
+     * @throws GeneralSecurityException thrown if the truststore could not be
+     * initialized due to a security error.
+     */
+    public ReloadingX509TrustManager(String type, String location, String password, long reloadInterval) throws IOException, GeneralSecurityException {
+        this.type = type;
+        file = new File(location);
+        this.password = password;
+        trustManagerRef = new AtomicReference<X509TrustManager>();
+        trustManagerRef.set(loadTrustManager());
+        this.reloadInterval = reloadInterval;
     }
 
-    TrustManagerFactory trustManagerFactory = 
-      TrustManagerFactory.getInstance(SSLFactory.SSLCERTIFICATE);
-    trustManagerFactory.init(ks);
-    TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
-    for (TrustManager trustManager1 : trustManagers) {
-      if (trustManager1 instanceof X509TrustManager) {
-        trustManager = (X509TrustManager) trustManager1;
-        break;
-      }
+    /**
+     * Starts the reloader thread.
+     */
+    public void init() {
+        reloader = new Thread(this, "Truststore reloader thread");
+        reloader.setDaemon(true);
+        running = true;
+        reloader.start();
     }
-    return trustManager;
-  }
 
-  @Override
-  public void run() {
-    while (running) {
-      try {
-        Thread.sleep(reloadInterval);
-      } catch (InterruptedException e) {
-        //NOP
-      }
-      if (running && needsReload()) {
-        try {
-          trustManagerRef.set(loadTrustManager());
-        } catch (Exception ex) {
-          LOG.warn(RELOAD_ERROR_MESSAGE + ex.toString(), ex);
+    /**
+     * Stops the reloader thread.
+     */
+    public void destroy() {
+        running = false;
+        reloader.interrupt();
+    }
+
+    /**
+     * Returns the reload check interval.
+     *
+     * @return the reload check interval, in milliseconds.
+     */
+    public long getReloadInterval() {
+        return reloadInterval;
+    }
+
+    @Override
+    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        X509TrustManager tm = trustManagerRef.get();
+        if (tm != null) {
+            tm.checkClientTrusted(chain, authType);
+        } else {
+            throw new CertificateException("Unknown client chain certificate: " + chain[0].toString());
         }
-      }
     }
-  }
 
+    @Override
+    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        X509TrustManager tm = trustManagerRef.get();
+        if (tm != null) {
+            tm.checkServerTrusted(chain, authType);
+        } else {
+            throw new CertificateException("Unknown server chain certificate: " + chain[0].toString());
+        }
+    }
+
+    private static final X509Certificate[] EMPTY = new X509Certificate[0];
+
+    @Override
+    public X509Certificate[] getAcceptedIssuers() {
+        X509Certificate[] issuers = EMPTY;
+        X509TrustManager tm = trustManagerRef.get();
+        if (tm != null) {
+            issuers = tm.getAcceptedIssuers();
+        }
+        return issuers;
+    }
+
+    boolean needsReload() {
+        boolean reload = true;
+        if (file.exists()) {
+            if (file.lastModified() == lastLoaded) {
+                reload = false;
+            }
+        } else {
+            lastLoaded = 0;
+        }
+        return reload;
+    }
+
+    X509TrustManager loadTrustManager() throws IOException, GeneralSecurityException {
+        X509TrustManager trustManager = null;
+        KeyStore ks = KeyStore.getInstance(type);
+        InputStream in = Files.newInputStream(file.toPath());
+        try {
+            ks.load(in, (password == null) ? null : password.toCharArray());
+            lastLoaded = file.lastModified();
+            LOG.debug("Loaded truststore '" + file + "'");
+        } finally {
+            in.close();
+        }
+        TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(SSLFactory.SSLCERTIFICATE);
+        trustManagerFactory.init(ks);
+        TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
+        for (TrustManager trustManager1 : trustManagers) {
+            if (trustManager1 instanceof X509TrustManager) {
+                trustManager = (X509TrustManager) trustManager1;
+                break;
+            }
+        }
+        return trustManager;
+    }
+
+    @Override
+    public void run() {
+        while (running) {
+            try {
+                Thread.sleep(reloadInterval);
+            } catch (InterruptedException e) {
+                //NOP
+            }
+            if (running && needsReload()) {
+                try {
+                    trustManagerRef.set(loadTrustManager());
+                } catch (Exception ex) {
+                    LOG.warn(RELOAD_ERROR_MESSAGE + ex.toString(), ex);
+                }
+            }
+        }
+    }
 }

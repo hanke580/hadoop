@@ -11,7 +11,6 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License. See accompanying LICENSE file.
  */
-
 package org.apache.hadoop.fs.contract.router;
 
 import java.io.IOException;
@@ -24,21 +23,20 @@ import org.junit.BeforeClass;
 /**
  * Test secure delete operations on the Router-based FS.
  */
-public class TestRouterHDFSContractDeleteSecure
-    extends AbstractContractDeleteTest {
+public class TestRouterHDFSContractDeleteSecure extends AbstractContractDeleteTest {
 
-  @BeforeClass
-  public static void createCluster() throws Exception {
-    RouterHDFSContract.createCluster(true);
-  }
+    @BeforeClass
+    public static void createCluster() throws Exception {
+        RouterHDFSContract.createCluster(true);
+    }
 
-  @AfterClass
-  public static void teardownCluster() throws IOException {
-    RouterHDFSContract.destroyCluster();
-  }
+    @AfterClass
+    public static void teardownCluster() throws IOException {
+        RouterHDFSContract.destroyCluster();
+    }
 
-  @Override
-  protected AbstractFSContract createContract(Configuration conf) {
-    return new RouterHDFSContract(conf);
-  }
+    @Override
+    protected AbstractFSContract createContract(Configuration conf) {
+        return new RouterHDFSContract(conf);
+    }
 }

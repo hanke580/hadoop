@@ -26,21 +26,34 @@ import org.apache.hadoop.oncrpc.XDR;
  * File attrbutes reported in NFS.
  */
 public class Nfs3FileAttributes {
-  private int type;
-  private int mode;
-  private int nlink;
-  private int uid;
-  private int gid;
-  private long size;
-  private long used;
-  private Specdata3 rdev;
-  private long fsid;
-  private long fileId;
-  private NfsTime atime;
-  private NfsTime mtime;
-  private NfsTime ctime;
 
-  /*
+    private int type;
+
+    private int mode;
+
+    private int nlink;
+
+    private int uid;
+
+    private int gid;
+
+    private long size;
+
+    private long used;
+
+    private Specdata3 rdev;
+
+    private long fsid;
+
+    private long fileId;
+
+    private NfsTime atime;
+
+    private NfsTime mtime;
+
+    private NfsTime ctime;
+
+    /*
    * The interpretation of the two words depends on the type of file system
    * object. For a block special (NF3BLK) or character special (NF3CHR) file,
    * specdata1 and specdata2 are the major and minor device numbers,
@@ -50,182 +63,178 @@ public class Nfs3FileAttributes {
    * server do not agree upon the values, the client should treat these fields
    * as if they are set to 0.
    */
-  public static class Specdata3 {
-    final int specdata1;
-    final int specdata2;
+    public static class Specdata3 {
 
-    public Specdata3() {
-      specdata1 = 0;
-      specdata2 = 0;
-    }
-    
-    public Specdata3(int specdata1, int specdata2) {
-      this.specdata1 = specdata1;
-      this.specdata2 = specdata2;
-    }
-    
-    public int getSpecdata1() {
-      return specdata1;
+        final int specdata1;
+
+        final int specdata2;
+
+        public Specdata3() {
+            specdata1 = 0;
+            specdata2 = 0;
+        }
+
+        public Specdata3(int specdata1, int specdata2) {
+            this.specdata1 = specdata1;
+            this.specdata2 = specdata2;
+        }
+
+        public int getSpecdata1() {
+            return specdata1;
+        }
+
+        public int getSpecdata2() {
+            return specdata2;
+        }
+
+        @Override
+        public String toString() {
+            return "(Specdata3: specdata1" + specdata1 + ", specdata2:" + specdata2 + ")";
+        }
     }
 
-    public int getSpecdata2() {
-      return specdata2;
+    public Nfs3FileAttributes() {
+        this(NfsFileType.NFSREG, 1, (short) 0, 0, 0, 0, 0, 0, 0, 0, new Specdata3());
     }
-    
+
+    public Nfs3FileAttributes(NfsFileType nfsType, int nlink, short mode, int uid, int gid, long size, long fsid, long fileId, long mtime, long atime, Specdata3 rdev) {
+        this.type = nfsType.toValue();
+        this.mode = mode;
+        this.nlink = nlink;
+        this.uid = uid;
+        this.gid = gid;
+        this.size = size;
+        this.used = this.size;
+        this.rdev = new Specdata3();
+        this.fsid = fsid;
+        this.fileId = fileId;
+        this.mtime = new NfsTime(mtime);
+        this.atime = atime != 0 ? new NfsTime(atime) : this.mtime;
+        this.ctime = this.mtime;
+        this.rdev = rdev;
+    }
+
+    public Nfs3FileAttributes(Nfs3FileAttributes other) {
+        this.type = other.getType();
+        this.mode = other.getMode();
+        this.nlink = other.getNlink();
+        this.uid = other.getUid();
+        this.gid = other.getGid();
+        this.size = other.getSize();
+        this.used = other.getUsed();
+        this.rdev = new Specdata3();
+        this.fsid = other.getFsid();
+        this.fileId = other.getFileId();
+        this.mtime = new NfsTime(other.getMtime());
+        this.atime = new NfsTime(other.getAtime());
+        this.ctime = new NfsTime(other.getCtime());
+    }
+
+    public void serialize(XDR xdr) {
+        xdr.writeInt(type);
+        xdr.writeInt(mode);
+        xdr.writeInt(nlink);
+        xdr.writeInt(uid);
+        xdr.writeInt(gid);
+        xdr.writeLongAsHyper(size);
+        xdr.writeLongAsHyper(used);
+        xdr.writeInt(rdev.getSpecdata1());
+        xdr.writeInt(rdev.getSpecdata2());
+        xdr.writeLongAsHyper(fsid);
+        xdr.writeLongAsHyper(fileId);
+        atime.serialize(xdr);
+        mtime.serialize(xdr);
+        ctime.serialize(xdr);
+    }
+
+    public static Nfs3FileAttributes deserialize(XDR xdr) {
+        Nfs3FileAttributes attr = new Nfs3FileAttributes();
+        attr.type = xdr.readInt();
+        attr.mode = xdr.readInt();
+        attr.nlink = xdr.readInt();
+        attr.uid = xdr.readInt();
+        attr.gid = xdr.readInt();
+        attr.size = xdr.readHyper();
+        attr.used = xdr.readHyper();
+        attr.rdev = new Specdata3(xdr.readInt(), xdr.readInt());
+        attr.fsid = xdr.readHyper();
+        attr.fileId = xdr.readHyper();
+        attr.atime = NfsTime.deserialize(xdr);
+        attr.mtime = NfsTime.deserialize(xdr);
+        attr.ctime = NfsTime.deserialize(xdr);
+        return attr;
+    }
+
     @Override
     public String toString() {
-      return "(Specdata3: specdata1" + specdata1 + ", specdata2:" + specdata2
-          + ")";
+        return String.format("type:%d, mode:%d, nlink:%d, uid:%d, gid:%d, " + "size:%d, used:%d, rdev:%s, fsid:%d, fileid:%d, atime:%s, " + "mtime:%s, ctime:%s", type, mode, nlink, uid, gid, size, used, rdev, fsid, fileId, atime, mtime, ctime);
     }
-  }
-   
-  public Nfs3FileAttributes() {
-    this(NfsFileType.NFSREG, 1, (short)0, 0, 0, 0, 0, 0, 0, 0, new Specdata3());
-  }
 
-  public Nfs3FileAttributes(NfsFileType nfsType, int nlink, short mode, int uid,
-      int gid, long size, long fsid, long fileId, long mtime, long atime, Specdata3 rdev) {
-    this.type = nfsType.toValue();
-    this.mode = mode;
-    this.nlink = nlink;
-    this.uid = uid;
-    this.gid = gid;
-    this.size = size;
-    this.used = this.size;
-    this.rdev = new Specdata3();
-    this.fsid = fsid;
-    this.fileId = fileId;
-    this.mtime = new NfsTime(mtime);
-    this.atime = atime != 0 ? new NfsTime(atime) : this.mtime;
-    this.ctime = this.mtime;
-    this.rdev = rdev;
-  }
-  
-  public Nfs3FileAttributes(Nfs3FileAttributes other) {
-    this.type = other.getType();
-    this.mode = other.getMode();
-    this.nlink = other.getNlink();
-    this.uid = other.getUid();
-    this.gid = other.getGid();
-    this.size = other.getSize();
-    this.used = other.getUsed();
-    this.rdev = new Specdata3();
-    this.fsid = other.getFsid();
-    this.fileId = other.getFileId();
-    this.mtime = new NfsTime(other.getMtime());
-    this.atime = new NfsTime(other.getAtime());
-    this.ctime = new NfsTime(other.getCtime());
-  }
+    public int getNlink() {
+        return nlink;
+    }
 
-  public void serialize(XDR xdr) {
-    xdr.writeInt(type);
-    xdr.writeInt(mode);
-    xdr.writeInt(nlink);
-    xdr.writeInt(uid);
-    xdr.writeInt(gid);
-    xdr.writeLongAsHyper(size);
-    xdr.writeLongAsHyper(used);
-    xdr.writeInt(rdev.getSpecdata1());
-    xdr.writeInt(rdev.getSpecdata2());
-    xdr.writeLongAsHyper(fsid);
-    xdr.writeLongAsHyper(fileId);
-    atime.serialize(xdr);
-    mtime.serialize(xdr);
-    ctime.serialize(xdr);
-  }
-  
-  public static Nfs3FileAttributes deserialize(XDR xdr) {
-    Nfs3FileAttributes attr = new Nfs3FileAttributes();
-    attr.type = xdr.readInt();
-    attr.mode = xdr.readInt();
-    attr.nlink = xdr.readInt();
-    attr.uid = xdr.readInt();
-    attr.gid = xdr.readInt();
-    attr.size = xdr.readHyper();
-    attr.used = xdr.readHyper();
-    attr.rdev = new Specdata3(xdr.readInt(), xdr.readInt());
-    attr.fsid = xdr.readHyper();
-    attr.fileId = xdr.readHyper();
-    attr.atime = NfsTime.deserialize(xdr);
-    attr.mtime = NfsTime.deserialize(xdr);
-    attr.ctime = NfsTime.deserialize(xdr);
-    return attr;
-  }
-  
-  @Override
-  public String toString() {
-    return String.format("type:%d, mode:%d, nlink:%d, uid:%d, gid:%d, " + 
-            "size:%d, used:%d, rdev:%s, fsid:%d, fileid:%d, atime:%s, " + 
-            "mtime:%s, ctime:%s",
-            type, mode, nlink, uid, gid, size, used, rdev, fsid, fileId, atime,
-            mtime, ctime);
-  }
+    public long getUsed() {
+        return used;
+    }
 
-  public int getNlink() {
-    return nlink;
-  }
+    public long getFsid() {
+        return fsid;
+    }
 
-  public long getUsed() {
-    return used;
-  }
+    public long getFileId() {
+        return fileId;
+    }
 
-  public long getFsid() {
-    return fsid;
-  }
+    public NfsTime getAtime() {
+        return atime;
+    }
 
-  public long getFileId() {
-    return fileId;
-  }
+    public NfsTime getMtime() {
+        return mtime;
+    }
 
-  public NfsTime getAtime() {
-    return atime;
-  }
+    public NfsTime getCtime() {
+        return ctime;
+    }
 
-  public NfsTime getMtime() {
-    return mtime;
-  }
+    public int getType() {
+        return type;
+    }
 
-  public NfsTime getCtime() {
-    return ctime;
-  }
+    public WccAttr getWccAttr() {
+        return new WccAttr(size, mtime, ctime);
+    }
 
-  public int getType() {
-    return type;
-  }
-  
-  public WccAttr getWccAttr() {
-    return new WccAttr(size, mtime, ctime);
-  }
-  
-  public long getSize() {
-    return size;
-  }
-  
-  public void setSize(long size) {
-    this.size = size;
-  }
-  
-  public void setUsed(long used) {
-    this.used = used;
-  }
-  
-  public int getMode() {
-    return this.mode;
-  }
-  
-  public int getUid() {
-    return this.uid;
-  }
-  
-  public int getGid() {
-    return this.gid;
-  }
-  
-  public Specdata3 getRdev() {
-    return rdev;
-  }
+    public long getSize() {
+        return size;
+    }
 
-  public void setRdev(Specdata3 rdev) {
-    this.rdev = rdev;
-  }
+    public void setSize(long size) {
+        this.size = size;
+    }
+
+    public void setUsed(long used) {
+        this.used = used;
+    }
+
+    public int getMode() {
+        return this.mode;
+    }
+
+    public int getUid() {
+        return this.uid;
+    }
+
+    public int getGid() {
+        return this.gid;
+    }
+
+    public Specdata3 getRdev() {
+        return rdev;
+    }
+
+    public void setRdev(Specdata3 rdev) {
+        this.rdev = rdev;
+    }
 }

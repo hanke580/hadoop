@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.server.namenode;
 
 import java.io.IOException;
-
 import org.apache.hadoop.conf.Configuration;
 
 /**
@@ -26,24 +25,25 @@ import org.apache.hadoop.conf.Configuration;
  * used to simulate the Namenode resource status.
  */
 public class MockNameNodeResourceChecker extends NameNodeResourceChecker {
-  private volatile boolean hasResourcesAvailable = true;
 
-  public MockNameNodeResourceChecker(Configuration conf) throws IOException {
-    super(conf);
-  }
+    private volatile boolean hasResourcesAvailable = true;
 
-  @Override
-  public boolean hasAvailableDiskSpace() {
-    return hasResourcesAvailable;
-  }
+    public MockNameNodeResourceChecker(Configuration conf) throws IOException {
+        super(conf);
+    }
 
-  /**
-   * Sets resource availability flag.
-   *
-   * @param resourceAvailable
-   *          sets true if the resource is available otherwise sets to false
-   */
-  public void setResourcesAvailable(boolean resourceAvailable) {
-    hasResourcesAvailable = resourceAvailable;
-  }
+    @Override
+    public boolean hasAvailableDiskSpace() {
+        return hasResourcesAvailable;
+    }
+
+    /**
+     * Sets resource availability flag.
+     *
+     * @param resourceAvailable
+     *          sets true if the resource is available otherwise sets to false
+     */
+    public void setResourcesAvailable(boolean resourceAvailable) {
+        hasResourcesAvailable = resourceAvailable;
+    }
 }

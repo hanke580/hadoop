@@ -15,7 +15,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.hadoop.fs.contract.router.web;
 
 import org.apache.hadoop.conf.Configuration;
@@ -23,7 +22,6 @@ import org.apache.hadoop.fs.contract.AbstractContractSeekTest;
 import org.apache.hadoop.fs.contract.AbstractFSContract;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-
 import java.io.IOException;
 
 /**
@@ -31,33 +29,33 @@ import java.io.IOException;
  */
 public class TestRouterWebHDFSContractSeek extends AbstractContractSeekTest {
 
-  @BeforeClass
-  public static void createCluster() throws IOException {
-    RouterWebHDFSContract.createCluster();
-  }
+    @BeforeClass
+    public static void createCluster() throws IOException {
+        RouterWebHDFSContract.createCluster();
+    }
 
-  @AfterClass
-  public static void teardownCluster() throws IOException {
-    RouterWebHDFSContract.destroyCluster();
-  }
+    @AfterClass
+    public static void teardownCluster() throws IOException {
+        RouterWebHDFSContract.destroyCluster();
+    }
 
-  @Override
-  protected AbstractFSContract createContract(Configuration conf) {
-    return new RouterWebHDFSContract(conf);
-  }
+    @Override
+    protected AbstractFSContract createContract(Configuration conf) {
+        return new RouterWebHDFSContract(conf);
+    }
 
-  @Override
-  public void testNegativeSeek() throws Throwable {
-    System.out.println("Not supported");
-  }
+    @Override
+    public void testNegativeSeek() throws Throwable {
+        System.out.println("Not supported");
+    }
 
-  @Override
-  public void testSeekReadClosedFile() throws Throwable {
-    System.out.println("Not supported");
-  }
+    @Override
+    public void testSeekReadClosedFile() throws Throwable {
+        System.out.println("Not supported");
+    }
 
-  @Override
-  public void testSeekPastEndOfFileThenReseekAndRead() throws Throwable {
-    System.out.println("Not supported");
-  }
+    @Override
+    public void testSeekPastEndOfFileThenReseekAndRead() throws Throwable {
+        System.out.println("Not supported");
+    }
 }

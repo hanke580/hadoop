@@ -22,7 +22,6 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-
 import com.google.common.annotations.VisibleForTesting;
 
 /**
@@ -32,67 +31,76 @@ import com.google.common.annotations.VisibleForTesting;
  */
 public class MockDomainNameResolver implements DomainNameResolver {
 
-  public static final String DOMAIN = "test.foo.bar";
-  // This host will be used to mock non-resolvable host
-  public static final String UNKNOW_DOMAIN = "unknown.foo.bar";
-  public static final byte[] BYTE_ADDR_1 = new byte[]{10, 1, 1, 1};
-  public static final byte[] BYTE_ADDR_2 = new byte[]{10, 1, 1, 2};
-  public static final String ADDR_1 = "10.1.1.1";
-  public static final String ADDR_2 = "10.1.1.2";
-  public static final String FQDN_1 = "host01.test";
-  public static final String FQDN_2 = "host02.test";
+    public static final String DOMAIN = "test.foo.bar";
 
-  /** Internal mapping of domain names and IP addresses. */
-  private Map<String, InetAddress[]> addrs = new TreeMap<>();
-  /** Internal mapping from IP addresses to fqdns. */
-  private Map<InetAddress, String> ptrMap = new HashMap<>();
+    // This host will be used to mock non-resolvable host
+    public static final String UNKNOW_DOMAIN = "unknown.foo.bar";
 
-  public MockDomainNameResolver() {
-    try {
-      InetAddress nn1Address = InetAddress.getByAddress(BYTE_ADDR_1);
-      InetAddress nn2Address = InetAddress.getByAddress(BYTE_ADDR_2);
-      addrs.put(DOMAIN, new InetAddress[]{nn1Address, nn2Address});
-      ptrMap.put(nn1Address, FQDN_1);
-      ptrMap.put(nn2Address, FQDN_2);
-    } catch (UnknownHostException e) {
-      throw new RuntimeException(e);
-    }
-  }
+    public static final byte[] BYTE_ADDR_1 = new byte[] { 10, 1, 1, 1 };
 
-  @Override
-  public InetAddress[] getAllByDomainName(String domainName)
-      throws UnknownHostException {
-    if (!addrs.containsKey(domainName)) {
-      throw new UnknownHostException(domainName + " is not resolvable");
-    }
-    return addrs.get(domainName);
-  }
+    public static final byte[] BYTE_ADDR_2 = new byte[] { 10, 1, 1, 2 };
 
-  @Override
-  public String getHostnameByIP(InetAddress address) {
-    return ptrMap.containsKey(address) ? ptrMap.get(address) : null;
-  }
+    public static final String ADDR_1 = "10.1.1.1";
 
-  @Override
-  public String[] getAllResolvedHostnameByDomainName(
-      String domainName, boolean useFQDN) throws UnknownHostException {
-    InetAddress[] addresses = getAllByDomainName(domainName);
-    String[] hosts = new String[addresses.length];
-    if (useFQDN) {
-      for (int i = 0; i < hosts.length; i++) {
-        hosts[i] = this.ptrMap.get(addresses[i]);
-      }
-    } else {
-      for (int i = 0; i < hosts.length; i++) {
-        hosts[i] = addresses[i].getHostAddress();
-      }
+    public static final String ADDR_2 = "10.1.1.2";
+
+    public static final String FQDN_1 = "host01.test";
+
+    public static final String FQDN_2 = "host02.test";
+
+    /**
+     * Internal mapping of domain names and IP addresses.
+     */
+    private Map<String, InetAddress[]> addrs = new TreeMap<>();
+
+    /**
+     * Internal mapping from IP addresses to fqdns.
+     */
+    private Map<InetAddress, String> ptrMap = new HashMap<>();
+
+    public MockDomainNameResolver() {
+        try {
+            InetAddress nn1Address = InetAddress.getByAddress(BYTE_ADDR_1);
+            InetAddress nn2Address = InetAddress.getByAddress(BYTE_ADDR_2);
+            addrs.put(DOMAIN, new InetAddress[] { nn1Address, nn2Address });
+            ptrMap.put(nn1Address, FQDN_1);
+            ptrMap.put(nn2Address, FQDN_2);
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    return hosts;
-  }
+    @Override
+    public InetAddress[] getAllByDomainName(String domainName) throws UnknownHostException {
+        if (!addrs.containsKey(domainName)) {
+            throw new UnknownHostException(domainName + " is not resolvable");
+        }
+        return addrs.get(domainName);
+    }
 
-  @VisibleForTesting
-  public void setAddressMap(Map<String, InetAddress[]> addresses) {
-    this.addrs = addresses;
-  }
+    @Override
+    public String getHostnameByIP(InetAddress address) {
+        return ptrMap.containsKey(address) ? ptrMap.get(address) : null;
+    }
+
+    @Override
+    public String[] getAllResolvedHostnameByDomainName(String domainName, boolean useFQDN) throws UnknownHostException {
+        InetAddress[] addresses = getAllByDomainName(domainName);
+        String[] hosts = new String[addresses.length];
+        if (useFQDN) {
+            for (int i = 0; i < hosts.length; i++) {
+                hosts[i] = this.ptrMap.get(addresses[i]);
+            }
+        } else {
+            for (int i = 0; i < hosts.length; i++) {
+                hosts[i] = addresses[i].getHostAddress();
+            }
+        }
+        return hosts;
+    }
+
+    @VisibleForTesting
+    public void setAddressMap(Map<String, InetAddress[]> addresses) {
+        this.addrs = addresses;
+    }
 }

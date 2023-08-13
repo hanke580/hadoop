@@ -22,12 +22,10 @@ import static org.apache.hadoop.hdfs.client.HdfsClientConfigKeys.DFS_WEBHDFS_RES
 import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_DATANODE_HTTPSERVER_FILTER_HANDLERS;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.Arrays;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -35,7 +33,6 @@ import org.apache.hadoop.hdfs.DFSTestUtil;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.net.NetUtils;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -55,116 +52,105 @@ import org.junit.runners.Parameterized.Parameters;
 @RunWith(Parameterized.class)
 public class TestWebHdfsWithRestCsrfPreventionFilter {
 
-  private static final Path FILE = new Path("/file");
+    private static final Path FILE = new Path("/file");
 
-  private final boolean nnRestCsrf;
-  private final boolean dnRestCsrf;
-  private final boolean clientRestCsrf;
+    private final boolean nnRestCsrf;
 
-  private MiniDFSCluster cluster;
-  private FileSystem fs, webhdfs;
+    private final boolean dnRestCsrf;
 
-  @Rule
-  public ExpectedException exception = ExpectedException.none();
+    private final boolean clientRestCsrf;
 
-  public TestWebHdfsWithRestCsrfPreventionFilter(boolean nnRestCsrf,
-      boolean dnRestCsrf, boolean clientRestCsrf) {
-    this.nnRestCsrf = nnRestCsrf;
-    this.dnRestCsrf = dnRestCsrf;
-    this.clientRestCsrf = clientRestCsrf;
-  }
+    private MiniDFSCluster cluster;
 
-  @Parameters
-  public static Iterable<Object[]> data() {
-    return Arrays.asList(new Object[][] {
-        {false, false, false},
-        {true, true, true},
-        {true, true, false},
-        {true, false, true},
-        {true, false, false},
-        {false, true, true},
-        {false, true, false},
-        {false, false, true}});
-  }
+    private FileSystem fs, webhdfs;
 
-  @Before
-  public void before() throws Exception {
-    Configuration nnConf = new Configuration();
-    nnConf.setBoolean(DFS_WEBHDFS_REST_CSRF_ENABLED_KEY, nnRestCsrf);
-    // Set configuration to treat anything as a browser, so that CSRF prevention
-    // checks actually get enforced.
-    nnConf.set(DFS_WEBHDFS_REST_CSRF_BROWSER_USERAGENTS_REGEX_KEY, ".*");
-    cluster = new MiniDFSCluster.Builder(nnConf).numDataNodes(0).build();
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
 
-    Configuration dnConf = new Configuration(nnConf);
-    dnConf.setBoolean(DFS_WEBHDFS_REST_CSRF_ENABLED_KEY, dnRestCsrf);
-    // By default the datanode loads the CSRF filter handler
-    dnConf.set(DFS_DATANODE_HTTPSERVER_FILTER_HANDLERS,
-        "org.apache.hadoop.hdfs.server.datanode.web.RestCsrfPreventionFilterHandler");
-    cluster.startDataNodes(dnConf, 1, true, null, null, null, null, false);
-
-    cluster.waitActive();
-    fs = cluster.getFileSystem();
-
-    Configuration clientConf = new Configuration();
-    clientConf.setBoolean(DFS_WEBHDFS_REST_CSRF_ENABLED_KEY, clientRestCsrf);
-    InetSocketAddress addr = cluster.getNameNode().getHttpAddress();
-    webhdfs = FileSystem.get(URI.create("webhdfs://" +
-        NetUtils.getHostPortString(addr)), clientConf);
-  }
-
-  @After
-  public void after() {
-    IOUtils.closeStream(webhdfs);
-    IOUtils.closeStream(fs);
-    if (cluster != null) {
-      cluster.shutdown();
+    public TestWebHdfsWithRestCsrfPreventionFilter(boolean nnRestCsrf, boolean dnRestCsrf, boolean clientRestCsrf) {
+        this.nnRestCsrf = nnRestCsrf;
+        this.dnRestCsrf = dnRestCsrf;
+        this.clientRestCsrf = clientRestCsrf;
     }
-  }
 
-  @Test
-  public void testCreate() throws Exception {
-    // create is a HTTP PUT that redirects from NameNode to DataNode, so we
-    // expect CSRF prevention on either server to block an unconfigured client.
-    if ((nnRestCsrf || dnRestCsrf) && !clientRestCsrf) {
-      expectException();
+    @Parameters
+    public static Iterable<Object[]> data() {
+        return Arrays.asList(new Object[][] { { false, false, false }, { true, true, true }, { true, true, false }, { true, false, true }, { true, false, false }, { false, true, true }, { false, true, false }, { false, false, true } });
     }
-    assertTrue(webhdfs.createNewFile(FILE));
-  }
 
-  @Test
-  public void testDelete() throws Exception {
-    DFSTestUtil.createFile(fs, FILE, 1024, (short)1, 0L);
-    // delete is an HTTP DELETE that executes solely within the NameNode as a
-    // metadata operation, so we expect CSRF prevention configured on the
-    // NameNode to block an unconfigured client.
-    if (nnRestCsrf && !clientRestCsrf) {
-      expectException();
+    @Before
+    public void before() throws Exception {
+        Configuration nnConf = new Configuration();
+        nnConf.setBoolean(DFS_WEBHDFS_REST_CSRF_ENABLED_KEY, nnRestCsrf);
+        // Set configuration to treat anything as a browser, so that CSRF prevention
+        // checks actually get enforced.
+        nnConf.set(DFS_WEBHDFS_REST_CSRF_BROWSER_USERAGENTS_REGEX_KEY, ".*");
+        cluster = new MiniDFSCluster.Builder(nnConf).numDataNodes(0).build();
+        Configuration dnConf = new Configuration(nnConf);
+        dnConf.setBoolean(DFS_WEBHDFS_REST_CSRF_ENABLED_KEY, dnRestCsrf);
+        // By default the datanode loads the CSRF filter handler
+        dnConf.set(DFS_DATANODE_HTTPSERVER_FILTER_HANDLERS, "org.apache.hadoop.hdfs.server.datanode.web.RestCsrfPreventionFilterHandler");
+        cluster.startDataNodes(dnConf, 1, true, null, null, null, null, false);
+        cluster.waitActive();
+        fs = cluster.getFileSystem();
+        Configuration clientConf = new Configuration();
+        clientConf.setBoolean(DFS_WEBHDFS_REST_CSRF_ENABLED_KEY, clientRestCsrf);
+        InetSocketAddress addr = cluster.getNameNode().getHttpAddress();
+        webhdfs = FileSystem.get(URI.create("webhdfs://" + NetUtils.getHostPortString(addr)), clientConf);
     }
-    assertTrue(webhdfs.delete(FILE, false));
-  }
 
-  @Test
-  public void testGetFileStatus() throws Exception {
-    // getFileStatus is an HTTP GET, not subject to CSRF prevention, so we
-    // expect it to succeed always, regardless of CSRF configuration.
-    assertNotNull(webhdfs.getFileStatus(new Path("/")));
-  }
-
-  @Test
-  public void testTruncate() throws Exception {
-    DFSTestUtil.createFile(fs, FILE, 1024, (short)1, 0L);
-    // truncate is an HTTP POST that executes solely within the NameNode as a
-    // metadata operation, so we expect CSRF prevention configured on the
-    // NameNode to block an unconfigured client.
-    if (nnRestCsrf && !clientRestCsrf) {
-      expectException();
+    @After
+    public void after() {
+        IOUtils.closeStream(webhdfs);
+        IOUtils.closeStream(fs);
+        if (cluster != null) {
+            cluster.shutdown();
+        }
     }
-    assertTrue(webhdfs.truncate(FILE, 0L));
-  }
 
-  private void expectException() {
-    exception.expect(IOException.class);
-    exception.expectMessage("Missing Required Header");
-  }
+    @Test
+    public void testCreate() throws Exception {
+        // create is a HTTP PUT that redirects from NameNode to DataNode, so we
+        // expect CSRF prevention on either server to block an unconfigured client.
+        if ((nnRestCsrf || dnRestCsrf) && !clientRestCsrf) {
+            expectException();
+        }
+        assertTrue(webhdfs.createNewFile(FILE));
+    }
+
+    @Test
+    public void testDelete() throws Exception {
+        DFSTestUtil.createFile(fs, FILE, 1024, (short) 1, 0L);
+        // delete is an HTTP DELETE that executes solely within the NameNode as a
+        // metadata operation, so we expect CSRF prevention configured on the
+        // NameNode to block an unconfigured client.
+        if (nnRestCsrf && !clientRestCsrf) {
+            expectException();
+        }
+        assertTrue(webhdfs.delete(FILE, false));
+    }
+
+    @Test
+    public void testGetFileStatus() throws Exception {
+        // getFileStatus is an HTTP GET, not subject to CSRF prevention, so we
+        // expect it to succeed always, regardless of CSRF configuration.
+        assertNotNull(webhdfs.getFileStatus(new Path("/")));
+    }
+
+    @Test
+    public void testTruncate() throws Exception {
+        DFSTestUtil.createFile(fs, FILE, 1024, (short) 1, 0L);
+        // truncate is an HTTP POST that executes solely within the NameNode as a
+        // metadata operation, so we expect CSRF prevention configured on the
+        // NameNode to block an unconfigured client.
+        if (nnRestCsrf && !clientRestCsrf) {
+            expectException();
+        }
+        assertTrue(webhdfs.truncate(FILE, 0L));
+    }
+
+    private void expectException() {
+        exception.expect(IOException.class);
+        exception.expectMessage("Missing Required Header");
+    }
 }

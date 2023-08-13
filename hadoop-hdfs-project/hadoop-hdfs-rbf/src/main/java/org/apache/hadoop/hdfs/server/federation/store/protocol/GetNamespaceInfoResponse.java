@@ -19,7 +19,6 @@ package org.apache.hadoop.hdfs.server.federation.store.protocol;
 
 import java.io.IOException;
 import java.util.Set;
-
 import org.apache.hadoop.classification.InterfaceAudience.Public;
 import org.apache.hadoop.classification.InterfaceStability.Unstable;
 import org.apache.hadoop.hdfs.server.federation.resolver.FederationNamespaceInfo;
@@ -30,23 +29,21 @@ import org.apache.hadoop.hdfs.server.federation.store.driver.StateStoreSerialize
  */
 public abstract class GetNamespaceInfoResponse {
 
-  public static GetNamespaceInfoResponse newInstance() {
-    return StateStoreSerializer.newRecord(GetNamespaceInfoResponse.class);
-  }
+    public static GetNamespaceInfoResponse newInstance() {
+        return StateStoreSerializer.newRecord(GetNamespaceInfoResponse.class);
+    }
 
-  public static GetNamespaceInfoResponse newInstance(
-      Set<FederationNamespaceInfo> namespaces) throws IOException {
-    GetNamespaceInfoResponse response = newInstance();
-    response.setNamespaceInfo(namespaces);
-    return response;
-  }
+    public static GetNamespaceInfoResponse newInstance(Set<FederationNamespaceInfo> namespaces) throws IOException {
+        GetNamespaceInfoResponse response = newInstance();
+        response.setNamespaceInfo(namespaces);
+        return response;
+    }
 
-  @Public
-  @Unstable
-  public abstract Set<FederationNamespaceInfo> getNamespaceInfo();
+    @Public
+    @Unstable
+    public abstract Set<FederationNamespaceInfo> getNamespaceInfo();
 
-  @Public
-  @Unstable
-  public abstract void setNamespaceInfo(
-      Set<FederationNamespaceInfo> namespaceInfo);
+    @Public
+    @Unstable
+    public abstract void setNamespaceInfo(Set<FederationNamespaceInfo> namespaceInfo);
 }

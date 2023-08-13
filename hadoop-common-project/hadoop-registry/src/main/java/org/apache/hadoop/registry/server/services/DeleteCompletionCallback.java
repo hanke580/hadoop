@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.registry.server.services;
 
 import org.apache.curator.framework.CuratorFramework;
@@ -23,7 +22,6 @@ import org.apache.curator.framework.api.BackgroundCallback;
 import org.apache.curator.framework.api.CuratorEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -32,26 +30,24 @@ import java.util.concurrent.atomic.AtomicInteger;
  * This callback logs at debug and increments the event counter.
  */
 public class DeleteCompletionCallback implements BackgroundCallback {
-  private static final Logger LOG =
-      LoggerFactory.getLogger(DeleteCompletionCallback.class);
 
-  private AtomicInteger events = new AtomicInteger(0);
+    private static final Logger LOG = LoggerFactory.getLogger(DeleteCompletionCallback.class);
 
-  @Override
-  public void processResult(CuratorFramework client,
-      CuratorEvent event) throws
-      Exception {
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("Delete event {}", event);
+    private AtomicInteger events = new AtomicInteger(0);
+
+    @Override
+    public void processResult(CuratorFramework client, CuratorEvent event) throws Exception {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Delete event {}", event);
+        }
+        events.incrementAndGet();
     }
-    events.incrementAndGet();
-  }
 
-  /**
-   * Get the number of deletion events
-   * @return the count of events
-   */
-  public int getEventCount() {
-    return events.get();
-  }
+    /**
+     * Get the number of deletion events
+     * @return the count of events
+     */
+    public int getEventCount() {
+        return events.get();
+    }
 }

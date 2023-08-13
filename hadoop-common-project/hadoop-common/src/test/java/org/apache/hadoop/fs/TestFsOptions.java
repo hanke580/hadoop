@@ -18,51 +18,42 @@
 package org.apache.hadoop.fs;
 
 import static org.junit.Assert.*;
-
 import org.apache.hadoop.fs.Options.ChecksumOpt;
 import org.apache.hadoop.util.DataChecksum;
-
 import org.junit.Test;
 
 public class TestFsOptions {
 
-  @Test
-  public void testProcessChecksumOpt() {
-    ChecksumOpt defaultOpt = new ChecksumOpt(DataChecksum.Type.CRC32, 512);
-    ChecksumOpt finalOpt;
+    @Test
+    public void testProcessChecksumOpt() {
+        ChecksumOpt defaultOpt = new ChecksumOpt(DataChecksum.Type.CRC32, 512);
+        ChecksumOpt finalOpt;
+        // Give a null
+        finalOpt = ChecksumOpt.processChecksumOpt(defaultOpt, null);
+        checkParams(defaultOpt, finalOpt);
+        // null with bpc
+        finalOpt = ChecksumOpt.processChecksumOpt(defaultOpt, null, 1024);
+        checkParams(DataChecksum.Type.CRC32, 1024, finalOpt);
+        ChecksumOpt myOpt = new ChecksumOpt();
+        // custom with unspecified parameters
+        finalOpt = ChecksumOpt.processChecksumOpt(defaultOpt, myOpt);
+        checkParams(defaultOpt, finalOpt);
+        myOpt = new ChecksumOpt(DataChecksum.Type.CRC32C, 2048);
+        // custom config
+        finalOpt = ChecksumOpt.processChecksumOpt(defaultOpt, myOpt);
+        checkParams(DataChecksum.Type.CRC32C, 2048, finalOpt);
+        // custom config + bpc
+        finalOpt = ChecksumOpt.processChecksumOpt(defaultOpt, myOpt, 4096);
+        checkParams(DataChecksum.Type.CRC32C, 4096, finalOpt);
+    }
 
-    // Give a null 
-    finalOpt = ChecksumOpt.processChecksumOpt(defaultOpt, null);
-    checkParams(defaultOpt, finalOpt);
+    private void checkParams(ChecksumOpt expected, ChecksumOpt obtained) {
+        assertEquals(expected.getChecksumType(), obtained.getChecksumType());
+        assertEquals(expected.getBytesPerChecksum(), obtained.getBytesPerChecksum());
+    }
 
-    // null with bpc
-    finalOpt = ChecksumOpt.processChecksumOpt(defaultOpt, null, 1024);
-    checkParams(DataChecksum.Type.CRC32, 1024, finalOpt);
-
-    ChecksumOpt myOpt = new ChecksumOpt();
-
-    // custom with unspecified parameters
-    finalOpt = ChecksumOpt.processChecksumOpt(defaultOpt, myOpt);
-    checkParams(defaultOpt, finalOpt);
-
-    myOpt = new ChecksumOpt(DataChecksum.Type.CRC32C, 2048);
-
-    // custom config
-    finalOpt = ChecksumOpt.processChecksumOpt(defaultOpt, myOpt);
-    checkParams(DataChecksum.Type.CRC32C, 2048, finalOpt);
-
-    // custom config + bpc
-    finalOpt = ChecksumOpt.processChecksumOpt(defaultOpt, myOpt, 4096);
-    checkParams(DataChecksum.Type.CRC32C, 4096, finalOpt);
-  }
-
-  private void checkParams(ChecksumOpt expected, ChecksumOpt obtained) {
-    assertEquals(expected.getChecksumType(), obtained.getChecksumType());
-    assertEquals(expected.getBytesPerChecksum(), obtained.getBytesPerChecksum());
-  }
-
-  private void checkParams(DataChecksum.Type type, int bpc, ChecksumOpt obtained) {
-    assertEquals(type, obtained.getChecksumType());
-    assertEquals(bpc, obtained.getBytesPerChecksum());
-  }
+    private void checkParams(DataChecksum.Type type, int bpc, ChecksumOpt obtained) {
+        assertEquals(type, obtained.getChecksumType());
+        assertEquals(bpc, obtained.getBytesPerChecksum());
+    }
 }

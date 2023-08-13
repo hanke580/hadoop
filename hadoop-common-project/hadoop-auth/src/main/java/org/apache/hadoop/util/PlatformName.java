@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.util;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -23,33 +22,29 @@ import org.apache.hadoop.classification.InterfaceStability;
 
 /**
  * A helper class for getting build-info of the java-vm.
- *
  */
-@InterfaceAudience.LimitedPrivate({"HBase"})
+@InterfaceAudience.LimitedPrivate({ "HBase" })
 @InterfaceStability.Unstable
 public class PlatformName {
-  /**
-   * The complete platform 'name' to identify the platform as
-   * per the java-vm.
-   */
-  public static final String PLATFORM_NAME =
-      (System.getProperty("os.name").startsWith("Windows")
-      ? System.getenv("os") : System.getProperty("os.name"))
-      + "-" + System.getProperty("os.arch")
-      + "-" + System.getProperty("sun.arch.data.model");
 
-  /**
-   * The java vendor name used in this platform.
-   */
-  public static final String JAVA_VENDOR_NAME = System.getProperty("java.vendor");
+    /**
+     * The complete platform 'name' to identify the platform as
+     * per the java-vm.
+     */
+    public static final String PLATFORM_NAME = (System.getProperty("os.name").startsWith("Windows") ? System.getenv("os") : System.getProperty("os.name")) + "-" + System.getProperty("os.arch") + "-" + System.getProperty("sun.arch.data.model");
 
-  /**
-   * A public static variable to indicate the current java vendor is
-   * IBM java or not.
-   */
-  public static final boolean IBM_JAVA = JAVA_VENDOR_NAME.contains("IBM");
+    /**
+     * The java vendor name used in this platform.
+     */
+    public static final String JAVA_VENDOR_NAME = System.getProperty("java.vendor");
 
-  public static void main(String[] args) {
-    System.out.println(PLATFORM_NAME);
-  }
+    /**
+     * A public static variable to indicate the current java vendor is
+     * IBM java or not.
+     */
+    public static final boolean IBM_JAVA = JAVA_VENDOR_NAME.contains("IBM");
+
+    public static void main(String[] args) {
+        System.out.println(PLATFORM_NAME);
+    }
 }

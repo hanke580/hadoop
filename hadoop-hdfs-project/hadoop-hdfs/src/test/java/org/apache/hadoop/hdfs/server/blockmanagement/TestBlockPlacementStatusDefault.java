@@ -28,30 +28,23 @@ import org.junit.Test;
  */
 public class TestBlockPlacementStatusDefault {
 
-  @Test
-  public void testIsPolicySatisfiedCorrectly() {
-    // 2 current racks and 2 expected
-    BlockPlacementStatusDefault bps =
-        new BlockPlacementStatusDefault(2, 2, 5);
-    assertTrue(bps.isPlacementPolicySatisfied());
-    assertEquals(0, bps.getAdditionalReplicasRequired());
-
-    // 1 current rack and 2 expected
-    bps =
-        new BlockPlacementStatusDefault(1, 2, 5);
-    assertFalse(bps.isPlacementPolicySatisfied());
-    assertEquals(1, bps.getAdditionalReplicasRequired());
-
-    // 3 current racks and 2 expected
-    bps =
-        new BlockPlacementStatusDefault(3, 2, 5);
-    assertTrue(bps.isPlacementPolicySatisfied());
-    assertEquals(0, bps.getAdditionalReplicasRequired());
-
-    // 1 current rack and 2 expected, but only 1 rack on the cluster
-    bps =
-        new BlockPlacementStatusDefault(1, 2, 1);
-    assertTrue(bps.isPlacementPolicySatisfied());
-    assertEquals(0, bps.getAdditionalReplicasRequired());
-  }
+    @Test
+    public void testIsPolicySatisfiedCorrectly() {
+        // 2 current racks and 2 expected
+        BlockPlacementStatusDefault bps = new BlockPlacementStatusDefault(2, 2, 5);
+        assertTrue(bps.isPlacementPolicySatisfied());
+        assertEquals(0, bps.getAdditionalReplicasRequired());
+        // 1 current rack and 2 expected
+        bps = new BlockPlacementStatusDefault(1, 2, 5);
+        assertFalse(bps.isPlacementPolicySatisfied());
+        assertEquals(1, bps.getAdditionalReplicasRequired());
+        // 3 current racks and 2 expected
+        bps = new BlockPlacementStatusDefault(3, 2, 5);
+        assertTrue(bps.isPlacementPolicySatisfied());
+        assertEquals(0, bps.getAdditionalReplicasRequired());
+        // 1 current rack and 2 expected, but only 1 rack on the cluster
+        bps = new BlockPlacementStatusDefault(1, 2, 1);
+        assertTrue(bps.isPlacementPolicySatisfied());
+        assertEquals(0, bps.getAdditionalReplicasRequired());
+    }
 }

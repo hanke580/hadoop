@@ -28,154 +28,150 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceStability.Unstable
 public final class DataNodeUsageReport {
 
-  private long bytesWrittenPerSec;
-  private long bytesReadPerSec;
-  private long writeTime;
-  private long readTime;
-  private long blocksWrittenPerSec;
-  private long blocksReadPerSec;
-  private long timestamp;
-
-  DataNodeUsageReport() {
-  }
-
-  private DataNodeUsageReport(Builder builder) {
-    this.bytesWrittenPerSec = builder.bytesWrittenPerSec;
-    this.bytesReadPerSec = builder.bytesReadPerSec;
-    this.writeTime = builder.writeTime;
-    this.readTime = builder.readTime;
-    this.blocksWrittenPerSec = builder.blocksWrittenPerSec;
-    this.blocksReadPerSec = builder.blocksReadPerSec;
-    this.timestamp = builder.timestamp;
-  }
-
-  /**
-   * An object representing a DataNodeUsageReport with default values. Should
-   * be used instead of null or creating new objects when there are
-   * no statistics to report.
-   */
-  public static final DataNodeUsageReport EMPTY_REPORT =
-      new DataNodeUsageReport();
-
-  @Override
-  public String toString() {
-    return "bytesWrittenPerSec:" + bytesWrittenPerSec + " "
-        + " bytesReadPerSec:"
-        + bytesReadPerSec + " writeTime:" + writeTime + " readTime:" + readTime
-        + " blocksWrittenPerSec:" + blocksWrittenPerSec + " blocksReadPerSec:" +
-        blocksReadPerSec + " timestamp:" + timestamp;
-  }
-
-  @Override
-  public int hashCode() {
-    return (int) (timestamp + bytesWrittenPerSec + bytesReadPerSec + writeTime
-        + readTime + blocksWrittenPerSec + blocksReadPerSec);
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    // If the object is compared with itself then return true
-    if (o == this) {
-      return true;
-    }
-
-    if (!(o instanceof DataNodeUsageReport)) {
-      return false;
-    }
-
-    DataNodeUsageReport c = (DataNodeUsageReport) o;
-    return this.timestamp == c.timestamp
-        && this.readTime == c.readTime
-        && this.writeTime == c.writeTime
-        && this.bytesWrittenPerSec == c.bytesWrittenPerSec
-        && this.bytesReadPerSec == c.bytesReadPerSec
-        && this.blocksWrittenPerSec == c.blocksWrittenPerSec
-        && this.blocksReadPerSec == c.blocksReadPerSec;
-  }
-
-  public long getBytesWrittenPerSec() {
-    return bytesWrittenPerSec;
-  }
-
-  public long getBytesReadPerSec() {
-    return bytesReadPerSec;
-  }
-
-  public long getWriteTime() {
-    return writeTime;
-  }
-
-  public long getReadTime() {
-    return readTime;
-  }
-
-  public long getBlocksWrittenPerSec() {
-    return blocksWrittenPerSec;
-  }
-
-  public long getBlocksReadPerSec() {
-    return blocksReadPerSec;
-  }
-
-  public long getTimestamp() {
-    return timestamp;
-  }
-
-  /**
-   * Builder class for {@link DataNodeUsageReport}.
-   */
-  public static class Builder {
-
     private long bytesWrittenPerSec;
+
     private long bytesReadPerSec;
+
     private long writeTime;
+
     private long readTime;
+
     private long blocksWrittenPerSec;
+
     private long blocksReadPerSec;
+
     private long timestamp;
 
-    public DataNodeUsageReport build() {
-      return new DataNodeUsageReport(this);
+    DataNodeUsageReport() {
     }
 
-    public Builder setBytesWrittenPerSec(long bWrittenPerSec) {
-      this.bytesWrittenPerSec = bWrittenPerSec;
-      return this;
+    private DataNodeUsageReport(Builder builder) {
+        this.bytesWrittenPerSec = builder.bytesWrittenPerSec;
+        this.bytesReadPerSec = builder.bytesReadPerSec;
+        this.writeTime = builder.writeTime;
+        this.readTime = builder.readTime;
+        this.blocksWrittenPerSec = builder.blocksWrittenPerSec;
+        this.blocksReadPerSec = builder.blocksReadPerSec;
+        this.timestamp = builder.timestamp;
     }
 
-    public Builder setBytesReadPerSec(long bReadPerSec) {
-      this.bytesReadPerSec = bReadPerSec;
-      return this;
+    /**
+     * An object representing a DataNodeUsageReport with default values. Should
+     * be used instead of null or creating new objects when there are
+     * no statistics to report.
+     */
+    public static final DataNodeUsageReport EMPTY_REPORT = new DataNodeUsageReport();
+
+    @Override
+    public String toString() {
+        return "bytesWrittenPerSec:" + bytesWrittenPerSec + " " + " bytesReadPerSec:" + bytesReadPerSec + " writeTime:" + writeTime + " readTime:" + readTime + " blocksWrittenPerSec:" + blocksWrittenPerSec + " blocksReadPerSec:" + blocksReadPerSec + " timestamp:" + timestamp;
     }
 
-    public Builder setWriteTime(long wTime) {
-      this.writeTime = wTime;
-      return this;
+    @Override
+    public int hashCode() {
+        return (int) (timestamp + bytesWrittenPerSec + bytesReadPerSec + writeTime + readTime + blocksWrittenPerSec + blocksReadPerSec);
     }
 
-    public Builder setReadTime(long rTime) {
-      this.readTime = rTime;
-      return this;
+    @Override
+    public boolean equals(Object o) {
+        // If the object is compared with itself then return true
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof DataNodeUsageReport)) {
+            return false;
+        }
+        DataNodeUsageReport c = (DataNodeUsageReport) o;
+        return this.timestamp == c.timestamp && this.readTime == c.readTime && this.writeTime == c.writeTime && this.bytesWrittenPerSec == c.bytesWrittenPerSec && this.bytesReadPerSec == c.bytesReadPerSec && this.blocksWrittenPerSec == c.blocksWrittenPerSec && this.blocksReadPerSec == c.blocksReadPerSec;
     }
 
-    public Builder setBlocksWrittenPerSec(long wBlock) {
-      this.blocksWrittenPerSec = wBlock;
-      return this;
+    public long getBytesWrittenPerSec() {
+        return bytesWrittenPerSec;
     }
 
-    public Builder setBlocksReadPerSec(long rBlock) {
-      this.blocksReadPerSec = rBlock;
-      return this;
+    public long getBytesReadPerSec() {
+        return bytesReadPerSec;
     }
 
-    public Builder setTimestamp(long ts) {
-      this.timestamp = ts;
-      return this;
+    public long getWriteTime() {
+        return writeTime;
     }
 
-    public Builder() {
+    public long getReadTime() {
+        return readTime;
     }
 
-  }
+    public long getBlocksWrittenPerSec() {
+        return blocksWrittenPerSec;
+    }
 
+    public long getBlocksReadPerSec() {
+        return blocksReadPerSec;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    /**
+     * Builder class for {@link DataNodeUsageReport}.
+     */
+    public static class Builder {
+
+        private long bytesWrittenPerSec;
+
+        private long bytesReadPerSec;
+
+        private long writeTime;
+
+        private long readTime;
+
+        private long blocksWrittenPerSec;
+
+        private long blocksReadPerSec;
+
+        private long timestamp;
+
+        public DataNodeUsageReport build() {
+            return new DataNodeUsageReport(this);
+        }
+
+        public Builder setBytesWrittenPerSec(long bWrittenPerSec) {
+            this.bytesWrittenPerSec = bWrittenPerSec;
+            return this;
+        }
+
+        public Builder setBytesReadPerSec(long bReadPerSec) {
+            this.bytesReadPerSec = bReadPerSec;
+            return this;
+        }
+
+        public Builder setWriteTime(long wTime) {
+            this.writeTime = wTime;
+            return this;
+        }
+
+        public Builder setReadTime(long rTime) {
+            this.readTime = rTime;
+            return this;
+        }
+
+        public Builder setBlocksWrittenPerSec(long wBlock) {
+            this.blocksWrittenPerSec = wBlock;
+            return this;
+        }
+
+        public Builder setBlocksReadPerSec(long rBlock) {
+            this.blocksReadPerSec = rBlock;
+            return this;
+        }
+
+        public Builder setTimestamp(long ts) {
+            this.timestamp = ts;
+            return this;
+        }
+
+        public Builder() {
+        }
+    }
 }

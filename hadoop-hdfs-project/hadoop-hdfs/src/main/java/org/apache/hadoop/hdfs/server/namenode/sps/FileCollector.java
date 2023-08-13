@@ -15,11 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.namenode.sps;
 
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
@@ -31,13 +29,12 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceStability.Evolving
 public interface FileCollector {
 
-  /**
-   * This method can be used to scan and collects the files under that
-   * directory and adds to the given BlockStorageMovementNeeded.
-   *
-   * @param path
-   *          - file path id
-   */
-  void scanAndCollectFiles(long path)
-      throws IOException, InterruptedException;
+    /**
+     * This method can be used to scan and collects the files under that
+     * directory and adds to the given BlockStorageMovementNeeded.
+     *
+     * @param path
+     *          - file path id
+     */
+    void scanAndCollectFiles(long path) throws IOException, InterruptedException;
 }

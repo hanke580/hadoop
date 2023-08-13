@@ -29,11 +29,9 @@ import org.apache.hadoop.hdfs.web.WebHdfsFileSystem;
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-
 import static org.apache.hadoop.hdfs.server.federation.FederationTestUtils.NAMENODES;
 
 /**
@@ -43,91 +41,83 @@ import static org.apache.hadoop.hdfs.server.federation.FederationTestUtils.NAMEN
  */
 public class RouterWebHDFSContract extends HDFSContract {
 
-  public static final Logger LOG =
-      LoggerFactory.getLogger(WebHdfsFileSystem.class);
+    public static final Logger LOG = LoggerFactory.getLogger(WebHdfsFileSystem.class);
 
-  public static final String CONTRACT_WEBHDFS_XML = "contract/webhdfs.xml";
-  private static MiniRouterDFSCluster cluster;
+    public static final String CONTRACT_WEBHDFS_XML = "contract/webhdfs.xml";
 
-  public RouterWebHDFSContract(Configuration conf) {
-    super(conf);
-    addConfResource(CONTRACT_WEBHDFS_XML);
-  }
+    private static MiniRouterDFSCluster cluster;
 
-  public static void createCluster() throws IOException {
-    createCluster(new HdfsConfiguration());
-  }
+    public RouterWebHDFSContract(Configuration conf) {
+        super(conf);
+        addConfResource(CONTRACT_WEBHDFS_XML);
+    }
 
-  public static void createCluster(Configuration conf) throws IOException {
-    try {
-      conf.addResource(CONTRACT_HDFS_XML);
-      conf.addResource(CONTRACT_WEBHDFS_XML);
+    public static void createCluster() throws IOException {
+        createCluster(new HdfsConfiguration());
+    }
 
-      cluster = new MiniRouterDFSCluster(true, 2, conf);
-
-      // Start NNs and DNs and wait until ready
-      cluster.startCluster(conf);
-
-      // Start routers with only an RPC service
-      cluster.startRouters();
-
-      // Register and verify all NNs with all routers
-      cluster.registerNamenodes();
-      cluster.waitNamenodeRegistration();
-
-      // Setup the mount table
-      cluster.installMockLocations();
-
-      // Making one Namenodes active per nameservice
-      if (cluster.isHighAvailability()) {
-        for (String ns : cluster.getNameservices()) {
-          cluster.switchToActive(ns, NAMENODES[0]);
-          cluster.switchToStandby(ns, NAMENODES[1]);
+    public static void createCluster(Configuration conf) throws IOException {
+        try {
+            conf.addResource(CONTRACT_HDFS_XML);
+            conf.addResource(CONTRACT_WEBHDFS_XML);
+            cluster = new MiniRouterDFSCluster(true, 2, conf);
+            // Start NNs and DNs and wait until ready
+            cluster.startCluster(conf);
+            // Start routers with only an RPC service
+            cluster.startRouters();
+            // Register and verify all NNs with all routers
+            cluster.registerNamenodes();
+            cluster.waitNamenodeRegistration();
+            // Setup the mount table
+            cluster.installMockLocations();
+            // Making one Namenodes active per nameservice
+            if (cluster.isHighAvailability()) {
+                for (String ns : cluster.getNameservices()) {
+                    cluster.switchToActive(ns, NAMENODES[0]);
+                    cluster.switchToStandby(ns, NAMENODES[1]);
+                }
+            }
+            cluster.waitActiveNamespaces();
+        } catch (Exception e) {
+            cluster = null;
+            throw new IOException(e.getCause());
         }
-      }
-      cluster.waitActiveNamespaces();
-    } catch (Exception e) {
-      cluster = null;
-      throw new IOException(e.getCause());
     }
-  }
 
-  public static void destroyCluster() {
-    if (cluster != null) {
-      cluster.shutdown();
-      cluster = null;
+    public static void destroyCluster() {
+        if (cluster != null) {
+            cluster.shutdown();
+            cluster = null;
+        }
     }
-  }
 
-  public static MiniDFSCluster getCluster() {
-    return cluster.getCluster();
-  }
-
-  @Override
-  public FileSystem getTestFileSystem() throws IOException {
-    return getFileSystem();
-  }
-
-  public static FileSystem getFileSystem() throws IOException {
-    //assumes cluster is not null
-    Assert.assertNotNull("cluster not created", cluster);
-
-    // Create a connection to WebHDFS
-    try {
-      RouterContext router = cluster.getRandomRouter();
-      String uriStr =
-          WebHdfsConstants.WEBHDFS_SCHEME + "://" + router.getHttpAddress();
-      URI uri = new URI(uriStr);
-      Configuration conf = new HdfsConfiguration();
-      return FileSystem.get(uri, conf);
-    } catch (URISyntaxException e) {
-      LOG.error("Cannot create URI for the WebHDFS filesystem", e);
+    public static MiniDFSCluster getCluster() {
+        return cluster.getCluster();
     }
-    return null;
-  }
 
-  @Override
-  public String getScheme() {
-    return WebHdfsConstants.WEBHDFS_SCHEME;
-  }
+    @Override
+    public FileSystem getTestFileSystem() throws IOException {
+        return getFileSystem();
+    }
+
+    public static FileSystem getFileSystem() throws IOException {
+        //assumes cluster is not null
+        Assert.assertNotNull("cluster not created", cluster);
+        // Create a connection to WebHDFS
+        try {
+            RouterContext router = cluster.getRandomRouter();
+            String uriStr = WebHdfsConstants.WEBHDFS_SCHEME + "://" + router.getHttpAddress();
+            URI uri = new URI(uriStr);
+            Configuration conf = new HdfsConfiguration();
+            return FileSystem.get(uri, conf);
+        } catch (URISyntaxException e) {
+            LOG.error("Cannot create URI for the WebHDFS filesystem", e);
+        }
+        return null;
+    }
+
+    @Override
+    public String getScheme() {
+        return WebHdfsConstants.WEBHDFS_SCHEME;
+    }
 }

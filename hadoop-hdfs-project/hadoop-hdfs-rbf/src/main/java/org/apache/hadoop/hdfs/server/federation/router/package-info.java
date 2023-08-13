@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * The router package includes the core services for a HDFS federation router.
  * The {@link Router} acts as a transparent proxy in front of a cluster of
@@ -29,3 +28,4 @@ package org.apache.hadoop.hdfs.server.federation.router;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

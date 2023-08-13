@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.registry;
 
 import org.apache.commons.io.FileUtils;
@@ -34,80 +33,77 @@ import org.junit.rules.TestName;
 import org.junit.rules.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 
 public class AbstractZKRegistryTest extends RegistryTestHelper {
-  private static final Logger LOG =
-      LoggerFactory.getLogger(AbstractZKRegistryTest.class);
 
-  private static final AddingCompositeService servicesToTeardown =
-      new AddingCompositeService("teardown");
-  // static initializer guarantees it is always started
-  // ahead of any @BeforeClass methods
-  static {
-    servicesToTeardown.init(new Configuration());
-    servicesToTeardown.start();
-  }
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractZKRegistryTest.class);
 
-  @Rule
-  public final Timeout testTimeout = new Timeout(10000);
+    private static final AddingCompositeService servicesToTeardown = new AddingCompositeService("teardown");
 
-  @Rule
-  public TestName methodName = new TestName();
+    // static initializer guarantees it is always started
+    // ahead of any @BeforeClass methods
+    static {
+        servicesToTeardown.init(new Configuration());
+        servicesToTeardown.start();
+    }
 
-  protected static void addToTeardown(Service svc) {
-    servicesToTeardown.addService(svc);
-  }
+    @Rule
+    public final Timeout testTimeout = new Timeout(10000);
 
-  @AfterClass
-  public static void teardownServices() throws IOException {
-    describe(LOG, "teardown of static services");
-    servicesToTeardown.close();
-  }
+    @Rule
+    public TestName methodName = new TestName();
 
-  protected static MicroZookeeperService zookeeper;
+    protected static void addToTeardown(Service svc) {
+        servicesToTeardown.addService(svc);
+    }
 
+    @AfterClass
+    public static void teardownServices() throws IOException {
+        describe(LOG, "teardown of static services");
+        servicesToTeardown.close();
+    }
 
-  @BeforeClass
-  public static void createZKServer() throws Exception {
-    File zkDir = new File("target/zookeeper");
-    FileUtils.deleteDirectory(zkDir);
-    assertTrue(zkDir.mkdirs());
-    zookeeper = new MicroZookeeperService("InMemoryZKService");
-    Configuration conf = new RegistryConfiguration();
-    conf.set(MicroZookeeperServiceKeys.KEY_ZKSERVICE_DIR, zkDir.getAbsolutePath());
-    zookeeper.init(conf);
-    zookeeper.start();
-    addToTeardown(zookeeper);
-  }
+    protected static MicroZookeeperService zookeeper;
 
-  /**
-   * give our thread a name
-   */
-  @Before
-  public void nameThread() {
-    Thread.currentThread().setName("JUnit");
-  }
+    @BeforeClass
+    public static void createZKServer() throws Exception {
+        File zkDir = new File("target/zookeeper");
+        FileUtils.deleteDirectory(zkDir);
+        assertTrue(zkDir.mkdirs());
+        zookeeper = new MicroZookeeperService("InMemoryZKService");
+        Configuration conf = new RegistryConfiguration();
+        conf.set(MicroZookeeperServiceKeys.KEY_ZKSERVICE_DIR, zkDir.getAbsolutePath());
+        zookeeper.init(conf);
+        zookeeper.start();
+        addToTeardown(zookeeper);
+    }
 
-  /**
-   * Returns the connection string to use
-   *
-   * @return connection string
-   */
-  public String getConnectString() {
-    return zookeeper.getConnectionString();
-  }
+    /**
+     * give our thread a name
+     */
+    @Before
+    public void nameThread() {
+        Thread.currentThread().setName("JUnit");
+    }
 
-  public Configuration createRegistryConfiguration() {
-    Configuration conf = new RegistryConfiguration();
-    conf.setInt(RegistryConstants.KEY_REGISTRY_ZK_CONNECTION_TIMEOUT, 1000);
-    conf.setInt(RegistryConstants.KEY_REGISTRY_ZK_RETRY_INTERVAL, 500);
-    conf.setInt(RegistryConstants.KEY_REGISTRY_ZK_RETRY_TIMES, 10);
-    conf.setInt(RegistryConstants.KEY_REGISTRY_ZK_RETRY_CEILING, 10);
-    conf.set(RegistryConstants.KEY_REGISTRY_ZK_QUORUM,
-        zookeeper.getConnectionString());
-    return conf;
-  }
+    /**
+     * Returns the connection string to use
+     *
+     * @return connection string
+     */
+    public String getConnectString() {
+        return zookeeper.getConnectionString();
+    }
+
+    public Configuration createRegistryConfiguration() {
+        Configuration conf = new RegistryConfiguration();
+        conf.setInt(RegistryConstants.KEY_REGISTRY_ZK_CONNECTION_TIMEOUT, 1000);
+        conf.setInt(RegistryConstants.KEY_REGISTRY_ZK_RETRY_INTERVAL, 500);
+        conf.setInt(RegistryConstants.KEY_REGISTRY_ZK_RETRY_TIMES, 10);
+        conf.setInt(RegistryConstants.KEY_REGISTRY_ZK_RETRY_CEILING, 10);
+        conf.set(RegistryConstants.KEY_REGISTRY_ZK_QUORUM, zookeeper.getConnectionString());
+        return conf;
+    }
 }

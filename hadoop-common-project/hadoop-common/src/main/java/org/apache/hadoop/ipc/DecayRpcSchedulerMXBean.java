@@ -15,18 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.ipc;
 
 /**
  * Provides metrics for Decay scheduler.
  */
 public interface DecayRpcSchedulerMXBean {
-  // Get an overview of the requests in history.
-  String getSchedulingDecisionSummary();
-  String getCallVolumeSummary();
-  int getUniqueIdentityCount();
-  long getTotalCallVolume();
-  double[] getAverageResponseTime();
-  long[] getResponseTimeCountInLastWindow();
+
+    // Get an overview of the requests in history.
+    String getSchedulingDecisionSummary();
+
+    String getCallVolumeSummary();
+
+    int getUniqueIdentityCount();
+
+    long getTotalCallVolume();
+
+    double[] getAverageResponseTime();
+
+    long[] getResponseTimeCountInLastWindow();
 }

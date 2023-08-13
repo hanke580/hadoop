@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.ipc;
 
 import java.io.IOException;
@@ -28,9 +27,10 @@ import java.io.IOException;
  * calls going correctly.
  */
 public class AsyncCallLimitExceededException extends IOException {
-  private static final long serialVersionUID = 1L;
 
-  public AsyncCallLimitExceededException(String message) {
-    super(message);
-  }
+    private static final long serialVersionUID = 1L;
+
+    public AsyncCallLimitExceededException(String message) {
+        super(message);
+    }
 }

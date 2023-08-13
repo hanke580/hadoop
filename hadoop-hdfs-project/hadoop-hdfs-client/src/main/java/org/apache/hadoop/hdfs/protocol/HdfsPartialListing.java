@@ -15,14 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.protocol;
 
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.ipc.RemoteException;
-
 import java.util.List;
 
 /**
@@ -33,50 +31,41 @@ import java.util.List;
 @InterfaceAudience.Private
 public class HdfsPartialListing {
 
-  private final List<HdfsFileStatus> partialListing;
-  private final int parentIdx;
-  private final RemoteException exception;
+    private final List<HdfsFileStatus> partialListing;
 
-  public HdfsPartialListing(
-      int parentIdx,
-      List<HdfsFileStatus> partialListing) {
-    this(parentIdx, partialListing, null);
-  }
+    private final int parentIdx;
 
-  public HdfsPartialListing(
-      int parentIdx,
-      RemoteException exception) {
-    this(parentIdx, null, exception);
-  }
+    private final RemoteException exception;
 
-  private HdfsPartialListing(
-      int parentIdx,
-      List<HdfsFileStatus> partialListing,
-      RemoteException exception) {
-    Preconditions.checkArgument(partialListing == null ^ exception == null);
-    this.parentIdx = parentIdx;
-    this.partialListing = partialListing;
-    this.exception = exception;
-  }
+    public HdfsPartialListing(int parentIdx, List<HdfsFileStatus> partialListing) {
+        this(parentIdx, partialListing, null);
+    }
 
-  public int getParentIdx() {
-    return parentIdx;
-  }
+    public HdfsPartialListing(int parentIdx, RemoteException exception) {
+        this(parentIdx, null, exception);
+    }
 
-  public List<HdfsFileStatus> getPartialListing() {
-    return partialListing;
-  }
+    private HdfsPartialListing(int parentIdx, List<HdfsFileStatus> partialListing, RemoteException exception) {
+        Preconditions.checkArgument(partialListing == null ^ exception == null);
+        this.parentIdx = parentIdx;
+        this.partialListing = partialListing;
+        this.exception = exception;
+    }
 
-  public RemoteException getException() {
-    return exception;
-  }
+    public int getParentIdx() {
+        return parentIdx;
+    }
 
-  @Override
-  public String toString() {
-    return new ToStringBuilder(this)
-        .append("partialListing", partialListing)
-        .append("parentIdx", parentIdx)
-        .append("exception", exception)
-        .toString();
-  }
+    public List<HdfsFileStatus> getPartialListing() {
+        return partialListing;
+    }
+
+    public RemoteException getException() {
+        return exception;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this).append("partialListing", partialListing).append("parentIdx", parentIdx).append("exception", exception).toString();
+    }
 }

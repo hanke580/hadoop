@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.net;
 
 import java.net.InetAddress;
@@ -27,37 +26,34 @@ import java.net.UnknownHostException;
  * fully qualified domain names belonging to the IPs from this host name
  */
 public class DNSDomainNameResolver implements DomainNameResolver {
-  @Override
-  public InetAddress[] getAllByDomainName(String domainName)
-      throws UnknownHostException {
-    return InetAddress.getAllByName(domainName);
-  }
 
-  @Override
-  public String getHostnameByIP(InetAddress address) {
-    String host = address.getCanonicalHostName();
-    if (host != null && host.length() != 0
-        && host.charAt(host.length()-1) == '.') {
-      host = host.substring(0, host.length()-1);
-    }
-    return host;
-  }
-
-  @Override
-  public String[] getAllResolvedHostnameByDomainName(
-      String domainName, boolean useFQDN) throws UnknownHostException {
-    InetAddress[] addresses = getAllByDomainName(domainName);
-    String[] hosts = new String[addresses.length];
-    if (useFQDN) {
-      for (int i = 0; i < addresses.length; i++) {
-        hosts[i] = getHostnameByIP(addresses[i]);
-      }
-    } else {
-      for (int i = 0; i < addresses.length; i++) {
-        hosts[i] = addresses[i].getHostAddress();
-      }
+    @Override
+    public InetAddress[] getAllByDomainName(String domainName) throws UnknownHostException {
+        return InetAddress.getAllByName(domainName);
     }
 
-    return hosts;
-  }
+    @Override
+    public String getHostnameByIP(InetAddress address) {
+        String host = address.getCanonicalHostName();
+        if (host != null && host.length() != 0 && host.charAt(host.length() - 1) == '.') {
+            host = host.substring(0, host.length() - 1);
+        }
+        return host;
+    }
+
+    @Override
+    public String[] getAllResolvedHostnameByDomainName(String domainName, boolean useFQDN) throws UnknownHostException {
+        InetAddress[] addresses = getAllByDomainName(domainName);
+        String[] hosts = new String[addresses.length];
+        if (useFQDN) {
+            for (int i = 0; i < addresses.length; i++) {
+                hosts[i] = getHostnameByIP(addresses[i]);
+            }
+        } else {
+            for (int i = 0; i < addresses.length; i++) {
+                hosts[i] = addresses[i].getHostAddress();
+            }
+        }
+        return hosts;
+    }
 }

@@ -18,7 +18,6 @@
 package org.apache.hadoop.metrics2.util;
 
 import java.util.PriorityQueue;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 
 /**
@@ -26,80 +25,88 @@ import org.apache.hadoop.classification.InterfaceAudience;
  */
 @InterfaceAudience.Private
 public class Metrics2Util {
-  /**
-   * A pair of a name and its corresponding value. Defines a custom
-   * comparator so the TopN PriorityQueue sorts based on the count.
-   */
-  @InterfaceAudience.Private
-  public static class NameValuePair implements Comparable<NameValuePair> {
-    private String name;
-    private long value;
 
-    public NameValuePair(String metricName, long value) {
-      this.name = metricName;
-      this.value = value;
-    }
+    /**
+     * A pair of a name and its corresponding value. Defines a custom
+     * comparator so the TopN PriorityQueue sorts based on the count.
+     */
+    @InterfaceAudience.Private
+    public static class NameValuePair implements Comparable<NameValuePair> {
 
-    public String getName() {
-      return name;
-    }
+        private String name;
 
-    public long getValue() {
-      return value;
-    }
+        private long value;
 
-    @Override
-    public int compareTo(NameValuePair other) {
-      return (int) (value - other.value);
-    }
-
-    @Override
-    public boolean equals(Object other) {
-      if (other instanceof NameValuePair) {
-        return compareTo((NameValuePair)other) == 0;
-      }
-      return false;
-    }
-
-    @Override
-    public int hashCode() {
-      return Long.valueOf(value).hashCode();
-    }
-  }
-
-  /**
-   * A fixed-size priority queue, used to retrieve top-n of offered entries.
-   */
-  @InterfaceAudience.Private
-  public static class TopN extends PriorityQueue<NameValuePair> {
-    private static final long serialVersionUID = 5134028249611535803L;
-    private int n; // > 0
-    private long total = 0;
-
-    public TopN(int n) {
-      super(n);
-      this.n = n;
-    }
-
-    @Override
-    public boolean offer(NameValuePair entry) {
-      updateTotal(entry.value);
-      if (size() == n) {
-        NameValuePair smallest = peek();
-        if (smallest.value >= entry.value) {
-          return false;
+        public NameValuePair(String metricName, long value) {
+            this.name = metricName;
+            this.value = value;
         }
-        poll(); // remove smallest
-      }
-      return super.offer(entry);
+
+        public String getName() {
+            return name;
+        }
+
+        public long getValue() {
+            return value;
+        }
+
+        @Override
+        public int compareTo(NameValuePair other) {
+            return (int) (value - other.value);
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (other instanceof NameValuePair) {
+                return compareTo((NameValuePair) other) == 0;
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return Long.valueOf(value).hashCode();
+        }
     }
 
-    private void updateTotal(long value) {
-      total += value;
-    }
+    /**
+     * A fixed-size priority queue, used to retrieve top-n of offered entries.
+     */
+    @InterfaceAudience.Private
+    public static class TopN extends PriorityQueue<NameValuePair> {
 
-    public long getTotal() {
-      return total;
+        private static final long serialVersionUID = 5134028249611535803L;
+
+        // > 0
+        private int n;
+
+        private long total = 0;
+
+        public TopN(int n) {
+            super(n);
+            this.n = n;
+        }
+
+        @Override
+        public boolean offer(NameValuePair entry) {
+            updateTotal(entry.value);
+            if (size() == n) {
+                NameValuePair smallest = peek();
+                if (smallest.value >= entry.value) {
+                    return false;
+                }
+                // remove smallest
+                poll();
+            }
+            return super.offer(entry);
+        }
+
+        private void updateTotal(long value) {
+            total += value;
+        }
+
+        public long getTotal() {
+            return total;
+        }
     }
-  }
 }

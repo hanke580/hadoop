@@ -15,14 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.registry.client.api;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.registry.client.types.ServiceRecord;
 import org.apache.hadoop.service.Service;
-
 import java.io.IOException;
 
 /**
@@ -32,29 +30,24 @@ import java.io.IOException;
 @InterfaceStability.Evolving
 public interface DNSOperations extends Service {
 
-  /**
-   * Register a service based on a service record.
-   *
-   * @param path the ZK path.
-   * @param record record providing DNS registration info.
-   * @throws IOException Any other IO Exception.
-   */
-  void register(String path, ServiceRecord record)
-      throws IOException;
+    /**
+     * Register a service based on a service record.
+     *
+     * @param path the ZK path.
+     * @param record record providing DNS registration info.
+     * @throws IOException Any other IO Exception.
+     */
+    void register(String path, ServiceRecord record) throws IOException;
 
-
-  /**
-   * Delete a service's registered endpoints.
-   *
-   * If the operation returns without an error then the entry has been
-   * deleted.
-   *
-   * @param path the ZK path.
-   * @param record service record
-   * @throws IOException Any other IO Exception
-   *
-   */
-  void delete(String path, ServiceRecord record)
-      throws IOException;
-
+    /**
+     * Delete a service's registered endpoints.
+     *
+     * If the operation returns without an error then the entry has been
+     * deleted.
+     *
+     * @param path the ZK path.
+     * @param record service record
+     * @throws IOException Any other IO Exception
+     */
+    void delete(String path, ServiceRecord record) throws IOException;
 }

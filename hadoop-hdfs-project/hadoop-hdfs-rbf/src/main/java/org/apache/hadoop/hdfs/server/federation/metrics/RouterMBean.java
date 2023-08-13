@@ -27,78 +27,78 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceStability.Evolving
 public interface RouterMBean {
 
-  /**
-   * When the router started.
-   * @return Date as a string the router started.
-   */
-  String getRouterStarted();
+    /**
+     * When the router started.
+     * @return Date as a string the router started.
+     */
+    String getRouterStarted();
 
-  /**
-   * Get the version of the router.
-   * @return Version of the router.
-   */
-  String getVersion();
+    /**
+     * Get the version of the router.
+     * @return Version of the router.
+     */
+    String getVersion();
 
-  /**
-   * Get the compilation date of the router.
-   * @return Compilation date of the router.
-   */
-  String getCompiledDate();
+    /**
+     * Get the compilation date of the router.
+     * @return Compilation date of the router.
+     */
+    String getCompiledDate();
 
-  /**
-   * Get the compilation info of the router.
-   * @return Compilation info of the router.
-   */
-  String getCompileInfo();
+    /**
+     * Get the compilation info of the router.
+     * @return Compilation info of the router.
+     */
+    String getCompileInfo();
 
-  /**
-   * Get the host and port of the router.
-   * @return Host and port of the router.
-   */
-  String getHostAndPort();
+    /**
+     * Get the host and port of the router.
+     * @return Host and port of the router.
+     */
+    String getHostAndPort();
 
-  /**
-   * Get the identifier of the router.
-   * @return Identifier of the router.
-   */
-  String getRouterId();
+    /**
+     * Get the identifier of the router.
+     * @return Identifier of the router.
+     */
+    String getRouterId();
 
-  /**
-   * Get the current state of the router.
-   *
-   * @return String label for the current router state.
-   */
-  String getRouterStatus();
+    /**
+     * Get the current state of the router.
+     *
+     * @return String label for the current router state.
+     */
+    String getRouterStatus();
 
-  /**
-   * Gets the cluster ids of the namenodes.
-   * @return the cluster ids of the namenodes.
-   */
-  String getClusterId();
+    /**
+     * Gets the cluster ids of the namenodes.
+     * @return the cluster ids of the namenodes.
+     */
+    String getClusterId();
 
-  /**
-   * Gets the block pool ids of the namenodes.
-   * @return the block pool ids of the namenodes.
-   */
-  String getBlockPoolId();
+    /**
+     * Gets the block pool ids of the namenodes.
+     * @return the block pool ids of the namenodes.
+     */
+    String getBlockPoolId();
 
-  /**
-   * Get the current number of delegation tokens in memory.
-   * @return number of DTs
-   */
-  long getCurrentTokensCount();
+    /**
+     * Get the current number of delegation tokens in memory.
+     * @return number of DTs
+     */
+    long getCurrentTokensCount();
 
-  /**
-   * Gets the safemode status.
-   *
-   * @return the safemode status.
-   */
-  String getSafemode();
+    /**
+     * Gets the safemode status.
+     *
+     * @return the safemode status.
+     */
+    String getSafemode();
 
-  /**
-   * Gets if security is enabled.
-   *
-   * @return true, if security is enabled.
-   */
-  boolean isSecurityEnabled();
+    /**
+     * Gets if security is enabled.
+     *
+     * @return true, if security is enabled.
+     */
+    boolean isSecurityEnabled();
 }

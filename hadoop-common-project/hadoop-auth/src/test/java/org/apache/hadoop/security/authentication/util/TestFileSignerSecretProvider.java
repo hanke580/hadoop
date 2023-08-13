@@ -16,7 +16,6 @@ package org.apache.hadoop.security.authentication.util;
 import org.apache.hadoop.security.authentication.server.AuthenticationFilter;
 import org.junit.Assert;
 import org.junit.Test;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.Writer;
@@ -24,28 +23,22 @@ import java.util.Properties;
 
 public class TestFileSignerSecretProvider {
 
-  @Test
-  public void testGetSecrets() throws Exception {
-    File testDir = new File(System.getProperty("test.build.data",
-        "target/test-dir"));
-    testDir.mkdirs();
-    String secretValue = "hadoop";
-    File secretFile = new File(testDir, "http-secret.txt");
-    Writer writer = new FileWriter(secretFile);
-    writer.write(secretValue);
-    writer.close();
-
-    FileSignerSecretProvider secretProvider
-            = new FileSignerSecretProvider();
-    Properties secretProviderProps = new Properties();
-    secretProviderProps.setProperty(
-            AuthenticationFilter.SIGNATURE_SECRET_FILE,
-        secretFile.getAbsolutePath());
-    secretProvider.init(secretProviderProps, null, -1);
-    Assert.assertArrayEquals(secretValue.getBytes(),
-        secretProvider.getCurrentSecret());
-    byte[][] allSecrets = secretProvider.getAllSecrets();
-    Assert.assertEquals(1, allSecrets.length);
-    Assert.assertArrayEquals(secretValue.getBytes(), allSecrets[0]);
-  }
+    @Test
+    public void testGetSecrets() throws Exception {
+        File testDir = new File(System.getProperty("test.build.data", "target/test-dir"));
+        testDir.mkdirs();
+        String secretValue = "hadoop";
+        File secretFile = new File(testDir, "http-secret.txt");
+        Writer writer = new FileWriter(secretFile);
+        writer.write(secretValue);
+        writer.close();
+        FileSignerSecretProvider secretProvider = new FileSignerSecretProvider();
+        Properties secretProviderProps = new Properties();
+        secretProviderProps.setProperty(AuthenticationFilter.SIGNATURE_SECRET_FILE, secretFile.getAbsolutePath());
+        secretProvider.init(secretProviderProps, null, -1);
+        Assert.assertArrayEquals(secretValue.getBytes(), secretProvider.getCurrentSecret());
+        byte[][] allSecrets = secretProvider.getAllSecrets();
+        Assert.assertEquals(1, allSecrets.length);
+        Assert.assertArrayEquals(secretValue.getBytes(), allSecrets[0]);
+    }
 }

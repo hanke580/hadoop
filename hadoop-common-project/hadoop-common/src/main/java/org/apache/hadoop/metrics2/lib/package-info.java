@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * A collection of library classes for implementing metrics sources
  */
@@ -25,3 +24,4 @@ package org.apache.hadoop.metrics2.lib;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

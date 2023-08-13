@@ -20,13 +20,11 @@ package org.apache.hadoop.security;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.SaslRpcServer.QualityOfProtection;
 import org.apache.hadoop.util.CombinedIPWhiteList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * An implementation of the SaslPropertiesResolver.
@@ -46,90 +44,80 @@ import org.slf4j.LoggerFactory;
  * Once a match is found , the IP address is determined to be in whitelist.
  *
  * The behavior can be configured using a bunch of configuration parameters.
- *
  */
 public class WhitelistBasedResolver extends SaslPropertiesResolver {
-  public static final Logger LOG =
-      LoggerFactory.getLogger(WhitelistBasedResolver.class);
 
-  private static final String FIXEDWHITELIST_DEFAULT_LOCATION = "/etc/hadoop/fixedwhitelist";
+    public static final Logger LOG = LoggerFactory.getLogger(WhitelistBasedResolver.class);
 
-  private static final String VARIABLEWHITELIST_DEFAULT_LOCATION = "/etc/hadoop/whitelist";
+    private static final String FIXEDWHITELIST_DEFAULT_LOCATION = "/etc/hadoop/fixedwhitelist";
 
-  /**
-   * Path to the file to containing subnets and ip addresses to form fixed whitelist.
-   */
-  public static final String HADOOP_SECURITY_SASL_FIXEDWHITELIST_FILE =
-    "hadoop.security.sasl.fixedwhitelist.file";
-  /**
-   * Enables/Disables variable whitelist
-   */
-  public static final String HADOOP_SECURITY_SASL_VARIABLEWHITELIST_ENABLE =
-    "hadoop.security.sasl.variablewhitelist.enable";
-  /**
-   * Path to the file to containing subnets and ip addresses to form variable whitelist.
-   */
-  public static final String HADOOP_SECURITY_SASL_VARIABLEWHITELIST_FILE =
-    "hadoop.security.sasl.variablewhitelist.file";
-  /**
-   * time in seconds by which the variable whitelist file is checked for updates
-   */
-  public static final String HADOOP_SECURITY_SASL_VARIABLEWHITELIST_CACHE_SECS =
-    "hadoop.security.sasl.variablewhitelist.cache.secs";
+    private static final String VARIABLEWHITELIST_DEFAULT_LOCATION = "/etc/hadoop/whitelist";
 
-  /**
-   * comma separated list containing alternate hadoop.rpc.protection values for
-   * clients which are not in whitelist
-   */
-  public static final String HADOOP_RPC_PROTECTION_NON_WHITELIST =
-    "hadoop.rpc.protection.non-whitelist";
+    /**
+     * Path to the file to containing subnets and ip addresses to form fixed whitelist.
+     */
+    public static final String HADOOP_SECURITY_SASL_FIXEDWHITELIST_FILE = "hadoop.security.sasl.fixedwhitelist.file";
 
-  private CombinedIPWhiteList whiteList;
+    /**
+     * Enables/Disables variable whitelist
+     */
+    public static final String HADOOP_SECURITY_SASL_VARIABLEWHITELIST_ENABLE = "hadoop.security.sasl.variablewhitelist.enable";
 
-  private Map<String, String> saslProps;
+    /**
+     * Path to the file to containing subnets and ip addresses to form variable whitelist.
+     */
+    public static final String HADOOP_SECURITY_SASL_VARIABLEWHITELIST_FILE = "hadoop.security.sasl.variablewhitelist.file";
 
-  @Override
-  public void setConf(Configuration conf) {
-    super.setConf(conf);
-    String fixedFile = conf.get(HADOOP_SECURITY_SASL_FIXEDWHITELIST_FILE,
-        FIXEDWHITELIST_DEFAULT_LOCATION);
-    String variableFile = null;
-    long expiryTime = 0;
+    /**
+     * time in seconds by which the variable whitelist file is checked for updates
+     */
+    public static final String HADOOP_SECURITY_SASL_VARIABLEWHITELIST_CACHE_SECS = "hadoop.security.sasl.variablewhitelist.cache.secs";
 
-    if (conf.getBoolean(HADOOP_SECURITY_SASL_VARIABLEWHITELIST_ENABLE, false)) {
-      variableFile = conf.get(HADOOP_SECURITY_SASL_VARIABLEWHITELIST_FILE,
-          VARIABLEWHITELIST_DEFAULT_LOCATION);
-      expiryTime =
-        conf.getLong(HADOOP_SECURITY_SASL_VARIABLEWHITELIST_CACHE_SECS,3600) * 1000;
+    /**
+     * comma separated list containing alternate hadoop.rpc.protection values for
+     * clients which are not in whitelist
+     */
+    public static final String HADOOP_RPC_PROTECTION_NON_WHITELIST = "hadoop.rpc.protection.non-whitelist";
+
+    private CombinedIPWhiteList whiteList;
+
+    private Map<String, String> saslProps;
+
+    @Override
+    public void setConf(Configuration conf) {
+        super.setConf(conf);
+        String fixedFile = conf.get(HADOOP_SECURITY_SASL_FIXEDWHITELIST_FILE, FIXEDWHITELIST_DEFAULT_LOCATION);
+        String variableFile = null;
+        long expiryTime = 0;
+        if (conf.getBoolean(HADOOP_SECURITY_SASL_VARIABLEWHITELIST_ENABLE, false)) {
+            variableFile = conf.get(HADOOP_SECURITY_SASL_VARIABLEWHITELIST_FILE, VARIABLEWHITELIST_DEFAULT_LOCATION);
+            expiryTime = conf.getLong(HADOOP_SECURITY_SASL_VARIABLEWHITELIST_CACHE_SECS, 3600) * 1000;
+        }
+        whiteList = new CombinedIPWhiteList(fixedFile, variableFile, expiryTime);
+        this.saslProps = getSaslProperties(conf);
     }
 
-    whiteList = new CombinedIPWhiteList(fixedFile,variableFile,expiryTime);
-
-    this.saslProps = getSaslProperties(conf);
-  }
-
-  /**
-   * Identify the Sasl Properties to be used for a connection with a client.
-   * @param clientAddress client's address
-   * @return the sasl properties to be used for the connection.
-   */
-  @Override
-  public Map<String, String> getServerProperties(InetAddress clientAddress) {
-    if (clientAddress == null) {
-      return saslProps;
+    /**
+     * Identify the Sasl Properties to be used for a connection with a client.
+     * @param clientAddress client's address
+     * @return the sasl properties to be used for the connection.
+     */
+    @Override
+    public Map<String, String> getServerProperties(InetAddress clientAddress) {
+        if (clientAddress == null) {
+            return saslProps;
+        }
+        return whiteList.isIn(clientAddress.getHostAddress()) ? getDefaultProperties() : saslProps;
     }
-    return  whiteList.isIn(clientAddress.getHostAddress())?getDefaultProperties():saslProps;
-  }
 
-  public Map<String, String> getServerProperties(String clientAddress) throws UnknownHostException {
-    if (clientAddress == null) {
-      return saslProps;
+    public Map<String, String> getServerProperties(String clientAddress) throws UnknownHostException {
+        if (clientAddress == null) {
+            return saslProps;
+        }
+        return getServerProperties(InetAddress.getByName(clientAddress));
     }
-    return getServerProperties(InetAddress.getByName(clientAddress));
-  }
 
-  static Map<String, String> getSaslProperties(Configuration conf) {
-    return getSaslProperties(conf, HADOOP_RPC_PROTECTION_NON_WHITELIST,
-        QualityOfProtection.PRIVACY);
-  }
+    static Map<String, String> getSaslProperties(Configuration conf) {
+        return getSaslProperties(conf, HADOOP_RPC_PROTECTION_NON_WHITELIST, QualityOfProtection.PRIVACY);
+    }
 }

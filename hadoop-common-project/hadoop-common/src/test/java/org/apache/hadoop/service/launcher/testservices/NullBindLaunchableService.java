@@ -15,11 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.service.launcher.testservices;
 
 import org.apache.hadoop.conf.Configuration;
-
 import java.util.List;
 
 /**
@@ -27,20 +25,19 @@ import java.util.List;
  * the {@link #bindArgs(Configuration, List)} method.
  */
 public class NullBindLaunchableService extends LaunchableRunningService {
-  public static final String NAME =
-      "org.apache.hadoop.service.launcher.testservices.NullBindLaunchableService";
 
-  public NullBindLaunchableService() {
-    this("NullBindLaunchableService");
-  }
+    public static final String NAME = "org.apache.hadoop.service.launcher.testservices.NullBindLaunchableService";
 
-  public NullBindLaunchableService(String name) {
-    super(name);
-  }
+    public NullBindLaunchableService() {
+        this("NullBindLaunchableService");
+    }
 
-  @Override
-  public Configuration bindArgs(Configuration config, List<String> args)
-      throws Exception {
-    return null;
-  }
+    public NullBindLaunchableService(String name) {
+        super(name);
+    }
+
+    @Override
+    public Configuration bindArgs(Configuration config, List<String> args) throws Exception {
+        return null;
+    }
 }

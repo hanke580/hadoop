@@ -24,10 +24,9 @@ import org.apache.hadoop.http.IsActiveServlet;
  */
 public class IsNameNodeActiveServlet extends IsActiveServlet {
 
-  @Override
-  protected boolean isActive() {
-    NameNode namenode = NameNodeHttpServer.getNameNodeFromContext(
-        getServletContext());
-    return namenode.isActiveState();
-  }
+    @Override
+    protected boolean isActive() {
+        NameNode namenode = NameNodeHttpServer.getNameNodeFromContext(getServletContext());
+        return namenode.isActiveState();
+    }
 }

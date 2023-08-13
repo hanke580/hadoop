@@ -15,82 +15,68 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.lib.servlet;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-
 import org.apache.hadoop.test.HTestCase;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-
 public class TestHostnameFilter extends HTestCase {
 
-  @Test
-  public void hostname() throws Exception {
-    ServletRequest request = Mockito.mock(ServletRequest.class);
-    Mockito.when(request.getRemoteAddr()).thenReturn("localhost");
+    @Test
+    public void hostname() throws Exception {
+        ServletRequest request = Mockito.mock(ServletRequest.class);
+        Mockito.when(request.getRemoteAddr()).thenReturn("localhost");
+        ServletResponse response = Mockito.mock(ServletResponse.class);
+        final AtomicBoolean invoked = new AtomicBoolean();
+        FilterChain chain = new FilterChain() {
 
-    ServletResponse response = Mockito.mock(ServletResponse.class);
+            @Override
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
+                // Hostname was set to "localhost", but may get resolved automatically to
+                // "127.0.0.1" depending on OS.
+                assertTrue(HostnameFilter.get().contains("localhost") || HostnameFilter.get().contains("127.0.0.1"));
+                invoked.set(true);
+            }
+        };
+        Filter filter = new HostnameFilter();
+        filter.init(null);
+        assertNull(HostnameFilter.get());
+        filter.doFilter(request, response, chain);
+        assertTrue(invoked.get());
+        assertNull(HostnameFilter.get());
+        filter.destroy();
+    }
 
-    final AtomicBoolean invoked = new AtomicBoolean();
+    @Test
+    public void testMissingHostname() throws Exception {
+        ServletRequest request = Mockito.mock(ServletRequest.class);
+        Mockito.when(request.getRemoteAddr()).thenReturn(null);
+        ServletResponse response = Mockito.mock(ServletResponse.class);
+        final AtomicBoolean invoked = new AtomicBoolean();
+        FilterChain chain = new FilterChain() {
 
-    FilterChain chain = new FilterChain() {
-      @Override
-      public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-        throws IOException, ServletException {
-        // Hostname was set to "localhost", but may get resolved automatically to
-        // "127.0.0.1" depending on OS.
-        assertTrue(HostnameFilter.get().contains("localhost") ||
-          HostnameFilter.get().contains("127.0.0.1"));
-        invoked.set(true);
-      }
-    };
-
-    Filter filter = new HostnameFilter();
-    filter.init(null);
-    assertNull(HostnameFilter.get());
-    filter.doFilter(request, response, chain);
-    assertTrue(invoked.get());
-    assertNull(HostnameFilter.get());
-    filter.destroy();
-  }
-
-  @Test
-  public void testMissingHostname() throws Exception {
-    ServletRequest request = Mockito.mock(ServletRequest.class);
-    Mockito.when(request.getRemoteAddr()).thenReturn(null);
-
-    ServletResponse response = Mockito.mock(ServletResponse.class);
-
-    final AtomicBoolean invoked = new AtomicBoolean();
-
-    FilterChain chain = new FilterChain() {
-      @Override
-      public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-        throws IOException, ServletException {
-        assertTrue(HostnameFilter.get().contains("???"));
-        invoked.set(true);
-      }
-    };
-
-    Filter filter = new HostnameFilter();
-    filter.init(null);
-    assertNull(HostnameFilter.get());
-    filter.doFilter(request, response, chain);
-    assertTrue(invoked.get());
-    assertNull(HostnameFilter.get());
-    filter.destroy();
-  }
+            @Override
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
+                assertTrue(HostnameFilter.get().contains("???"));
+                invoked.set(true);
+            }
+        };
+        Filter filter = new HostnameFilter();
+        filter.init(null);
+        assertNull(HostnameFilter.get());
+        filter.doFilter(request, response, chain);
+        assertTrue(invoked.get());
+        assertNull(HostnameFilter.get());
+        filter.destroy();
+    }
 }

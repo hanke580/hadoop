@@ -15,11 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs;
 
 import static org.junit.Assert.assertEquals;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -27,7 +25,6 @@ import java.net.URI;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -41,74 +38,93 @@ import org.junit.Test;
 
 /**
  * This test covers privilege related aspects of FsShell
- *
  */
 public class TestFsShellPermission {
 
-  static private final String TEST_ROOT = "/testroot";
+    static private final String TEST_ROOT = "/testroot";
 
-  static UserGroupInformation createUGI(String ownername, String groupName) {
-    return UserGroupInformation.createUserForTesting(ownername,
-        new String[]{groupName});
-  }
-
-  private class FileEntry {
-    private String path;
-    private boolean isDir;
-    private String owner;
-    private String group;
-    private String permission;
-    public FileEntry(String path, boolean isDir,
-        String owner, String group, String permission) {
-      this.path = path;
-      this.isDir = isDir;
-      this.owner = owner;
-      this.group = group;
-      this.permission = permission;
+    static UserGroupInformation createUGI(String ownername, String groupName) {
+        return UserGroupInformation.createUserForTesting(ownername, new String[] { groupName });
     }
-    String getPath() { return path; }
-    boolean isDirectory() { return isDir; }
-    String getOwner() { return owner; }
-    String getGroup() { return group; }
-    String getPermission() { return permission; }
-  }
 
-  private void createFiles(FileSystem fs, String topdir,
-      FileEntry[] entries) throws IOException {
-    for (FileEntry entry : entries) {
-      String newPathStr = topdir + "/" + entry.getPath();
-      Path newPath = new Path(newPathStr);
-      if (entry.isDirectory()) {
-        fs.mkdirs(newPath);
-      } else {
-        FileSystemTestHelper.createFile(fs,  newPath);
-      }
-      fs.setPermission(newPath, new FsPermission(entry.getPermission()));
-      fs.setOwner(newPath, entry.getOwner(), entry.getGroup());
+    private class FileEntry {
+
+        private String path;
+
+        private boolean isDir;
+
+        private String owner;
+
+        private String group;
+
+        private String permission;
+
+        public FileEntry(String path, boolean isDir, String owner, String group, String permission) {
+            this.path = path;
+            this.isDir = isDir;
+            this.owner = owner;
+            this.group = group;
+            this.permission = permission;
+        }
+
+        String getPath() {
+            return path;
+        }
+
+        boolean isDirectory() {
+            return isDir;
+        }
+
+        String getOwner() {
+            return owner;
+        }
+
+        String getGroup() {
+            return group;
+        }
+
+        String getPermission() {
+            return permission;
+        }
     }
-  }
 
-  /** delete directory and everything underneath it.*/
-  private static void deldir(FileSystem fs, String topdir) throws IOException {
-    fs.delete(new Path(topdir), true);
-  }
-
-  static String execCmd(FsShell shell, final String[] args) throws Exception {
-    ByteArrayOutputStream baout = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(baout, true);
-    PrintStream old = System.out;
-    int ret;
-    try {
-      System.setOut(out);
-      ret = shell.run(args);
-      out.close();
-    } finally {
-      System.setOut(old);
+    private void createFiles(FileSystem fs, String topdir, FileEntry[] entries) throws IOException {
+        for (FileEntry entry : entries) {
+            String newPathStr = topdir + "/" + entry.getPath();
+            Path newPath = new Path(newPathStr);
+            if (entry.isDirectory()) {
+                fs.mkdirs(newPath);
+            } else {
+                FileSystemTestHelper.createFile(fs, newPath);
+            }
+            fs.setPermission(newPath, new FsPermission(entry.getPermission()));
+            fs.setOwner(newPath, entry.getOwner(), entry.getGroup());
+        }
     }
-    return String.valueOf(ret);
-  }
 
-  /*
+    /**
+     * delete directory and everything underneath it.
+     */
+    private static void deldir(FileSystem fs, String topdir) throws IOException {
+        fs.delete(new Path(topdir), true);
+    }
+
+    static String execCmd(FsShell shell, final String[] args) throws Exception {
+        ByteArrayOutputStream baout = new ByteArrayOutputStream();
+        PrintStream out = new PrintStream(baout, true);
+        PrintStream old = System.out;
+        int ret;
+        try {
+            System.setOut(out);
+            ret = shell.run(args);
+            out.close();
+        } finally {
+            System.setOut(old);
+        }
+        return String.valueOf(ret);
+    }
+
+    /*
    * Each instance of TestDeleteHelper captures one testing scenario.
    *
    * To create all files listed in fileEntries, and then delete as user
@@ -119,160 +135,133 @@ public class TestFsShellPermission {
    * the existence of deleteEntry is checked against expectedToDelete
    * to ensure the command is finished with expected result
    */
-  private class TestDeleteHelper {
-    private FileEntry[] fileEntries;
-    private FileEntry deleteEntry;
-    private String cmdAndOptions;
-    private boolean expectedToDelete;
+    private class TestDeleteHelper {
 
-    final String doAsGroup;
-    final UserGroupInformation userUgi;
+        private FileEntry[] fileEntries;
 
-    public TestDeleteHelper(
-        FileEntry[] fileEntries,
-        FileEntry deleteEntry,
-        String cmdAndOptions,
-        String doAsUser,
-        boolean expectedToDelete) {
-      this.fileEntries = fileEntries;
-      this.deleteEntry = deleteEntry;
-      this.cmdAndOptions = cmdAndOptions;
-      this.expectedToDelete = expectedToDelete;
+        private FileEntry deleteEntry;
 
-      doAsGroup = doAsUser.equals("hdfs")? "supergroup" : "users";
-      userUgi = createUGI(doAsUser, doAsGroup);
-    }
+        private String cmdAndOptions;
 
-    public void execute(Configuration conf, FileSystem fs) throws Exception {
-      fs.mkdirs(new Path(TEST_ROOT));
+        private boolean expectedToDelete;
 
-      createFiles(fs, TEST_ROOT, fileEntries);
-      final FsShell fsShell = new FsShell(conf);
-      final String deletePath =  TEST_ROOT + "/" + deleteEntry.getPath();
+        final String doAsGroup;
 
-      String[] tmpCmdOpts = StringUtils.split(cmdAndOptions);
-      ArrayList<String> tmpArray = new ArrayList<String>(Arrays.asList(tmpCmdOpts));
-      tmpArray.add(deletePath);
-      final String[] cmdOpts = tmpArray.toArray(new String[tmpArray.size()]);
-      userUgi.doAs(new PrivilegedExceptionAction<String>() {
-        public String run() throws Exception {
-          return execCmd(fsShell, cmdOpts);
+        final UserGroupInformation userUgi;
+
+        public TestDeleteHelper(FileEntry[] fileEntries, FileEntry deleteEntry, String cmdAndOptions, String doAsUser, boolean expectedToDelete) {
+            this.fileEntries = fileEntries;
+            this.deleteEntry = deleteEntry;
+            this.cmdAndOptions = cmdAndOptions;
+            this.expectedToDelete = expectedToDelete;
+            doAsGroup = doAsUser.equals("hdfs") ? "supergroup" : "users";
+            userUgi = createUGI(doAsUser, doAsGroup);
         }
-      });
 
-      boolean deleted = !fs.exists(new Path(deletePath));
-      assertEquals(expectedToDelete, deleted);
+        public void execute(Configuration conf, FileSystem fs) throws Exception {
+            fs.mkdirs(new Path(TEST_ROOT));
+            createFiles(fs, TEST_ROOT, fileEntries);
+            final FsShell fsShell = new FsShell(conf);
+            final String deletePath = TEST_ROOT + "/" + deleteEntry.getPath();
+            String[] tmpCmdOpts = StringUtils.split(cmdAndOptions);
+            ArrayList<String> tmpArray = new ArrayList<String>(Arrays.asList(tmpCmdOpts));
+            tmpArray.add(deletePath);
+            final String[] cmdOpts = tmpArray.toArray(new String[tmpArray.size()]);
+            userUgi.doAs(new PrivilegedExceptionAction<String>() {
 
-      deldir(fs, TEST_ROOT);
+                public String run() throws Exception {
+                    return execCmd(fsShell, cmdOpts);
+                }
+            });
+            boolean deleted = !fs.exists(new Path(deletePath));
+            assertEquals(expectedToDelete, deleted);
+            deldir(fs, TEST_ROOT);
+        }
     }
-  }
 
-  private TestDeleteHelper genDeleteEmptyDirHelper(final String cmdOpts,
-      final String targetPerm,
-      final String asUser,
-      boolean expectedToDelete) {
-    FileEntry[] files = {
-        new FileEntry("userA", true, "userA", "users", "755"),
-        new FileEntry("userA/userB", true, "userB", "users", targetPerm)
-    };
-    FileEntry deleteEntry = files[1];
-    return new TestDeleteHelper(files, deleteEntry, cmdOpts, asUser,
-        expectedToDelete);
-  }
-
-  // Expect target to be deleted
-  private TestDeleteHelper genRmrEmptyDirWithReadPerm() {
-    return genDeleteEmptyDirHelper("-rm -r", "744", "userA", true);
-  }
-
-  // Expect target to be deleted
-  private TestDeleteHelper genRmrEmptyDirWithNoPerm() {
-    return genDeleteEmptyDirHelper("-rm -r", "700", "userA", true);
-  }
-
-  // Expect target to be deleted
-  private TestDeleteHelper genRmrfEmptyDirWithNoPerm() {
-    return genDeleteEmptyDirHelper("-rm -r -f", "700", "userA", true);
-  }
-
-  private TestDeleteHelper genDeleteNonEmptyDirHelper(final String cmd,
-      final String targetPerm,
-      final String asUser,
-      boolean expectedToDelete) {
-    FileEntry[] files = {
-        new FileEntry("userA", true, "userA", "users", "755"),
-        new FileEntry("userA/userB", true, "userB", "users", targetPerm),
-        new FileEntry("userA/userB/xyzfile", false, "userB", "users",
-            targetPerm)
-    };
-    FileEntry deleteEntry = files[1];
-    return new TestDeleteHelper(files, deleteEntry, cmd, asUser,
-        expectedToDelete);
-  }
-
-  // Expect target not to be deleted
-  private TestDeleteHelper genRmrNonEmptyDirWithReadPerm() {
-    return genDeleteNonEmptyDirHelper("-rm -r", "744", "userA", false);
-  }
-
-  // Expect target not to be deleted
-  private TestDeleteHelper genRmrNonEmptyDirWithNoPerm() {
-    return genDeleteNonEmptyDirHelper("-rm -r", "700", "userA", false);
-  }
-
-  // Expect target to be deleted
-  private TestDeleteHelper genRmrNonEmptyDirWithAllPerm() {
-    return genDeleteNonEmptyDirHelper("-rm -r", "777", "userA", true);
-  }
-
-  // Expect target not to be deleted
-  private TestDeleteHelper genRmrfNonEmptyDirWithNoPerm() {
-    return genDeleteNonEmptyDirHelper("-rm -r -f", "700", "userA", false);
-  }
-
-  // Expect target to be deleted
-  public TestDeleteHelper genDeleteSingleFileNotAsOwner() throws Exception {
-    FileEntry[] files = {
-        new FileEntry("userA", true, "userA", "users", "755"),
-        new FileEntry("userA/userB", false, "userB", "users", "700")
-    };
-    FileEntry deleteEntry = files[1];
-    return new TestDeleteHelper(files, deleteEntry, "-rm -r", "userA", true);
-  }
-
-  @Test
-  public void testDelete() throws Exception {
-    Configuration conf = null;
-    MiniDFSCluster cluster = null;
-    try {
-      conf = new Configuration();
-      cluster = new MiniDFSCluster.Builder(conf).numDataNodes(2).build();
-
-      String nnUri = FileSystem.getDefaultUri(conf).toString();
-      FileSystem fs = FileSystem.get(URI.create(nnUri), conf);
-
-      ArrayList<TestDeleteHelper> ta = new ArrayList<TestDeleteHelper>();
-
-      // Add empty dir tests
-      ta.add(genRmrEmptyDirWithReadPerm());
-      ta.add(genRmrEmptyDirWithNoPerm());
-      ta.add(genRmrfEmptyDirWithNoPerm());
-
-      // Add non-empty dir tests
-      ta.add(genRmrNonEmptyDirWithReadPerm());
-      ta.add(genRmrNonEmptyDirWithNoPerm());
-      ta.add(genRmrNonEmptyDirWithAllPerm());
-      ta.add(genRmrfNonEmptyDirWithNoPerm());
-
-      // Add single tile test
-      ta.add(genDeleteSingleFileNotAsOwner());
-
-      // Run all tests
-      for(TestDeleteHelper t : ta) {
-        t.execute(conf,  fs);
-      }
-    } finally {
-      if (cluster != null) { cluster.shutdown(); }
+    private TestDeleteHelper genDeleteEmptyDirHelper(final String cmdOpts, final String targetPerm, final String asUser, boolean expectedToDelete) {
+        FileEntry[] files = { new FileEntry("userA", true, "userA", "users", "755"), new FileEntry("userA/userB", true, "userB", "users", targetPerm) };
+        FileEntry deleteEntry = files[1];
+        return new TestDeleteHelper(files, deleteEntry, cmdOpts, asUser, expectedToDelete);
     }
-  }
+
+    // Expect target to be deleted
+    private TestDeleteHelper genRmrEmptyDirWithReadPerm() {
+        return genDeleteEmptyDirHelper("-rm -r", "744", "userA", true);
+    }
+
+    // Expect target to be deleted
+    private TestDeleteHelper genRmrEmptyDirWithNoPerm() {
+        return genDeleteEmptyDirHelper("-rm -r", "700", "userA", true);
+    }
+
+    // Expect target to be deleted
+    private TestDeleteHelper genRmrfEmptyDirWithNoPerm() {
+        return genDeleteEmptyDirHelper("-rm -r -f", "700", "userA", true);
+    }
+
+    private TestDeleteHelper genDeleteNonEmptyDirHelper(final String cmd, final String targetPerm, final String asUser, boolean expectedToDelete) {
+        FileEntry[] files = { new FileEntry("userA", true, "userA", "users", "755"), new FileEntry("userA/userB", true, "userB", "users", targetPerm), new FileEntry("userA/userB/xyzfile", false, "userB", "users", targetPerm) };
+        FileEntry deleteEntry = files[1];
+        return new TestDeleteHelper(files, deleteEntry, cmd, asUser, expectedToDelete);
+    }
+
+    // Expect target not to be deleted
+    private TestDeleteHelper genRmrNonEmptyDirWithReadPerm() {
+        return genDeleteNonEmptyDirHelper("-rm -r", "744", "userA", false);
+    }
+
+    // Expect target not to be deleted
+    private TestDeleteHelper genRmrNonEmptyDirWithNoPerm() {
+        return genDeleteNonEmptyDirHelper("-rm -r", "700", "userA", false);
+    }
+
+    // Expect target to be deleted
+    private TestDeleteHelper genRmrNonEmptyDirWithAllPerm() {
+        return genDeleteNonEmptyDirHelper("-rm -r", "777", "userA", true);
+    }
+
+    // Expect target not to be deleted
+    private TestDeleteHelper genRmrfNonEmptyDirWithNoPerm() {
+        return genDeleteNonEmptyDirHelper("-rm -r -f", "700", "userA", false);
+    }
+
+    // Expect target to be deleted
+    public TestDeleteHelper genDeleteSingleFileNotAsOwner() throws Exception {
+        FileEntry[] files = { new FileEntry("userA", true, "userA", "users", "755"), new FileEntry("userA/userB", false, "userB", "users", "700") };
+        FileEntry deleteEntry = files[1];
+        return new TestDeleteHelper(files, deleteEntry, "-rm -r", "userA", true);
+    }
+
+    @Test
+    public void testDelete() throws Exception {
+        Configuration conf = null;
+        MiniDFSCluster cluster = null;
+        try {
+            conf = new Configuration();
+            cluster = new MiniDFSCluster.Builder(conf).numDataNodes(2).build();
+            String nnUri = FileSystem.getDefaultUri(conf).toString();
+            FileSystem fs = FileSystem.get(URI.create(nnUri), conf);
+            ArrayList<TestDeleteHelper> ta = new ArrayList<TestDeleteHelper>();
+            // Add empty dir tests
+            ta.add(genRmrEmptyDirWithReadPerm());
+            ta.add(genRmrEmptyDirWithNoPerm());
+            ta.add(genRmrfEmptyDirWithNoPerm());
+            // Add non-empty dir tests
+            ta.add(genRmrNonEmptyDirWithReadPerm());
+            ta.add(genRmrNonEmptyDirWithNoPerm());
+            ta.add(genRmrNonEmptyDirWithAllPerm());
+            ta.add(genRmrfNonEmptyDirWithNoPerm());
+            // Add single tile test
+            ta.add(genDeleteSingleFileNotAsOwner());
+            // Run all tests
+            for (TestDeleteHelper t : ta) {
+                t.execute(conf, fs);
+            }
+        } finally {
+            if (cluster != null) {
+                cluster.shutdown();
+            }
+        }
+    }
 }

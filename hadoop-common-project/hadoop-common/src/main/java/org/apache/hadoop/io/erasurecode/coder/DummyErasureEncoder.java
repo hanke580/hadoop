@@ -29,17 +29,15 @@ import org.apache.hadoop.io.erasurecode.rawcoder.RawErasureEncoder;
  * HDFS side logic instead of codec, and is intended for test only.
  */
 public class DummyErasureEncoder extends ErasureEncoder {
-  public DummyErasureEncoder(ErasureCoderOptions options) {
-    super(options);
-  }
 
-  @Override
-  protected ErasureCodingStep prepareEncodingStep(ECBlockGroup blockGroup) {
-    RawErasureEncoder rawEncoder = new DummyRawEncoder(getOptions());
+    public DummyErasureEncoder(ErasureCoderOptions options) {
+        super(options);
+    }
 
-    ECBlock[] inputBlocks = getInputBlocks(blockGroup);
-
-    return new ErasureEncodingStep(inputBlocks,
-        getOutputBlocks(blockGroup), rawEncoder);
-  }
+    @Override
+    protected ErasureCodingStep prepareEncodingStep(ECBlockGroup blockGroup) {
+        RawErasureEncoder rawEncoder = new DummyRawEncoder(getOptions());
+        ECBlock[] inputBlocks = getInputBlocks(blockGroup);
+        return new ErasureEncodingStep(inputBlocks, getOutputBlocks(blockGroup), rawEncoder);
+    }
 }

@@ -27,54 +27,51 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class TestHttpServerLogs extends HttpServerFunctionalTest {
-  static final Logger LOG = LoggerFactory.getLogger(TestHttpServerLogs.class);
-  private static HttpServer2 server;
 
-  @BeforeClass
-  public static void setup() throws Exception {
-  }
+    static final Logger LOG = LoggerFactory.getLogger(TestHttpServerLogs.class);
 
-  private void startServer(Configuration conf) throws Exception {
-    server = createTestServer(conf);
-    server.addJerseyResourcePackage(
-        JerseyResource.class.getPackage().getName(), "/jersey/*");
-    server.start();
-    baseUrl = getServerURL(server);
-    LOG.info("HTTP server started: "+ baseUrl);
-  }
+    private static HttpServer2 server;
 
-  @AfterClass
-  public static void cleanup() throws Exception {
-    if (server != null && server.isAlive()) {
-      server.stop();
+    @BeforeClass
+    public static void setup() throws Exception {
     }
-  }
 
-  @Test
-  public void testLogsEnabled() throws Exception {
-    Configuration conf = new Configuration();
-    conf.setBoolean(
-        CommonConfigurationKeysPublic.HADOOP_HTTP_LOGS_ENABLED, true);
-    startServer(conf);
-    URL url = new URL("http://"
-        + NetUtils.getHostPortString(server.getConnectorAddress(0)) + "/logs");
-    HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-    assertEquals(HttpStatus.SC_OK, conn.getResponseCode());
-  }
+    private void startServer(Configuration conf) throws Exception {
+        server = createTestServer(conf);
+        server.addJerseyResourcePackage(JerseyResource.class.getPackage().getName(), "/jersey/*");
+        server.start();
+        baseUrl = getServerURL(server);
+        LOG.info("HTTP server started: " + baseUrl);
+    }
 
-  @Test
-  public void testLogsDisabled() throws Exception {
-    Configuration conf = new Configuration();
-    conf.setBoolean(
-        CommonConfigurationKeysPublic.HADOOP_HTTP_LOGS_ENABLED, false);
-    startServer(conf);
-    URL url = new URL(baseUrl + "/logs");
-    HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-    assertEquals(HttpStatus.SC_NOT_FOUND, conn.getResponseCode());
-  }
+    @AfterClass
+    public static void cleanup() throws Exception {
+        if (server != null && server.isAlive()) {
+            server.stop();
+        }
+    }
+
+    @Test
+    public void testLogsEnabled() throws Exception {
+        Configuration conf = new Configuration();
+        conf.setBoolean(CommonConfigurationKeysPublic.HADOOP_HTTP_LOGS_ENABLED, true);
+        startServer(conf);
+        URL url = new URL("http://" + NetUtils.getHostPortString(server.getConnectorAddress(0)) + "/logs");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        assertEquals(HttpStatus.SC_OK, conn.getResponseCode());
+    }
+
+    @Test
+    public void testLogsDisabled() throws Exception {
+        Configuration conf = new Configuration();
+        conf.setBoolean(CommonConfigurationKeysPublic.HADOOP_HTTP_LOGS_ENABLED, false);
+        startServer(conf);
+        URL url = new URL(baseUrl + "/logs");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        assertEquals(HttpStatus.SC_NOT_FOUND, conn.getResponseCode());
+    }
 }

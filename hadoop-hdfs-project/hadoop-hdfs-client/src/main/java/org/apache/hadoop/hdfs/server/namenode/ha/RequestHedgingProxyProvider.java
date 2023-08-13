@@ -32,11 +32,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ExecutionException;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.ipc.RemoteException;
 import org.apache.hadoop.ipc.StandbyException;
-
 import org.apache.hadoop.io.retry.MultiException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,256 +47,231 @@ import org.slf4j.LoggerFactory;
  * standbys. Once it receive a response from any one of the configured proxies,
  * outstanding requests to other proxies are immediately cancelled.
  */
-public class RequestHedgingProxyProvider<T> extends
-        ConfiguredFailoverProxyProvider<T> {
+public class RequestHedgingProxyProvider<T> extends ConfiguredFailoverProxyProvider<T> {
 
-  public static final Logger LOG =
-      LoggerFactory.getLogger(RequestHedgingProxyProvider.class);
+    public static final Logger LOG = LoggerFactory.getLogger(RequestHedgingProxyProvider.class);
 
-  class RequestHedgingInvocationHandler implements InvocationHandler {
+    class RequestHedgingInvocationHandler implements InvocationHandler {
 
-    final Map<String, ProxyInfo<T>> targetProxies;
-    // Proxy of the active nn
-    private volatile ProxyInfo<T> currentUsedProxy = null;
+        final Map<String, ProxyInfo<T>> targetProxies;
 
-    public RequestHedgingInvocationHandler(
-            Map<String, ProxyInfo<T>> targetProxies) {
-      this.targetProxies = new HashMap<>(targetProxies);
+        // Proxy of the active nn
+        private volatile ProxyInfo<T> currentUsedProxy = null;
+
+        public RequestHedgingInvocationHandler(Map<String, ProxyInfo<T>> targetProxies) {
+            this.targetProxies = new HashMap<>(targetProxies);
+        }
+
+        /**
+         * Creates a Executor and invokes all proxies concurrently. This
+         * implementation assumes that Clients have configured proper socket
+         * timeouts, else the call can block forever.
+         *
+         * @param proxy
+         * @param method
+         * @param args
+         * @return
+         * @throws Throwable
+         */
+        @Override
+        public Object invoke(Object proxy, final Method method, final Object[] args) throws Throwable {
+            // Need double check locking to guarantee thread-safe since
+            // currentUsedProxy is lazily initialized.
+            if (currentUsedProxy == null) {
+                synchronized (this) {
+                    if (currentUsedProxy == null) {
+                        Map<Future<Object>, ProxyInfo<T>> proxyMap = new HashMap<>();
+                        int numAttempts = 0;
+                        ExecutorService executor = null;
+                        CompletionService<Object> completionService;
+                        try {
+                            // Optimization : if only 2 proxies are configured and one had
+                            // failed
+                            // over, then we dont need to create a threadpool etc.
+                            targetProxies.remove(toIgnore);
+                            if (targetProxies.size() == 0) {
+                                LOG.trace("No valid proxies left");
+                                throw new RemoteException(IOException.class.getName(), "No valid proxies left. " + "All NameNode proxies have failed over.");
+                            }
+                            if (targetProxies.size() == 1) {
+                                ProxyInfo<T> proxyInfo = targetProxies.values().iterator().next();
+                                try {
+                                    currentUsedProxy = proxyInfo;
+                                    Object retVal = method.invoke(proxyInfo.proxy, args);
+                                    LOG.debug("Invocation successful on [{}]", currentUsedProxy.proxyInfo);
+                                    return retVal;
+                                } catch (InvocationTargetException ex) {
+                                    Exception unwrappedException = unwrapInvocationTargetException(ex);
+                                    logProxyException(unwrappedException, currentUsedProxy.proxyInfo);
+                                    LOG.trace("Unsuccessful invocation on [{}]", currentUsedProxy.proxyInfo);
+                                    throw unwrappedException;
+                                }
+                            }
+                            executor = Executors.newFixedThreadPool(proxies.size());
+                            completionService = new ExecutorCompletionService<>(executor);
+                            for (final Map.Entry<String, ProxyInfo<T>> pEntry : targetProxies.entrySet()) {
+                                Callable<Object> c = new Callable<Object>() {
+
+                                    @Override
+                                    public Object call() throws Exception {
+                                        LOG.trace("Invoking method {} on proxy {}", method, pEntry.getValue().proxyInfo);
+                                        return method.invoke(pEntry.getValue().proxy, args);
+                                    }
+                                };
+                                proxyMap.put(completionService.submit(c), pEntry.getValue());
+                                numAttempts++;
+                            }
+                            Map<String, Exception> badResults = new HashMap<>();
+                            while (numAttempts > 0) {
+                                Future<Object> callResultFuture = completionService.take();
+                                Object retVal;
+                                try {
+                                    currentUsedProxy = proxyMap.get(callResultFuture);
+                                    retVal = callResultFuture.get();
+                                    LOG.debug("Invocation successful on [{}]", currentUsedProxy.proxyInfo);
+                                    return retVal;
+                                } catch (ExecutionException ex) {
+                                    Exception unwrappedException = unwrapExecutionException(ex);
+                                    ProxyInfo<T> tProxyInfo = proxyMap.get(callResultFuture);
+                                    logProxyException(unwrappedException, tProxyInfo.proxyInfo);
+                                    badResults.put(tProxyInfo.proxyInfo, unwrappedException);
+                                    LOG.trace("Unsuccessful invocation on [{}]", tProxyInfo.proxyInfo);
+                                    numAttempts--;
+                                }
+                            }
+                            // At this point we should have All bad results (Exceptions)
+                            // Or should have returned with successful result.
+                            if (badResults.size() == 1) {
+                                throw badResults.values().iterator().next();
+                            } else {
+                                throw new MultiException(badResults);
+                            }
+                        } finally {
+                            if (executor != null) {
+                                LOG.trace("Shutting down threadpool executor");
+                                executor.shutdownNow();
+                            }
+                        }
+                    }
+                }
+            }
+            // Because the above synchronized block will return or throw an exception,
+            // so we don't need to do any check to prevent the first initialized
+            // thread from stepping to following codes.
+            try {
+                Object retVal = method.invoke(currentUsedProxy.proxy, args);
+                LOG.debug("Invocation successful on [{}]", currentUsedProxy.proxyInfo);
+                return retVal;
+            } catch (InvocationTargetException ex) {
+                Exception unwrappedException = unwrapInvocationTargetException(ex);
+                logProxyException(unwrappedException, currentUsedProxy.proxyInfo);
+                LOG.trace("Unsuccessful invocation on [{}]", currentUsedProxy.proxyInfo);
+                throw unwrappedException;
+            }
+        }
     }
 
     /**
-     * Creates a Executor and invokes all proxies concurrently. This
-     * implementation assumes that Clients have configured proper socket
-     * timeouts, else the call can block forever.
-     *
-     * @param proxy
-     * @param method
-     * @param args
-     * @return
-     * @throws Throwable
+     * A proxy wrapping {@link RequestHedgingInvocationHandler}.
      */
+    private ProxyInfo<T> currentUsedHandler = null;
+
+    private volatile String toIgnore = null;
+
+    public RequestHedgingProxyProvider(Configuration conf, URI uri, Class<T> xface, HAProxyFactory<T> proxyFactory) {
+        super(conf, uri, xface, proxyFactory);
+    }
+
+    @SuppressWarnings("unchecked")
     @Override
-    public Object
-    invoke(Object proxy, final Method method, final Object[] args)
-            throws Throwable {
-      // Need double check locking to guarantee thread-safe since
-      // currentUsedProxy is lazily initialized.
-      if (currentUsedProxy == null) {
-        synchronized (this) {
-          if (currentUsedProxy == null) {
-            Map<Future<Object>, ProxyInfo<T>> proxyMap = new HashMap<>();
-            int numAttempts = 0;
-
-            ExecutorService executor = null;
-            CompletionService<Object> completionService;
-            try {
-              // Optimization : if only 2 proxies are configured and one had
-              // failed
-              // over, then we dont need to create a threadpool etc.
-              targetProxies.remove(toIgnore);
-              if (targetProxies.size() == 0) {
-                LOG.trace("No valid proxies left");
-                throw new RemoteException(IOException.class.getName(),
-                    "No valid proxies left. "
-                        + "All NameNode proxies have failed over.");
-              }
-              if (targetProxies.size() == 1) {
-                ProxyInfo<T> proxyInfo =
-                    targetProxies.values().iterator().next();
-                try {
-                  currentUsedProxy = proxyInfo;
-                  Object retVal = method.invoke(proxyInfo.proxy, args);
-                  LOG.debug("Invocation successful on [{}]",
-                      currentUsedProxy.proxyInfo);
-                  return retVal;
-                } catch (InvocationTargetException ex) {
-                  Exception unwrappedException =
-                      unwrapInvocationTargetException(ex);
-                  logProxyException(unwrappedException,
-                      currentUsedProxy.proxyInfo);
-                  LOG.trace("Unsuccessful invocation on [{}]",
-                      currentUsedProxy.proxyInfo);
-                  throw unwrappedException;
-                }
-              }
-              executor = Executors.newFixedThreadPool(proxies.size());
-              completionService = new ExecutorCompletionService<>(executor);
-              for (final Map.Entry<String, ProxyInfo<T>> pEntry : targetProxies
-                  .entrySet()) {
-                Callable<Object> c = new Callable<Object>() {
-                  @Override
-                  public Object call() throws Exception {
-                    LOG.trace("Invoking method {} on proxy {}", method,
-                        pEntry.getValue().proxyInfo);
-                    return method.invoke(pEntry.getValue().proxy, args);
-                  }
-                };
-                proxyMap.put(completionService.submit(c), pEntry.getValue());
-                numAttempts++;
-              }
-
-              Map<String, Exception> badResults = new HashMap<>();
-              while (numAttempts > 0) {
-                Future<Object> callResultFuture = completionService.take();
-                Object retVal;
-                try {
-                  currentUsedProxy = proxyMap.get(callResultFuture);
-                  retVal = callResultFuture.get();
-                  LOG.debug("Invocation successful on [{}]",
-                      currentUsedProxy.proxyInfo);
-                  return retVal;
-                } catch (ExecutionException ex) {
-                  Exception unwrappedException = unwrapExecutionException(ex);
-                  ProxyInfo<T> tProxyInfo = proxyMap.get(callResultFuture);
-                  logProxyException(unwrappedException, tProxyInfo.proxyInfo);
-                  badResults.put(tProxyInfo.proxyInfo, unwrappedException);
-                  LOG.trace("Unsuccessful invocation on [{}]",
-                      tProxyInfo.proxyInfo);
-                  numAttempts--;
-                }
-              }
-
-              // At this point we should have All bad results (Exceptions)
-              // Or should have returned with successful result.
-              if (badResults.size() == 1) {
-                throw badResults.values().iterator().next();
-              } else {
-                throw new MultiException(badResults);
-              }
-            } finally {
-              if (executor != null) {
-                LOG.trace("Shutting down threadpool executor");
-                executor.shutdownNow();
-              }
-            }
-          }
+    public synchronized ProxyInfo<T> getProxy() {
+        if (currentUsedHandler != null) {
+            return currentUsedHandler;
         }
-      }
-      // Because the above synchronized block will return or throw an exception,
-      // so we don't need to do any check to prevent the first initialized
-      // thread from stepping to following codes.
-      try {
-        Object retVal = method.invoke(currentUsedProxy.proxy, args);
-        LOG.debug("Invocation successful on [{}]", currentUsedProxy.proxyInfo);
-        return retVal;
-      } catch (InvocationTargetException ex) {
-        Exception unwrappedException = unwrapInvocationTargetException(ex);
-        logProxyException(unwrappedException, currentUsedProxy.proxyInfo);
-        LOG.trace("Unsuccessful invocation on [{}]",
-            currentUsedProxy.proxyInfo);
-        throw unwrappedException;
-      }
+        Map<String, ProxyInfo<T>> targetProxyInfos = new HashMap<>();
+        StringBuilder combinedInfo = new StringBuilder("[");
+        for (int i = 0; i < proxies.size(); i++) {
+            ProxyInfo<T> pInfo = super.getProxy();
+            incrementProxyIndex();
+            targetProxyInfos.put(pInfo.proxyInfo, pInfo);
+            combinedInfo.append(pInfo.proxyInfo).append(',');
+        }
+        combinedInfo.append(']');
+        T wrappedProxy = (T) Proxy.newProxyInstance(RequestHedgingInvocationHandler.class.getClassLoader(), new Class<?>[] { xface }, new RequestHedgingInvocationHandler(targetProxyInfos));
+        currentUsedHandler = new ProxyInfo<T>(wrappedProxy, combinedInfo.toString());
+        return currentUsedHandler;
     }
-  }
 
-  /** A proxy wrapping {@link RequestHedgingInvocationHandler}. */
-  private ProxyInfo<T> currentUsedHandler = null;
-  private volatile String toIgnore = null;
-
-  public RequestHedgingProxyProvider(Configuration conf, URI uri,
-      Class<T> xface, HAProxyFactory<T> proxyFactory) {
-    super(conf, uri, xface, proxyFactory);
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public synchronized ProxyInfo<T> getProxy() {
-    if (currentUsedHandler != null) {
-      return currentUsedHandler;
+    @Override
+    public synchronized void performFailover(T currentProxy) {
+        toIgnore = ((RequestHedgingInvocationHandler) Proxy.getInvocationHandler(currentUsedHandler.proxy)).currentUsedProxy.proxyInfo;
+        this.currentUsedHandler = null;
     }
-    Map<String, ProxyInfo<T>> targetProxyInfos = new HashMap<>();
-    StringBuilder combinedInfo = new StringBuilder("[");
-    for (int i = 0; i < proxies.size(); i++) {
-      ProxyInfo<T> pInfo = super.getProxy();
-      incrementProxyIndex();
-      targetProxyInfos.put(pInfo.proxyInfo, pInfo);
-      combinedInfo.append(pInfo.proxyInfo).append(',');
+
+    /**
+     * Check the exception returned by the proxy log a warning message if it's
+     * not a StandbyException (expected exception).
+     * @param ex Exception to evaluate.
+     * @param proxyInfo Information of the proxy reporting the exception.
+     */
+    private void logProxyException(Exception ex, String proxyInfo) {
+        if (isStandbyException(ex)) {
+            LOG.debug("Invocation returned standby exception on [{}]", proxyInfo, ex);
+        } else {
+            LOG.warn("Invocation returned exception on [{}]", proxyInfo, ex);
+        }
     }
-    combinedInfo.append(']');
-    T wrappedProxy = (T) Proxy.newProxyInstance(
-            RequestHedgingInvocationHandler.class.getClassLoader(),
-            new Class<?>[]{xface},
-            new RequestHedgingInvocationHandler(targetProxyInfos));
-    currentUsedHandler =
-        new ProxyInfo<T>(wrappedProxy, combinedInfo.toString());
-    return currentUsedHandler;
-  }
 
-  @Override
-  public synchronized void performFailover(T currentProxy) {
-    toIgnore = ((RequestHedgingInvocationHandler) Proxy.getInvocationHandler(
-        currentUsedHandler.proxy)).currentUsedProxy.proxyInfo;
-    this.currentUsedHandler = null;
-  }
-
-  /**
-   * Check the exception returned by the proxy log a warning message if it's
-   * not a StandbyException (expected exception).
-   * @param ex Exception to evaluate.
-   * @param proxyInfo Information of the proxy reporting the exception.
-   */
-  private void logProxyException(Exception ex, String proxyInfo) {
-    if (isStandbyException(ex)) {
-      LOG.debug("Invocation returned standby exception on [{}]", proxyInfo, ex);
-    } else {
-      LOG.warn("Invocation returned exception on [{}]", proxyInfo, ex);
+    /**
+     * Check if the returned exception is caused by an standby namenode.
+     * @param exception Exception to check.
+     * @return If the exception is caused by an standby namenode.
+     */
+    private boolean isStandbyException(Exception exception) {
+        if (exception instanceof RemoteException) {
+            return ((RemoteException) exception).unwrapRemoteException() instanceof StandbyException;
+        }
+        return false;
     }
-  }
 
-  /**
-   * Check if the returned exception is caused by an standby namenode.
-   * @param exception Exception to check.
-   * @return If the exception is caused by an standby namenode.
-   */
-  private boolean isStandbyException(Exception exception) {
-    if (exception instanceof RemoteException) {
-      return ((RemoteException) exception).unwrapRemoteException()
-          instanceof StandbyException;
+    /**
+     * Unwraps the ExecutionException. <p>
+     * Example:
+     * <blockquote><pre>
+     * if ex is
+     * ExecutionException(InvocationTargetException(SomeException))
+     * returns SomeException
+     * </pre></blockquote>
+     *
+     * @return unwrapped exception
+     */
+    private Exception unwrapExecutionException(ExecutionException ex) {
+        if (ex != null) {
+            Throwable cause = ex.getCause();
+            if (cause instanceof InvocationTargetException) {
+                return unwrapInvocationTargetException((InvocationTargetException) cause);
+            }
+        }
+        return ex;
     }
-    return false;
-  }
 
-  /**
-   * Unwraps the ExecutionException. <p>
-   * Example:
-   * <blockquote><pre>
-   * if ex is
-   * ExecutionException(InvocationTargetException(SomeException))
-   * returns SomeException
-   * </pre></blockquote>
-   *
-   * @return unwrapped exception
-   */
-  private Exception unwrapExecutionException(ExecutionException ex) {
-    if (ex != null) {
-      Throwable cause = ex.getCause();
-      if (cause instanceof InvocationTargetException) {
-        return
-            unwrapInvocationTargetException((InvocationTargetException)cause);
-      }
+    /**
+     * Unwraps the InvocationTargetException. <p>
+     * Example:
+     * <blockquote><pre>
+     * if ex is InvocationTargetException(SomeException)
+     * returns SomeException
+     * </pre></blockquote>
+     *
+     * @return unwrapped exception
+     */
+    private Exception unwrapInvocationTargetException(InvocationTargetException ex) {
+        if (ex != null) {
+            Throwable cause = ex.getCause();
+            if (cause instanceof Exception) {
+                return (Exception) cause;
+            }
+        }
+        return ex;
     }
-    return ex;
-
-  }
-
-  /**
-   * Unwraps the InvocationTargetException. <p>
-   * Example:
-   * <blockquote><pre>
-   * if ex is InvocationTargetException(SomeException)
-   * returns SomeException
-   * </pre></blockquote>
-   *
-   * @return unwrapped exception
-   */
-  private Exception unwrapInvocationTargetException(
-      InvocationTargetException ex) {
-    if (ex != null) {
-      Throwable cause = ex.getCause();
-      if (cause instanceof Exception) {
-        return (Exception) cause;
-      }
-    }
-    return ex;
-  }
 }

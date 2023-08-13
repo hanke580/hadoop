@@ -21,30 +21,28 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import org.apache.hadoop.security.GroupMappingServiceProvider;
 import org.apache.hadoop.test.HadoopUsersConfTestHelper;
 
 public class DummyGroupMapping implements GroupMappingServiceProvider {
 
-  @Override
-  public List<String> getGroups(String user) throws IOException {
-    if (user.equals("root")) {
-      return Arrays.asList("admin");
+    @Override
+    public List<String> getGroups(String user) throws IOException {
+        if (user.equals("root")) {
+            return Arrays.asList("admin");
+        } else if (user.equals("nobody")) {
+            return Arrays.asList("nobody");
+        } else {
+            String[] groups = HadoopUsersConfTestHelper.getHadoopUserGroups(user);
+            return (groups != null) ? Arrays.asList(groups) : Collections.emptyList();
+        }
     }
-    else if (user.equals("nobody")) {
-      return Arrays.asList("nobody");
-    } else {
-      String[] groups = HadoopUsersConfTestHelper.getHadoopUserGroups(user);
-      return (groups != null) ? Arrays.asList(groups) : Collections.emptyList();
+
+    @Override
+    public void cacheGroupsRefresh() throws IOException {
     }
-  }
 
-  @Override
-  public void cacheGroupsRefresh() throws IOException {
-  }
-
-  @Override
-  public void cacheGroupsAdd(List<String> groups) throws IOException {
-  }
+    @Override
+    public void cacheGroupsAdd(List<String> groups) throws IOException {
+    }
 }

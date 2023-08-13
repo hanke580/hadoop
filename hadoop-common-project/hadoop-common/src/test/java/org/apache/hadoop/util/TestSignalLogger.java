@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.util;
 
 import org.apache.commons.lang3.SystemUtils;
@@ -26,18 +25,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TestSignalLogger {
-  public static final Logger LOG =
-      LoggerFactory.getLogger(TestSignalLogger.class);
-  
-  @Test(timeout=60000)
-  public void testInstall() throws Exception {
-    Assume.assumeTrue(SystemUtils.IS_OS_UNIX);
-    SignalLogger.INSTANCE.register(LogAdapter.create(LOG));
-    try {
-      SignalLogger.INSTANCE.register(LogAdapter.create(LOG));
-      Assert.fail("expected IllegalStateException from double registration");
-    } catch (IllegalStateException e) {
-      // fall through
+
+    public static final Logger LOG = LoggerFactory.getLogger(TestSignalLogger.class);
+
+    @Test(timeout = 60000)
+    public void testInstall() throws Exception {
+        Assume.assumeTrue(SystemUtils.IS_OS_UNIX);
+        SignalLogger.INSTANCE.register(LogAdapter.create(LOG));
+        try {
+            SignalLogger.INSTANCE.register(LogAdapter.create(LOG));
+            Assert.fail("expected IllegalStateException from double registration");
+        } catch (IllegalStateException e) {
+            // fall through
+        }
     }
-  }
 }

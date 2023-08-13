@@ -27,26 +27,26 @@ import org.apache.hadoop.security.token.delegation.web.DelegationTokenIdentifier
 @InterfaceAudience.Private
 public final class KMSDelegationToken {
 
-  public static final String TOKEN_KIND_STR = "kms-dt";
-  public static final Text TOKEN_KIND = new Text(TOKEN_KIND_STR);
+    public static final String TOKEN_KIND_STR = "kms-dt";
 
-  // Utility class is not supposed to be instantiated.
-  private KMSDelegationToken() {
-  }
+    public static final Text TOKEN_KIND = new Text(TOKEN_KIND_STR);
 
-  /**
-   * DelegationTokenIdentifier used for the KMS.
-   */
-  public static class KMSDelegationTokenIdentifier
-      extends DelegationTokenIdentifier {
-
-    public KMSDelegationTokenIdentifier() {
-      super(TOKEN_KIND);
+    // Utility class is not supposed to be instantiated.
+    private KMSDelegationToken() {
     }
 
-    @Override
-    public Text getKind() {
-      return TOKEN_KIND;
+    /**
+     * DelegationTokenIdentifier used for the KMS.
+     */
+    public static class KMSDelegationTokenIdentifier extends DelegationTokenIdentifier {
+
+        public KMSDelegationTokenIdentifier() {
+            super(TOKEN_KIND);
+        }
+
+        @Override
+        public Text getKind() {
+            return TOKEN_KIND;
+        }
     }
-  }
 }

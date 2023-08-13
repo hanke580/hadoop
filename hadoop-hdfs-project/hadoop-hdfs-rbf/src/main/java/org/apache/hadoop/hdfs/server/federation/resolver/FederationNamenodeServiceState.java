@@ -24,27 +24,34 @@ import org.apache.hadoop.ha.HAServiceProtocol.HAServiceState;
  * NN priority for RPC calls.
  */
 public enum FederationNamenodeServiceState {
-  ACTIVE, // HAServiceState.ACTIVE or operational.
-  OBSERVER, // HAServiceState.OBSERVER.
-  STANDBY, // HAServiceState.STANDBY.
-  UNAVAILABLE, // When the namenode cannot be reached.
-  EXPIRED, // When the last update is too old.
-  DISABLED; // When the nameservice is disabled.
 
-  public static FederationNamenodeServiceState getState(HAServiceState state) {
-    switch(state) {
-    case ACTIVE:
-      return FederationNamenodeServiceState.ACTIVE;
-    case OBSERVER:
-      return FederationNamenodeServiceState.OBSERVER;
-    case STANDBY:
-      return FederationNamenodeServiceState.STANDBY;
-    case INITIALIZING:
-      return FederationNamenodeServiceState.UNAVAILABLE;
-    case STOPPING:
-      return FederationNamenodeServiceState.UNAVAILABLE;
-    default:
-      return FederationNamenodeServiceState.UNAVAILABLE;
+    // HAServiceState.ACTIVE or operational.
+    ACTIVE,
+    // HAServiceState.OBSERVER.
+    OBSERVER,
+    // HAServiceState.STANDBY.
+    STANDBY,
+    // When the namenode cannot be reached.
+    UNAVAILABLE,
+    // When the last update is too old.
+    EXPIRED,
+    // When the nameservice is disabled.
+    DISABLED;
+
+    public static FederationNamenodeServiceState getState(HAServiceState state) {
+        switch(state) {
+            case ACTIVE:
+                return FederationNamenodeServiceState.ACTIVE;
+            case OBSERVER:
+                return FederationNamenodeServiceState.OBSERVER;
+            case STANDBY:
+                return FederationNamenodeServiceState.STANDBY;
+            case INITIALIZING:
+                return FederationNamenodeServiceState.UNAVAILABLE;
+            case STOPPING:
+                return FederationNamenodeServiceState.UNAVAILABLE;
+            default:
+                return FederationNamenodeServiceState.UNAVAILABLE;
+        }
     }
-  }
 }

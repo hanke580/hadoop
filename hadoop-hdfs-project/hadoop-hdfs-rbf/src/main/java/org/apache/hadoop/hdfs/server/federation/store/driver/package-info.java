@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * The state store uses modular data storage classes derived from
  * StateStoreDriver to handle querying, updating and deleting data records. The
@@ -27,11 +26,10 @@
  * the StateStoreDriver interface. These methods allow the querying, updating,
  * inserting and deleting of data records into the state store.
  */
-
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
-
 package org.apache.hadoop.hdfs.server.federation.store.driver;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

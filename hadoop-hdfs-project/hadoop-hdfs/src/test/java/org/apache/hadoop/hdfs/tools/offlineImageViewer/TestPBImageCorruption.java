@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.tools.offlineImageViewer;
 
 import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -26,30 +25,31 @@ import static org.junit.Assert.assertEquals;
  * PBImageCorruption classes.
  */
 public class TestPBImageCorruption {
-  @Test
-  public void testProperCorruptionTypeCreation() {
-    PBImageCorruption ct = new PBImageCorruption(209, false, true, 1);
-    assertEquals("CorruptNode", ct.getType());
-    ct.addMissingChildCorruption();
-    assertEquals("CorruptNodeWithMissingChild", ct.getType());
-  }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testImproperCorruptionTypeCreation() {
-    PBImageCorruption ct = new PBImageCorruption(210, false, false, 2);
-  }
+    @Test
+    public void testProperCorruptionTypeCreation() {
+        PBImageCorruption ct = new PBImageCorruption(209, false, true, 1);
+        assertEquals("CorruptNode", ct.getType());
+        ct.addMissingChildCorruption();
+        assertEquals("CorruptNodeWithMissingChild", ct.getType());
+    }
 
-  @Test
-  public void testCorruptionClass() {
-    PBImageCorruption c = new PBImageCorruption(211, true, false, 3);
-    String expected = "MissingChild";
-    assertEquals(211, c.getId());
-    assertEquals(expected, c.getType());
-    assertEquals(3, c.getNumOfCorruptChildren());
-    c.addCorruptNodeCorruption();
-    expected = "CorruptNodeWithMissingChild";
-    c.setNumberOfCorruption(34);
-    assertEquals(expected, c.getType());
-    assertEquals(34, c.getNumOfCorruptChildren());
-  }
+    @Test(expected = IllegalArgumentException.class)
+    public void testImproperCorruptionTypeCreation() {
+        PBImageCorruption ct = new PBImageCorruption(210, false, false, 2);
+    }
+
+    @Test
+    public void testCorruptionClass() {
+        PBImageCorruption c = new PBImageCorruption(211, true, false, 3);
+        String expected = "MissingChild";
+        assertEquals(211, c.getId());
+        assertEquals(expected, c.getType());
+        assertEquals(3, c.getNumOfCorruptChildren());
+        c.addCorruptNodeCorruption();
+        expected = "CorruptNodeWithMissingChild";
+        c.setNumberOfCorruption(34);
+        assertEquals(expected, c.getType());
+        assertEquals(34, c.getNumOfCorruptChildren());
+    }
 }

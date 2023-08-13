@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.web;
 
 import java.io.IOException;
@@ -29,7 +28,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -43,174 +41,185 @@ import org.junit.Test;
 import org.junit.rules.Timeout;
 
 public class TestWebHdfsContentLength {
-  private static ServerSocket listenSocket;
-  private static String bindAddr;
-  private static Path p;
-  private static FileSystem fs;
 
-  private static final Pattern contentLengthPattern = Pattern.compile(
-      "^(Content-Length|Transfer-Encoding):\\s*(.*)", Pattern.MULTILINE);
+    private static ServerSocket listenSocket;
 
-  private static String errResponse =
-      "HTTP/1.1 500 Boom\r\n" +
-      "Content-Length: 0\r\n" +
-      "Connection: close\r\n\r\n";
-  private static String redirectResponse;
+    private static String bindAddr;
 
-  private static ExecutorService executor;
+    private static Path p;
 
-  @Rule
-  public Timeout timeout = new Timeout(30000);
+    private static FileSystem fs;
 
-  @BeforeClass
-  public static void setup() throws IOException {
-    listenSocket = new ServerSocket();
-    listenSocket.bind(null);
-    bindAddr = NetUtils.getHostPortString(
-        (InetSocketAddress)listenSocket.getLocalSocketAddress());
-    redirectResponse =
-        "HTTP/1.1 307 Redirect\r\n" +
-        "Location: http://"+bindAddr+"/path\r\n" +
-        "Connection: close\r\n\r\n";
+    private static final Pattern contentLengthPattern = Pattern.compile("^(Content-Length|Transfer-Encoding):\\s*(.*)", Pattern.MULTILINE);
 
-    p = new Path("webhdfs://"+bindAddr+"/path");
-    fs = p.getFileSystem(new Configuration());
-    executor = Executors.newSingleThreadExecutor();    
-  }
-  
-  @AfterClass
-  public static void teardown() throws IOException {
-    if (listenSocket != null) {
-      listenSocket.close();
+    private static String errResponse = "HTTP/1.1 500 Boom\r\n" + "Content-Length: 0\r\n" + "Connection: close\r\n\r\n";
+
+    private static String redirectResponse;
+
+    private static ExecutorService executor;
+
+    @Rule
+    public Timeout timeout = new Timeout(30000);
+
+    @BeforeClass
+    public static void setup() throws IOException {
+        listenSocket = new ServerSocket();
+        listenSocket.bind(null);
+        bindAddr = NetUtils.getHostPortString((InetSocketAddress) listenSocket.getLocalSocketAddress());
+        redirectResponse = "HTTP/1.1 307 Redirect\r\n" + "Location: http://" + bindAddr + "/path\r\n" + "Connection: close\r\n\r\n";
+        p = new Path("webhdfs://" + bindAddr + "/path");
+        fs = p.getFileSystem(new Configuration());
+        executor = Executors.newSingleThreadExecutor();
     }
-    if (executor != null) {
-      executor.shutdownNow();
-    }
-  }
-  
-  @Test
-  public void testGetOp() throws Exception {
-    Future<String> future = contentLengthFuture(errResponse);
-    try {
-      fs.getFileStatus(p);
-      Assert.fail();
-    } catch (IOException ioe) {} // expected
-    Assert.assertEquals(null, getContentLength(future));
-  }
 
-  @Test
-  public void testGetOpWithRedirect() {
-    Future<String> future1 = contentLengthFuture(redirectResponse);
-    Future<String> future2 = contentLengthFuture(errResponse);
-    Future<String> future3 = contentLengthFuture(errResponse);
-    try {
-      fs.open(p).read();
-      Assert.fail();
-    } catch (IOException ioe) {} // expected
-    Assert.assertEquals(null, getContentLength(future1));
-    Assert.assertEquals(null, getContentLength(future2));
-    Assert.assertEquals(null, getContentLength(future3));
-  }
-  
-  @Test
-  public void testPutOp() {
-    Future<String> future = contentLengthFuture(errResponse);
-    try {
-      fs.mkdirs(p);
-      Assert.fail();
-    } catch (IOException ioe) {} // expected
-    Assert.assertEquals("0", getContentLength(future));
-  }
-
-  @Test
-  public void testPutOpWithRedirect() {
-    Future<String> future1 = contentLengthFuture(redirectResponse);
-    Future<String> future2 = contentLengthFuture(errResponse);
-    try {
-      FSDataOutputStream os = fs.create(p);
-      os.write(new byte[]{0});
-      os.close();
-      Assert.fail();
-    } catch (IOException ioe) {} // expected
-    Assert.assertEquals("0", getContentLength(future1));
-    Assert.assertEquals("chunked", getContentLength(future2));
-  }
-  
-  @Test
-  public void testPostOp() {  
-    Future<String> future = contentLengthFuture(errResponse);
-    try {
-      fs.concat(p, new Path[]{p});
-      Assert.fail();
-    } catch (IOException ioe) {} // expected
-    Assert.assertEquals("0", getContentLength(future));
-  }
-  
-  @Test
-  public void testPostOpWithRedirect() {
-    // POST operation with redirect
-    Future<String> future1 = contentLengthFuture(redirectResponse);
-    Future<String> future2 = contentLengthFuture(errResponse);
-    try {
-      FSDataOutputStream os = fs.append(p);
-      os.write(new byte[]{0});
-      os.close();
-      Assert.fail();
-    } catch (IOException ioe) {} // expected
-    Assert.assertEquals("0", getContentLength(future1));
-    Assert.assertEquals("chunked", getContentLength(future2));
-  }
-  
-  @Test
-  public void testDelete() {
-    Future<String> future = contentLengthFuture(errResponse);
-    try {
-      fs.delete(p, false);
-      Assert.fail();
-    } catch (IOException ioe) {} // expected
-    Assert.assertEquals(null, getContentLength(future));
-  }  
-
-  private String getContentLength(Future<String> future)  {
-    String request = null;
-    try {
-      request = future.get(2, TimeUnit.SECONDS);
-    } catch (Exception e) {
-      Assert.fail(e.toString());
-    }
-    Matcher matcher = contentLengthPattern.matcher(request);
-    return matcher.find() ? matcher.group(2) : null;
-  }
-  
-  private Future<String> contentLengthFuture(final String response) {
-    return executor.submit(new Callable<String>() {
-      @Override
-      public String call() throws Exception {
-        Socket client = listenSocket.accept();
-        client.setSoTimeout(2000);
-        try {
-          client.getOutputStream().write(response.getBytes());
-          client.shutdownOutput();
-          byte[] buf = new byte[4*1024]; // much bigger than request
-
-          // The second request can be sent with Transfer-Encoding: chunked.
-          // The Java HTTP client tends to split the headers and the chunked
-          // body into separate writes, so the first read likely only gets the
-          // headers.  We must fully consume the input to prevent a hang on the
-          // client side.
-          StringBuilder sb = new StringBuilder();
-          for (;;) {
-            int n = client.getInputStream().read(buf);
-            if (n <= 0) {
-              break;
-            }
-            sb.append(new String(buf, 0, n, "UTF-8"));
-          }
-          return sb.toString();
-        } finally {
-          client.close();
+    @AfterClass
+    public static void teardown() throws IOException {
+        if (listenSocket != null) {
+            listenSocket.close();
         }
-      }
-    });
-  }
+        if (executor != null) {
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    public void testGetOp() throws Exception {
+        Future<String> future = contentLengthFuture(errResponse);
+        try {
+            fs.getFileStatus(p);
+            Assert.fail();
+        }// expected
+         catch (IOException ioe) {
+        }
+        Assert.assertEquals(null, getContentLength(future));
+    }
+
+    @Test
+    public void testGetOpWithRedirect() {
+        Future<String> future1 = contentLengthFuture(redirectResponse);
+        Future<String> future2 = contentLengthFuture(errResponse);
+        Future<String> future3 = contentLengthFuture(errResponse);
+        try {
+            fs.open(p).read();
+            Assert.fail();
+        }// expected
+         catch (IOException ioe) {
+        }
+        Assert.assertEquals(null, getContentLength(future1));
+        Assert.assertEquals(null, getContentLength(future2));
+        Assert.assertEquals(null, getContentLength(future3));
+    }
+
+    @Test
+    public void testPutOp() {
+        Future<String> future = contentLengthFuture(errResponse);
+        try {
+            fs.mkdirs(p);
+            Assert.fail();
+        }// expected
+         catch (IOException ioe) {
+        }
+        Assert.assertEquals("0", getContentLength(future));
+    }
+
+    @Test
+    public void testPutOpWithRedirect() {
+        Future<String> future1 = contentLengthFuture(redirectResponse);
+        Future<String> future2 = contentLengthFuture(errResponse);
+        try {
+            FSDataOutputStream os = fs.create(p);
+            os.write(new byte[] { 0 });
+            os.close();
+            Assert.fail();
+        }// expected
+         catch (IOException ioe) {
+        }
+        Assert.assertEquals("0", getContentLength(future1));
+        Assert.assertEquals("chunked", getContentLength(future2));
+    }
+
+    @Test
+    public void testPostOp() {
+        Future<String> future = contentLengthFuture(errResponse);
+        try {
+            fs.concat(p, new Path[] { p });
+            Assert.fail();
+        }// expected
+         catch (IOException ioe) {
+        }
+        Assert.assertEquals("0", getContentLength(future));
+    }
+
+    @Test
+    public void testPostOpWithRedirect() {
+        // POST operation with redirect
+        Future<String> future1 = contentLengthFuture(redirectResponse);
+        Future<String> future2 = contentLengthFuture(errResponse);
+        try {
+            FSDataOutputStream os = fs.append(p);
+            os.write(new byte[] { 0 });
+            os.close();
+            Assert.fail();
+        }// expected
+         catch (IOException ioe) {
+        }
+        Assert.assertEquals("0", getContentLength(future1));
+        Assert.assertEquals("chunked", getContentLength(future2));
+    }
+
+    @Test
+    public void testDelete() {
+        Future<String> future = contentLengthFuture(errResponse);
+        try {
+            fs.delete(p, false);
+            Assert.fail();
+        }// expected
+         catch (IOException ioe) {
+        }
+        Assert.assertEquals(null, getContentLength(future));
+    }
+
+    private String getContentLength(Future<String> future) {
+        String request = null;
+        try {
+            request = future.get(2, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            Assert.fail(e.toString());
+        }
+        Matcher matcher = contentLengthPattern.matcher(request);
+        return matcher.find() ? matcher.group(2) : null;
+    }
+
+    private Future<String> contentLengthFuture(final String response) {
+        return executor.submit(new Callable<String>() {
+
+            @Override
+            public String call() throws Exception {
+                Socket client = listenSocket.accept();
+                client.setSoTimeout(2000);
+                try {
+                    client.getOutputStream().write(response.getBytes());
+                    client.shutdownOutput();
+                    // much bigger than request
+                    byte[] buf = new byte[4 * 1024];
+                    // The second request can be sent with Transfer-Encoding: chunked.
+                    // The Java HTTP client tends to split the headers and the chunked
+                    // body into separate writes, so the first read likely only gets the
+                    // headers.  We must fully consume the input to prevent a hang on the
+                    // client side.
+                    StringBuilder sb = new StringBuilder();
+                    for (; ; ) {
+                        int n = client.getInputStream().read(buf);
+                        if (n <= 0) {
+                            break;
+                        }
+                        sb.append(new String(buf, 0, n, "UTF-8"));
+                    }
+                    return sb.toString();
+                } finally {
+                    client.close();
+                }
+            }
+        });
+    }
 }

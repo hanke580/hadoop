@@ -11,7 +11,6 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License. See accompanying LICENSE file.
  */
-
 package org.apache.hadoop.fs.contract.router;
 
 import org.apache.hadoop.conf.Configuration;
@@ -20,29 +19,27 @@ import org.apache.hadoop.fs.contract.AbstractContractConcatTest;
 import org.apache.hadoop.fs.contract.AbstractFSContract;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-
 import java.io.IOException;
 
 /**
  * Test secure concat operations on the Router-based FS.
  */
-public class TestRouterHDFSContractConcatSecure
-    extends AbstractContractConcatTest {
+public class TestRouterHDFSContractConcatSecure extends AbstractContractConcatTest {
 
-  @BeforeClass
-  public static void createCluster() throws Exception {
-    RouterHDFSContract.createCluster(true);
-    // perform a simple operation on the cluster to verify it is up
-    RouterHDFSContract.getFileSystem().getDefaultBlockSize(new Path("/"));
-  }
+    @BeforeClass
+    public static void createCluster() throws Exception {
+        RouterHDFSContract.createCluster(true);
+        // perform a simple operation on the cluster to verify it is up
+        RouterHDFSContract.getFileSystem().getDefaultBlockSize(new Path("/"));
+    }
 
-  @AfterClass
-  public static void teardownCluster() throws IOException {
-    RouterHDFSContract.destroyCluster();
-  }
+    @AfterClass
+    public static void teardownCluster() throws IOException {
+        RouterHDFSContract.destroyCluster();
+    }
 
-  @Override
-  protected AbstractFSContract createContract(Configuration conf) {
-    return new RouterHDFSContract(conf);
-  }
+    @Override
+    protected AbstractFSContract createContract(Configuration conf) {
+        return new RouterHDFSContract(conf);
+    }
 }

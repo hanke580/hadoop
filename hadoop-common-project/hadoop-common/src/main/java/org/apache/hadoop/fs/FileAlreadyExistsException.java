@@ -15,29 +15,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.fs;
 
-
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
 /**
- * Used when target file already exists for any operation and 
- * is not configured to be overwritten.  
+ * Used when target file already exists for any operation and
+ * is not configured to be overwritten.
  */
 @InterfaceAudience.Public
 @InterfaceStability.Stable
-public class FileAlreadyExistsException
-    extends IOException {
+public class FileAlreadyExistsException extends IOException {
 
-  public FileAlreadyExistsException() {
-    super();
-  }
+    public FileAlreadyExistsException() {
+        super();
+    }
 
-  public FileAlreadyExistsException(String msg) {
-    super(msg);
-  }
+    public FileAlreadyExistsException(String msg) {
+        super(msg);
+    }
 }

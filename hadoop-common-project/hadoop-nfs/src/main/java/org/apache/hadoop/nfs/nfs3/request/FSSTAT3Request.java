@@ -18,7 +18,6 @@
 package org.apache.hadoop.nfs.nfs3.request;
 
 import java.io.IOException;
-
 import org.apache.hadoop.nfs.nfs3.FileHandle;
 import org.apache.hadoop.oncrpc.XDR;
 
@@ -26,17 +25,18 @@ import org.apache.hadoop.oncrpc.XDR;
  * FSSTAT3 Request
  */
 public class FSSTAT3Request extends RequestWithHandle {
-  public static FSSTAT3Request deserialize(XDR xdr) throws IOException {
-    FileHandle handle = readHandle(xdr);
-    return new FSSTAT3Request(handle);
-  }
 
-  public FSSTAT3Request(FileHandle handle) {
-    super(handle);
-  }
-  
-  @Override
-  public void serialize(XDR xdr) {
-    handle.serialize(xdr);    
-  }
+    public static FSSTAT3Request deserialize(XDR xdr) throws IOException {
+        FileHandle handle = readHandle(xdr);
+        return new FSSTAT3Request(handle);
+    }
+
+    public FSSTAT3Request(FileHandle handle) {
+        super(handle);
+    }
+
+    @Override
+    public void serialize(XDR xdr) {
+        handle.serialize(xdr);
+    }
 }

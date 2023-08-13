@@ -22,7 +22,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-
 import org.apache.hadoop.metrics2.lib.DefaultMetricsSystem;
 import org.apache.hadoop.metrics2.sink.PrometheusMetricsSink;
 
@@ -31,17 +30,14 @@ import org.apache.hadoop.metrics2.sink.PrometheusMetricsSink;
  */
 public class PrometheusServlet extends HttpServlet {
 
-  public PrometheusMetricsSink getPrometheusSink() {
-    return
-        (PrometheusMetricsSink) getServletContext().getAttribute(
-            HttpServer2.PROMETHEUS_SINK);
-  }
+    public PrometheusMetricsSink getPrometheusSink() {
+        return (PrometheusMetricsSink) getServletContext().getAttribute(HttpServer2.PROMETHEUS_SINK);
+    }
 
-  @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-      throws ServletException, IOException {
-    DefaultMetricsSystem.instance().publishMetricsNow();
-    getPrometheusSink().writeMetrics(resp.getWriter());
-    resp.getWriter().flush();
-  }
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        DefaultMetricsSystem.instance().publishMetricsNow();
+        getPrometheusSink().writeMetrics(resp.getWriter());
+        resp.getWriter().flush();
+    }
 }

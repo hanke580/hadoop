@@ -19,20 +19,19 @@ package org.apache.hadoop.security.authorize;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
 
 public class TestProxyServers {
 
-  @Test
-  public void testProxyServer() {
-    Configuration conf = new Configuration();
-    assertFalse(ProxyServers.isProxyServer("1.1.1.1"));
-    conf.set(ProxyServers.CONF_HADOOP_PROXYSERVERS, "2.2.2.2, 3.3.3.3");
-    ProxyUsers.refreshSuperUserGroupsConfiguration(conf);
-    assertFalse(ProxyServers.isProxyServer("1.1.1.1"));
-    assertTrue(ProxyServers.isProxyServer("2.2.2.2"));
-    assertTrue(ProxyServers.isProxyServer("3.3.3.3"));
-  }
+    @Test
+    public void testProxyServer() {
+        Configuration conf = new Configuration();
+        assertFalse(ProxyServers.isProxyServer("1.1.1.1"));
+        conf.set(ProxyServers.CONF_HADOOP_PROXYSERVERS, "2.2.2.2, 3.3.3.3");
+        ProxyUsers.refreshSuperUserGroupsConfiguration(conf);
+        assertFalse(ProxyServers.isProxyServer("1.1.1.1"));
+        assertTrue(ProxyServers.isProxyServer("2.2.2.2"));
+        assertTrue(ProxyServers.isProxyServer("3.3.3.3"));
+    }
 }

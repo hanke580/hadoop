@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.fs;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -28,13 +27,11 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.EnumSet;
-
 import static org.apache.hadoop.fs.CreateFlag.CREATE;
 import static org.apache.hadoop.fs.FileContextTestHelper.getDefaultBlockSize;
 import static org.apache.hadoop.fs.FileContextTestHelper.getFileData;
@@ -44,120 +41,110 @@ import static org.junit.Assert.assertTrue;
 /**
  * Test of FileContext apis on Webhdfs.
  */
-public class TestWebHdfsFileContextMainOperations
-    extends FileContextMainOperationsBaseTest {
+public class TestWebHdfsFileContextMainOperations extends FileContextMainOperationsBaseTest {
 
-  protected static MiniDFSCluster cluster;
-  private static Path defaultWorkingDirectory;
-  protected static URI webhdfsUrl;
+    protected static MiniDFSCluster cluster;
 
-  protected static int numBlocks = 2;
+    private static Path defaultWorkingDirectory;
 
-  protected static final byte[] data = getFileData(numBlocks,
-      getDefaultBlockSize());
-  protected static final HdfsConfiguration CONF = new HdfsConfiguration();
+    protected static URI webhdfsUrl;
 
-  @Override
-  public Path getDefaultWorkingDirectory() {
-    return defaultWorkingDirectory;
-  }
+    protected static int numBlocks = 2;
 
-  @Override
-  protected FileContextTestHelper createFileContextHelper() {
-    return new FileContextTestHelper();
-  }
+    protected static final byte[] data = getFileData(numBlocks, getDefaultBlockSize());
 
-  public URI getWebhdfsUrl() {
-    return webhdfsUrl;
-  }
+    protected static final HdfsConfiguration CONF = new HdfsConfiguration();
 
-  @BeforeClass
-  public static void clusterSetupAtBeginning()
-      throws IOException, LoginException, URISyntaxException {
+    @Override
+    public Path getDefaultWorkingDirectory() {
+        return defaultWorkingDirectory;
+    }
 
-    cluster = new MiniDFSCluster.Builder(CONF).numDataNodes(2).build();
-    cluster.waitClusterUp();
-    webhdfsUrl = new URI(WebHdfs.SCHEME + "://" + cluster.getConfiguration(0)
-        .get(DFSConfigKeys.DFS_NAMENODE_HTTP_ADDRESS_KEY));
-    fc = FileContext.getFileContext(webhdfsUrl, CONF);
-    defaultWorkingDirectory = fc.makeQualified(new Path(
-        "/user/" + UserGroupInformation.getCurrentUser().getShortUserName()));
-    fc.mkdir(defaultWorkingDirectory, FileContext.DEFAULT_PERM, true);
-  }
+    @Override
+    protected FileContextTestHelper createFileContextHelper() {
+        return new FileContextTestHelper();
+    }
 
-  @Before
-  public void setUp() throws Exception {
-    URI webhdfsUrlReal = getWebhdfsUrl();
-    Path testBuildData = new Path(
-        webhdfsUrlReal + "/" + GenericTestUtils.DEFAULT_TEST_DATA_PATH
-            + RandomStringUtils.randomAlphanumeric(10));
-    Path rootPath = new Path(testBuildData, "root-uri");
+    public URI getWebhdfsUrl() {
+        return webhdfsUrl;
+    }
 
-    localFsRootPath = rootPath.makeQualified(webhdfsUrlReal, null);
-    fc.mkdir(getTestRootPath(fc, "test"), FileContext.DEFAULT_PERM, true);
-  }
+    @BeforeClass
+    public static void clusterSetupAtBeginning() throws IOException, LoginException, URISyntaxException {
+        cluster = new MiniDFSCluster.Builder(CONF).numDataNodes(2).build();
+        cluster.waitClusterUp();
+        webhdfsUrl = new URI(WebHdfs.SCHEME + "://" + cluster.getConfiguration(0).get(DFSConfigKeys.DFS_NAMENODE_HTTP_ADDRESS_KEY));
+        fc = FileContext.getFileContext(webhdfsUrl, CONF);
+        defaultWorkingDirectory = fc.makeQualified(new Path("/user/" + UserGroupInformation.getCurrentUser().getShortUserName()));
+        fc.mkdir(defaultWorkingDirectory, FileContext.DEFAULT_PERM, true);
+    }
 
-  private Path getTestRootPath(FileContext fc, String path) {
-    return fileContextTestHelper.getTestRootPath(fc, path);
-  }
+    @Before
+    public void setUp() throws Exception {
+        URI webhdfsUrlReal = getWebhdfsUrl();
+        Path testBuildData = new Path(webhdfsUrlReal + "/" + GenericTestUtils.DEFAULT_TEST_DATA_PATH + RandomStringUtils.randomAlphanumeric(10));
+        Path rootPath = new Path(testBuildData, "root-uri");
+        localFsRootPath = rootPath.makeQualified(webhdfsUrlReal, null);
+        fc.mkdir(getTestRootPath(fc, "test"), FileContext.DEFAULT_PERM, true);
+    }
 
-  @Override
-  protected boolean listCorruptedBlocksSupported() {
-    return false;
-  }
+    private Path getTestRootPath(FileContext fc, String path) {
+        return fileContextTestHelper.getTestRootPath(fc, path);
+    }
 
-  /**
-   * Test FileContext APIs when symlinks are not supported
-   * TODO: Open separate JIRA for full support of the Symlink in webhdfs
-   */
-  @Test
-  public void testUnsupportedSymlink() throws IOException {
+    @Override
+    protected boolean listCorruptedBlocksSupported() {
+        return false;
+    }
+
     /**
-     * WebHdfs client Partially supports the Symlink.
-     * creation of Symlink is supported, but the getLinkTargetPath() api is not supported currently,
-     * Implement the test case once the full support is available.
+     * Test FileContext APIs when symlinks are not supported
+     * TODO: Open separate JIRA for full support of the Symlink in webhdfs
      */
-  }
-
-  /**
-   * TODO: Open JIRA for the idiosyncrasies between hdfs and webhdfs
-   */
-  public void testSetVerifyChecksum() throws IOException {
-    final Path rootPath = getTestRootPath(fc, "test");
-    final Path path = new Path(rootPath, "zoo");
-
-    FSDataOutputStream out = fc
-        .create(path, EnumSet.of(CREATE), Options.CreateOpts.createParent());
-    try {
-      out.write(data, 0, data.length);
-    } finally {
-      out.close();
+    @Test
+    public void testUnsupportedSymlink() throws IOException {
+        /**
+         * WebHdfs client Partially supports the Symlink.
+         * creation of Symlink is supported, but the getLinkTargetPath() api is not supported currently,
+         * Implement the test case once the full support is available.
+         */
     }
 
-    //In webhdfs scheme fc.setVerifyChecksum() can be called only after
-    // writing first few bytes but in case of the hdfs scheme we can call
-    // immediately after the creation call.
-    // instruct FS to verify checksum through the FileContext:
-    fc.setVerifyChecksum(true, path);
-
-    FileStatus fileStatus = fc.getFileStatus(path);
-    final long len = fileStatus.getLen();
-    assertTrue(len == data.length);
-    byte[] bb = new byte[(int) len];
-    FSDataInputStream fsdis = fc.open(path);
-    try {
-      fsdis.readFully(bb);
-    } finally {
-      fsdis.close();
+    /**
+     * TODO: Open JIRA for the idiosyncrasies between hdfs and webhdfs
+     */
+    public void testSetVerifyChecksum() throws IOException {
+        final Path rootPath = getTestRootPath(fc, "test");
+        final Path path = new Path(rootPath, "zoo");
+        FSDataOutputStream out = fc.create(path, EnumSet.of(CREATE), Options.CreateOpts.createParent());
+        try {
+            out.write(data, 0, data.length);
+        } finally {
+            out.close();
+        }
+        //In webhdfs scheme fc.setVerifyChecksum() can be called only after
+        // writing first few bytes but in case of the hdfs scheme we can call
+        // immediately after the creation call.
+        // instruct FS to verify checksum through the FileContext:
+        fc.setVerifyChecksum(true, path);
+        FileStatus fileStatus = fc.getFileStatus(path);
+        final long len = fileStatus.getLen();
+        assertTrue(len == data.length);
+        byte[] bb = new byte[(int) len];
+        FSDataInputStream fsdis = fc.open(path);
+        try {
+            fsdis.readFully(bb);
+        } finally {
+            fsdis.close();
+        }
+        assertArrayEquals(data, bb);
     }
-    assertArrayEquals(data, bb);
-  }
 
-  @AfterClass
-  public static void ClusterShutdownAtEnd() throws Exception {
-    if (cluster != null) {
-      cluster.shutdown();
-      cluster = null;
+    @AfterClass
+    public static void ClusterShutdownAtEnd() throws Exception {
+        if (cluster != null) {
+            cluster.shutdown();
+            cluster = null;
+        }
     }
-  }
 }

@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.service.launcher;
 
 import org.apache.hadoop.service.launcher.testservices.FailInConstructorService;
@@ -27,57 +26,51 @@ import org.junit.Test;
 /**
  * Explore the ways in which the launcher is expected to (safely) fail.
  */
-public class TestServiceLauncherCreationFailures extends
-    AbstractServiceLauncherTestBase {
+public class TestServiceLauncherCreationFailures extends AbstractServiceLauncherTestBase {
 
-  public static final String SELF =
-      "org.apache.hadoop.service.launcher.TestServiceLauncherCreationFailures";
+    public static final String SELF = "org.apache.hadoop.service.launcher.TestServiceLauncherCreationFailures";
 
-  @Test
-  public void testNoArgs() throws Throwable {
-    try {
-      ServiceLauncher.serviceMain();
-    } catch (ServiceLaunchException e) {
-      assertExceptionDetails(EXIT_USAGE, "", e);
+    @Test
+    public void testNoArgs() throws Throwable {
+        try {
+            ServiceLauncher.serviceMain();
+        } catch (ServiceLaunchException e) {
+            assertExceptionDetails(EXIT_USAGE, "", e);
+        }
     }
-  }
 
-  @Test
-  public void testUnknownClass() throws Throwable {
-    assertServiceCreationFails("no.such.classname");
-  }
+    @Test
+    public void testUnknownClass() throws Throwable {
+        assertServiceCreationFails("no.such.classname");
+    }
 
-  @Test
-  public void testNotAService() throws Throwable {
-    assertServiceCreationFails(SELF);
-  }
+    @Test
+    public void testNotAService() throws Throwable {
+        assertServiceCreationFails(SELF);
+    }
 
-  @Test
-  public void testNoSimpleConstructor() throws Throwable {
-    assertServiceCreationFails(
-        "org.apache.hadoop.service.launcher.FailureTestService");
-  }
+    @Test
+    public void testNoSimpleConstructor() throws Throwable {
+        assertServiceCreationFails("org.apache.hadoop.service.launcher.FailureTestService");
+    }
 
-  @Test
-  public void testFailInConstructor() throws Throwable {
-    assertServiceCreationFails(FailInConstructorService.NAME);
-  }
+    @Test
+    public void testFailInConstructor() throws Throwable {
+        assertServiceCreationFails(FailInConstructorService.NAME);
+    }
 
-  @Test
-  public void testFailInInit() throws Throwable {
-    assertLaunchOutcome(FailInInitService.EXIT_CODE, "",
-        FailInInitService.NAME);
-  }
+    @Test
+    public void testFailInInit() throws Throwable {
+        assertLaunchOutcome(FailInInitService.EXIT_CODE, "", FailInInitService.NAME);
+    }
 
-  @Test
-  public void testFailInStart() throws Throwable {
-    assertLaunchOutcome(FailInStartService.EXIT_CODE, "",
-        FailInStartService.NAME);
-  }
+    @Test
+    public void testFailInStart() throws Throwable {
+        assertLaunchOutcome(FailInStartService.EXIT_CODE, "", FailInStartService.NAME);
+    }
 
-  @Test
-  public void testFailInStopIsIgnored() throws Throwable {
-    assertRuns(FailingStopInStartService.NAME);
-  }
-
+    @Test
+    public void testFailInStopIsIgnored() throws Throwable {
+        assertRuns(FailingStopInStartService.NAME);
+    }
 }

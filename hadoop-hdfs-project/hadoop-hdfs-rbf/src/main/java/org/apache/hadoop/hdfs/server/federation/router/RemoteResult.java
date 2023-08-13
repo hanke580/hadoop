@@ -26,59 +26,70 @@ import java.io.IOException;
  * @param <R> Type of the result.
  */
 public class RemoteResult<T extends RemoteLocationContext, R> {
-  /** The remote location. */
-  private final T loc;
-  /** The result from the remote location. */
-  private final R result;
-  /** If the result is set; used for void types. */
-  private final boolean resultSet;
-  /** The exception if we couldn't get the result. */
-  private final IOException ioe;
 
-  public RemoteResult(T location, R r) {
-    this.loc = location;
-    this.result = r;
-    this.resultSet = true;
-    this.ioe = null;
-  }
+    /**
+     * The remote location.
+     */
+    private final T loc;
 
-  public RemoteResult(T location, IOException e) {
-    this.loc = location;
-    this.result = null;
-    this.resultSet = false;
-    this.ioe = e;
-  }
+    /**
+     * The result from the remote location.
+     */
+    private final R result;
 
-  public T getLocation() {
-    return loc;
-  }
+    /**
+     * If the result is set; used for void types.
+     */
+    private final boolean resultSet;
 
-  public boolean hasResult() {
-    return resultSet;
-  }
+    /**
+     * The exception if we couldn't get the result.
+     */
+    private final IOException ioe;
 
-  public R getResult() {
-    return result;
-  }
-
-  public boolean hasException() {
-    return getException() != null;
-  }
-
-  public IOException getException() {
-    return ioe;
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder()
-        .append("loc=").append(getLocation());
-    if (hasResult()) {
-      sb.append(" result=").append(getResult());
+    public RemoteResult(T location, R r) {
+        this.loc = location;
+        this.result = r;
+        this.resultSet = true;
+        this.ioe = null;
     }
-    if (hasException()) {
-      sb.append(" exception=").append(getException());
+
+    public RemoteResult(T location, IOException e) {
+        this.loc = location;
+        this.result = null;
+        this.resultSet = false;
+        this.ioe = e;
     }
-    return sb.toString();
-  }
+
+    public T getLocation() {
+        return loc;
+    }
+
+    public boolean hasResult() {
+        return resultSet;
+    }
+
+    public R getResult() {
+        return result;
+    }
+
+    public boolean hasException() {
+        return getException() != null;
+    }
+
+    public IOException getException() {
+        return ioe;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder().append("loc=").append(getLocation());
+        if (hasResult()) {
+            sb.append(" result=").append(getResult());
+        }
+        if (hasException()) {
+            sb.append(" exception=").append(getException());
+        }
+        return sb.toString();
+    }
 }

@@ -18,9 +18,7 @@
 package org.apache.hadoop.hdfs;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-
 import java.io.File;
-
 import org.apache.hadoop.hdfs.client.HdfsClientConfigKeys;
 import org.apache.hadoop.net.unix.DomainSocket;
 import org.apache.hadoop.net.unix.TemporarySocketDirectory;
@@ -34,47 +32,44 @@ import org.junit.BeforeClass;
  * Socket caching.  This is a regression test for HDFS-4417.
  */
 public class TestParallelShortCircuitReadUnCached extends TestParallelReadUtil {
-  private static TemporarySocketDirectory sockDir;
 
-  @BeforeClass
-  static public void setupCluster() throws Exception {
-    if (DomainSocket.getLoadingFailureReason() != null) return;
-    sockDir = new TemporarySocketDirectory();
-    HdfsConfiguration conf = new HdfsConfiguration();
-    conf.set(DFSConfigKeys.DFS_DOMAIN_SOCKET_PATH_KEY,
-      new File(sockDir.getDir(), 
-        "TestParallelShortCircuitReadUnCached._PORT.sock").getAbsolutePath());
-    conf.setBoolean(HdfsClientConfigKeys.Read.ShortCircuit.KEY, true);
-    // Enabling data transfer encryption should have no effect when using
-    // short-circuit local reads.  This is a regression test for HDFS-5353.
-    conf.setBoolean(DFSConfigKeys.DFS_ENCRYPT_DATA_TRANSFER_KEY, true);
-    conf.setBoolean(DFSConfigKeys.DFS_BLOCK_ACCESS_TOKEN_ENABLE_KEY, true);
-    conf.setBoolean(HdfsClientConfigKeys.Read.ShortCircuit.SKIP_CHECKSUM_KEY,
-        false);
-    conf.setBoolean(HdfsClientConfigKeys.
-        DFS_CLIENT_DOMAIN_SOCKET_DATA_TRAFFIC, true);
-    // We want to test reading from stale sockets.
-    conf.setInt(DFSConfigKeys.DFS_DATANODE_SOCKET_REUSE_KEEPALIVE_KEY, 1);
-    conf.setLong(HdfsClientConfigKeys.DFS_CLIENT_SOCKET_CACHE_EXPIRY_MSEC_KEY,
-        5 * 60 * 1000);
-    conf.setInt(HdfsClientConfigKeys.DFS_CLIENT_SOCKET_CACHE_CAPACITY_KEY, 32);
-    // Avoid using the FileInputStreamCache.
-    conf.setInt(HdfsClientConfigKeys.Read.ShortCircuit.STREAMS_CACHE_SIZE_KEY,
-        0);
-    DomainSocket.disableBindPathValidation();
-    DFSInputStream.tcpReadsDisabledForTesting = true;
-    setupCluster(1, conf);
-  }
+    private static TemporarySocketDirectory sockDir;
 
-  @Before
-  public void before() {
-    Assume.assumeThat(DomainSocket.getLoadingFailureReason(), equalTo(null));
-  }
+    @BeforeClass
+    static public void setupCluster() throws Exception {
+        if (DomainSocket.getLoadingFailureReason() != null)
+            return;
+        sockDir = new TemporarySocketDirectory();
+        HdfsConfiguration conf = new HdfsConfiguration();
+        conf.set(DFSConfigKeys.DFS_DOMAIN_SOCKET_PATH_KEY, new File(sockDir.getDir(), "TestParallelShortCircuitReadUnCached._PORT.sock").getAbsolutePath());
+        conf.setBoolean(HdfsClientConfigKeys.Read.ShortCircuit.KEY, true);
+        // Enabling data transfer encryption should have no effect when using
+        // short-circuit local reads.  This is a regression test for HDFS-5353.
+        conf.setBoolean(DFSConfigKeys.DFS_ENCRYPT_DATA_TRANSFER_KEY, true);
+        conf.setBoolean(DFSConfigKeys.DFS_BLOCK_ACCESS_TOKEN_ENABLE_KEY, true);
+        conf.setBoolean(HdfsClientConfigKeys.Read.ShortCircuit.SKIP_CHECKSUM_KEY, false);
+        conf.setBoolean(HdfsClientConfigKeys.DFS_CLIENT_DOMAIN_SOCKET_DATA_TRAFFIC, true);
+        // We want to test reading from stale sockets.
+        conf.setInt(DFSConfigKeys.DFS_DATANODE_SOCKET_REUSE_KEEPALIVE_KEY, 1);
+        conf.setLong(HdfsClientConfigKeys.DFS_CLIENT_SOCKET_CACHE_EXPIRY_MSEC_KEY, 5 * 60 * 1000);
+        conf.setInt(HdfsClientConfigKeys.DFS_CLIENT_SOCKET_CACHE_CAPACITY_KEY, 32);
+        // Avoid using the FileInputStreamCache.
+        conf.setInt(HdfsClientConfigKeys.Read.ShortCircuit.STREAMS_CACHE_SIZE_KEY, 0);
+        DomainSocket.disableBindPathValidation();
+        DFSInputStream.tcpReadsDisabledForTesting = true;
+        setupCluster(1, conf);
+    }
 
-  @AfterClass
-  static public void teardownCluster() throws Exception {
-    if (DomainSocket.getLoadingFailureReason() != null) return;
-    sockDir.close();
-    TestParallelReadUtil.teardownCluster();
-  }
+    @Before
+    public void before() {
+        Assume.assumeThat(DomainSocket.getLoadingFailureReason(), equalTo(null));
+    }
+
+    @AfterClass
+    static public void teardownCluster() throws Exception {
+        if (DomainSocket.getLoadingFailureReason() != null)
+            return;
+        sockDir.close();
+        TestParallelReadUtil.teardownCluster();
+    }
 }

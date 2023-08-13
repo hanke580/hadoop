@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.ReadableByteChannel;
-
 import org.apache.hadoop.net.unix.DomainSocket;
 import org.apache.hadoop.classification.InterfaceAudience;
 
@@ -31,102 +30,106 @@ import org.apache.hadoop.classification.InterfaceAudience;
  */
 @InterfaceAudience.Private
 public class DomainPeer implements Peer {
-  private final DomainSocket socket;
-  private final OutputStream out;
-  private final InputStream in;
-  private final ReadableByteChannel channel;
 
-  public DomainPeer(DomainSocket socket) {
-    this.socket = socket;
-    this.out = socket.getOutputStream();
-    this.in = socket.getInputStream();
-    this.channel = socket.getChannel();
-  }
+    private final DomainSocket socket;
 
-  @Override
-  public ReadableByteChannel getInputStreamChannel() {
-    return channel;
-  }
+    private final OutputStream out;
 
-  @Override
-  public void setReadTimeout(int timeoutMs) throws IOException {
-    socket.setAttribute(DomainSocket.RECEIVE_TIMEOUT, timeoutMs);
-  }
+    private final InputStream in;
 
-  @Override
-  public int getReceiveBufferSize() throws IOException {
-    return socket.getAttribute(DomainSocket.RECEIVE_BUFFER_SIZE);
-  }
+    private final ReadableByteChannel channel;
 
-  @Override
-  public boolean getTcpNoDelay() throws IOException {
-    /* No TCP, no TCP_NODELAY. */
-    return false;
-  }
+    public DomainPeer(DomainSocket socket) {
+        this.socket = socket;
+        this.out = socket.getOutputStream();
+        this.in = socket.getInputStream();
+        this.channel = socket.getChannel();
+    }
 
-  @Override
-  public void setWriteTimeout(int timeoutMs) throws IOException {
-    socket.setAttribute(DomainSocket.SEND_TIMEOUT, timeoutMs);
-  }
+    @Override
+    public ReadableByteChannel getInputStreamChannel() {
+        return channel;
+    }
 
-  @Override
-  public boolean isClosed() {
-    return !socket.isOpen();
-  }
+    @Override
+    public void setReadTimeout(int timeoutMs) throws IOException {
+        socket.setAttribute(DomainSocket.RECEIVE_TIMEOUT, timeoutMs);
+    }
 
-  @Override
-  public void close() throws IOException {
-    socket.close();
-  }
+    @Override
+    public int getReceiveBufferSize() throws IOException {
+        return socket.getAttribute(DomainSocket.RECEIVE_BUFFER_SIZE);
+    }
 
-  @Override
-  public String getRemoteAddressString() {
-    return "unix:" + socket.getPath();
-  }
+    @Override
+    public boolean getTcpNoDelay() throws IOException {
+        /* No TCP, no TCP_NODELAY. */
+        return false;
+    }
 
-  @Override
-  public String getLocalAddressString() {
-    return "<local>";
-  }
+    @Override
+    public void setWriteTimeout(int timeoutMs) throws IOException {
+        socket.setAttribute(DomainSocket.SEND_TIMEOUT, timeoutMs);
+    }
 
-  @Override
-  public InputStream getInputStream() throws IOException {
-    return in;
-  }
+    @Override
+    public boolean isClosed() {
+        return !socket.isOpen();
+    }
 
-  @Override
-  public OutputStream getOutputStream() throws IOException {
-    return out;
-  }
+    @Override
+    public void close() throws IOException {
+        socket.close();
+    }
 
-  @Override
-  public boolean isLocal() {
-    /* UNIX domain sockets can only be used for local communication. */
-    return true;
-  }
+    @Override
+    public String getRemoteAddressString() {
+        return "unix:" + socket.getPath();
+    }
 
-  @Override
-  public String toString() {
-    return "DomainPeer(" + getRemoteAddressString() + ")";
-  }
+    @Override
+    public String getLocalAddressString() {
+        return "<local>";
+    }
 
-  @Override
-  public DomainSocket getDomainSocket() {
-    return socket;
-  }
+    @Override
+    public InputStream getInputStream() throws IOException {
+        return in;
+    }
 
-  @Override
-  public boolean hasSecureChannel() {
-    //
-    // Communication over domain sockets is assumed to be secure, since it
-    // doesn't pass over any network.  We also carefully control the privileges
-    // that can be used on the domain socket inode and its parent directories.
-    // See #{java.org.apache.hadoop.net.unix.DomainSocket#validateSocketPathSecurity0}
-    // for details.
-    //
-    // So unless you are running as root or the hdfs superuser, you cannot
-    // launch a man-in-the-middle attach on UNIX domain socket traffic.
-    //
-    return true;
-  }
+    @Override
+    public OutputStream getOutputStream() throws IOException {
+        return out;
+    }
+
+    @Override
+    public boolean isLocal() {
+        /* UNIX domain sockets can only be used for local communication. */
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "DomainPeer(" + getRemoteAddressString() + ")";
+    }
+
+    @Override
+    public DomainSocket getDomainSocket() {
+        return socket;
+    }
+
+    @Override
+    public boolean hasSecureChannel() {
+        //
+        // Communication over domain sockets is assumed to be secure, since it
+        // doesn't pass over any network.  We also carefully control the privileges
+        // that can be used on the domain socket inode and its parent directories.
+        // See #{java.org.apache.hadoop.net.unix.DomainSocket#validateSocketPathSecurity0}
+        // for details.
+        //
+        // So unless you are running as root or the hdfs superuser, you cannot
+        // launch a man-in-the-middle attach on UNIX domain socket traffic.
+        //
+        return true;
+    }
 }

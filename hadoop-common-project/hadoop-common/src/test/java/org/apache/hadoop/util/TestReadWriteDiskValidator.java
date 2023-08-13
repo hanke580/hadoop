@@ -15,13 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import org.apache.hadoop.metrics2.MetricsSource;
 import org.apache.hadoop.metrics2.MetricsSystem;
 import org.apache.hadoop.metrics2.impl.MetricsCollectorImpl;
@@ -31,7 +29,6 @@ import org.apache.hadoop.util.DiskChecker.DiskErrorException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.Assert;
-
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -42,121 +39,75 @@ import java.nio.file.Paths;
  */
 public class TestReadWriteDiskValidator {
 
-  private MetricsSystem ms;
+    private MetricsSystem ms;
 
-  @Before
-  public void setUp() {
-    ms = DefaultMetricsSystem.instance();
-  }
-
-  @Test
-  public void testReadWriteDiskValidator()
-      throws DiskErrorException, InterruptedException {
-    int count = 100;
-    File testDir = new File(System.getProperty("test.build.data"));
-    ReadWriteDiskValidator readWriteDiskValidator =
-        (ReadWriteDiskValidator) DiskValidatorFactory.getInstance(
-            ReadWriteDiskValidator.NAME);
-
-    for (int i = 0; i < count; i++) {
-      readWriteDiskValidator.checkStatus(testDir);
+    @Before
+    public void setUp() {
+        ms = DefaultMetricsSystem.instance();
     }
 
-    ReadWriteDiskValidatorMetrics metric =
-        ReadWriteDiskValidatorMetrics.getMetric(testDir.toString());
-    Assert.assertEquals("The count number of estimator in MutableQuantiles"
-        + "metrics of file read is not right",
-        metric.getFileReadQuantiles()[0].getEstimator().getCount(), count);
-
-    Assert.assertEquals("The count number of estimator in MutableQuantiles"
-        + "metrics of file write is not right",
-        metric.getFileWriteQuantiles()[0].getEstimator().getCount(),
-        count);
-
-    MetricsSource source = ms.getSource(
-        ReadWriteDiskValidatorMetrics.sourceName(testDir.toString()));
-    MetricsCollectorImpl collector = new MetricsCollectorImpl();
-    source.getMetrics(collector, true);
-
-    MetricsRecords.assertMetric(collector.getRecords().get(0),
-        "FailureCount", 0);
-    MetricsRecords.assertMetric(collector.getRecords().get(0),
-        "LastFailureTime", (long)0);
-
-    // All MutableQuantiles haven't rolled over yet because the minimum
-    // interval is 1 hours, so we just test if these metrics exist.
-    MetricsRecords.assertMetricNotNull(collector.getRecords().get(0),
-        "WriteLatency3600sNumOps");
-    MetricsRecords.assertMetricNotNull(collector.getRecords().get(0),
-        "WriteLatency3600s50thPercentileLatencyMicros");
-    MetricsRecords.assertMetricNotNull(collector.getRecords().get(0),
-        "WriteLatency86400sNumOps");
-    MetricsRecords.assertMetricNotNull(collector.getRecords().get(0),
-        "WriteLatency864000sNumOps");
-
-    MetricsRecords.assertMetricNotNull(collector.getRecords().get(0),
-        "ReadLatency3600sNumOps");
-    MetricsRecords.assertMetricNotNull(collector.getRecords().get(0),
-        "ReadLatency3600s50thPercentileLatencyMicros");
-    MetricsRecords.assertMetricNotNull(collector.getRecords().get(0),
-        "ReadLatency86400sNumOps");
-    MetricsRecords.assertMetricNotNull(collector.getRecords().get(0),
-        "ReadLatency864000sNumOps");
-  }
-
-  @Test
-  public void testCheckFailures() throws Throwable {
-    ReadWriteDiskValidator readWriteDiskValidator =
-        (ReadWriteDiskValidator) DiskValidatorFactory.getInstance(
-            ReadWriteDiskValidator.NAME);
-
-    // create a temporary test directory under the system test directory
-    File testDir = Files.createTempDirectory(
-        Paths.get(System.getProperty("test.build.data")), "test").toFile();
-
-    try {
-      Shell.execCommand(Shell.getSetPermissionCommand("000", false,
-          testDir.getAbsolutePath()));
-    } catch (Exception e){
-      testDir.delete();
-      throw e;
+    @Test
+    public void testReadWriteDiskValidator() throws DiskErrorException, InterruptedException {
+        int count = 100;
+        File testDir = new File(System.getProperty("test.build.data"));
+        ReadWriteDiskValidator readWriteDiskValidator = (ReadWriteDiskValidator) DiskValidatorFactory.getInstance(ReadWriteDiskValidator.NAME);
+        for (int i = 0; i < count; i++) {
+            readWriteDiskValidator.checkStatus(testDir);
+        }
+        ReadWriteDiskValidatorMetrics metric = ReadWriteDiskValidatorMetrics.getMetric(testDir.toString());
+        Assert.assertEquals("The count number of estimator in MutableQuantiles" + "metrics of file read is not right", metric.getFileReadQuantiles()[0].getEstimator().getCount(), count);
+        Assert.assertEquals("The count number of estimator in MutableQuantiles" + "metrics of file write is not right", metric.getFileWriteQuantiles()[0].getEstimator().getCount(), count);
+        MetricsSource source = ms.getSource(ReadWriteDiskValidatorMetrics.sourceName(testDir.toString()));
+        MetricsCollectorImpl collector = new MetricsCollectorImpl();
+        source.getMetrics(collector, true);
+        MetricsRecords.assertMetric(collector.getRecords().get(0), "FailureCount", 0);
+        MetricsRecords.assertMetric(collector.getRecords().get(0), "LastFailureTime", (long) 0);
+        // All MutableQuantiles haven't rolled over yet because the minimum
+        // interval is 1 hours, so we just test if these metrics exist.
+        MetricsRecords.assertMetricNotNull(collector.getRecords().get(0), "WriteLatency3600sNumOps");
+        MetricsRecords.assertMetricNotNull(collector.getRecords().get(0), "WriteLatency3600s50thPercentileLatencyMicros");
+        MetricsRecords.assertMetricNotNull(collector.getRecords().get(0), "WriteLatency86400sNumOps");
+        MetricsRecords.assertMetricNotNull(collector.getRecords().get(0), "WriteLatency864000sNumOps");
+        MetricsRecords.assertMetricNotNull(collector.getRecords().get(0), "ReadLatency3600sNumOps");
+        MetricsRecords.assertMetricNotNull(collector.getRecords().get(0), "ReadLatency3600s50thPercentileLatencyMicros");
+        MetricsRecords.assertMetricNotNull(collector.getRecords().get(0), "ReadLatency86400sNumOps");
+        MetricsRecords.assertMetricNotNull(collector.getRecords().get(0), "ReadLatency864000sNumOps");
     }
 
-    try {
-      readWriteDiskValidator.checkStatus(testDir);
-      fail("Disk check should fail.");
-    } catch (DiskErrorException e) {
-      assertEquals("Disk Check failed!", e.getMessage());
+    @Test
+    public void testCheckFailures() throws Throwable {
+        ReadWriteDiskValidator readWriteDiskValidator = (ReadWriteDiskValidator) DiskValidatorFactory.getInstance(ReadWriteDiskValidator.NAME);
+        // create a temporary test directory under the system test directory
+        File testDir = Files.createTempDirectory(Paths.get(System.getProperty("test.build.data")), "test").toFile();
+        try {
+            Shell.execCommand(Shell.getSetPermissionCommand("000", false, testDir.getAbsolutePath()));
+        } catch (Exception e) {
+            testDir.delete();
+            throw e;
+        }
+        try {
+            readWriteDiskValidator.checkStatus(testDir);
+            fail("Disk check should fail.");
+        } catch (DiskErrorException e) {
+            assertEquals("Disk Check failed!", e.getMessage());
+        }
+        MetricsSource source = ms.getSource(ReadWriteDiskValidatorMetrics.sourceName(testDir.toString()));
+        MetricsCollectorImpl collector = new MetricsCollectorImpl();
+        source.getMetrics(collector, true);
+        try {
+            readWriteDiskValidator.checkStatus(testDir);
+            fail("Disk check should fail.");
+        } catch (DiskErrorException e) {
+            assertEquals("Disk Check failed!", e.getMessage());
+        }
+        source.getMetrics(collector, true);
+        // verify the first metrics record
+        MetricsRecords.assertMetric(collector.getRecords().get(0), "FailureCount", 1);
+        Long lastFailureTime1 = (Long) MetricsRecords.getMetricValueByName(collector.getRecords().get(0), "LastFailureTime");
+        // verify the second metrics record
+        MetricsRecords.assertMetric(collector.getRecords().get(1), "FailureCount", 2);
+        Long lastFailureTime2 = (Long) MetricsRecords.getMetricValueByName(collector.getRecords().get(1), "LastFailureTime");
+        assertTrue("The first failure time should be less than the second one", lastFailureTime1 < lastFailureTime2);
+        testDir.delete();
     }
-
-    MetricsSource source = ms.getSource(
-        ReadWriteDiskValidatorMetrics.sourceName(testDir.toString()));
-    MetricsCollectorImpl collector = new MetricsCollectorImpl();
-    source.getMetrics(collector, true);
-
-    try {
-      readWriteDiskValidator.checkStatus(testDir);
-      fail("Disk check should fail.");
-    } catch (DiskErrorException e) {
-      assertEquals("Disk Check failed!", e.getMessage());
-    }
-
-    source.getMetrics(collector, true);
-
-    // verify the first metrics record
-    MetricsRecords.assertMetric(collector.getRecords().get(0),
-        "FailureCount", 1);
-    Long lastFailureTime1 = (Long) MetricsRecords.getMetricValueByName(
-        collector.getRecords().get(0), "LastFailureTime");
-
-    // verify the second metrics record
-    MetricsRecords.assertMetric(collector.getRecords().get(1),
-        "FailureCount", 2);
-    Long lastFailureTime2 = (Long) MetricsRecords.getMetricValueByName(
-        collector.getRecords().get(1), "LastFailureTime");
-    assertTrue("The first failure time should be less than the second one",
-        lastFailureTime1 < lastFailureTime2);
-
-    testDir.delete();
-  }
 }

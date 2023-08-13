@@ -23,28 +23,29 @@ import java.util.List;
  * user group information will not be used.
  */
 public class NullGroupsMapping implements GroupMappingServiceProvider {
-  /**
-   * Nothing is returned, so nothing is cached.
-   * @param groups ignored
-   */
-  @Override
-  public void cacheGroupsAdd(List<String> groups) {
-  }
 
-  /**
-   * Returns an empty list.
-   * @param user ignored
-   * @return an empty list
-   */
-  @Override
-  public List<String> getGroups(String user) {
-    return Collections.emptyList();
-  }
+    /**
+     * Nothing is returned, so nothing is cached.
+     * @param groups ignored
+     */
+    @Override
+    public void cacheGroupsAdd(List<String> groups) {
+    }
 
-  /**
-   * Nothing is returned, so nothing is cached.
-   */
-  @Override
-  public void cacheGroupsRefresh() {
-  }
+    /**
+     * Returns an empty list.
+     * @param user ignored
+     * @return an empty list
+     */
+    @Override
+    public List<String> getGroups(String user) {
+        return Collections.emptyList();
+    }
+
+    /**
+     * Nothing is returned, so nothing is cached.
+     */
+    @Override
+    public void cacheGroupsRefresh() {
+    }
 }

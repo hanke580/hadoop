@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.tools.protocolPB;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -25,13 +24,9 @@ import org.apache.hadoop.ipc.ProtocolInfo;
 import org.apache.hadoop.security.KerberosInfo;
 import org.apache.hadoop.tools.proto.GetUserMappingsProtocolProtos.GetUserMappingsProtocolService;
 
-@KerberosInfo(
-    serverPrincipal=CommonConfigurationKeys.HADOOP_SECURITY_SERVICE_USER_NAME_KEY)
-@ProtocolInfo(
-    protocolName = "org.apache.hadoop.tools.GetUserMappingsProtocol", 
-    protocolVersion = 1)
-@InterfaceAudience.LimitedPrivate({"HDFS", "MapReduce"})
+@KerberosInfo(serverPrincipal = CommonConfigurationKeys.HADOOP_SECURITY_SERVICE_USER_NAME_KEY)
+@ProtocolInfo(protocolName = "org.apache.hadoop.tools.GetUserMappingsProtocol", protocolVersion = 1)
+@InterfaceAudience.LimitedPrivate({ "HDFS", "MapReduce" })
 @InterfaceStability.Evolving
-public interface GetUserMappingsProtocolPB extends
-  GetUserMappingsProtocolService.BlockingInterface {
+public interface GetUserMappingsProtocolPB extends GetUserMappingsProtocolService.BlockingInterface {
 }

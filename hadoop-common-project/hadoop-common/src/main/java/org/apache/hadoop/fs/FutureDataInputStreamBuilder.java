@@ -19,7 +19,6 @@ package org.apache.hadoop.fs;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
@@ -36,26 +35,21 @@ import org.apache.hadoop.classification.InterfaceStability;
  * If the option is not related to the file system, the option will be ignored.
  * If the option is must, but not supported by the file system, a
  * {@link IllegalArgumentException} will be thrown.
- *
  */
 @InterfaceAudience.Public
 @InterfaceStability.Unstable
-public interface FutureDataInputStreamBuilder
-    extends FSBuilder<CompletableFuture<FSDataInputStream>, FutureDataInputStreamBuilder> {
+public interface FutureDataInputStreamBuilder extends FSBuilder<CompletableFuture<FSDataInputStream>, FutureDataInputStreamBuilder> {
 
-  @Override
-  CompletableFuture<FSDataInputStream> build()
-      throws IllegalArgumentException, UnsupportedOperationException,
-      IOException;
+    @Override
+    CompletableFuture<FSDataInputStream> build() throws IllegalArgumentException, UnsupportedOperationException, IOException;
 
-  /**
-   * A FileStatus may be provided to the open request.
-   * It is up to the implementation whether to use this or not.
-   * @param status status.
-   * @return the builder.
-   */
-  default FutureDataInputStreamBuilder withFileStatus(FileStatus status) {
-    return this;
-  }
-
+    /**
+     * A FileStatus may be provided to the open request.
+     * It is up to the implementation whether to use this or not.
+     * @param status status.
+     * @return the builder.
+     */
+    default FutureDataInputStreamBuilder withFileStatus(FileStatus status) {
+        return this;
+    }
 }

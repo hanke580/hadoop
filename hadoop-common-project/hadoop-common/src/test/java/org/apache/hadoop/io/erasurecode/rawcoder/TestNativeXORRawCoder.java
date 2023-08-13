@@ -27,17 +27,17 @@ import org.junit.Test;
  */
 public class TestNativeXORRawCoder extends TestXORRawCoderBase {
 
-  @Before
-  public void setup() {
-    Assume.assumeTrue(ErasureCodeNative.isNativeCodeLoaded());
-    this.encoderFactoryClass = NativeXORRawErasureCoderFactory.class;
-    this.decoderFactoryClass = NativeXORRawErasureCoderFactory.class;
-    setAllowDump(true);
-  }
+    @Before
+    public void setup() {
+        Assume.assumeTrue(ErasureCodeNative.isNativeCodeLoaded());
+        this.encoderFactoryClass = NativeXORRawErasureCoderFactory.class;
+        this.decoderFactoryClass = NativeXORRawErasureCoderFactory.class;
+        setAllowDump(true);
+    }
 
-  @Test
-  public void testAfterRelease63() throws Exception {
-    prepare(6, 3, null, null);
-    testAfterRelease();
-  }
+    @Test
+    public void testAfterRelease63() throws Exception {
+        prepare(6, 3, null, null);
+        testAfterRelease();
+    }
 }

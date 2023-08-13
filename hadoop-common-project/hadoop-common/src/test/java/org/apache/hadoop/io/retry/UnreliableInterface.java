@@ -15,13 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.io.retry;
 
 import java.io.IOException;
-
 import javax.security.sasl.SaslException;
-
 import org.apache.hadoop.ipc.RemoteException;
 import org.apache.hadoop.ipc.StandbyException;
 import org.apache.hadoop.security.AccessControlException;
@@ -36,69 +33,68 @@ import org.apache.hadoop.security.AccessControlException;
  * Some methods may be annotated with the {@link Idempotent} annotation.
  * In order to test those some methods of UnreliableInterface are annotated,
  * but they are not actually Idempotent functions.
- *
  */
 public interface UnreliableInterface {
-  
-  public static class UnreliableException extends Exception {
-    private static final long serialVersionUID = 1L;
 
-    private String identifier;
-    
-    public UnreliableException() {
-      // no body
+    public static class UnreliableException extends Exception {
+
+        private static final long serialVersionUID = 1L;
+
+        private String identifier;
+
+        public UnreliableException() {
+            // no body
+        }
+
+        public UnreliableException(String identifier) {
+            this.identifier = identifier;
+        }
+
+        @Override
+        public String getMessage() {
+            return identifier;
+        }
     }
-    
-    public UnreliableException(String identifier) {
-      this.identifier = identifier;
+
+    public static class FatalException extends UnreliableException {
+
+        private static final long serialVersionUID = 1L;
+        // no body
     }
-    
-    @Override
-    public String getMessage() {
-      return identifier;
-    }
-  }
-  
-  public static class FatalException extends UnreliableException {
-    private static final long serialVersionUID = 1L;
-    // no body
-  }
-  
-  void alwaysSucceeds() throws UnreliableException;
-  
-  void alwaysFailsWithFatalException() throws FatalException;
-  void alwaysFailsWithRemoteFatalException() throws RemoteException;
 
-  void failsOnceWithIOException() throws IOException;
-  void failsOnceWithRemoteException() throws RemoteException;
+    void alwaysSucceeds() throws UnreliableException;
 
-  void failsOnceThenSucceeds() throws UnreliableException;
-  boolean failsOnceThenSucceedsWithReturnValue() throws UnreliableException;
+    void alwaysFailsWithFatalException() throws FatalException;
 
-  void failsTenTimesThenSucceeds() throws UnreliableException;
+    void alwaysFailsWithRemoteFatalException() throws RemoteException;
 
-  void failsWithSASLExceptionTenTimes() throws SaslException;
+    void failsOnceWithIOException() throws IOException;
 
-  @Idempotent
-  void failsWithAccessControlExceptionEightTimes()
-      throws AccessControlException;
+    void failsOnceWithRemoteException() throws RemoteException;
 
-  @Idempotent
-  void failsWithWrappedAccessControlException()
-      throws IOException;
+    void failsOnceThenSucceeds() throws UnreliableException;
 
-  public String succeedsOnceThenFailsReturningString()
-      throws UnreliableException, StandbyException, IOException;
-  @Idempotent
-  public String succeedsOnceThenFailsReturningStringIdempotent()
-      throws UnreliableException, StandbyException, IOException;
-  public String succeedsTenTimesThenFailsReturningString()
-      throws UnreliableException, StandbyException, IOException;
-  
-  @Idempotent
-  public String failsIfIdentifierDoesntMatch(String identifier)
-      throws UnreliableException, StandbyException, IOException;
+    boolean failsOnceThenSucceedsWithReturnValue() throws UnreliableException;
 
-  void nonIdempotentVoidFailsIfIdentifierDoesntMatch(String identifier)
-      throws UnreliableException, StandbyException, IOException;
+    void failsTenTimesThenSucceeds() throws UnreliableException;
+
+    void failsWithSASLExceptionTenTimes() throws SaslException;
+
+    @Idempotent
+    void failsWithAccessControlExceptionEightTimes() throws AccessControlException;
+
+    @Idempotent
+    void failsWithWrappedAccessControlException() throws IOException;
+
+    public String succeedsOnceThenFailsReturningString() throws UnreliableException, StandbyException, IOException;
+
+    @Idempotent
+    public String succeedsOnceThenFailsReturningStringIdempotent() throws UnreliableException, StandbyException, IOException;
+
+    public String succeedsTenTimesThenFailsReturningString() throws UnreliableException, StandbyException, IOException;
+
+    @Idempotent
+    public String failsIfIdentifierDoesntMatch(String identifier) throws UnreliableException, StandbyException, IOException;
+
+    void nonIdempotentVoidFailsIfIdentifierDoesntMatch(String identifier) throws UnreliableException, StandbyException, IOException;
 }

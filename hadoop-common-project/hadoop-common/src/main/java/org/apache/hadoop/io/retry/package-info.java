@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * A mechanism for selectively retrying methods that throw exceptions under
  * certain circumstances.
@@ -37,8 +36,10 @@
  * {@link org.apache.hadoop.io.retry.RetryProxy#create(Class, Object, Map)
  * per-method basis}.
  */
-@InterfaceAudience.LimitedPrivate({"HBase", "HDFS", "MapReduce"})
+@InterfaceAudience.LimitedPrivate({ "HBase", "HDFS", "MapReduce" })
 @InterfaceStability.Evolving
 package org.apache.hadoop.io.retry;
+
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

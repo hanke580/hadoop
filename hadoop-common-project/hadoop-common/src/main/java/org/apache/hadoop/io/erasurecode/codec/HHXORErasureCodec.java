@@ -31,17 +31,17 @@ import org.apache.hadoop.io.erasurecode.coder.HHXORErasureEncoder;
 @InterfaceAudience.Private
 public class HHXORErasureCodec extends ErasureCodec {
 
-  public HHXORErasureCodec(Configuration conf, ErasureCodecOptions options) {
-    super(conf, options);
-  }
+    public HHXORErasureCodec(Configuration conf, ErasureCodecOptions options) {
+        super(conf, options);
+    }
 
-  @Override
-  public ErasureEncoder createEncoder() {
-    return new HHXORErasureEncoder(getCoderOptions());
-  }
+    @Override
+    public ErasureEncoder createEncoder() {
+        return new HHXORErasureEncoder(getCoderOptions());
+    }
 
-  @Override
-  public ErasureDecoder createDecoder() {
-    return new HHXORErasureDecoder(getCoderOptions());
-  }
+    @Override
+    public ErasureDecoder createDecoder() {
+        return new HHXORErasureDecoder(getCoderOptions());
+    }
 }

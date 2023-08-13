@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.metrics2.lib;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -28,35 +27,42 @@ import org.apache.hadoop.metrics2.MetricsRecordBuilder;
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
 public abstract class MutableMetric {
-  private volatile boolean changed = true;
 
-  /**
-   * Get a snapshot of the metric
-   * @param builder the metrics record builder
-   * @param all if true, snapshot unchanged metrics as well
-   */
-  public abstract void snapshot(MetricsRecordBuilder builder, boolean all);
+    private volatile boolean changed = true;
 
-  /**
-   * Get a snapshot of metric if changed
-   * @param builder the metrics record builder
-   */
-  public void snapshot(MetricsRecordBuilder builder) {
-    snapshot(builder, false);
-  }
+    /**
+     * Get a snapshot of the metric
+     * @param builder the metrics record builder
+     * @param all if true, snapshot unchanged metrics as well
+     */
+    public abstract void snapshot(MetricsRecordBuilder builder, boolean all);
 
-  /**
-   * Set the changed flag in mutable operations
-   */
-  protected void setChanged() { changed = true; }
+    /**
+     * Get a snapshot of metric if changed
+     * @param builder the metrics record builder
+     */
+    public void snapshot(MetricsRecordBuilder builder) {
+        snapshot(builder, false);
+    }
 
-  /**
-   * Clear the changed flag in the snapshot operations
-   */
-  protected void clearChanged() { changed = false; }
+    /**
+     * Set the changed flag in mutable operations
+     */
+    protected void setChanged() {
+        changed = true;
+    }
 
-  /**
-   * @return  true if metric is changed since last snapshot/snapshot
-   */
-  public boolean changed() { return changed; }
+    /**
+     * Clear the changed flag in the snapshot operations
+     */
+    protected void clearChanged() {
+        changed = false;
+    }
+
+    /**
+     * @return  true if metric is changed since last snapshot/snapshot
+     */
+    public boolean changed() {
+        return changed;
+    }
 }

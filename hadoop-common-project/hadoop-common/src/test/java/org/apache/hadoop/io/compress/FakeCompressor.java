@@ -18,7 +18,6 @@
 package org.apache.hadoop.io.compress;
 
 import java.io.IOException;
-
 import org.apache.hadoop.conf.Configuration;
 
 /**
@@ -27,87 +26,89 @@ import org.apache.hadoop.conf.Configuration;
  */
 class FakeCompressor implements Compressor {
 
-  private boolean finish;
-  private boolean finished;
-  private int nread;
-  private int nwrite;
+    private boolean finish;
 
-  private byte[] userBuf;
-  private int userBufOff;
-  private int userBufLen;
+    private boolean finished;
 
-  @Override
-  public int compress(byte[] b, int off, int len) throws IOException {
-    int n = Math.min(len, userBufLen);
-    if (userBuf != null && b != null)
-      System.arraycopy(userBuf, userBufOff, b, off, n);
-    userBufOff += n;
-    userBufLen -= n;
-    nwrite += n;
+    private int nread;
 
-    if (finish && userBufLen <= 0)
-      finished = true;
+    private int nwrite;
 
-    return n;
-  }
+    private byte[] userBuf;
 
-  @Override
-  public void end() {
-    // nop
-  }
+    private int userBufOff;
 
-  @Override
-  public void finish() {
-    finish = true;
-  }
+    private int userBufLen;
 
-  @Override
-  public boolean finished() {
-    return finished;
-  }
+    @Override
+    public int compress(byte[] b, int off, int len) throws IOException {
+        int n = Math.min(len, userBufLen);
+        if (userBuf != null && b != null)
+            System.arraycopy(userBuf, userBufOff, b, off, n);
+        userBufOff += n;
+        userBufLen -= n;
+        nwrite += n;
+        if (finish && userBufLen <= 0)
+            finished = true;
+        return n;
+    }
 
-  @Override
-  public long getBytesRead() {
-    return nread;
-  }
+    @Override
+    public void end() {
+        // nop
+    }
 
-  @Override
-  public long getBytesWritten() {
-    return nwrite;
-  }
+    @Override
+    public void finish() {
+        finish = true;
+    }
 
-  @Override
-  public boolean needsInput() {
-    return userBufLen <= 0;
-  }
+    @Override
+    public boolean finished() {
+        return finished;
+    }
 
-  @Override
-  public void reset() {
-    finish = false;
-    finished = false;
-    nread = 0;
-    nwrite = 0;
-    userBuf = null;
-    userBufOff = 0;
-    userBufLen = 0;
-  }
+    @Override
+    public long getBytesRead() {
+        return nread;
+    }
 
-  @Override
-  public void setDictionary(byte[] b, int off, int len) {
-    // nop
-  }
+    @Override
+    public long getBytesWritten() {
+        return nwrite;
+    }
 
-  @Override
-  public void setInput(byte[] b, int off, int len) {
-    nread += len;
-    userBuf = b;
-    userBufOff = off;
-    userBufLen = len;
-  }
+    @Override
+    public boolean needsInput() {
+        return userBufLen <= 0;
+    }
 
-  @Override
-  public void reinit(Configuration conf) {
-    // nop
-  }
+    @Override
+    public void reset() {
+        finish = false;
+        finished = false;
+        nread = 0;
+        nwrite = 0;
+        userBuf = null;
+        userBufOff = 0;
+        userBufLen = 0;
+    }
 
+    @Override
+    public void setDictionary(byte[] b, int off, int len) {
+        // nop
+    }
+
+    @Override
+    public void setInput(byte[] b, int off, int len) {
+        nread += len;
+        userBuf = b;
+        userBufOff = off;
+        userBufLen = len;
+    }
+
+    @Override
+    public void reinit(Configuration conf) {
+        // nop
+    }
 }

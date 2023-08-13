@@ -19,7 +19,6 @@ package org.apache.hadoop.hdfs.tools;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -39,131 +38,96 @@ import org.junit.Test;
  * Test StoragePolicyAdmin commands
  */
 public class TestStoragePolicyCommands {
-  private static final short REPL = 1;
-  private static final int SIZE = 128;
 
-  protected static Configuration conf;
-  protected static MiniDFSCluster cluster;
-  protected static FileSystem fs;
+    private static final short REPL = 1;
 
-  @Before
-  public void clusterSetUp() throws IOException, URISyntaxException {
-    conf = new HdfsConfiguration();
-    conf.set(DFSConfigKeys.DFS_STORAGE_POLICY_SATISFIER_MODE_KEY,
-        StoragePolicySatisfierMode.EXTERNAL.toString());
-    StorageType[][] newtypes = new StorageType[][] {
-        {StorageType.ARCHIVE, StorageType.DISK}};
-    cluster = new MiniDFSCluster.Builder(conf).numDataNodes(REPL)
-        .storageTypes(newtypes).build();
-    cluster.waitActive();
-    fs = cluster.getFileSystem();
-  }
+    private static final int SIZE = 128;
 
-  @After
-  public void clusterShutdown() throws IOException{
-    if(fs != null) {
-      fs.close();
-      fs = null;
+    protected static Configuration conf;
+
+    protected static MiniDFSCluster cluster;
+
+    protected static FileSystem fs;
+
+    @Before
+    public void clusterSetUp() throws IOException, URISyntaxException {
+        conf = new HdfsConfiguration();
+        conf.set(DFSConfigKeys.DFS_STORAGE_POLICY_SATISFIER_MODE_KEY, StoragePolicySatisfierMode.EXTERNAL.toString());
+        StorageType[][] newtypes = new StorageType[][] { { StorageType.ARCHIVE, StorageType.DISK } };
+        cluster = new MiniDFSCluster.Builder(conf).numDataNodes(REPL).storageTypes(newtypes).build();
+        cluster.waitActive();
+        fs = cluster.getFileSystem();
     }
-    if(cluster != null) {
-      cluster.shutdown();
-      cluster = null;
+
+    @After
+    public void clusterShutdown() throws IOException {
+        if (fs != null) {
+            fs.close();
+            fs = null;
+        }
+        if (cluster != null) {
+            cluster.shutdown();
+            cluster = null;
+        }
     }
-  }
 
-
-  @Test
-  public void testSetAndUnsetStoragePolicy() throws Exception {
-    final Path foo = new Path("/foo");
-    final Path bar = new Path(foo, "bar");
-    final Path wow = new Path(bar, "wow");
-    DFSTestUtil.createFile(fs, wow, SIZE, REPL, 0);
-
-    /*
+    @Test
+    public void testSetAndUnsetStoragePolicy() throws Exception {
+        final Path foo = new Path("/foo");
+        final Path bar = new Path(foo, "bar");
+        final Path wow = new Path(bar, "wow");
+        DFSTestUtil.createFile(fs, wow, SIZE, REPL, 0);
+        /*
      * test: set storage policy
      */
-    final StoragePolicyAdmin admin = new StoragePolicyAdmin(conf);
-    DFSTestUtil.toolRun(admin, "-setStoragePolicy -path " + fs.getUri()
-        + "/foo -policy WARM", 0, "Set storage policy WARM on " + fs.getUri()
-        + "/foo");
-    DFSTestUtil.toolRun(admin, "-setStoragePolicy -path /foo/bar -policy COLD",
-        0, "Set storage policy COLD on " + bar.toString());
-    DFSTestUtil.toolRun(admin, "-setStoragePolicy -path /foo/bar/wow -policy HOT",
-        0, "Set storage policy HOT on " + wow.toString());
-    DFSTestUtil.toolRun(admin, "-setStoragePolicy -path /fooz -policy WARM",
-        2, "File/Directory does not exist: /fooz");
-
-    /*
+        final StoragePolicyAdmin admin = new StoragePolicyAdmin(conf);
+        DFSTestUtil.toolRun(admin, "-setStoragePolicy -path " + fs.getUri() + "/foo -policy WARM", 0, "Set storage policy WARM on " + fs.getUri() + "/foo");
+        DFSTestUtil.toolRun(admin, "-setStoragePolicy -path /foo/bar -policy COLD", 0, "Set storage policy COLD on " + bar.toString());
+        DFSTestUtil.toolRun(admin, "-setStoragePolicy -path /foo/bar/wow -policy HOT", 0, "Set storage policy HOT on " + wow.toString());
+        DFSTestUtil.toolRun(admin, "-setStoragePolicy -path /fooz -policy WARM", 2, "File/Directory does not exist: /fooz");
+        /*
      * test: get storage policy after set
      */
-    final BlockStoragePolicySuite suite = BlockStoragePolicySuite
-        .createDefaultSuite();
-    final BlockStoragePolicy warm = suite.getPolicy("WARM");
-    final BlockStoragePolicy cold = suite.getPolicy("COLD");
-    final BlockStoragePolicy hot = suite.getPolicy("HOT");
-    DFSTestUtil.toolRun(admin, "-getStoragePolicy -path " + fs.getUri()
-        + "/foo", 0, "The storage policy of " + fs.getUri() + "/foo:\n"
-        + warm);
-    DFSTestUtil.toolRun(admin, "-getStoragePolicy -path /foo/bar", 0,
-        "The storage policy of " + bar.toString() + ":\n" + cold);
-    DFSTestUtil.toolRun(admin, "-getStoragePolicy -path /foo/bar/wow", 0,
-        "The storage policy of " + wow.toString() + ":\n" + hot);
-    DFSTestUtil.toolRun(admin, "-getStoragePolicy -path /fooz", 2,
-        "File/Directory does not exist: /fooz");
-
-    /*
+        final BlockStoragePolicySuite suite = BlockStoragePolicySuite.createDefaultSuite();
+        final BlockStoragePolicy warm = suite.getPolicy("WARM");
+        final BlockStoragePolicy cold = suite.getPolicy("COLD");
+        final BlockStoragePolicy hot = suite.getPolicy("HOT");
+        DFSTestUtil.toolRun(admin, "-getStoragePolicy -path " + fs.getUri() + "/foo", 0, "The storage policy of " + fs.getUri() + "/foo:\n" + warm);
+        DFSTestUtil.toolRun(admin, "-getStoragePolicy -path /foo/bar", 0, "The storage policy of " + bar.toString() + ":\n" + cold);
+        DFSTestUtil.toolRun(admin, "-getStoragePolicy -path /foo/bar/wow", 0, "The storage policy of " + wow.toString() + ":\n" + hot);
+        DFSTestUtil.toolRun(admin, "-getStoragePolicy -path /fooz", 2, "File/Directory does not exist: /fooz");
+        /*
      * test: unset storage policy
      */
-    DFSTestUtil.toolRun(admin, "-unsetStoragePolicy -path " + fs.getUri()
-        + "/foo", 0, "Unset storage policy from " + fs.getUri() + "/foo");
-    DFSTestUtil.toolRun(admin, "-unsetStoragePolicy -path /foo/bar", 0,
-        "Unset storage policy from " + bar.toString());
-    DFSTestUtil.toolRun(admin, "-unsetStoragePolicy -path /foo/bar/wow", 0,
-        "Unset storage policy from " + wow.toString());
-    DFSTestUtil.toolRun(admin, "-unsetStoragePolicy -path /fooz", 2,
-        "File/Directory does not exist: /fooz");
-
-    /*
+        DFSTestUtil.toolRun(admin, "-unsetStoragePolicy -path " + fs.getUri() + "/foo", 0, "Unset storage policy from " + fs.getUri() + "/foo");
+        DFSTestUtil.toolRun(admin, "-unsetStoragePolicy -path /foo/bar", 0, "Unset storage policy from " + bar.toString());
+        DFSTestUtil.toolRun(admin, "-unsetStoragePolicy -path /foo/bar/wow", 0, "Unset storage policy from " + wow.toString());
+        DFSTestUtil.toolRun(admin, "-unsetStoragePolicy -path /fooz", 2, "File/Directory does not exist: /fooz");
+        /*
      * test: get storage policy after unset
      */
-    DFSTestUtil.toolRun(admin, "-getStoragePolicy -path /foo", 0,
-        "The storage policy of " + foo.toString() + " is unspecified");
-    DFSTestUtil.toolRun(admin, "-getStoragePolicy -path /foo/bar", 0,
-        "The storage policy of " + bar.toString() + " is unspecified");
-    DFSTestUtil.toolRun(admin, "-getStoragePolicy -path /foo/bar/wow", 0,
-        "The storage policy of " + wow.toString() + " is unspecified");
-    DFSTestUtil.toolRun(admin, "-getStoragePolicy -path /fooz", 2,
-        "File/Directory does not exist: /fooz");
-  }
+        DFSTestUtil.toolRun(admin, "-getStoragePolicy -path /foo", 0, "The storage policy of " + foo.toString() + " is unspecified");
+        DFSTestUtil.toolRun(admin, "-getStoragePolicy -path /foo/bar", 0, "The storage policy of " + bar.toString() + " is unspecified");
+        DFSTestUtil.toolRun(admin, "-getStoragePolicy -path /foo/bar/wow", 0, "The storage policy of " + wow.toString() + " is unspecified");
+        DFSTestUtil.toolRun(admin, "-getStoragePolicy -path /fooz", 2, "File/Directory does not exist: /fooz");
+    }
 
-  @Test
-  public void testSetAndGetStoragePolicy() throws Exception {
-    final Path foo = new Path("/foo");
-    final Path bar = new Path(foo, "bar");
-    DFSTestUtil.createFile(fs, bar, SIZE, REPL, 0);
-
-    final StoragePolicyAdmin admin = new StoragePolicyAdmin(conf);
-    DFSTestUtil.toolRun(admin, "-getStoragePolicy -path /foo", 0,
-        "The storage policy of " + foo.toString() + " is unspecified");
-    DFSTestUtil.toolRun(admin, "-getStoragePolicy -path /foo/bar", 0,
-        "The storage policy of " + bar.toString() + " is unspecified");
-
-    DFSTestUtil.toolRun(admin, "-setStoragePolicy -path /foo -policy WARM", 0,
-        "Set storage policy WARM on " + foo.toString());
-    DFSTestUtil.toolRun(admin, "-setStoragePolicy -path /foo/bar -policy COLD",
-        0, "Set storage policy COLD on " + bar.toString());
-    DFSTestUtil.toolRun(admin, "-setStoragePolicy -path /fooz -policy WARM",
-        2, "File/Directory does not exist: /fooz");
-
-    final BlockStoragePolicySuite suite = BlockStoragePolicySuite
-        .createDefaultSuite();
-    final BlockStoragePolicy warm = suite.getPolicy("WARM");
-    final BlockStoragePolicy cold = suite.getPolicy("COLD");
-    DFSTestUtil.toolRun(admin, "-getStoragePolicy -path /foo", 0,
-        "The storage policy of " + foo.toString() + ":\n" + warm);
-    DFSTestUtil.toolRun(admin, "-getStoragePolicy -path /foo/bar", 0,
-        "The storage policy of " + bar.toString() + ":\n" + cold);
-    DFSTestUtil.toolRun(admin, "-getStoragePolicy -path /fooz", 2,
-        "File/Directory does not exist: /fooz");
-  }
+    @Test
+    public void testSetAndGetStoragePolicy() throws Exception {
+        final Path foo = new Path("/foo");
+        final Path bar = new Path(foo, "bar");
+        DFSTestUtil.createFile(fs, bar, SIZE, REPL, 0);
+        final StoragePolicyAdmin admin = new StoragePolicyAdmin(conf);
+        DFSTestUtil.toolRun(admin, "-getStoragePolicy -path /foo", 0, "The storage policy of " + foo.toString() + " is unspecified");
+        DFSTestUtil.toolRun(admin, "-getStoragePolicy -path /foo/bar", 0, "The storage policy of " + bar.toString() + " is unspecified");
+        DFSTestUtil.toolRun(admin, "-setStoragePolicy -path /foo -policy WARM", 0, "Set storage policy WARM on " + foo.toString());
+        DFSTestUtil.toolRun(admin, "-setStoragePolicy -path /foo/bar -policy COLD", 0, "Set storage policy COLD on " + bar.toString());
+        DFSTestUtil.toolRun(admin, "-setStoragePolicy -path /fooz -policy WARM", 2, "File/Directory does not exist: /fooz");
+        final BlockStoragePolicySuite suite = BlockStoragePolicySuite.createDefaultSuite();
+        final BlockStoragePolicy warm = suite.getPolicy("WARM");
+        final BlockStoragePolicy cold = suite.getPolicy("COLD");
+        DFSTestUtil.toolRun(admin, "-getStoragePolicy -path /foo", 0, "The storage policy of " + foo.toString() + ":\n" + warm);
+        DFSTestUtil.toolRun(admin, "-getStoragePolicy -path /foo/bar", 0, "The storage policy of " + bar.toString() + ":\n" + cold);
+        DFSTestUtil.toolRun(admin, "-getStoragePolicy -path /fooz", 2, "File/Directory does not exist: /fooz");
+    }
 }

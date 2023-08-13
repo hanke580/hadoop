@@ -35,30 +35,28 @@ import org.apache.htrace.core.Tracer;
 @InterfaceAudience.Private
 @InterfaceStability.Unstable
 public final class FsTracer {
-  private static Tracer instance;
 
-  public static synchronized Tracer get(Configuration conf) {
-    if (instance == null) {
-      instance = new Tracer.Builder("FSClient").
-          conf(TraceUtils.wrapHadoopConf(CommonConfigurationKeys.
-              FS_CLIENT_HTRACE_PREFIX, conf)).
-          build();
-    }
-    return instance;
-  }
+    private static Tracer instance;
 
-  @VisibleForTesting
-  public static synchronized void clear() {
-    if (instance == null) {
-      return;
+    public static synchronized Tracer get(Configuration conf) {
+        if (instance == null) {
+            instance = new Tracer.Builder("FSClient").conf(TraceUtils.wrapHadoopConf(CommonConfigurationKeys.FS_CLIENT_HTRACE_PREFIX, conf)).build();
+        }
+        return instance;
     }
-    try {
-      instance.close();
-    } finally {
-      instance = null;
-    }
-  }
 
-  private FsTracer() {
-  }
+    @VisibleForTesting
+    public static synchronized void clear() {
+        if (instance == null) {
+            return;
+        }
+        try {
+            instance.close();
+        } finally {
+            instance = null;
+        }
+    }
+
+    private FsTracer() {
+    }
 }

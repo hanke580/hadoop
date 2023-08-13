@@ -19,12 +19,10 @@ package org.apache.hadoop.hdfs;
 
 import static org.apache.hadoop.fs.CommonConfigurationKeys.FS_CLIENT_TOPOLOGY_RESOLUTION_ENABLED;
 import static org.apache.hadoop.fs.CommonConfigurationKeys.FS_CLIENT_TOPOLOGY_RESOLUTION_ENABLED_DEFAULT;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CommonConfigurationKeys;
@@ -42,9 +40,7 @@ import org.apache.hadoop.net.NodeBase;
 import org.apache.hadoop.net.ScriptBasedMapping;
 import org.apache.hadoop.util.Daemon;
 import org.apache.hadoop.util.ReflectionUtils;
-
 import com.google.common.annotations.VisibleForTesting;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,248 +52,232 @@ import org.slf4j.LoggerFactory;
  */
 @InterfaceAudience.Private
 public class ClientContext {
-  private static final Logger LOG = LoggerFactory.getLogger(
-      ClientContext.class);
 
-  /**
-   * Global map of context names to caches contexts.
-   */
-  private final static HashMap<String, ClientContext> CACHES = new HashMap<>();
+    private static final Logger LOG = LoggerFactory.getLogger(ClientContext.class);
 
-  /**
-   * Name of context.
-   */
-  private final String name;
+    /**
+     * Global map of context names to caches contexts.
+     */
+    private final static HashMap<String, ClientContext> CACHES = new HashMap<>();
 
-  /**
-   * String representation of the configuration.
-   */
-  private final String confString;
+    /**
+     * Name of context.
+     */
+    private final String name;
 
-  /**
-   * Caches short-circuit file descriptors, mmap regions.
-   */
-  private final ShortCircuitCache shortCircuitCache;
+    /**
+     * String representation of the configuration.
+     */
+    private final String confString;
 
-  /**
-   * Caches TCP and UNIX domain sockets for reuse.
-   */
-  private final PeerCache peerCache;
+    /**
+     * Caches short-circuit file descriptors, mmap regions.
+     */
+    private final ShortCircuitCache shortCircuitCache;
 
-  /**
-   * Stores information about socket paths.
-   */
-  private final DomainSocketFactory domainSocketFactory;
+    /**
+     * Caches TCP and UNIX domain sockets for reuse.
+     */
+    private final PeerCache peerCache;
 
-  /**
-   * Caches key Providers for the DFSClient
-   */
-  private final KeyProviderCache keyProviderCache;
-  /**
-   * True if we should use the legacy BlockReaderLocal.
-   */
-  private final boolean useLegacyBlockReaderLocal;
+    /**
+     * Stores information about socket paths.
+     */
+    private final DomainSocketFactory domainSocketFactory;
 
-  /**
-   * True if the legacy BlockReaderLocal is disabled.
-   *
-   * The legacy block reader local gets disabled completely whenever there is an
-   * error or miscommunication.  The new block reader local code handles this
-   * case more gracefully inside DomainSocketFactory.
-   */
-  private volatile boolean disableLegacyBlockReaderLocal = false;
+    /**
+     * Caches key Providers for the DFSClient
+     */
+    private final KeyProviderCache keyProviderCache;
 
-  /** Creating byte[] for {@link DFSOutputStream}. */
-  private final ByteArrayManager byteArrayManager;
+    /**
+     * True if we should use the legacy BlockReaderLocal.
+     */
+    private final boolean useLegacyBlockReaderLocal;
 
-  /**
-   * Whether or not we complained about a DFSClient fetching a CacheContext that
-   * didn't match its config values yet.
-   */
-  private boolean printedConfWarning = false;
+    /**
+     * True if the legacy BlockReaderLocal is disabled.
+     *
+     * The legacy block reader local gets disabled completely whenever there is an
+     * error or miscommunication.  The new block reader local code handles this
+     * case more gracefully inside DomainSocketFactory.
+     */
+    private volatile boolean disableLegacyBlockReaderLocal = false;
 
-  private NodeBase clientNode;
-  private boolean topologyResolutionEnabled;
+    /**
+     * Creating byte[] for {@link DFSOutputStream}.
+     */
+    private final ByteArrayManager byteArrayManager;
 
-  private Daemon deadNodeDetectorThr = null;
+    /**
+     * Whether or not we complained about a DFSClient fetching a CacheContext that
+     * didn't match its config values yet.
+     */
+    private boolean printedConfWarning = false;
 
-  /**
-   * The switch to DeadNodeDetector.
-   */
-  private boolean deadNodeDetectionEnabled = false;
+    private NodeBase clientNode;
 
-  /**
-   * Detect the dead datanodes in advance, and share this information among all
-   * the DFSInputStreams in the same client.
-   */
-  private DeadNodeDetector deadNodeDetector = null;
+    private boolean topologyResolutionEnabled;
 
-  private ClientContext(String name, DfsClientConf conf,
-      Configuration config) {
-    final ShortCircuitConf scConf = conf.getShortCircuitConf();
+    private Daemon deadNodeDetectorThr = null;
 
-    this.name = name;
-    this.confString = scConf.confAsString();
-    this.shortCircuitCache = ShortCircuitCache.fromConf(scConf);
-    this.peerCache = new PeerCache(scConf.getSocketCacheCapacity(),
-        scConf.getSocketCacheExpiry());
-    this.keyProviderCache = new KeyProviderCache(
-        scConf.getKeyProviderCacheExpiryMs());
-    this.useLegacyBlockReaderLocal = scConf.isUseLegacyBlockReaderLocal();
-    this.domainSocketFactory = new DomainSocketFactory(scConf);
+    /**
+     * The switch to DeadNodeDetector.
+     */
+    private boolean deadNodeDetectionEnabled = false;
 
-    this.byteArrayManager = ByteArrayManager.newInstance(
-        conf.getWriteByteArrayManagerConf());
-    this.deadNodeDetectionEnabled = conf.isDeadNodeDetectionEnabled();
-    if (deadNodeDetectionEnabled && deadNodeDetector == null) {
-      deadNodeDetector = new DeadNodeDetector(name, config);
-      deadNodeDetectorThr = new Daemon(deadNodeDetector);
-      deadNodeDetectorThr.start();
+    /**
+     * Detect the dead datanodes in advance, and share this information among all
+     * the DFSInputStreams in the same client.
+     */
+    private DeadNodeDetector deadNodeDetector = null;
+
+    private ClientContext(String name, DfsClientConf conf, Configuration config) {
+        final ShortCircuitConf scConf = conf.getShortCircuitConf();
+        this.name = name;
+        this.confString = scConf.confAsString();
+        this.shortCircuitCache = ShortCircuitCache.fromConf(scConf);
+        this.peerCache = new PeerCache(scConf.getSocketCacheCapacity(), scConf.getSocketCacheExpiry());
+        this.keyProviderCache = new KeyProviderCache(scConf.getKeyProviderCacheExpiryMs());
+        this.useLegacyBlockReaderLocal = scConf.isUseLegacyBlockReaderLocal();
+        this.domainSocketFactory = new DomainSocketFactory(scConf);
+        this.byteArrayManager = ByteArrayManager.newInstance(conf.getWriteByteArrayManagerConf());
+        this.deadNodeDetectionEnabled = conf.isDeadNodeDetectionEnabled();
+        if (deadNodeDetectionEnabled && deadNodeDetector == null) {
+            deadNodeDetector = new DeadNodeDetector(name, config);
+            deadNodeDetectorThr = new Daemon(deadNodeDetector);
+            deadNodeDetectorThr.start();
+        }
+        initTopologyResolution(config);
     }
-    initTopologyResolution(config);
-  }
 
-  private void initTopologyResolution(Configuration config) {
-    topologyResolutionEnabled = config.getBoolean(
-        FS_CLIENT_TOPOLOGY_RESOLUTION_ENABLED,
-        FS_CLIENT_TOPOLOGY_RESOLUTION_ENABLED_DEFAULT);
-    if (!topologyResolutionEnabled) {
-      return;
+    private void initTopologyResolution(Configuration config) {
+        topologyResolutionEnabled = config.getBoolean(FS_CLIENT_TOPOLOGY_RESOLUTION_ENABLED, FS_CLIENT_TOPOLOGY_RESOLUTION_ENABLED_DEFAULT);
+        if (!topologyResolutionEnabled) {
+            return;
+        }
+        DNSToSwitchMapping dnsToSwitchMapping = ReflectionUtils.newInstance(config.getClass(CommonConfigurationKeys.NET_TOPOLOGY_NODE_SWITCH_MAPPING_IMPL_KEY, ScriptBasedMapping.class, DNSToSwitchMapping.class), config);
+        String clientHostName = NetUtils.getLocalHostname();
+        List<String> nodes = new ArrayList<>();
+        nodes.add(clientHostName);
+        List<String> resolvedHosts = dnsToSwitchMapping.resolve(nodes);
+        if (resolvedHosts != null && !resolvedHosts.isEmpty() && !resolvedHosts.get(0).equals(NetworkTopology.DEFAULT_RACK)) {
+            // The client machine is able to resolve its own network location.
+            this.clientNode = new NodeBase(clientHostName, resolvedHosts.get(0));
+        }
     }
-    DNSToSwitchMapping dnsToSwitchMapping = ReflectionUtils.newInstance(
-        config.getClass(
-            CommonConfigurationKeys.NET_TOPOLOGY_NODE_SWITCH_MAPPING_IMPL_KEY,
-            ScriptBasedMapping.class, DNSToSwitchMapping.class), config);
-    String clientHostName = NetUtils.getLocalHostname();
-    List<String> nodes = new ArrayList<>();
-    nodes.add(clientHostName);
-    List<String> resolvedHosts = dnsToSwitchMapping.resolve(nodes);
-    if (resolvedHosts != null && !resolvedHosts.isEmpty() &&
-        !resolvedHosts.get(0).equals(NetworkTopology.DEFAULT_RACK)) {
-      // The client machine is able to resolve its own network location.
-      this.clientNode = new NodeBase(clientHostName, resolvedHosts.get(0));
+
+    public static ClientContext get(String name, DfsClientConf conf, Configuration config) {
+        ClientContext context;
+        synchronized (ClientContext.class) {
+            context = CACHES.get(name);
+            if (context == null) {
+                context = new ClientContext(name, conf, config);
+                CACHES.put(name, context);
+            } else {
+                context.printConfWarningIfNeeded(conf);
+            }
+        }
+        return context;
     }
-  }
 
-  public static ClientContext get(String name, DfsClientConf conf,
-      Configuration config) {
-    ClientContext context;
-    synchronized(ClientContext.class) {
-      context = CACHES.get(name);
-      if (context == null) {
-        context = new ClientContext(name, conf, config);
-        CACHES.put(name, context);
-      } else {
-        context.printConfWarningIfNeeded(conf);
-      }
+    public static ClientContext get(String name, Configuration config) {
+        return get(name, new DfsClientConf(config), config);
     }
-    return context;
-  }
 
-  public static ClientContext get(String name, Configuration config) {
-    return get(name, new DfsClientConf(config), config);
-  }
-
-  /**
-   * Get a client context, from a Configuration object.
-   *
-   * This method is less efficient than the version which takes a DFSClient#Conf
-   * object, and should be mostly used by tests.
-   */
-  @VisibleForTesting
-  public static ClientContext getFromConf(Configuration conf) {
-    return get(conf.get(HdfsClientConfigKeys.DFS_CLIENT_CONTEXT,
-        HdfsClientConfigKeys.DFS_CLIENT_CONTEXT_DEFAULT), conf);
-  }
-
-  private void printConfWarningIfNeeded(DfsClientConf conf) {
-    String existing = this.getConfString();
-    String requested = conf.getShortCircuitConf().confAsString();
-    if (!existing.equals(requested)) {
-      if (!printedConfWarning) {
-        printedConfWarning = true;
-        LOG.warn("Existing client context '" + name + "' does not match " +
-            "requested configuration.  Existing: " + existing +
-            ", Requested: " + requested);
-      }
+    /**
+     * Get a client context, from a Configuration object.
+     *
+     * This method is less efficient than the version which takes a DFSClient#Conf
+     * object, and should be mostly used by tests.
+     */
+    @VisibleForTesting
+    public static ClientContext getFromConf(Configuration conf) {
+        return get(conf.get(HdfsClientConfigKeys.DFS_CLIENT_CONTEXT, HdfsClientConfigKeys.DFS_CLIENT_CONTEXT_DEFAULT), conf);
     }
-  }
 
-  public String getConfString() {
-    return confString;
-  }
-
-  public ShortCircuitCache getShortCircuitCache() {
-    return shortCircuitCache;
-  }
-
-  public PeerCache getPeerCache() {
-    return peerCache;
-  }
-
-  public KeyProviderCache getKeyProviderCache() {
-    return keyProviderCache;
-  }
-
-  public boolean getUseLegacyBlockReaderLocal() {
-    return useLegacyBlockReaderLocal;
-  }
-
-  public boolean getDisableLegacyBlockReaderLocal() {
-    return disableLegacyBlockReaderLocal;
-  }
-
-  public void setDisableLegacyBlockReaderLocal() {
-    disableLegacyBlockReaderLocal = true;
-  }
-
-  public DomainSocketFactory getDomainSocketFactory() {
-    return domainSocketFactory;
-  }
-
-  public ByteArrayManager getByteArrayManager() {
-    return byteArrayManager;
-  }
-
-  public int getNetworkDistance(DatanodeInfo datanodeInfo) throws IOException {
-    // If applications disable the feature or the client machine can't
-    // resolve its network location, clientNode will be set to null.
-    if (clientNode == null) {
-      return DFSUtilClient.isLocalAddress(NetUtils.
-          createSocketAddr(datanodeInfo.getXferAddr())) ? 0 :
-          Integer.MAX_VALUE;
+    private void printConfWarningIfNeeded(DfsClientConf conf) {
+        String existing = this.getConfString();
+        String requested = conf.getShortCircuitConf().confAsString();
+        if (!existing.equals(requested)) {
+            if (!printedConfWarning) {
+                printedConfWarning = true;
+                LOG.warn("Existing client context '" + name + "' does not match " + "requested configuration.  Existing: " + existing + ", Requested: " + requested);
+            }
+        }
     }
-    NodeBase node = new NodeBase(datanodeInfo.getHostName(),
-        datanodeInfo.getNetworkLocation());
-    return NetworkTopology.getDistanceByPath(clientNode, node);
-  }
 
-  /**
-   * The switch to DeadNodeDetector. If true, DeadNodeDetector is available.
-   */
-  public boolean isDeadNodeDetectionEnabled() {
-    return deadNodeDetectionEnabled;
-  }
-
-  /**
-   * Obtain DeadNodeDetector of the current client.
-   */
-  public DeadNodeDetector getDeadNodeDetector() {
-    return deadNodeDetector;
-  }
-
-  /**
-   * Close dead node detector thread.
-   */
-  public void stopDeadNodeDetectorThread() {
-    if (deadNodeDetectorThr != null) {
-      deadNodeDetectorThr.interrupt();
-      try {
-        deadNodeDetectorThr.join();
-      } catch (InterruptedException e) {
-        LOG.warn("Encountered exception while waiting to join on dead " +
-            "node detector thread.", e);
-      }
+    public String getConfString() {
+        return confString;
     }
-  }
+
+    public ShortCircuitCache getShortCircuitCache() {
+        return shortCircuitCache;
+    }
+
+    public PeerCache getPeerCache() {
+        return peerCache;
+    }
+
+    public KeyProviderCache getKeyProviderCache() {
+        return keyProviderCache;
+    }
+
+    public boolean getUseLegacyBlockReaderLocal() {
+        return useLegacyBlockReaderLocal;
+    }
+
+    public boolean getDisableLegacyBlockReaderLocal() {
+        return disableLegacyBlockReaderLocal;
+    }
+
+    public void setDisableLegacyBlockReaderLocal() {
+        disableLegacyBlockReaderLocal = true;
+    }
+
+    public DomainSocketFactory getDomainSocketFactory() {
+        return domainSocketFactory;
+    }
+
+    public ByteArrayManager getByteArrayManager() {
+        return byteArrayManager;
+    }
+
+    public int getNetworkDistance(DatanodeInfo datanodeInfo) throws IOException {
+        // If applications disable the feature or the client machine can't
+        // resolve its network location, clientNode will be set to null.
+        if (clientNode == null) {
+            return DFSUtilClient.isLocalAddress(NetUtils.createSocketAddr(datanodeInfo.getXferAddr())) ? 0 : Integer.MAX_VALUE;
+        }
+        NodeBase node = new NodeBase(datanodeInfo.getHostName(), datanodeInfo.getNetworkLocation());
+        return NetworkTopology.getDistanceByPath(clientNode, node);
+    }
+
+    /**
+     * The switch to DeadNodeDetector. If true, DeadNodeDetector is available.
+     */
+    public boolean isDeadNodeDetectionEnabled() {
+        return deadNodeDetectionEnabled;
+    }
+
+    /**
+     * Obtain DeadNodeDetector of the current client.
+     */
+    public DeadNodeDetector getDeadNodeDetector() {
+        return deadNodeDetector;
+    }
+
+    /**
+     * Close dead node detector thread.
+     */
+    public void stopDeadNodeDetectorThread() {
+        if (deadNodeDetectorThr != null) {
+            deadNodeDetectorThr.interrupt();
+            try {
+                deadNodeDetectorThr.join();
+            } catch (InterruptedException e) {
+                LOG.warn("Encountered exception while waiting to join on dead " + "node detector thread.", e);
+            }
+        }
+    }
 }

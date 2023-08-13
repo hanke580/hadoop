@@ -18,7 +18,6 @@ package org.apache.hadoop.fs;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
@@ -29,34 +28,34 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceStability.Unstable
 public final class BBUploadHandle implements UploadHandle {
 
-  private static final long serialVersionUID = 0x69d5509b;
+    private static final long serialVersionUID = 0x69d5509b;
 
-  private final byte[] bytes;
+    private final byte[] bytes;
 
-  private BBUploadHandle(ByteBuffer byteBuffer){
-    this.bytes = byteBuffer.array();
-  }
-
-  public static UploadHandle from(ByteBuffer byteBuffer) {
-    return new BBUploadHandle(byteBuffer);
-  }
-
-  @Override
-  public int hashCode() {
-    return Arrays.hashCode(bytes);
-  }
-
-  @Override
-  public ByteBuffer bytes() {
-    return ByteBuffer.wrap(bytes);
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (!(other instanceof UploadHandle)) {
-      return false;
+    private BBUploadHandle(ByteBuffer byteBuffer) {
+        this.bytes = byteBuffer.array();
     }
-    UploadHandle o = (UploadHandle) other;
-    return bytes().equals(o.bytes());
-  }
+
+    public static UploadHandle from(ByteBuffer byteBuffer) {
+        return new BBUploadHandle(byteBuffer);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(bytes);
+    }
+
+    @Override
+    public ByteBuffer bytes() {
+        return ByteBuffer.wrap(bytes);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof UploadHandle)) {
+            return false;
+        }
+        UploadHandle o = (UploadHandle) other;
+        return bytes().equals(o.bytes());
+    }
 }

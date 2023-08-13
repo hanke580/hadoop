@@ -19,7 +19,6 @@ package org.apache.hadoop.hdfs.protocol;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.fs.Path;
-
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 
@@ -30,60 +29,62 @@ import java.util.Arrays;
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
 public class ProvidedStorageLocation {
-  private final Path path;
-  private final long offset;
-  private final long length;
-  private final byte[] nonce;
 
-  public ProvidedStorageLocation(Path path, long offset, long length,
-      byte[] nonce) {
-    this.path = path;
-    this.offset = offset;
-    this.length = length;
-    this.nonce = Arrays.copyOf(nonce, nonce.length);
-  }
+    private final Path path;
 
-  public @Nonnull Path getPath() {
-    return path;
-  }
+    private final long offset;
 
-  public long getOffset() {
-    return offset;
-  }
+    private final long length;
 
-  public long getLength() {
-    return length;
-  }
+    private final byte[] nonce;
 
-  public @Nonnull byte[] getNonce() {
-    // create a copy of the nonce and return it.
-    return Arrays.copyOf(nonce, nonce.length);
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+    public ProvidedStorageLocation(Path path, long offset, long length, byte[] nonce) {
+        this.path = path;
+        this.offset = offset;
+        this.length = length;
+        this.nonce = Arrays.copyOf(nonce, nonce.length);
     }
 
-    ProvidedStorageLocation that = (ProvidedStorageLocation) o;
-
-    if ((offset != that.offset) || (length != that.length)
-        || !path.equals(that.path)) {
-      return false;
+    @Nonnull
+    public Path getPath() {
+        return path;
     }
-    return Arrays.equals(nonce, that.nonce);
-  }
 
-  @Override
-  public int hashCode() {
-    int result = path.hashCode();
-    result = 31 * result + (int) (offset ^ (offset >>> 32));
-    result = 31 * result + (int) (length ^ (length >>> 32));
-    result = 31 * result + Arrays.hashCode(nonce);
-    return result;
-  }
+    public long getOffset() {
+        return offset;
+    }
+
+    public long getLength() {
+        return length;
+    }
+
+    @Nonnull
+    public byte[] getNonce() {
+        // create a copy of the nonce and return it.
+        return Arrays.copyOf(nonce, nonce.length);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ProvidedStorageLocation that = (ProvidedStorageLocation) o;
+        if ((offset != that.offset) || (length != that.length) || !path.equals(that.path)) {
+            return false;
+        }
+        return Arrays.equals(nonce, that.nonce);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = path.hashCode();
+        result = 31 * result + (int) (offset ^ (offset >>> 32));
+        result = 31 * result + (int) (length ^ (length >>> 32));
+        result = 31 * result + Arrays.hashCode(nonce);
+        return result;
+    }
 }

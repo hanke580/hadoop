@@ -19,7 +19,6 @@ package org.apache.hadoop.fs;
 
 import java.io.Serializable;
 import java.nio.ByteBuffer;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
@@ -33,23 +32,22 @@ import org.apache.hadoop.classification.InterfaceStability;
 @FunctionalInterface
 public interface PathHandle extends Serializable {
 
-  /**
-   * @return Serialized form in bytes.
-   */
-  default byte[] toByteArray() {
-    ByteBuffer bb = bytes();
-    byte[] ret = new byte[bb.remaining()];
-    bb.get(ret);
-    return ret;
-  }
+    /**
+     * @return Serialized form in bytes.
+     */
+    default byte[] toByteArray() {
+        ByteBuffer bb = bytes();
+        byte[] ret = new byte[bb.remaining()];
+        bb.get(ret);
+        return ret;
+    }
 
-  /**
-   * Get the bytes of this path handle.
-   * @return the bytes to get to the process completing the upload.
-   */
-  ByteBuffer bytes();
+    /**
+     * Get the bytes of this path handle.
+     * @return the bytes to get to the process completing the upload.
+     */
+    ByteBuffer bytes();
 
-  @Override
-  boolean equals(Object other);
-
+    @Override
+    boolean equals(Object other);
 }

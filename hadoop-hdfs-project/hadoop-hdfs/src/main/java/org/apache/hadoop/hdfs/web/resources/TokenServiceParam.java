@@ -15,30 +15,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.web.resources;
 
 import org.apache.hadoop.hdfs.web.resources.StringParam;
 
 public class TokenServiceParam extends StringParam {
 
-  /** Parameter name */
-  public static final String NAME = "service";
-  /** Default parameter value. */
-  public static final String DEFAULT = NULL;
+    /**
+     * Parameter name
+     */
+    public static final String NAME = "service";
 
-  private static final StringParam.Domain DOMAIN = new StringParam.Domain(NAME, null);
+    /**
+     * Default parameter value.
+     */
+    public static final String DEFAULT = NULL;
 
-  /**
-   * Constructor.
-   * @param str a string representation of the parameter value.
-   */
-  public TokenServiceParam(final String str) {
-    super(DOMAIN, str == null || str.equals(DEFAULT)? null: str);
-  }
+    private static final StringParam.Domain DOMAIN = new StringParam.Domain(NAME, null);
 
-  @Override
-  public String getName() {
-    return NAME;
-  }
+    /**
+     * Constructor.
+     * @param str a string representation of the parameter value.
+     */
+    public TokenServiceParam(final String str) {
+        super(DOMAIN, str == null || str.equals(DEFAULT) ? null : str);
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
+    }
 }

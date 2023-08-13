@@ -22,17 +22,18 @@ package org.apache.hadoop.hdfs.web.resources;
  */
 public class StartAfterParam extends StringParam {
 
-  public static final String NAME = "startafter";
-  public static final String DEFAULT = "";
+    public static final String NAME = "startafter";
 
-  private static final Domain DOMAIN = new Domain(NAME, null);
+    public static final String DEFAULT = "";
 
-  public StartAfterParam(final String str) {
-    super(DOMAIN, str != null && !str.equals(DEFAULT) ? str : null);
-  }
+    private static final Domain DOMAIN = new Domain(NAME, null);
 
-  @Override
-  public String getName() {
-    return NAME;
-  }
+    public StartAfterParam(final String str) {
+        super(DOMAIN, str != null && !str.equals(DEFAULT) ? str : null);
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
+    }
 }

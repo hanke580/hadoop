@@ -20,7 +20,6 @@ package org.apache.hadoop.tracing;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.tracing.SpanReceiverInfo.ConfigurationPair;
@@ -31,45 +30,46 @@ import org.apache.htrace.core.HTraceConfiguration;
  */
 @InterfaceAudience.Private
 public class TraceUtils {
-  private static List<ConfigurationPair> EMPTY = Collections.emptyList();
-  static final String DEFAULT_HADOOP_TRACE_PREFIX = "hadoop.htrace.";
 
-  public static HTraceConfiguration wrapHadoopConf(final String prefix,
-        final Configuration conf) {
-    return wrapHadoopConf(prefix, conf, EMPTY);
-  }
+    private static List<ConfigurationPair> EMPTY = Collections.emptyList();
 
-  public static HTraceConfiguration wrapHadoopConf(final String prefix,
-        final Configuration conf, List<ConfigurationPair> extraConfig) {
-    final HashMap<String, String> extraMap = new HashMap<String, String>();
-    for (ConfigurationPair pair : extraConfig) {
-      extraMap.put(pair.getKey(), pair.getValue());
+    static final String DEFAULT_HADOOP_TRACE_PREFIX = "hadoop.htrace.";
+
+    public static HTraceConfiguration wrapHadoopConf(final String prefix, final Configuration conf) {
+        return wrapHadoopConf(prefix, conf, EMPTY);
     }
-    return new HTraceConfiguration() {
-      @Override
-      public String get(String key) {
-        String ret = getInternal(prefix + key);
-        if (ret != null) {
-          return ret;
-        }
-        return getInternal(DEFAULT_HADOOP_TRACE_PREFIX  + key);
-      }
 
-      @Override
-      public String get(String key, String defaultValue) {
-        String ret = get(key);
-        if (ret != null) {
-          return ret;
+    public static HTraceConfiguration wrapHadoopConf(final String prefix, final Configuration conf, List<ConfigurationPair> extraConfig) {
+        final HashMap<String, String> extraMap = new HashMap<String, String>();
+        for (ConfigurationPair pair : extraConfig) {
+            extraMap.put(pair.getKey(), pair.getValue());
         }
-        return defaultValue;
-      }
+        return new HTraceConfiguration() {
 
-      private String getInternal(String key) {
-        if (extraMap.containsKey(key)) {
-          return extraMap.get(key);
-        }
-        return conf.get(key);
-      }
-    };
-  }
+            @Override
+            public String get(String key) {
+                String ret = getInternal(prefix + key);
+                if (ret != null) {
+                    return ret;
+                }
+                return getInternal(DEFAULT_HADOOP_TRACE_PREFIX + key);
+            }
+
+            @Override
+            public String get(String key, String defaultValue) {
+                String ret = get(key);
+                if (ret != null) {
+                    return ret;
+                }
+                return defaultValue;
+            }
+
+            private String getInternal(String key) {
+                if (extraMap.containsKey(key)) {
+                    return extraMap.get(key);
+                }
+                return conf.get(key);
+            }
+        };
+    }
 }

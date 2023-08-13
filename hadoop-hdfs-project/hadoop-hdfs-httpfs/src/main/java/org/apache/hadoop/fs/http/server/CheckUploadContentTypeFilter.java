@@ -15,14 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.fs.http.server;
-
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.fs.http.client.HttpFSFileSystem;
 import org.apache.hadoop.util.StringUtils;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -42,74 +39,65 @@ import java.util.Set;
 @InterfaceAudience.Private
 public class CheckUploadContentTypeFilter implements Filter {
 
-  private static final Set<String> UPLOAD_OPERATIONS = new HashSet<String>();
+    private static final Set<String> UPLOAD_OPERATIONS = new HashSet<String>();
 
-  static {
-    UPLOAD_OPERATIONS.add(HttpFSFileSystem.Operation.APPEND.toString());
-    UPLOAD_OPERATIONS.add(HttpFSFileSystem.Operation.CREATE.toString());
-  }
+    static {
+        UPLOAD_OPERATIONS.add(HttpFSFileSystem.Operation.APPEND.toString());
+        UPLOAD_OPERATIONS.add(HttpFSFileSystem.Operation.CREATE.toString());
+    }
 
-  /**
-   * Initializes the filter.
-   * <p>
-   * This implementation is a NOP.
-   *
-   * @param config filter configuration.
-   *
-   * @throws ServletException thrown if the filter could not be initialized.
-   */
-  @Override
-  public void init(FilterConfig config) throws ServletException {
-  }
+    /**
+     * Initializes the filter.
+     * <p>
+     * This implementation is a NOP.
+     *
+     * @param config filter configuration.
+     *
+     * @throws ServletException thrown if the filter could not be initialized.
+     */
+    @Override
+    public void init(FilterConfig config) throws ServletException {
+    }
 
-  /**
-   * Enforces the content-type to be application/octet-stream for
-   * POST and PUT requests.
-   *
-   * @param request servlet request.
-   * @param response servlet response.
-   * @param chain filter chain.
-   *
-   * @throws IOException thrown if an IO error occurs.
-   * @throws ServletException thrown if a servlet error occurs.
-   */
-  @Override
-  public void doFilter(ServletRequest request, ServletResponse response,
-                       FilterChain chain)
-    throws IOException, ServletException {
-    boolean contentTypeOK = true;
-    HttpServletRequest httpReq = (HttpServletRequest) request;
-    HttpServletResponse httpRes = (HttpServletResponse) response;
-    String method = httpReq.getMethod();
-    if (method.equals("PUT") || method.equals("POST")) {
-      String op = httpReq.getParameter(HttpFSFileSystem.OP_PARAM);
-      if (op != null && UPLOAD_OPERATIONS.contains(
-          StringUtils.toUpperCase(op))) {
-        if ("true".equalsIgnoreCase(httpReq.getParameter(HttpFSParametersProvider.DataParam.NAME))) {
-          String contentType = httpReq.getContentType();
-          contentTypeOK =
-            HttpFSFileSystem.UPLOAD_CONTENT_TYPE.equalsIgnoreCase(contentType);
+    /**
+     * Enforces the content-type to be application/octet-stream for
+     * POST and PUT requests.
+     *
+     * @param request servlet request.
+     * @param response servlet response.
+     * @param chain filter chain.
+     *
+     * @throws IOException thrown if an IO error occurs.
+     * @throws ServletException thrown if a servlet error occurs.
+     */
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        boolean contentTypeOK = true;
+        HttpServletRequest httpReq = (HttpServletRequest) request;
+        HttpServletResponse httpRes = (HttpServletResponse) response;
+        String method = httpReq.getMethod();
+        if (method.equals("PUT") || method.equals("POST")) {
+            String op = httpReq.getParameter(HttpFSFileSystem.OP_PARAM);
+            if (op != null && UPLOAD_OPERATIONS.contains(StringUtils.toUpperCase(op))) {
+                if ("true".equalsIgnoreCase(httpReq.getParameter(HttpFSParametersProvider.DataParam.NAME))) {
+                    String contentType = httpReq.getContentType();
+                    contentTypeOK = HttpFSFileSystem.UPLOAD_CONTENT_TYPE.equalsIgnoreCase(contentType);
+                }
+            }
         }
-      }
+        if (contentTypeOK) {
+            chain.doFilter(httpReq, httpRes);
+        } else {
+            httpRes.sendError(HttpServletResponse.SC_BAD_REQUEST, "Data upload requests must have content-type set to '" + HttpFSFileSystem.UPLOAD_CONTENT_TYPE + "'");
+        }
     }
-    if (contentTypeOK) {
-      chain.doFilter(httpReq, httpRes);
+
+    /**
+     * Destroys the filter.
+     * <p>
+     * This implementation is a NOP.
+     */
+    @Override
+    public void destroy() {
     }
-    else {
-      httpRes.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                        "Data upload requests must have content-type set to '" +
-                        HttpFSFileSystem.UPLOAD_CONTENT_TYPE + "'");
-
-    }
-  }
-
-  /**
-   * Destroys the filter.
-   * <p>
-   * This implementation is a NOP.
-   */
-  @Override
-  public void destroy() {
-  }
-
 }

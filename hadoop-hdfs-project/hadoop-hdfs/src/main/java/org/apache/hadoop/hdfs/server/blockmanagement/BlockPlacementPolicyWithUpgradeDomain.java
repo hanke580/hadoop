@@ -19,7 +19,6 @@ package org.apache.hadoop.hdfs.server.blockmanagement;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,8 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.StorageType;
 import org.apache.hadoop.hdfs.DFSConfigKeys;
@@ -47,130 +44,113 @@ import org.apache.hadoop.net.NetworkTopology;
  */
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
-public class BlockPlacementPolicyWithUpgradeDomain extends
-    BlockPlacementPolicyDefault {
+public class BlockPlacementPolicyWithUpgradeDomain extends BlockPlacementPolicyDefault {
 
-  private int upgradeDomainFactor;
+    private int upgradeDomainFactor;
 
-  @Override
-  public void initialize(Configuration conf,  FSClusterStats stats,
-      NetworkTopology clusterMap, Host2NodesMap host2datanodeMap) {
-    super.initialize(conf, stats, clusterMap, host2datanodeMap);
-    upgradeDomainFactor = conf.getInt(
-        DFSConfigKeys.DFS_UPGRADE_DOMAIN_FACTOR,
-        DFSConfigKeys.DFS_UPGRADE_DOMAIN_FACTOR_DEFAULT);
-  }
+    @Override
+    public void initialize(Configuration conf, FSClusterStats stats, NetworkTopology clusterMap, Host2NodesMap host2datanodeMap) {
+        super.initialize(conf, stats, clusterMap, host2datanodeMap);
+        upgradeDomainFactor = conf.getInt(DFSConfigKeys.DFS_UPGRADE_DOMAIN_FACTOR, DFSConfigKeys.DFS_UPGRADE_DOMAIN_FACTOR_DEFAULT);
+    }
 
-  @Override
-  protected boolean isGoodDatanode(DatanodeDescriptor node,
-      int maxTargetPerRack, boolean considerLoad,
-      List<DatanodeStorageInfo> results, boolean avoidStaleNodes) {
-    boolean isGoodTarget = super.isGoodDatanode(node,
-        maxTargetPerRack, considerLoad, results, avoidStaleNodes);
-    if (isGoodTarget) {
-      if (results.size() > 0 && results.size() < upgradeDomainFactor) {
-        // Each node in "results" has a different upgrade domain. Make sure
-        // the candidate node introduces a new upgrade domain.
-        Set<String> upgradeDomains = getUpgradeDomains(results);
-        if (upgradeDomains.contains(node.getUpgradeDomain())) {
-          isGoodTarget = false;
+    @Override
+    protected boolean isGoodDatanode(DatanodeDescriptor node, int maxTargetPerRack, boolean considerLoad, List<DatanodeStorageInfo> results, boolean avoidStaleNodes) {
+        boolean isGoodTarget = super.isGoodDatanode(node, maxTargetPerRack, considerLoad, results, avoidStaleNodes);
+        if (isGoodTarget) {
+            if (results.size() > 0 && results.size() < upgradeDomainFactor) {
+                // Each node in "results" has a different upgrade domain. Make sure
+                // the candidate node introduces a new upgrade domain.
+                Set<String> upgradeDomains = getUpgradeDomains(results);
+                if (upgradeDomains.contains(node.getUpgradeDomain())) {
+                    isGoodTarget = false;
+                }
+            }
         }
-      }
+        return isGoodTarget;
     }
-    return isGoodTarget;
-  }
 
-  // If upgrade domain isn't specified, uses its XferAddr as upgrade domain.
-  // Such fallback is useful to test the scenario where upgrade domain isn't
-  // defined but the block placement is set to upgrade domain policy.
-  public String getUpgradeDomainWithDefaultValue(DatanodeInfo datanodeInfo) {
-    String upgradeDomain = datanodeInfo.getUpgradeDomain();
-    if (upgradeDomain == null) {
-      LOG.warn("Upgrade domain isn't defined for " + datanodeInfo);
-      upgradeDomain = datanodeInfo.getXferAddr();
+    // If upgrade domain isn't specified, uses its XferAddr as upgrade domain.
+    // Such fallback is useful to test the scenario where upgrade domain isn't
+    // defined but the block placement is set to upgrade domain policy.
+    public String getUpgradeDomainWithDefaultValue(DatanodeInfo datanodeInfo) {
+        String upgradeDomain = datanodeInfo.getUpgradeDomain();
+        if (upgradeDomain == null) {
+            LOG.warn("Upgrade domain isn't defined for " + datanodeInfo);
+            upgradeDomain = datanodeInfo.getXferAddr();
+        }
+        return upgradeDomain;
     }
-    return upgradeDomain;
-  }
 
-  private String getUpgradeDomain(DatanodeStorageInfo storage) {
-    return getUpgradeDomainWithDefaultValue(storage.getDatanodeDescriptor());
-  }
+    private String getUpgradeDomain(DatanodeStorageInfo storage) {
+        return getUpgradeDomainWithDefaultValue(storage.getDatanodeDescriptor());
+    }
 
-  private Set<String> getUpgradeDomains(List<DatanodeStorageInfo> results) {
-    Set<String> upgradeDomains = new HashSet<>();
-    if (results == null) {
-      return upgradeDomains;
+    private Set<String> getUpgradeDomains(List<DatanodeStorageInfo> results) {
+        Set<String> upgradeDomains = new HashSet<>();
+        if (results == null) {
+            return upgradeDomains;
+        }
+        for (DatanodeStorageInfo storageInfo : results) {
+            upgradeDomains.add(getUpgradeDomain(storageInfo));
+        }
+        return upgradeDomains;
     }
-    for(DatanodeStorageInfo storageInfo : results) {
-      upgradeDomains.add(getUpgradeDomain(storageInfo));
-    }
-    return upgradeDomains;
-  }
 
-  private Set<String> getUpgradeDomainsFromNodes(DatanodeInfo[] nodes) {
-    Set<String> upgradeDomains = new HashSet<>();
-    if (nodes == null) {
-      return upgradeDomains;
+    private Set<String> getUpgradeDomainsFromNodes(DatanodeInfo[] nodes) {
+        Set<String> upgradeDomains = new HashSet<>();
+        if (nodes == null) {
+            return upgradeDomains;
+        }
+        for (DatanodeInfo node : nodes) {
+            upgradeDomains.add(getUpgradeDomainWithDefaultValue(node));
+        }
+        return upgradeDomains;
     }
-    for(DatanodeInfo node : nodes) {
-      upgradeDomains.add(getUpgradeDomainWithDefaultValue(node));
-    }
-    return upgradeDomains;
-  }
 
-  private <T> Map<String, List<T>> getUpgradeDomainMap(
-      Collection<T> storagesOrDataNodes) {
-    Map<String, List<T>> upgradeDomainMap = new HashMap<>();
-    for(T storage : storagesOrDataNodes) {
-      String upgradeDomain = getUpgradeDomainWithDefaultValue(
-          getDatanodeInfo(storage));
-      List<T> storages = upgradeDomainMap.get(upgradeDomain);
-      if (storages == null) {
-        storages = new ArrayList<>();
-        upgradeDomainMap.put(upgradeDomain, storages);
-      }
-      storages.add(storage);
+    private <T> Map<String, List<T>> getUpgradeDomainMap(Collection<T> storagesOrDataNodes) {
+        Map<String, List<T>> upgradeDomainMap = new HashMap<>();
+        for (T storage : storagesOrDataNodes) {
+            String upgradeDomain = getUpgradeDomainWithDefaultValue(getDatanodeInfo(storage));
+            List<T> storages = upgradeDomainMap.get(upgradeDomain);
+            if (storages == null) {
+                storages = new ArrayList<>();
+                upgradeDomainMap.put(upgradeDomain, storages);
+            }
+            storages.add(storage);
+        }
+        return upgradeDomainMap;
     }
-    return upgradeDomainMap;
-  }
 
-  @Override
-  public BlockPlacementStatus verifyBlockPlacement(DatanodeInfo[] locs,
-      int numberOfReplicas) {
-    BlockPlacementStatus defaultStatus = super.verifyBlockPlacement(locs,
-        numberOfReplicas);
-    BlockPlacementStatusWithUpgradeDomain upgradeDomainStatus =
-        new BlockPlacementStatusWithUpgradeDomain(defaultStatus,
-            getUpgradeDomainsFromNodes(locs),
-                numberOfReplicas, upgradeDomainFactor);
-    return upgradeDomainStatus;
-  }
-
-  private <T> List<T> getShareUDSet(
-      Map<String, List<T>> upgradeDomains) {
-    List<T> getShareUDSet = new ArrayList<>();
-    for (Map.Entry<String, List<T>> e : upgradeDomains.entrySet()) {
-      if (e.getValue().size() > 1) {
-        getShareUDSet.addAll(e.getValue());
-      }
+    @Override
+    public BlockPlacementStatus verifyBlockPlacement(DatanodeInfo[] locs, int numberOfReplicas) {
+        BlockPlacementStatus defaultStatus = super.verifyBlockPlacement(locs, numberOfReplicas);
+        BlockPlacementStatusWithUpgradeDomain upgradeDomainStatus = new BlockPlacementStatusWithUpgradeDomain(defaultStatus, getUpgradeDomainsFromNodes(locs), numberOfReplicas, upgradeDomainFactor);
+        return upgradeDomainStatus;
     }
-    return getShareUDSet;
-  }
 
-  private Collection<DatanodeStorageInfo> combine(
-      Collection<DatanodeStorageInfo> moreThanOne,
-      Collection<DatanodeStorageInfo> exactlyOne) {
-    List<DatanodeStorageInfo> all = new ArrayList<>();
-    if (moreThanOne != null) {
-      all.addAll(moreThanOne);
+    private <T> List<T> getShareUDSet(Map<String, List<T>> upgradeDomains) {
+        List<T> getShareUDSet = new ArrayList<>();
+        for (Map.Entry<String, List<T>> e : upgradeDomains.entrySet()) {
+            if (e.getValue().size() > 1) {
+                getShareUDSet.addAll(e.getValue());
+            }
+        }
+        return getShareUDSet;
     }
-    if (exactlyOne != null) {
-      all.addAll(exactlyOne);
-    }
-    return all;
-  }
 
-  /*
+    private Collection<DatanodeStorageInfo> combine(Collection<DatanodeStorageInfo> moreThanOne, Collection<DatanodeStorageInfo> exactlyOne) {
+        List<DatanodeStorageInfo> all = new ArrayList<>();
+        if (moreThanOne != null) {
+            all.addAll(moreThanOne);
+        }
+        if (exactlyOne != null) {
+            all.addAll(exactlyOne);
+        }
+        return all;
+    }
+
+    /*
    * The policy to pick the replica set for deleting the over-replicated
    * replica which meet the rack and upgrade domain requirements.
    * The algorithm:
@@ -241,72 +221,63 @@ public class BlockPlacementPolicyWithUpgradeDomain extends
    *    shareRackAndUDSet, otherwise return shareUDSet which is the same as
    *    shareUDNotRackSet.
    */
-  @Override
-  protected Collection<DatanodeStorageInfo> pickupReplicaSet(
-      Collection<DatanodeStorageInfo> moreThanOne,
-      Collection<DatanodeStorageInfo> exactlyOne,
-      Map<String, List<DatanodeStorageInfo>> rackMap) {
-    // shareUDSet includes DatanodeStorageInfo that share same upgrade
-    // domain with another DatanodeStorageInfo.
-    Collection<DatanodeStorageInfo> all = combine(moreThanOne, exactlyOne);
-    List<DatanodeStorageInfo> shareUDSet = getShareUDSet(
-        getUpgradeDomainMap(all));
-    // shareRackAndUDSet contains those DatanodeStorageInfo that
-    // share rack and upgrade domain with another DatanodeStorageInfo.
-    List<DatanodeStorageInfo> shareRackAndUDSet = new ArrayList<>();
-    if (shareUDSet.size() == 0) {
-      // All upgrade domains are unique, use the parent set.
-      return super.pickupReplicaSet(moreThanOne, exactlyOne, rackMap);
-    } else if (moreThanOne != null) {
-      for (DatanodeStorageInfo storage : shareUDSet) {
-        if (moreThanOne.contains(storage)) {
-          shareRackAndUDSet.add(storage);
+    @Override
+    protected Collection<DatanodeStorageInfo> pickupReplicaSet(Collection<DatanodeStorageInfo> moreThanOne, Collection<DatanodeStorageInfo> exactlyOne, Map<String, List<DatanodeStorageInfo>> rackMap) {
+        // shareUDSet includes DatanodeStorageInfo that share same upgrade
+        // domain with another DatanodeStorageInfo.
+        Collection<DatanodeStorageInfo> all = combine(moreThanOne, exactlyOne);
+        List<DatanodeStorageInfo> shareUDSet = getShareUDSet(getUpgradeDomainMap(all));
+        // shareRackAndUDSet contains those DatanodeStorageInfo that
+        // share rack and upgrade domain with another DatanodeStorageInfo.
+        List<DatanodeStorageInfo> shareRackAndUDSet = new ArrayList<>();
+        if (shareUDSet.size() == 0) {
+            // All upgrade domains are unique, use the parent set.
+            return super.pickupReplicaSet(moreThanOne, exactlyOne, rackMap);
+        } else if (moreThanOne != null) {
+            for (DatanodeStorageInfo storage : shareUDSet) {
+                if (moreThanOne.contains(storage)) {
+                    shareRackAndUDSet.add(storage);
+                }
+            }
         }
-      }
+        return (shareRackAndUDSet.size() > 0) ? shareRackAndUDSet : shareUDSet;
     }
-    return (shareRackAndUDSet.size() > 0) ? shareRackAndUDSet : shareUDSet;
-  }
 
-  @Override
-  boolean useDelHint(DatanodeStorageInfo delHint,
-      DatanodeStorageInfo added, List<DatanodeStorageInfo> moreThanOne,
-      Collection<DatanodeStorageInfo> exactlyOne,
-      List<StorageType> excessTypes) {
-    if (!super.useDelHint(delHint, added, moreThanOne, exactlyOne,
-        excessTypes)) {
-      // If BlockPlacementPolicyDefault doesn't allow useDelHint, there is no
-      // point checking with upgrade domain policy.
-      return false;
+    @Override
+    boolean useDelHint(DatanodeStorageInfo delHint, DatanodeStorageInfo added, List<DatanodeStorageInfo> moreThanOne, Collection<DatanodeStorageInfo> exactlyOne, List<StorageType> excessTypes) {
+        if (!super.useDelHint(delHint, added, moreThanOne, exactlyOne, excessTypes)) {
+            // If BlockPlacementPolicyDefault doesn't allow useDelHint, there is no
+            // point checking with upgrade domain policy.
+            return false;
+        }
+        return isMovableBasedOnUpgradeDomain(combine(moreThanOne, exactlyOne), delHint, added);
     }
-    return isMovableBasedOnUpgradeDomain(combine(moreThanOne, exactlyOne),
-        delHint, added);
-  }
 
-  // Check if moving from source to target will preserve the upgrade domain
-  // policy.
-  private <T> boolean isMovableBasedOnUpgradeDomain(Collection<T> all,
-      T source, T target) {
-    Map<String, List<T>> udMap = getUpgradeDomainMap(all);
-    // shareUDSet includes datanodes that share same upgrade
-    // domain with another datanode.
-    List<T> shareUDSet = getShareUDSet(udMap);
-    // check if removing source reduces the number of upgrade domains
-    if (notReduceNumOfGroups(shareUDSet, source, target)) {
-      return true;
-    } else if (udMap.size() > upgradeDomainFactor) {
-      return true; // existing number of upgrade domain exceeds the limit.
-    } else {
-      return false; // removing source reduces the number of UDs.
+    // Check if moving from source to target will preserve the upgrade domain
+    // policy.
+    private <T> boolean isMovableBasedOnUpgradeDomain(Collection<T> all, T source, T target) {
+        Map<String, List<T>> udMap = getUpgradeDomainMap(all);
+        // shareUDSet includes datanodes that share same upgrade
+        // domain with another datanode.
+        List<T> shareUDSet = getShareUDSet(udMap);
+        // check if removing source reduces the number of upgrade domains
+        if (notReduceNumOfGroups(shareUDSet, source, target)) {
+            return true;
+        } else if (udMap.size() > upgradeDomainFactor) {
+            // existing number of upgrade domain exceeds the limit.
+            return true;
+        } else {
+            // removing source reduces the number of UDs.
+            return false;
+        }
     }
-  }
 
-  @Override
-  public boolean isMovable(Collection<DatanodeInfo> locs,
-      DatanodeInfo source, DatanodeInfo target) {
-    if (super.isMovable(locs, source, target)) {
-      return isMovableBasedOnUpgradeDomain(locs, source, target);
-    } else {
-      return false;
+    @Override
+    public boolean isMovable(Collection<DatanodeInfo> locs, DatanodeInfo source, DatanodeInfo target) {
+        if (super.isMovable(locs, source, target)) {
+            return isMovableBasedOnUpgradeDomain(locs, source, target);
+        } else {
+            return false;
+        }
     }
-  }
 }

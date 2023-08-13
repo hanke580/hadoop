@@ -30,38 +30,35 @@ import org.slf4j.LoggerFactory;
  */
 public class StateStoreConnectionMonitorService extends PeriodicService {
 
-  private static final Logger LOG =
-      LoggerFactory.getLogger(StateStoreConnectionMonitorService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StateStoreConnectionMonitorService.class);
 
-  /** Service that maintains the State Store connection. */
-  private final StateStoreService stateStore;
+    /**
+     * Service that maintains the State Store connection.
+     */
+    private final StateStoreService stateStore;
 
-
-  /**
-   * Create a new service to monitor the connectivity of the state store driver.
-   *
-   * @param store Instance of the state store to be monitored.
-   */
-  public StateStoreConnectionMonitorService(StateStoreService store) {
-    super(StateStoreConnectionMonitorService.class.getSimpleName());
-    this.stateStore = store;
-  }
-
-  @Override
-  protected void serviceInit(Configuration conf) throws Exception {
-    this.setIntervalMs(conf.getLong(
-        RBFConfigKeys.FEDERATION_STORE_CONNECTION_TEST_MS,
-        RBFConfigKeys.FEDERATION_STORE_CONNECTION_TEST_MS_DEFAULT));
-
-    super.serviceInit(conf);
-  }
-
-  @Override
-  public void periodicInvoke() {
-    LOG.debug("Checking state store connection");
-    if (!stateStore.isDriverReady()) {
-      LOG.info("Attempting to open state store driver.");
-      stateStore.loadDriver();
+    /**
+     * Create a new service to monitor the connectivity of the state store driver.
+     *
+     * @param store Instance of the state store to be monitored.
+     */
+    public StateStoreConnectionMonitorService(StateStoreService store) {
+        super(StateStoreConnectionMonitorService.class.getSimpleName());
+        this.stateStore = store;
     }
-  }
+
+    @Override
+    protected void serviceInit(Configuration conf) throws Exception {
+        this.setIntervalMs(conf.getLong(RBFConfigKeys.FEDERATION_STORE_CONNECTION_TEST_MS, RBFConfigKeys.FEDERATION_STORE_CONNECTION_TEST_MS_DEFAULT));
+        super.serviceInit(conf);
+    }
+
+    @Override
+    public void periodicInvoke() {
+        LOG.debug("Checking state store connection");
+        if (!stateStore.isDriverReady()) {
+            LOG.info("Attempting to open state store driver.");
+            stateStore.loadDriver();
+        }
+    }
 }

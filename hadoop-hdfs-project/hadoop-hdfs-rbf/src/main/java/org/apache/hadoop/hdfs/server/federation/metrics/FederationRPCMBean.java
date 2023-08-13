@@ -28,75 +28,75 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceStability.Evolving
 public interface FederationRPCMBean {
 
-  long getProxyOps();
+    long getProxyOps();
 
-  double getProxyAvg();
+    double getProxyAvg();
 
-  long getProcessingOps();
+    long getProcessingOps();
 
-  double getProcessingAvg();
+    double getProcessingAvg();
 
-  long getProxyOpFailureCommunicate();
+    long getProxyOpFailureCommunicate();
 
-  long getProxyOpFailureStandby();
+    long getProxyOpFailureStandby();
 
-  long getProxyOpFailureClientOverloaded();
+    long getProxyOpFailureClientOverloaded();
 
-  long getProxyOpNotImplemented();
+    long getProxyOpNotImplemented();
 
-  long getProxyOpRetries();
+    long getProxyOpRetries();
 
-  long getProxyOpNoNamenodes();
+    long getProxyOpNoNamenodes();
 
-  long getRouterFailureStateStoreOps();
+    long getRouterFailureStateStoreOps();
 
-  long getRouterFailureReadOnlyOps();
+    long getRouterFailureReadOnlyOps();
 
-  long getRouterFailureLockedOps();
+    long getRouterFailureLockedOps();
 
-  long getRouterFailureSafemodeOps();
+    long getRouterFailureSafemodeOps();
 
-  int getRpcServerCallQueue();
+    int getRpcServerCallQueue();
 
-  /**
-   * Get the number of RPC connections between the clients and the Router.
-   * @return Number of RPC connections between the clients and the Router.
-   */
-  int getRpcServerNumOpenConnections();
+    /**
+     * Get the number of RPC connections between the clients and the Router.
+     * @return Number of RPC connections between the clients and the Router.
+     */
+    int getRpcServerNumOpenConnections();
 
-  /**
-   * Get the number of RPC connections between the Router and the NNs.
-   * @return Number of RPC connections between the Router and the NNs.
-   */
-  int getRpcClientNumConnections();
+    /**
+     * Get the number of RPC connections between the Router and the NNs.
+     * @return Number of RPC connections between the Router and the NNs.
+     */
+    int getRpcClientNumConnections();
 
-  /**
-   * Get the number of active RPC connections between the Router and the NNs.
-   * @return Number of active RPC connections between the Router and the NNs.
-   */
-  int getRpcClientNumActiveConnections();
+    /**
+     * Get the number of active RPC connections between the Router and the NNs.
+     * @return Number of active RPC connections between the Router and the NNs.
+     */
+    int getRpcClientNumActiveConnections();
 
-  /**
-   * Get the number of RPC connections to be created.
-   * @return Number of RPC connections to be created.
-   */
-  int getRpcClientNumCreatingConnections();
+    /**
+     * Get the number of RPC connections to be created.
+     * @return Number of RPC connections to be created.
+     */
+    int getRpcClientNumCreatingConnections();
 
-  /**
-   * Get the number of connection pools between the Router and a NNs.
-   * @return Number of connection pools between the Router and a NNs.
-   */
-  int getRpcClientNumConnectionPools();
+    /**
+     * Get the number of connection pools between the Router and a NNs.
+     * @return Number of connection pools between the Router and a NNs.
+     */
+    int getRpcClientNumConnectionPools();
 
-  /**
-   * JSON representation of the RPC connections from the Router to the NNs.
-   * @return JSON string representation.
-   */
-  String getRpcClientConnections();
+    /**
+     * JSON representation of the RPC connections from the Router to the NNs.
+     * @return JSON string representation.
+     */
+    String getRpcClientConnections();
 
-  /**
-   * Get the JSON representation of the async caller thread pool.
-   * @return JSON string representation of the async caller thread pool.
-   */
-  String getAsyncCallerPool();
+    /**
+     * Get the JSON representation of the async caller thread pool.
+     * @return JSON string representation of the async caller thread pool.
+     */
+    String getAsyncCallerPool();
 }

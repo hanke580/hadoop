@@ -20,10 +20,8 @@ package org.apache.hadoop.fs.shell.find;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
-
 import java.io.IOException;
 import java.net.URI;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -41,46 +39,49 @@ import org.apache.hadoop.fs.Path;
  * {@link FileSystem#resolvePath(Path)} returns the passed in {@link Path}
  */
 class MockFileSystem extends FilterFileSystem {
-  private static FileSystem mockFs = null;
 
-  /** Setup and return the underlying {@link FileSystem} mock */
-  static FileSystem setup() throws IOException {
-    if (mockFs == null) {
-      mockFs = mock(FileSystem.class);
+    private static FileSystem mockFs = null;
+
+    /**
+     * Setup and return the underlying {@link FileSystem} mock
+     */
+    static FileSystem setup() throws IOException {
+        if (mockFs == null) {
+            mockFs = mock(FileSystem.class);
+        }
+        reset(mockFs);
+        Configuration conf = new Configuration();
+        conf.set("fs.defaultFS", "mockfs:///");
+        conf.setClass("fs.mockfs.impl", MockFileSystem.class, FileSystem.class);
+        when(mockFs.getConf()).thenReturn(conf);
+        return mockFs;
     }
-    reset(mockFs);
-    Configuration conf = new Configuration();
-    conf.set("fs.defaultFS", "mockfs:///");
-    conf.setClass("fs.mockfs.impl", MockFileSystem.class, FileSystem.class);
-    when(mockFs.getConf()).thenReturn(conf);
-    return mockFs;
-  }
 
-  private MockFileSystem() {
-    super(mockFs);
-  }
+    private MockFileSystem() {
+        super(mockFs);
+    }
 
-  @Override
-  public void initialize(URI uri, Configuration conf) {
-  }
+    @Override
+    public void initialize(URI uri, Configuration conf) {
+    }
 
-  @Override
-  public Path makeQualified(Path path) {
-    return path;
-  }
+    @Override
+    public Path makeQualified(Path path) {
+        return path;
+    }
 
-  @Override
-  public FileStatus[] globStatus(Path pathPattern) throws IOException {
-    return fs.globStatus(pathPattern);
-  }
+    @Override
+    public FileStatus[] globStatus(Path pathPattern) throws IOException {
+        return fs.globStatus(pathPattern);
+    }
 
-  @Override
-  public Path getWorkingDirectory() {
-    return new Path("/");
-  }
+    @Override
+    public Path getWorkingDirectory() {
+        return new Path("/");
+    }
 
-  @Override
-  public Path resolvePath(final Path p) throws IOException {
-    return p;
-  }
+    @Override
+    public Path resolvePath(final Path p) throws IOException {
+        return p;
+    }
 }

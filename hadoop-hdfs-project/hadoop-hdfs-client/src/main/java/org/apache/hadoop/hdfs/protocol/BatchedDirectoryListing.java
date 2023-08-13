@@ -28,35 +28,32 @@ import org.apache.hadoop.classification.InterfaceAudience;
 @InterfaceAudience.Private
 public class BatchedDirectoryListing {
 
-  private final HdfsPartialListing[] listings;
-  private final boolean hasMore;
-  private final byte[] startAfter;
+    private final HdfsPartialListing[] listings;
 
-  public BatchedDirectoryListing(HdfsPartialListing[] listings,
-      boolean hasMore, byte[] startAfter) {
-    this.listings = listings;
-    this.hasMore = hasMore;
-    this.startAfter = startAfter;
-  }
+    private final boolean hasMore;
 
-  public HdfsPartialListing[] getListings() {
-    return listings;
-  }
+    private final byte[] startAfter;
 
-  public boolean hasMore() {
-    return hasMore;
-  }
+    public BatchedDirectoryListing(HdfsPartialListing[] listings, boolean hasMore, byte[] startAfter) {
+        this.listings = listings;
+        this.hasMore = hasMore;
+        this.startAfter = startAfter;
+    }
 
-  public byte[] getStartAfter() {
-    return startAfter;
-  }
+    public HdfsPartialListing[] getListings() {
+        return listings;
+    }
 
-  @Override
-  public String toString() {
-    return new ToStringBuilder(this)
-        .append("listings", listings)
-        .append("hasMore", hasMore)
-        .append("startAfter", startAfter)
-        .toString();
-  }
+    public boolean hasMore() {
+        return hasMore;
+    }
+
+    public byte[] getStartAfter() {
+        return startAfter;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this).append("listings", listings).append("hasMore", hasMore).append("startAfter", startAfter).toString();
+    }
 }

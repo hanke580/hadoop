@@ -22,11 +22,9 @@ import org.slf4j.LoggerFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 import static org.junit.Assume.assumeTrue;
 
 /**
@@ -34,38 +32,36 @@ import static org.junit.Assume.assumeTrue;
  * test cases.
  */
 @RunWith(Parameterized.class)
-public class ParameterizedTestDFSStripedOutputStreamWithFailure extends
-    TestDFSStripedOutputStreamWithFailureBase{
-  public static final Logger LOG = LoggerFactory.getLogger(
-      ParameterizedTestDFSStripedOutputStreamWithFailure.class);
+public class ParameterizedTestDFSStripedOutputStreamWithFailure extends TestDFSStripedOutputStreamWithFailureBase {
 
-  private int base;
+    public static final Logger LOG = LoggerFactory.getLogger(ParameterizedTestDFSStripedOutputStreamWithFailure.class);
 
-  @Parameterized.Parameters
-  public static Collection<Object[]> data() {
-    List<Object[]> parameters = new ArrayList<>();
-    for (int i = 0; i <= 10; i++) {
-      parameters.add(new Object[]{RANDOM.nextInt(220)});
+    private int base;
+
+    @Parameterized.Parameters
+    public static Collection<Object[]> data() {
+        List<Object[]> parameters = new ArrayList<>();
+        for (int i = 0; i <= 10; i++) {
+            parameters.add(new Object[] { RANDOM.nextInt(220) });
+        }
+        return parameters;
     }
-    return parameters;
-  }
 
-  public ParameterizedTestDFSStripedOutputStreamWithFailure(int base) {
-    this.base = base;
-  }
-
-  @Test(timeout = 240000)
-  public void runTestWithSingleFailure() {
-    assumeTrue(base >= 0);
-    if (base > lengths.size()) {
-      base = base % lengths.size();
+    public ParameterizedTestDFSStripedOutputStreamWithFailure(int base) {
+        this.base = base;
     }
-    final int i = base;
-    final Integer length = getLength(i);
-    assumeTrue("Skip test " + i + " since length=null.", length != null);
-    assumeTrue("Test " + i + ", length=" + length
-        + ", is not chosen to run.", RANDOM.nextInt(16) != 0);
-    System.out.println("Run test " + i + ", length=" + length);
-    runTest(length);
-  }
+
+    @Test(timeout = 240000)
+    public void runTestWithSingleFailure() {
+        assumeTrue(base >= 0);
+        if (base > lengths.size()) {
+            base = base % lengths.size();
+        }
+        final int i = base;
+        final Integer length = getLength(i);
+        assumeTrue("Skip test " + i + " since length=null.", length != null);
+        assumeTrue("Test " + i + ", length=" + length + ", is not chosen to run.", RANDOM.nextInt(16) != 0);
+        System.out.println("Run test " + i + ", length=" + length);
+        runTest(length);
+    }
 }

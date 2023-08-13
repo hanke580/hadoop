@@ -26,14 +26,12 @@ import org.mockito.Mockito;
  */
 public abstract class StorageAdapter {
 
-  /**
-   * Inject and return a spy on a storage directory
-   */
-  public static StorageDirectory spyOnStorageDirectory(
-      Storage s, int idx) {
-
-    StorageDirectory dir = Mockito.spy(s.getStorageDir(idx));
-    s.getStorageDirs().set(idx, dir);
-    return dir;
-  }
+    /**
+     * Inject and return a spy on a storage directory
+     */
+    public static StorageDirectory spyOnStorageDirectory(Storage s, int idx) {
+        StorageDirectory dir = Mockito.spy(s.getStorageDir(idx));
+        s.getStorageDirs().set(idx, dir);
+        return dir;
+    }
 }

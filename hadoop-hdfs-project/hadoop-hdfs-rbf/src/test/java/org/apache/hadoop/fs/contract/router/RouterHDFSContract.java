@@ -18,9 +18,7 @@
 package org.apache.hadoop.fs.contract.router;
 
 import static org.apache.hadoop.hdfs.server.federation.FederationTestUtils.NAMENODES;
-
 import java.io.IOException;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.contract.AbstractFSContractTestBase;
@@ -34,87 +32,80 @@ import org.junit.Assert;
  */
 public class RouterHDFSContract extends HDFSContract {
 
-  public static final int BLOCK_SIZE =
-      AbstractFSContractTestBase.TEST_FILE_LEN;
-  private static MiniRouterDFSCluster cluster;
+    public static final int BLOCK_SIZE = AbstractFSContractTestBase.TEST_FILE_LEN;
 
-  public RouterHDFSContract(Configuration conf) {
-    super(conf);
-  }
+    private static MiniRouterDFSCluster cluster;
 
-  public static void createCluster() throws IOException {
-    createCluster(false);
-  }
+    public RouterHDFSContract(Configuration conf) {
+        super(conf);
+    }
 
-  public static void createCluster(boolean security) throws IOException {
-    createCluster(true, 2, security);
-  }
+    public static void createCluster() throws IOException {
+        createCluster(false);
+    }
 
-  public static void createCluster(
-      boolean ha, int numNameServices, boolean security) throws IOException {
-    try {
-      Configuration conf = null;
-      if (security) {
-        conf = SecurityConfUtil.initSecurity();
-      }
-      cluster = new MiniRouterDFSCluster(ha, numNameServices, conf);
+    public static void createCluster(boolean security) throws IOException {
+        createCluster(true, 2, security);
+    }
 
-      // Start NNs and DNs and wait until ready
-      cluster.startCluster(conf);
-
-      // Start routers with only an RPC service
-      cluster.startRouters();
-
-      // Register and verify all NNs with all routers
-      cluster.registerNamenodes();
-      cluster.waitNamenodeRegistration();
-
-      // Setup the mount table
-      cluster.installMockLocations();
-
-      // Making one Namenodes active per nameservice
-      if (cluster.isHighAvailability()) {
-        for (String ns : cluster.getNameservices()) {
-          cluster.switchToActive(ns, NAMENODES[0]);
-          cluster.switchToStandby(ns, NAMENODES[1]);
+    public static void createCluster(boolean ha, int numNameServices, boolean security) throws IOException {
+        try {
+            Configuration conf = null;
+            if (security) {
+                conf = SecurityConfUtil.initSecurity();
+            }
+            cluster = new MiniRouterDFSCluster(ha, numNameServices, conf);
+            // Start NNs and DNs and wait until ready
+            cluster.startCluster(conf);
+            // Start routers with only an RPC service
+            cluster.startRouters();
+            // Register and verify all NNs with all routers
+            cluster.registerNamenodes();
+            cluster.waitNamenodeRegistration();
+            // Setup the mount table
+            cluster.installMockLocations();
+            // Making one Namenodes active per nameservice
+            if (cluster.isHighAvailability()) {
+                for (String ns : cluster.getNameservices()) {
+                    cluster.switchToActive(ns, NAMENODES[0]);
+                    cluster.switchToStandby(ns, NAMENODES[1]);
+                }
+            }
+            cluster.waitActiveNamespaces();
+        } catch (Exception e) {
+            destroyCluster();
+            throw new IOException("Cannot start federated cluster", e);
         }
-      }
-
-      cluster.waitActiveNamespaces();
-    } catch (Exception e) {
-      destroyCluster();
-      throw new IOException("Cannot start federated cluster", e);
     }
-  }
 
-  public static void destroyCluster() throws IOException {
-    if (cluster != null) {
-      cluster.shutdown();
-      cluster = null;
+    public static void destroyCluster() throws IOException {
+        if (cluster != null) {
+            cluster.shutdown();
+            cluster = null;
+        }
+        try {
+            SecurityConfUtil.destroy();
+        } catch (Exception e) {
+            throw new IOException("Cannot destroy security context", e);
+        }
     }
-    try {
-      SecurityConfUtil.destroy();
-    } catch (Exception e) {
-      throw new IOException("Cannot destroy security context", e);
+
+    public static MiniDFSCluster getCluster() {
+        return cluster.getCluster();
     }
-  }
 
-  public static MiniDFSCluster getCluster() {
-    return cluster.getCluster();
-  }
+    public static MiniRouterDFSCluster getRouterCluster() {
+        return cluster;
+    }
 
-  public static MiniRouterDFSCluster getRouterCluster() {
-    return cluster;
-  }
+    public static FileSystem getFileSystem() throws IOException {
+        //assumes cluster is not null
+        Assert.assertNotNull("cluster not created", cluster);
+        return cluster.getRandomRouter().getFileSystem();
+    }
 
-  public static FileSystem getFileSystem() throws IOException {
-    //assumes cluster is not null
-    Assert.assertNotNull("cluster not created", cluster);
-    return cluster.getRandomRouter().getFileSystem();
-  }
-
-  @Override
-  public FileSystem getTestFileSystem() throws IOException {
-    return getFileSystem();
-  }
+    @Override
+    public FileSystem getTestFileSystem() throws IOException {
+        return getFileSystem();
+    }
 }

@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.service.launcher.testservices;
 
 import org.apache.hadoop.service.launcher.AbstractLaunchableService;
@@ -25,25 +24,22 @@ import org.apache.hadoop.service.launcher.ServiceLaunchException;
 /**
  * Try to stop() in service start; in execute() raise an exception.
  */
-public class StoppingInStartLaunchableService
-    extends AbstractLaunchableService {
+public class StoppingInStartLaunchableService extends AbstractLaunchableService {
 
-  public static final String NAME =
-      "org.apache.hadoop.service.launcher.testservices.StoppingInStartLaunchableService";
-  public StoppingInStartLaunchableService(String name) {
-    super(name);
-  }
+    public static final String NAME = "org.apache.hadoop.service.launcher.testservices.StoppingInStartLaunchableService";
 
-  @Override
-  protected void serviceStart() throws Exception {
-    super.serviceStart();
-    stop();
+    public StoppingInStartLaunchableService(String name) {
+        super(name);
     }
 
-  @Override
-  public int execute() throws Exception {
-    throw new ServiceLaunchException(
-        LauncherExitCodes.EXIT_SERVICE_LIFECYCLE_EXCEPTION,
-        "Should not have been executed");
-  }
+    @Override
+    protected void serviceStart() throws Exception {
+        super.serviceStart();
+        stop();
+    }
+
+    @Override
+    public int execute() throws Exception {
+        throw new ServiceLaunchException(LauncherExitCodes.EXIT_SERVICE_LIFECYCLE_EXCEPTION, "Should not have been executed");
+    }
 }

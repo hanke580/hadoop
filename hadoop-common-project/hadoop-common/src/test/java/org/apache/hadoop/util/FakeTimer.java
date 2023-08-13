@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.util;
 
 import java.util.concurrent.TimeUnit;
@@ -29,43 +28,50 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Private
 @InterfaceStability.Unstable
 public class FakeTimer extends Timer {
-  private long now;
-  private long nowNanos;
 
-  /** Constructs a FakeTimer with a non-zero value */
-  public FakeTimer() {
-    // Initialize with a non-trivial value.
-    now = 1577836800000L; // 2020-01-01 00:00:00,000+0000
-    nowNanos = TimeUnit.MILLISECONDS.toNanos(1000);
-  }
+    private long now;
 
-  @Override
-  public long now() {
-    return now;
-  }
+    private long nowNanos;
 
-  @Override
-  public long monotonicNow() {
-    return TimeUnit.NANOSECONDS.toMillis(nowNanos);
-  }
+    /**
+     * Constructs a FakeTimer with a non-zero value
+     */
+    public FakeTimer() {
+        // Initialize with a non-trivial value.
+        // 2020-01-01 00:00:00,000+0000
+        now = 1577836800000L;
+        nowNanos = TimeUnit.MILLISECONDS.toNanos(1000);
+    }
 
-  @Override
-  public long monotonicNowNanos() {
-    return nowNanos;
-  }
+    @Override
+    public long now() {
+        return now;
+    }
 
-  /** Increases the time by milliseconds */
-  public void advance(long advMillis) {
-    now += advMillis;
-    nowNanos += TimeUnit.MILLISECONDS.toNanos(advMillis);
-  }
+    @Override
+    public long monotonicNow() {
+        return TimeUnit.NANOSECONDS.toMillis(nowNanos);
+    }
 
-  /**
-   * Increases the time by nanoseconds.
-   * @param advNanos Nanoseconds to advance by.
-   */
-  public void advanceNanos(long advNanos) {
-    now += TimeUnit.NANOSECONDS.toMillis(advNanos);
-    nowNanos += advNanos;
-  }
+    @Override
+    public long monotonicNowNanos() {
+        return nowNanos;
+    }
+
+    /**
+     * Increases the time by milliseconds
+     */
+    public void advance(long advMillis) {
+        now += advMillis;
+        nowNanos += TimeUnit.MILLISECONDS.toNanos(advMillis);
+    }
+
+    /**
+     * Increases the time by nanoseconds.
+     * @param advNanos Nanoseconds to advance by.
+     */
+    public void advanceNanos(long advNanos) {
+        now += TimeUnit.NANOSECONDS.toMillis(advNanos);
+        nowNanos += advNanos;
+    }
 }

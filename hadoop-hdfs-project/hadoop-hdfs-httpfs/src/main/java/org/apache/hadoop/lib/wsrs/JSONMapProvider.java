@@ -15,13 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.lib.wsrs;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.http.JettyUtils;
 import org.json.simple.JSONObject;
-
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -41,27 +39,24 @@ import java.util.Map;
 @Produces(MediaType.APPLICATION_JSON + "; " + JettyUtils.UTF_8)
 @InterfaceAudience.Private
 public class JSONMapProvider implements MessageBodyWriter<Map> {
-  private static final String ENTER = System.getProperty("line.separator");
 
-  @Override
-  public boolean isWriteable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
-    return Map.class.isAssignableFrom(aClass);
-  }
+    private static final String ENTER = System.getProperty("line.separator");
 
-  @Override
-  public long getSize(Map map, Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
-    return -1;
-  }
+    @Override
+    public boolean isWriteable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
+        return Map.class.isAssignableFrom(aClass);
+    }
 
-  @Override
-  public void writeTo(Map map, Class<?> aClass, Type type, Annotation[] annotations,
-                      MediaType mediaType, MultivaluedMap<String, Object> stringObjectMultivaluedMap,
-                      OutputStream outputStream) throws IOException, WebApplicationException {
-    Writer writer =
-        new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
-    JSONObject.writeJSONString(map, writer);
-    writer.write(ENTER);
-    writer.flush();
-  }
+    @Override
+    public long getSize(Map map, Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
+        return -1;
+    }
 
+    @Override
+    public void writeTo(Map map, Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> stringObjectMultivaluedMap, OutputStream outputStream) throws IOException, WebApplicationException {
+        Writer writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
+        JSONObject.writeJSONString(map, writer);
+        writer.write(ENTER);
+        writer.flush();
+    }
 }

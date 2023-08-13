@@ -25,24 +25,22 @@ import org.slf4j.LoggerFactory;
  * This test extends TestErasureCodingPolicies to use a random (non-default) EC
  * policy.
  */
-public class TestErasureCodingPoliciesWithRandomECPolicy extends
-    TestErasureCodingPolicies {
-  private static final Logger LOG = LoggerFactory.getLogger(
-      TestErasureCodingPoliciesWithRandomECPolicy.class);
+public class TestErasureCodingPoliciesWithRandomECPolicy extends TestErasureCodingPolicies {
 
-  private ErasureCodingPolicy ecPolicy;
+    private static final Logger LOG = LoggerFactory.getLogger(TestErasureCodingPoliciesWithRandomECPolicy.class);
 
-  public TestErasureCodingPoliciesWithRandomECPolicy() {
-    // If you want to debug this test with a specific ec policy, please use
-    // SystemErasureCodingPolicies class.
-    // e.g. ecPolicy = SystemErasureCodingPolicies.getByID(RS_3_2_POLICY_ID);
-    ecPolicy = StripedFileTestUtil.getRandomNonDefaultECPolicy();
-    LOG.info("run {} with {}.", TestErasureCodingPoliciesWithRandomECPolicy
-        .class.getSuperclass().getSimpleName(), ecPolicy.getName());
-  }
+    private ErasureCodingPolicy ecPolicy;
 
-  @Override
-  public ErasureCodingPolicy getEcPolicy() {
-    return ecPolicy;
-  }
+    public TestErasureCodingPoliciesWithRandomECPolicy() {
+        // If you want to debug this test with a specific ec policy, please use
+        // SystemErasureCodingPolicies class.
+        // e.g. ecPolicy = SystemErasureCodingPolicies.getByID(RS_3_2_POLICY_ID);
+        ecPolicy = StripedFileTestUtil.getRandomNonDefaultECPolicy();
+        LOG.info("run {} with {}.", TestErasureCodingPoliciesWithRandomECPolicy.class.getSuperclass().getSimpleName(), ecPolicy.getName());
+    }
+
+    @Override
+    public ErasureCodingPolicy getEcPolicy() {
+        return ecPolicy;
+    }
 }

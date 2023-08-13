@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.datanode.fsdataset.impl;
 
 import org.apache.hadoop.fs.Path;
@@ -23,69 +22,61 @@ import org.apache.hadoop.hdfs.protocol.HdfsConstants;
 import org.apache.hadoop.hdfs.protocol.HdfsFileStatus;
 import org.apache.hadoop.test.GenericTestUtils;
 import org.junit.Test;
-
 import java.io.IOException;
-
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 
-
 public class TestLazyPersistPolicy extends LazyPersistTestCase {
-  @Test
-  public void testPolicyNotSetByDefault() throws IOException {
-    getClusterBuilder().build();
-    final String METHOD_NAME = GenericTestUtils.getMethodName();
-    Path path = new Path("/" + METHOD_NAME + ".dat");
 
-    makeTestFile(path, 0, false);
-    // Stat the file and check that the LAZY_PERSIST policy is not
-    // returned back.
-    HdfsFileStatus status = client.getFileInfo(path.toString());
-    assertThat(status.getStoragePolicy(), not(LAZY_PERSIST_POLICY_ID));
-  }
+    @Test
+    public void testPolicyNotSetByDefault() throws IOException {
+        getClusterBuilder().build();
+        final String METHOD_NAME = GenericTestUtils.getMethodName();
+        Path path = new Path("/" + METHOD_NAME + ".dat");
+        makeTestFile(path, 0, false);
+        // Stat the file and check that the LAZY_PERSIST policy is not
+        // returned back.
+        HdfsFileStatus status = client.getFileInfo(path.toString());
+        assertThat(status.getStoragePolicy(), not(LAZY_PERSIST_POLICY_ID));
+    }
 
-  @Test
-  public void testPolicyPropagation() throws IOException {
-    getClusterBuilder().build();
-    final String METHOD_NAME = GenericTestUtils.getMethodName();
-    Path path = new Path("/" + METHOD_NAME + ".dat");
+    @Test
+    public void testPolicyPropagation() throws IOException {
+        getClusterBuilder().build();
+        final String METHOD_NAME = GenericTestUtils.getMethodName();
+        Path path = new Path("/" + METHOD_NAME + ".dat");
+        makeTestFile(path, 0, true);
+        // Stat the file and check that the lazyPersist flag is returned back.
+        HdfsFileStatus status = client.getFileInfo(path.toString());
+        assertThat(status.getStoragePolicy(), is(LAZY_PERSIST_POLICY_ID));
+    }
 
-    makeTestFile(path, 0, true);
-    // Stat the file and check that the lazyPersist flag is returned back.
-    HdfsFileStatus status = client.getFileInfo(path.toString());
-    assertThat(status.getStoragePolicy(), is(LAZY_PERSIST_POLICY_ID));
-  }
+    @Test
+    public void testPolicyPersistenceInEditLog() throws IOException {
+        getClusterBuilder().build();
+        final String METHOD_NAME = GenericTestUtils.getMethodName();
+        Path path = new Path("/" + METHOD_NAME + ".dat");
+        makeTestFile(path, 0, true);
+        cluster.restartNameNode(true);
+        // Stat the file and check that the lazyPersist flag is returned back.
+        HdfsFileStatus status = client.getFileInfo(path.toString());
+        assertThat(status.getStoragePolicy(), is(LAZY_PERSIST_POLICY_ID));
+    }
 
-  @Test
-  public void testPolicyPersistenceInEditLog() throws IOException {
-    getClusterBuilder().build();
-    final String METHOD_NAME = GenericTestUtils.getMethodName();
-    Path path = new Path("/" + METHOD_NAME + ".dat");
-
-    makeTestFile(path, 0, true);
-    cluster.restartNameNode(true);
-
-    // Stat the file and check that the lazyPersist flag is returned back.
-    HdfsFileStatus status = client.getFileInfo(path.toString());
-    assertThat(status.getStoragePolicy(), is(LAZY_PERSIST_POLICY_ID));
-  }
-
-  @Test
-  public void testPolicyPersistenceInFsImage() throws IOException {
-    getClusterBuilder().build();
-    final String METHOD_NAME = GenericTestUtils.getMethodName();
-    Path path = new Path("/" + METHOD_NAME + ".dat");
-
-    makeTestFile(path, 0, true);
-    // checkpoint
-    fs.setSafeMode(HdfsConstants.SafeModeAction.SAFEMODE_ENTER);
-    fs.saveNamespace();
-    fs.setSafeMode(HdfsConstants.SafeModeAction.SAFEMODE_LEAVE);
-    cluster.restartNameNode(true);
-
-    // Stat the file and check that the lazyPersist flag is returned back.
-    HdfsFileStatus status = client.getFileInfo(path.toString());
-    assertThat(status.getStoragePolicy(), is(LAZY_PERSIST_POLICY_ID));
-  }
+    @Test
+    public void testPolicyPersistenceInFsImage() throws IOException {
+        getClusterBuilder().build();
+        final String METHOD_NAME = GenericTestUtils.getMethodName();
+        Path path = new Path("/" + METHOD_NAME + ".dat");
+        makeTestFile(path, 0, true);
+        // checkpoint
+        fs.setSafeMode(HdfsConstants.SafeModeAction.SAFEMODE_ENTER);
+        fs.saveNamespace();
+        fs.setSafeMode(HdfsConstants.SafeModeAction.SAFEMODE_LEAVE);
+        cluster.restartNameNode(true);
+        // Stat the file and check that the lazyPersist flag is returned back.
+        HdfsFileStatus status = client.getFileInfo(path.toString());
+        assertThat(status.getStoragePolicy(), is(LAZY_PERSIST_POLICY_ID));
+    }
 }

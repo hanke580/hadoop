@@ -20,10 +20,8 @@ package org.apache.hadoop.hdfs.server.federation.store;
 import static org.apache.hadoop.hdfs.server.federation.store.FederationStateStoreTestUtils.clearRecords;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.util.Set;
-
 import org.apache.hadoop.hdfs.server.federation.store.records.DisabledNameservice;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,38 +32,34 @@ import org.junit.Test;
  */
 public class TestStateStoreDisabledNameservice extends TestStateStoreBase {
 
-  private static DisabledNameserviceStore disabledStore;
+    private static DisabledNameserviceStore disabledStore;
 
-  @Before
-  public void setup() throws IOException, InterruptedException {
-    disabledStore = getStateStore()
-        .getRegisteredRecordStore(DisabledNameserviceStore.class);
-    // Clear disabled nameservice registrations
-    assertTrue(clearRecords(getStateStore(), DisabledNameservice.class));
-  }
+    @Before
+    public void setup() throws IOException, InterruptedException {
+        disabledStore = getStateStore().getRegisteredRecordStore(DisabledNameserviceStore.class);
+        // Clear disabled nameservice registrations
+        assertTrue(clearRecords(getStateStore(), DisabledNameservice.class));
+    }
 
-  @Test
-  public void testDisableNameservice() throws IOException {
-    // no nameservices disabled firstly
-    Set<String> disabledNameservices = disabledStore.getDisabledNameservices();
-    assertEquals(0, disabledNameservices.size());
-
-    // disable two nameservices
-    disabledStore.disableNameservice("ns0");
-    disabledStore.disableNameservice("ns1");
-    disabledStore.loadCache(true);
-    // verify if the nameservices are disabled
-    disabledNameservices = disabledStore.getDisabledNameservices();
-    assertEquals(2, disabledNameservices.size());
-    assertTrue(disabledNameservices.contains("ns0")
-        && disabledNameservices.contains("ns1"));
-
-    // enable one nameservice
-    disabledStore.enableNameservice("ns0");
-    disabledStore.loadCache(true);
-    // verify the disabled nameservice again
-    disabledNameservices = disabledStore.getDisabledNameservices();
-    assertEquals(1, disabledNameservices.size());
-    assertTrue(disabledNameservices.contains("ns1"));
-  }
+    @Test
+    public void testDisableNameservice() throws IOException {
+        // no nameservices disabled firstly
+        Set<String> disabledNameservices = disabledStore.getDisabledNameservices();
+        assertEquals(0, disabledNameservices.size());
+        // disable two nameservices
+        disabledStore.disableNameservice("ns0");
+        disabledStore.disableNameservice("ns1");
+        disabledStore.loadCache(true);
+        // verify if the nameservices are disabled
+        disabledNameservices = disabledStore.getDisabledNameservices();
+        assertEquals(2, disabledNameservices.size());
+        assertTrue(disabledNameservices.contains("ns0") && disabledNameservices.contains("ns1"));
+        // enable one nameservice
+        disabledStore.enableNameservice("ns0");
+        disabledStore.loadCache(true);
+        // verify the disabled nameservice again
+        disabledNameservices = disabledStore.getDisabledNameservices();
+        assertEquals(1, disabledNameservices.size());
+        assertTrue(disabledNameservices.contains("ns1"));
+    }
 }

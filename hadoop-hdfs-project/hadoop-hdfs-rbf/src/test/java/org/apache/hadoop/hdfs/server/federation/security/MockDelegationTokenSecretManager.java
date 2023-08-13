@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.federation.security;
 
 import org.apache.hadoop.hdfs.security.token.delegation.DelegationTokenIdentifier;
@@ -27,26 +26,19 @@ import java.io.IOException;
  * Mock functionality of AbstractDelegationTokenSecretManager.
  * for testing
  */
-public class MockDelegationTokenSecretManager
-    extends AbstractDelegationTokenSecretManager<DelegationTokenIdentifier> {
+public class MockDelegationTokenSecretManager extends AbstractDelegationTokenSecretManager<DelegationTokenIdentifier> {
 
-  public MockDelegationTokenSecretManager(
-      long delegationKeyUpdateInterval,
-      long delegationTokenMaxLifetime,
-      long delegationTokenRenewInterval,
-      long delegationTokenRemoverScanInterval) {
-    super(delegationKeyUpdateInterval, delegationTokenMaxLifetime,
-        delegationTokenRenewInterval, delegationTokenRemoverScanInterval);
-  }
+    public MockDelegationTokenSecretManager(long delegationKeyUpdateInterval, long delegationTokenMaxLifetime, long delegationTokenRenewInterval, long delegationTokenRemoverScanInterval) {
+        super(delegationKeyUpdateInterval, delegationTokenMaxLifetime, delegationTokenRenewInterval, delegationTokenRemoverScanInterval);
+    }
 
-  public MockDelegationTokenSecretManager(Configuration conf)
-      throws IOException {
-    super(100000, 100000, 100000, 100000);
-    this.startThreads();
-  }
+    public MockDelegationTokenSecretManager(Configuration conf) throws IOException {
+        super(100000, 100000, 100000, 100000);
+        this.startThreads();
+    }
 
-  @Override
-  public DelegationTokenIdentifier createIdentifier() {
-    return new DelegationTokenIdentifier();
-  }
+    @Override
+    public DelegationTokenIdentifier createIdentifier() {
+        return new DelegationTokenIdentifier();
+    }
 }

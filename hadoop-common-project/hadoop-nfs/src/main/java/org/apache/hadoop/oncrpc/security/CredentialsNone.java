@@ -18,26 +18,27 @@
 package org.apache.hadoop.oncrpc.security;
 
 import org.apache.hadoop.oncrpc.XDR;
-
 import com.google.common.base.Preconditions;
 
-/** Credential used by AUTH_NONE */
+/**
+ * Credential used by AUTH_NONE
+ */
 public class CredentialsNone extends Credentials {
 
-  public CredentialsNone() {
-    super(AuthFlavor.AUTH_NONE);
-    mCredentialsLength = 0;
-  }
+    public CredentialsNone() {
+        super(AuthFlavor.AUTH_NONE);
+        mCredentialsLength = 0;
+    }
 
-  @Override
-  public void read(XDR xdr) {
-    mCredentialsLength = xdr.readInt();
-    Preconditions.checkState(mCredentialsLength == 0);
-  }
+    @Override
+    public void read(XDR xdr) {
+        mCredentialsLength = xdr.readInt();
+        Preconditions.checkState(mCredentialsLength == 0);
+    }
 
-  @Override
-  public void write(XDR xdr) {
-    Preconditions.checkState(mCredentialsLength == 0);
-    xdr.writeInt(mCredentialsLength);
-  }
+    @Override
+    public void write(XDR xdr) {
+        Preconditions.checkState(mCredentialsLength == 0);
+        xdr.writeInt(mCredentialsLength);
+    }
 }

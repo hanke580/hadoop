@@ -24,10 +24,10 @@ import java.io.IOException;
  */
 public class BlockPinningException extends IOException {
 
-  // Required by {@link java.io.Serializable}.
-  private static final long serialVersionUID = 1L;
+    // Required by {@link java.io.Serializable}.
+    private static final long serialVersionUID = 1L;
 
-  public BlockPinningException(String errMsg) {
-    super(errMsg);
-  }
+    public BlockPinningException(String errMsg) {
+        super(errMsg);
+    }
 }

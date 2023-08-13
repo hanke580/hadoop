@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * Builtin metrics filters (to be used in metrics config files)
  */
@@ -25,3 +24,4 @@ package org.apache.hadoop.metrics2.filter;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

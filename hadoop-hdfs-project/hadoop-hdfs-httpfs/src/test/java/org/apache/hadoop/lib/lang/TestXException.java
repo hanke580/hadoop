@@ -15,50 +15,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.lib.lang;
-
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-
 import org.apache.hadoop.test.HTestCase;
 import org.junit.Test;
 
 public class TestXException extends HTestCase {
 
-  public enum TestERROR implements XException.ERROR {
-    TC;
+    public enum TestERROR implements XException.ERROR {
 
-    @Override
-    public String getTemplate() {
-      return "{0}";
+        TC;
+
+        @Override
+        public String getTemplate() {
+            return "{0}";
+        }
     }
-  }
 
-  @Test
-  public void testXException() throws Exception {
-    XException ex = new XException(TestERROR.TC);
-    assertEquals(ex.getError(), TestERROR.TC);
-    assertEquals(ex.getMessage(), "TC: {0}");
-    assertNull(ex.getCause());
-
-    ex = new XException(TestERROR.TC, "msg");
-    assertEquals(ex.getError(), TestERROR.TC);
-    assertEquals(ex.getMessage(), "TC: msg");
-    assertNull(ex.getCause());
-
-    Exception cause = new Exception();
-    ex = new XException(TestERROR.TC, cause);
-    assertEquals(ex.getError(), TestERROR.TC);
-    assertEquals(ex.getMessage(), "TC: " + cause.toString());
-    assertEquals(ex.getCause(), cause);
-
-    XException xcause = ex;
-    ex = new XException(xcause);
-    assertEquals(ex.getError(), TestERROR.TC);
-    assertEquals(ex.getMessage(), xcause.getMessage());
-    assertEquals(ex.getCause(), xcause);
-  }
-
+    @Test
+    public void testXException() throws Exception {
+        XException ex = new XException(TestERROR.TC);
+        assertEquals(ex.getError(), TestERROR.TC);
+        assertEquals(ex.getMessage(), "TC: {0}");
+        assertNull(ex.getCause());
+        ex = new XException(TestERROR.TC, "msg");
+        assertEquals(ex.getError(), TestERROR.TC);
+        assertEquals(ex.getMessage(), "TC: msg");
+        assertNull(ex.getCause());
+        Exception cause = new Exception();
+        ex = new XException(TestERROR.TC, cause);
+        assertEquals(ex.getError(), TestERROR.TC);
+        assertEquals(ex.getMessage(), "TC: " + cause.toString());
+        assertEquals(ex.getCause(), cause);
+        XException xcause = ex;
+        ex = new XException(xcause);
+        assertEquals(ex.getError(), TestERROR.TC);
+        assertEquals(ex.getMessage(), xcause.getMessage());
+        assertEquals(ex.getCause(), xcause);
+    }
 }

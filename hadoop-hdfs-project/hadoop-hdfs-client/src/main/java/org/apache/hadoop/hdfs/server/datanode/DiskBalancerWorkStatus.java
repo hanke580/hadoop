@@ -16,9 +16,7 @@
  * limitations under the License.
  *
  */
-
 package org.apache.hadoop.hdfs.server.datanode;
-
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -26,11 +24,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.base.Preconditions;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.LinkedList;
-
 import static com.fasterxml.jackson.databind.type.TypeFactory.defaultInstance;
 
 /**
@@ -39,253 +35,252 @@ import static com.fasterxml.jackson.databind.type.TypeFactory.defaultInstance;
 @InterfaceAudience.Private
 @InterfaceStability.Unstable
 public class DiskBalancerWorkStatus {
-  private static final ObjectMapper MAPPER = new ObjectMapper();
-  private static final ObjectMapper MAPPER_WITH_INDENT_OUTPUT =
-      new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
-  private static final ObjectReader READER_WORKSTATUS =
-      new ObjectMapper().readerFor(DiskBalancerWorkStatus.class);
-  private static final ObjectReader READER_WORKENTRY = new ObjectMapper()
-      .readerFor(defaultInstance().constructCollectionType(List.class,
-          DiskBalancerWorkEntry.class));
 
-  private final List<DiskBalancerWorkEntry> currentState;
-  private Result result;
-  private String planID;
-  private String planFile;
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
-  /**
-   * Constructs a default workStatus Object.
-   */
-  public DiskBalancerWorkStatus() {
-    this.currentState = new LinkedList<>();
-  }
+    private static final ObjectMapper MAPPER_WITH_INDENT_OUTPUT = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
-  /**
-   * Constructs a workStatus Object.
-   *
-   * @param result - int
-   * @param planID - Plan ID
-   * @param planFile - Plan file name
-   */
-  public DiskBalancerWorkStatus(Result result, String planID, String planFile) {
-    this();
-    this.result = result;
-    this.planID = planID;
-    this.planFile = planFile;
-  }
+    private static final ObjectReader READER_WORKSTATUS = new ObjectMapper().readerFor(DiskBalancerWorkStatus.class);
 
-  /**
-   * Constructs a workStatus Object.
-   *
-   * @param result       - int
-   * @param planID       - Plan ID
-   * @param currentState - Current State
-   */
-  public DiskBalancerWorkStatus(Result result, String planID,
-                                List<DiskBalancerWorkEntry> currentState) {
-    this.result = result;
-    this.planID = planID;
-    this.currentState = currentState;
-  }
+    private static final ObjectReader READER_WORKENTRY = new ObjectMapper().readerFor(defaultInstance().constructCollectionType(List.class, DiskBalancerWorkEntry.class));
 
+    private final List<DiskBalancerWorkEntry> currentState;
 
-  /**
-   * Constructs a workStatus Object.
-   *
-   * @param result       - int
-   * @param planID       - Plan ID
-   * @param currentState - List of WorkEntries.
-   */
-  public DiskBalancerWorkStatus(Result result, String planID, String planFile,
-                                String currentState) throws IOException {
-    this.result = result;
-    this.planID = planID;
-    this.planFile = planFile;
-    this.currentState = READER_WORKENTRY.readValue(currentState);
-  }
+    private Result result;
 
+    private String planID;
 
-  /**
-   * Returns result.
-   *
-   * @return long
-   */
-  public Result getResult() {
-    return result;
-  }
+    private String planFile;
 
-  /**
-   * Returns planID.
-   *
-   * @return String
-   */
-  public String getPlanID() {
-    return planID;
-  }
-
-  /**
-   * Returns planFile.
-   *
-   * @return String
-   */
-  public String getPlanFile() {
-    return planFile;
-  }
-
-  /**
-   * Gets current Status.
-   *
-   * @return - Json String
-   */
-  public List<DiskBalancerWorkEntry> getCurrentState() {
-    return currentState;
-  }
-
-  /**
-   * Return current state as a string.
-   *
-   * @throws IOException
-   **/
-  public String currentStateString() throws IOException {
-    return MAPPER_WITH_INDENT_OUTPUT.writeValueAsString(currentState);
-  }
-
-  public String toJsonString() throws IOException {
-    return MAPPER.writeValueAsString(this);
-  }
-
-  /**
-   * Returns a DiskBalancerWorkStatus object from the Json .
-   * @param json - json String
-   * @return DiskBalancerWorkStatus
-   * @throws IOException
-   */
-  public static DiskBalancerWorkStatus parseJson(String json) throws
-      IOException {
-    return READER_WORKSTATUS.readValue(json);
-  }
-
-
-  /**
-   * Adds a new work entry to the list.
-   *
-   * @param entry - DiskBalancerWorkEntry
-   */
-
-  public void addWorkEntry(DiskBalancerWorkEntry entry) {
-    Preconditions.checkNotNull(entry);
-    currentState.add(entry);
-  }
-
-  /** Various result values. **/
-  public enum Result {
-    NO_PLAN(0),
-    PLAN_UNDER_PROGRESS(1),
-    PLAN_DONE(2),
-    PLAN_CANCELLED(3);
-    private int result;
-
-    private Result(int result) {
-      this.result = result;
+    /**
+     * Constructs a default workStatus Object.
+     */
+    public DiskBalancerWorkStatus() {
+        this.currentState = new LinkedList<>();
     }
 
     /**
-     * Get int value of result.
+     * Constructs a workStatus Object.
      *
-     * @return int
+     * @param result - int
+     * @param planID - Plan ID
+     * @param planFile - Plan file name
      */
-    public int getIntResult() {
-      return result;
-    }
-  }
-
-  /**
-   * A class that is used to report each work item that we are working on. This
-   * class describes the Source, Destination and how much data has been already
-   * moved, errors encountered etc. This is useful for the disk balancer stats
-   * as well as the queryStatus RPC.
-   */
-  public static class DiskBalancerWorkEntry {
-    private String sourcePath;
-    private String destPath;
-    private DiskBalancerWorkItem workItem;
-
-    /**
-     * Constructor needed for json serialization.
-     */
-    public DiskBalancerWorkEntry() {
-    }
-
-    public DiskBalancerWorkEntry(String workItem) throws IOException {
-      this.workItem = DiskBalancerWorkItem.parseJson(workItem);
+    public DiskBalancerWorkStatus(Result result, String planID, String planFile) {
+        this();
+        this.result = result;
+        this.planID = planID;
+        this.planFile = planFile;
     }
 
     /**
-     * Constructs a Work Entry class.
+     * Constructs a workStatus Object.
      *
-     * @param sourcePath - Source Path where we are moving data from.
-     * @param destPath   - Destination path to where we are moving data to.
-     * @param workItem   - Current work status of this move.
+     * @param result       - int
+     * @param planID       - Plan ID
+     * @param currentState - Current State
      */
-    public DiskBalancerWorkEntry(String sourcePath, String destPath,
-                                 DiskBalancerWorkItem workItem) {
-      this.sourcePath = sourcePath;
-      this.destPath = destPath;
-      this.workItem = workItem;
+    public DiskBalancerWorkStatus(Result result, String planID, List<DiskBalancerWorkEntry> currentState) {
+        this.result = result;
+        this.planID = planID;
+        this.currentState = currentState;
     }
 
     /**
-     * Returns the source path.
+     * Constructs a workStatus Object.
      *
-     * @return - Source path
+     * @param result       - int
+     * @param planID       - Plan ID
+     * @param currentState - List of WorkEntries.
      */
-    public String getSourcePath() {
-      return sourcePath;
+    public DiskBalancerWorkStatus(Result result, String planID, String planFile, String currentState) throws IOException {
+        this.result = result;
+        this.planID = planID;
+        this.planFile = planFile;
+        this.currentState = READER_WORKENTRY.readValue(currentState);
     }
 
     /**
-     * Sets the Source Path.
+     * Returns result.
      *
-     * @param sourcePath - Volume Path.
+     * @return long
      */
-    public void setSourcePath(String sourcePath) {
-      this.sourcePath = sourcePath;
+    public Result getResult() {
+        return result;
     }
 
     /**
-     * Gets the Destination path.
+     * Returns planID.
      *
-     * @return - Path
+     * @return String
      */
-    public String getDestPath() {
-      return destPath;
+    public String getPlanID() {
+        return planID;
     }
 
     /**
-     * Sets the destination path.
+     * Returns planFile.
      *
-     * @param destPath - Path
+     * @return String
      */
-    public void setDestPath(String destPath) {
-      this.destPath = destPath;
+    public String getPlanFile() {
+        return planFile;
     }
 
     /**
-     * Gets the current status of work for these volumes.
+     * Gets current Status.
      *
-     * @return - Work Item
+     * @return - Json String
      */
-    public DiskBalancerWorkItem getWorkItem() {
-      return workItem;
+    public List<DiskBalancerWorkEntry> getCurrentState() {
+        return currentState;
     }
 
     /**
-     * Sets the work item.
+     * Return current state as a string.
      *
-     * @param workItem - sets the work item information
+     * @throws IOException
      */
-    public void setWorkItem(DiskBalancerWorkItem workItem) {
-      this.workItem = workItem;
+    public String currentStateString() throws IOException {
+        return MAPPER_WITH_INDENT_OUTPUT.writeValueAsString(currentState);
     }
-  }
+
+    public String toJsonString() throws IOException {
+        return MAPPER.writeValueAsString(this);
+    }
+
+    /**
+     * Returns a DiskBalancerWorkStatus object from the Json .
+     * @param json - json String
+     * @return DiskBalancerWorkStatus
+     * @throws IOException
+     */
+    public static DiskBalancerWorkStatus parseJson(String json) throws IOException {
+        return READER_WORKSTATUS.readValue(json);
+    }
+
+    /**
+     * Adds a new work entry to the list.
+     *
+     * @param entry - DiskBalancerWorkEntry
+     */
+    public void addWorkEntry(DiskBalancerWorkEntry entry) {
+        Preconditions.checkNotNull(entry);
+        currentState.add(entry);
+    }
+
+    /**
+     * Various result values. *
+     */
+    public enum Result {
+
+        NO_PLAN(0), PLAN_UNDER_PROGRESS(1), PLAN_DONE(2), PLAN_CANCELLED(3);
+
+        private int result;
+
+        private Result(int result) {
+            this.result = result;
+        }
+
+        /**
+         * Get int value of result.
+         *
+         * @return int
+         */
+        public int getIntResult() {
+            return result;
+        }
+    }
+
+    /**
+     * A class that is used to report each work item that we are working on. This
+     * class describes the Source, Destination and how much data has been already
+     * moved, errors encountered etc. This is useful for the disk balancer stats
+     * as well as the queryStatus RPC.
+     */
+    public static class DiskBalancerWorkEntry {
+
+        private String sourcePath;
+
+        private String destPath;
+
+        private DiskBalancerWorkItem workItem;
+
+        /**
+         * Constructor needed for json serialization.
+         */
+        public DiskBalancerWorkEntry() {
+        }
+
+        public DiskBalancerWorkEntry(String workItem) throws IOException {
+            this.workItem = DiskBalancerWorkItem.parseJson(workItem);
+        }
+
+        /**
+         * Constructs a Work Entry class.
+         *
+         * @param sourcePath - Source Path where we are moving data from.
+         * @param destPath   - Destination path to where we are moving data to.
+         * @param workItem   - Current work status of this move.
+         */
+        public DiskBalancerWorkEntry(String sourcePath, String destPath, DiskBalancerWorkItem workItem) {
+            this.sourcePath = sourcePath;
+            this.destPath = destPath;
+            this.workItem = workItem;
+        }
+
+        /**
+         * Returns the source path.
+         *
+         * @return - Source path
+         */
+        public String getSourcePath() {
+            return sourcePath;
+        }
+
+        /**
+         * Sets the Source Path.
+         *
+         * @param sourcePath - Volume Path.
+         */
+        public void setSourcePath(String sourcePath) {
+            this.sourcePath = sourcePath;
+        }
+
+        /**
+         * Gets the Destination path.
+         *
+         * @return - Path
+         */
+        public String getDestPath() {
+            return destPath;
+        }
+
+        /**
+         * Sets the destination path.
+         *
+         * @param destPath - Path
+         */
+        public void setDestPath(String destPath) {
+            this.destPath = destPath;
+        }
+
+        /**
+         * Gets the current status of work for these volumes.
+         *
+         * @return - Work Item
+         */
+        public DiskBalancerWorkItem getWorkItem() {
+            return workItem;
+        }
+
+        /**
+         * Sets the work item.
+         *
+         * @param workItem - sets the work item information
+         */
+        public void setWorkItem(DiskBalancerWorkItem workItem) {
+            this.workItem = workItem;
+        }
+    }
 }

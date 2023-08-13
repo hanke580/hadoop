@@ -29,11 +29,9 @@ import org.apache.hadoop.hdfs.web.URLConnectionFactory;
 import org.apache.hadoop.util.JsonSerialization;
 import org.apache.hadoop.util.Timer;
 import org.apache.http.HttpStatus;
-
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import static org.apache.hadoop.hdfs.client.HdfsClientConfigKeys.OAUTH_CLIENT_ID_KEY;
 import static org.apache.hadoop.hdfs.client.HdfsClientConfigKeys.OAUTH_REFRESH_URL_KEY;
 import static org.apache.hadoop.hdfs.web.oauth2.OAuth2Constants.ACCESS_TOKEN;
@@ -52,84 +50,64 @@ import static org.apache.hadoop.hdfs.web.oauth2.Utils.notNull;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
-public abstract class CredentialBasedAccessTokenProvider
-    extends AccessTokenProvider {
+public abstract class CredentialBasedAccessTokenProvider extends AccessTokenProvider {
 
-  public static final String OAUTH_CREDENTIAL_KEY
-      = "dfs.webhdfs.oauth2.credential";
+    public static final String OAUTH_CREDENTIAL_KEY = "dfs.webhdfs.oauth2.credential";
 
-  private AccessTokenTimer timer;
+    private AccessTokenTimer timer;
 
-  private String clientId;
+    private String clientId;
 
-  private String refreshURL;
+    private String refreshURL;
 
-  private String accessToken;
+    private String accessToken;
 
-  private boolean initialCredentialObtained = false;
+    private boolean initialCredentialObtained = false;
 
-  CredentialBasedAccessTokenProvider() {
-    this.timer = new AccessTokenTimer();
-  }
-
-  CredentialBasedAccessTokenProvider(Timer timer) {
-    this.timer = new AccessTokenTimer(timer);
-  }
-
-  public abstract String getCredential();
-
-  @Override
-  public void setConf(Configuration conf) {
-    super.setConf(conf);
-    clientId = notNull(conf, OAUTH_CLIENT_ID_KEY);
-    refreshURL = notNull(conf, OAUTH_REFRESH_URL_KEY);
-  }
-
-  @Override
-  public synchronized String getAccessToken() throws IOException {
-    if(timer.shouldRefresh() || !initialCredentialObtained) {
-      refresh();
-      initialCredentialObtained = true;
+    CredentialBasedAccessTokenProvider() {
+        this.timer = new AccessTokenTimer();
     }
 
-    return accessToken;
-  }
-
-  void refresh() throws IOException {
-    try {
-      OkHttpClient client = new OkHttpClient();
-      client.setConnectTimeout(URLConnectionFactory.DEFAULT_SOCKET_TIMEOUT,
-          TimeUnit.MILLISECONDS);
-      client.setReadTimeout(URLConnectionFactory.DEFAULT_SOCKET_TIMEOUT,
-          TimeUnit.MILLISECONDS);
-
-      String bodyString = Utils.postBody(CLIENT_SECRET, getCredential(),
-          GRANT_TYPE, CLIENT_CREDENTIALS,
-          CLIENT_ID, clientId);
-
-      RequestBody body = RequestBody.create(URLENCODED, bodyString);
-
-      Request request = new Request.Builder()
-          .url(refreshURL)
-          .post(body)
-          .build();
-      Response responseBody = client.newCall(request).execute();
-
-      if (responseBody.code() != HttpStatus.SC_OK) {
-        throw new IllegalArgumentException("Received invalid http response: "
-            + responseBody.code() + ", text = " + responseBody.toString());
-      }
-
-      Map<?, ?> response = JsonSerialization.mapReader().readValue(
-          responseBody.body().string());
-
-      String newExpiresIn = response.get(EXPIRES_IN).toString();
-      timer.setExpiresIn(newExpiresIn);
-
-      accessToken = response.get(ACCESS_TOKEN).toString();
-
-    } catch (Exception e) {
-      throw new IOException("Unable to obtain access token from credential", e);
+    CredentialBasedAccessTokenProvider(Timer timer) {
+        this.timer = new AccessTokenTimer(timer);
     }
-  }
+
+    public abstract String getCredential();
+
+    @Override
+    public void setConf(Configuration conf) {
+        super.setConf(conf);
+        clientId = notNull(conf, OAUTH_CLIENT_ID_KEY);
+        refreshURL = notNull(conf, OAUTH_REFRESH_URL_KEY);
+    }
+
+    @Override
+    public synchronized String getAccessToken() throws IOException {
+        if (timer.shouldRefresh() || !initialCredentialObtained) {
+            refresh();
+            initialCredentialObtained = true;
+        }
+        return accessToken;
+    }
+
+    void refresh() throws IOException {
+        try {
+            OkHttpClient client = new OkHttpClient();
+            client.setConnectTimeout(URLConnectionFactory.DEFAULT_SOCKET_TIMEOUT, TimeUnit.MILLISECONDS);
+            client.setReadTimeout(URLConnectionFactory.DEFAULT_SOCKET_TIMEOUT, TimeUnit.MILLISECONDS);
+            String bodyString = Utils.postBody(CLIENT_SECRET, getCredential(), GRANT_TYPE, CLIENT_CREDENTIALS, CLIENT_ID, clientId);
+            RequestBody body = RequestBody.create(URLENCODED, bodyString);
+            Request request = new Request.Builder().url(refreshURL).post(body).build();
+            Response responseBody = client.newCall(request).execute();
+            if (responseBody.code() != HttpStatus.SC_OK) {
+                throw new IllegalArgumentException("Received invalid http response: " + responseBody.code() + ", text = " + responseBody.toString());
+            }
+            Map<?, ?> response = JsonSerialization.mapReader().readValue(responseBody.body().string());
+            String newExpiresIn = response.get(EXPIRES_IN).toString();
+            timer.setExpiresIn(newExpiresIn);
+            accessToken = response.get(ACCESS_TOKEN).toString();
+        } catch (Exception e) {
+            throw new IOException("Unable to obtain access token from credential", e);
+        }
+    }
 }

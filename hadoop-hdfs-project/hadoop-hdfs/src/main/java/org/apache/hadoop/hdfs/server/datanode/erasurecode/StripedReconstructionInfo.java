@@ -29,94 +29,87 @@ import org.apache.hadoop.hdfs.protocol.ExtendedBlock;
 @InterfaceAudience.Private
 public class StripedReconstructionInfo {
 
-  private final ExtendedBlock blockGroup;
-  private final ErasureCodingPolicy ecPolicy;
+    private final ExtendedBlock blockGroup;
 
-  // source info
-  private final byte[] liveIndices;
-  private final DatanodeInfo[] sources;
+    private final ErasureCodingPolicy ecPolicy;
 
-  // target info
-  private final byte[] targetIndices;
-  private final DatanodeInfo[] targets;
-  private final StorageType[] targetStorageTypes;
-  private final String[] targetStorageIds;
+    // source info
+    private final byte[] liveIndices;
 
-  public StripedReconstructionInfo(ExtendedBlock blockGroup,
-      ErasureCodingPolicy ecPolicy, byte[] liveIndices, DatanodeInfo[] sources,
-      byte[] targetIndices) {
-    this(blockGroup, ecPolicy, liveIndices, sources, targetIndices, null,
-        null, null);
-  }
+    private final DatanodeInfo[] sources;
 
-  StripedReconstructionInfo(ExtendedBlock blockGroup,
-      ErasureCodingPolicy ecPolicy, byte[] liveIndices, DatanodeInfo[] sources,
-      DatanodeInfo[] targets, StorageType[] targetStorageTypes,
-      String[] targetStorageIds) {
-    this(blockGroup, ecPolicy, liveIndices, sources, null, targets,
-        targetStorageTypes, targetStorageIds);
-  }
+    // target info
+    private final byte[] targetIndices;
 
-  private StripedReconstructionInfo(ExtendedBlock blockGroup,
-      ErasureCodingPolicy ecPolicy, byte[] liveIndices, DatanodeInfo[] sources,
-      byte[] targetIndices, DatanodeInfo[] targets,
-      StorageType[] targetStorageTypes, String[] targetStorageIds) {
+    private final DatanodeInfo[] targets;
 
-    this.blockGroup = blockGroup;
-    this.ecPolicy = ecPolicy;
-    this.liveIndices = liveIndices;
-    this.sources = sources;
-    this.targetIndices = targetIndices;
-    this.targets = targets;
-    this.targetStorageTypes = targetStorageTypes;
-    this.targetStorageIds = targetStorageIds;
-  }
+    private final StorageType[] targetStorageTypes;
 
-  ExtendedBlock getBlockGroup() {
-    return blockGroup;
-  }
+    private final String[] targetStorageIds;
 
-  ErasureCodingPolicy getEcPolicy() {
-    return ecPolicy;
-  }
+    public StripedReconstructionInfo(ExtendedBlock blockGroup, ErasureCodingPolicy ecPolicy, byte[] liveIndices, DatanodeInfo[] sources, byte[] targetIndices) {
+        this(blockGroup, ecPolicy, liveIndices, sources, targetIndices, null, null, null);
+    }
 
-  byte[] getLiveIndices() {
-    return liveIndices;
-  }
+    StripedReconstructionInfo(ExtendedBlock blockGroup, ErasureCodingPolicy ecPolicy, byte[] liveIndices, DatanodeInfo[] sources, DatanodeInfo[] targets, StorageType[] targetStorageTypes, String[] targetStorageIds) {
+        this(blockGroup, ecPolicy, liveIndices, sources, null, targets, targetStorageTypes, targetStorageIds);
+    }
 
-  DatanodeInfo[] getSources() {
-    return sources;
-  }
+    private StripedReconstructionInfo(ExtendedBlock blockGroup, ErasureCodingPolicy ecPolicy, byte[] liveIndices, DatanodeInfo[] sources, byte[] targetIndices, DatanodeInfo[] targets, StorageType[] targetStorageTypes, String[] targetStorageIds) {
+        this.blockGroup = blockGroup;
+        this.ecPolicy = ecPolicy;
+        this.liveIndices = liveIndices;
+        this.sources = sources;
+        this.targetIndices = targetIndices;
+        this.targets = targets;
+        this.targetStorageTypes = targetStorageTypes;
+        this.targetStorageIds = targetStorageIds;
+    }
 
-  byte[] getTargetIndices() {
-    return targetIndices;
-  }
+    ExtendedBlock getBlockGroup() {
+        return blockGroup;
+    }
 
-  DatanodeInfo[] getTargets() {
-    return targets;
-  }
+    ErasureCodingPolicy getEcPolicy() {
+        return ecPolicy;
+    }
 
-  StorageType[] getTargetStorageTypes() {
-    return targetStorageTypes;
-  }
+    byte[] getLiveIndices() {
+        return liveIndices;
+    }
 
-  String[] getTargetStorageIds() {
-    return targetStorageIds;
-  }
+    DatanodeInfo[] getSources() {
+        return sources;
+    }
 
-  /**
-   * Return the weight of this EC reconstruction task.
-   *
-   * DN uses it to coordinate with NN to adjust the speed of scheduling the
-   * reconstructions tasks to this DN.
-   *
-   * @return the weight of this reconstruction task.
-   * @see HDFS-12044
-   */
-  int getWeight() {
-    // See HDFS-12044. The weight of a RS(n, k) is calculated by the network
-    // connections it opens.
-    return sources.length + targets.length;
-  }
+    byte[] getTargetIndices() {
+        return targetIndices;
+    }
+
+    DatanodeInfo[] getTargets() {
+        return targets;
+    }
+
+    StorageType[] getTargetStorageTypes() {
+        return targetStorageTypes;
+    }
+
+    String[] getTargetStorageIds() {
+        return targetStorageIds;
+    }
+
+    /**
+     * Return the weight of this EC reconstruction task.
+     *
+     * DN uses it to coordinate with NN to adjust the speed of scheduling the
+     * reconstructions tasks to this DN.
+     *
+     * @return the weight of this reconstruction task.
+     * @see HDFS-12044
+     */
+    int getWeight() {
+        // See HDFS-12044. The weight of a RS(n, k) is calculated by the network
+        // connections it opens.
+        return sources.length + targets.length;
+    }
 }
-

@@ -19,7 +19,6 @@ package org.apache.hadoop.hdfs.protocolPB;
 
 import java.io.IOException;
 import java.util.List;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.hdfs.client.BlockReportOptions;
 import org.apache.hadoop.hdfs.protocol.BlockLocalPathInfo;
@@ -72,288 +71,223 @@ import org.apache.hadoop.net.NetUtils;
  * {@link ClientDatanodeProtocol} server implementation.
  */
 @InterfaceAudience.Private
-public class ClientDatanodeProtocolServerSideTranslatorPB implements
-    ClientDatanodeProtocolPB {
-  private final static RefreshNamenodesResponseProto REFRESH_NAMENODE_RESP =
-      RefreshNamenodesResponseProto.newBuilder().build();
-  private final static DeleteBlockPoolResponseProto DELETE_BLOCKPOOL_RESP =
-      DeleteBlockPoolResponseProto.newBuilder().build();
-  private final static ShutdownDatanodeResponseProto SHUTDOWN_DATANODE_RESP =
-      ShutdownDatanodeResponseProto.newBuilder().build();
-  private final static StartReconfigurationResponseProto START_RECONFIG_RESP =
-      StartReconfigurationResponseProto.newBuilder().build();
-  private final static TriggerBlockReportResponseProto TRIGGER_BLOCK_REPORT_RESP =
-      TriggerBlockReportResponseProto.newBuilder().build();
-  private final static EvictWritersResponseProto EVICT_WRITERS_RESP =
-      EvictWritersResponseProto.newBuilder().build();
-  
-  private final ClientDatanodeProtocol impl;
+public class ClientDatanodeProtocolServerSideTranslatorPB implements ClientDatanodeProtocolPB {
 
-  public ClientDatanodeProtocolServerSideTranslatorPB(
-      ClientDatanodeProtocol impl) {
-    this.impl = impl;
-  }
+    private final static RefreshNamenodesResponseProto REFRESH_NAMENODE_RESP = RefreshNamenodesResponseProto.newBuilder().build();
 
-  @Override
-  public GetReplicaVisibleLengthResponseProto getReplicaVisibleLength(
-      RpcController unused, GetReplicaVisibleLengthRequestProto request)
-      throws ServiceException {
-    long len;
-    try {
-      len = impl.getReplicaVisibleLength(PBHelperClient.convert(request.getBlock()));
-    } catch (IOException e) {
-      throw new ServiceException(e);
+    private final static DeleteBlockPoolResponseProto DELETE_BLOCKPOOL_RESP = DeleteBlockPoolResponseProto.newBuilder().build();
+
+    private final static ShutdownDatanodeResponseProto SHUTDOWN_DATANODE_RESP = ShutdownDatanodeResponseProto.newBuilder().build();
+
+    private final static StartReconfigurationResponseProto START_RECONFIG_RESP = StartReconfigurationResponseProto.newBuilder().build();
+
+    private final static TriggerBlockReportResponseProto TRIGGER_BLOCK_REPORT_RESP = TriggerBlockReportResponseProto.newBuilder().build();
+
+    private final static EvictWritersResponseProto EVICT_WRITERS_RESP = EvictWritersResponseProto.newBuilder().build();
+
+    private final ClientDatanodeProtocol impl;
+
+    public ClientDatanodeProtocolServerSideTranslatorPB(ClientDatanodeProtocol impl) {
+        this.impl = impl;
     }
-    return GetReplicaVisibleLengthResponseProto.newBuilder().setLength(len)
-        .build();
-  }
 
-  @Override
-  public RefreshNamenodesResponseProto refreshNamenodes(
-      RpcController unused, RefreshNamenodesRequestProto request)
-      throws ServiceException {
-    try {
-      impl.refreshNamenodes();
-    } catch (IOException e) {
-      throw new ServiceException(e);
+    @Override
+    public GetReplicaVisibleLengthResponseProto getReplicaVisibleLength(RpcController unused, GetReplicaVisibleLengthRequestProto request) throws ServiceException {
+        long len;
+        try {
+            len = impl.getReplicaVisibleLength(PBHelperClient.convert(request.getBlock()));
+        } catch (IOException e) {
+            throw new ServiceException(e);
+        }
+        return GetReplicaVisibleLengthResponseProto.newBuilder().setLength(len).build();
     }
-    return REFRESH_NAMENODE_RESP;
-  }
 
-  @Override
-  public DeleteBlockPoolResponseProto deleteBlockPool(RpcController unused,
-      DeleteBlockPoolRequestProto request) throws ServiceException {
-    try {
-      impl.deleteBlockPool(request.getBlockPool(), request.getForce());
-    } catch (IOException e) {
-      throw new ServiceException(e);
+    @Override
+    public RefreshNamenodesResponseProto refreshNamenodes(RpcController unused, RefreshNamenodesRequestProto request) throws ServiceException {
+        try {
+            impl.refreshNamenodes();
+        } catch (IOException e) {
+            throw new ServiceException(e);
+        }
+        return REFRESH_NAMENODE_RESP;
     }
-    return DELETE_BLOCKPOOL_RESP;
-  }
 
-  @Override
-  public GetBlockLocalPathInfoResponseProto getBlockLocalPathInfo(
-      RpcController unused, GetBlockLocalPathInfoRequestProto request)
-      throws ServiceException {
-    BlockLocalPathInfo resp;
-    try {
-      resp = impl.getBlockLocalPathInfo(
-                 PBHelperClient.convert(request.getBlock()),
-                 PBHelperClient.convert(request.getToken()));
-    } catch (IOException e) {
-      throw new ServiceException(e);
+    @Override
+    public DeleteBlockPoolResponseProto deleteBlockPool(RpcController unused, DeleteBlockPoolRequestProto request) throws ServiceException {
+        try {
+            impl.deleteBlockPool(request.getBlockPool(), request.getForce());
+        } catch (IOException e) {
+            throw new ServiceException(e);
+        }
+        return DELETE_BLOCKPOOL_RESP;
     }
-    return GetBlockLocalPathInfoResponseProto.newBuilder()
-        .setBlock(PBHelperClient.convert(resp.getBlock()))
-        .setLocalPath(resp.getBlockPath()).setLocalMetaPath(resp.getMetaPath())
-        .build();
-  }
 
-  @Override
-  public ShutdownDatanodeResponseProto shutdownDatanode(
-      RpcController unused, ShutdownDatanodeRequestProto request)
-      throws ServiceException {
-    try {
-      impl.shutdownDatanode(request.getForUpgrade());
-    } catch (IOException e) {
-      throw new ServiceException(e);
+    @Override
+    public GetBlockLocalPathInfoResponseProto getBlockLocalPathInfo(RpcController unused, GetBlockLocalPathInfoRequestProto request) throws ServiceException {
+        BlockLocalPathInfo resp;
+        try {
+            resp = impl.getBlockLocalPathInfo(PBHelperClient.convert(request.getBlock()), PBHelperClient.convert(request.getToken()));
+        } catch (IOException e) {
+            throw new ServiceException(e);
+        }
+        return GetBlockLocalPathInfoResponseProto.newBuilder().setBlock(PBHelperClient.convert(resp.getBlock())).setLocalPath(resp.getBlockPath()).setLocalMetaPath(resp.getMetaPath()).build();
     }
-    return SHUTDOWN_DATANODE_RESP;
-  }
 
-  @Override
-  public EvictWritersResponseProto evictWriters(RpcController unused,
-      EvictWritersRequestProto request) throws ServiceException {
-    try {
-      impl.evictWriters();
-    } catch (IOException e) {
-      throw new ServiceException(e);
+    @Override
+    public ShutdownDatanodeResponseProto shutdownDatanode(RpcController unused, ShutdownDatanodeRequestProto request) throws ServiceException {
+        try {
+            impl.shutdownDatanode(request.getForUpgrade());
+        } catch (IOException e) {
+            throw new ServiceException(e);
+        }
+        return SHUTDOWN_DATANODE_RESP;
     }
-    return EVICT_WRITERS_RESP;
-  }
 
-  public GetDatanodeInfoResponseProto getDatanodeInfo(RpcController unused,
-      GetDatanodeInfoRequestProto request) throws ServiceException {
-    GetDatanodeInfoResponseProto res;
-    try {
-      res = GetDatanodeInfoResponseProto.newBuilder()
-          .setLocalInfo(PBHelperClient.convert(impl.getDatanodeInfo())).build();
-    } catch (IOException e) {
-      throw new ServiceException(e);
+    @Override
+    public EvictWritersResponseProto evictWriters(RpcController unused, EvictWritersRequestProto request) throws ServiceException {
+        try {
+            impl.evictWriters();
+        } catch (IOException e) {
+            throw new ServiceException(e);
+        }
+        return EVICT_WRITERS_RESP;
     }
-    return res;
-  }
 
-  @Override
-  public StartReconfigurationResponseProto startReconfiguration(
-      RpcController unused, StartReconfigurationRequestProto request)
-      throws ServiceException {
-    try {
-      impl.startReconfiguration();
-    } catch (IOException e) {
-      throw new ServiceException(e);
+    public GetDatanodeInfoResponseProto getDatanodeInfo(RpcController unused, GetDatanodeInfoRequestProto request) throws ServiceException {
+        GetDatanodeInfoResponseProto res;
+        try {
+            res = GetDatanodeInfoResponseProto.newBuilder().setLocalInfo(PBHelperClient.convert(impl.getDatanodeInfo())).build();
+        } catch (IOException e) {
+            throw new ServiceException(e);
+        }
+        return res;
     }
-    return START_RECONFIG_RESP;
-  }
 
-  @Override
-  public ListReconfigurablePropertiesResponseProto listReconfigurableProperties(
-      RpcController controller,
-      ListReconfigurablePropertiesRequestProto request)
-      throws ServiceException {
-    try {
-      return ReconfigurationProtocolServerSideUtils
-          .listReconfigurableProperties(impl.listReconfigurableProperties());
-    } catch (IOException e) {
-      throw new ServiceException(e);
+    @Override
+    public StartReconfigurationResponseProto startReconfiguration(RpcController unused, StartReconfigurationRequestProto request) throws ServiceException {
+        try {
+            impl.startReconfiguration();
+        } catch (IOException e) {
+            throw new ServiceException(e);
+        }
+        return START_RECONFIG_RESP;
     }
-  }
 
-  @Override
-  public GetReconfigurationStatusResponseProto getReconfigurationStatus(
-      RpcController unused, GetReconfigurationStatusRequestProto request)
-      throws ServiceException {
-    try {
-      return ReconfigurationProtocolServerSideUtils
-          .getReconfigurationStatus(impl.getReconfigurationStatus());
-    } catch (IOException e) {
-      throw new ServiceException(e);
+    @Override
+    public ListReconfigurablePropertiesResponseProto listReconfigurableProperties(RpcController controller, ListReconfigurablePropertiesRequestProto request) throws ServiceException {
+        try {
+            return ReconfigurationProtocolServerSideUtils.listReconfigurableProperties(impl.listReconfigurableProperties());
+        } catch (IOException e) {
+            throw new ServiceException(e);
+        }
     }
-  }
 
-  @Override
-  public TriggerBlockReportResponseProto triggerBlockReport(
-      RpcController unused, TriggerBlockReportRequestProto request)
-          throws ServiceException {
-    try {
-      BlockReportOptions.Factory factory = new BlockReportOptions.Factory().
-          setIncremental(request.getIncremental());
-      if (request.hasNnAddress()) {
-        factory.setNamenodeAddr(NetUtils.createSocketAddr(request.getNnAddress()));
-      }
-      impl.triggerBlockReport(factory.build());
-    } catch (IOException e) {
-      throw new ServiceException(e);
+    @Override
+    public GetReconfigurationStatusResponseProto getReconfigurationStatus(RpcController unused, GetReconfigurationStatusRequestProto request) throws ServiceException {
+        try {
+            return ReconfigurationProtocolServerSideUtils.getReconfigurationStatus(impl.getReconfigurationStatus());
+        } catch (IOException e) {
+            throw new ServiceException(e);
+        }
     }
-    return TRIGGER_BLOCK_REPORT_RESP;
-  }
 
-  @Override
-  public GetBalancerBandwidthResponseProto getBalancerBandwidth(
-      RpcController controller, GetBalancerBandwidthRequestProto request)
-      throws ServiceException {
-    long bandwidth;
-    try {
-      bandwidth = impl.getBalancerBandwidth();
-    } catch (IOException e) {
-      throw new ServiceException(e);
+    @Override
+    public TriggerBlockReportResponseProto triggerBlockReport(RpcController unused, TriggerBlockReportRequestProto request) throws ServiceException {
+        try {
+            BlockReportOptions.Factory factory = new BlockReportOptions.Factory().setIncremental(request.getIncremental());
+            if (request.hasNnAddress()) {
+                factory.setNamenodeAddr(NetUtils.createSocketAddr(request.getNnAddress()));
+            }
+            impl.triggerBlockReport(factory.build());
+        } catch (IOException e) {
+            throw new ServiceException(e);
+        }
+        return TRIGGER_BLOCK_REPORT_RESP;
     }
-    return GetBalancerBandwidthResponseProto.newBuilder()
-        .setBandwidth(bandwidth).build();
-  }
 
-  /**
-   * Submit a disk balancer plan for execution.
-   * @param controller  - RpcController
-   * @param request   - Request
-   * @return   Response
-   * @throws ServiceException
-   */
-  @Override
-  public SubmitDiskBalancerPlanResponseProto submitDiskBalancerPlan(
-      RpcController controller, SubmitDiskBalancerPlanRequestProto request)
-      throws ServiceException {
-    try {
-      impl.submitDiskBalancerPlan(request.getPlanID(),
-          request.hasPlanVersion() ? request.getPlanVersion() : 1,
-          request.hasPlanFile() ? request.getPlanFile() : "",
-          request.getPlan(),
-          request.hasIgnoreDateCheck() ? request.getIgnoreDateCheck() : false);
-      SubmitDiskBalancerPlanResponseProto response =
-          SubmitDiskBalancerPlanResponseProto.newBuilder()
-              .build();
-      return response;
-    } catch(Exception e) {
-      throw new ServiceException(e);
+    @Override
+    public GetBalancerBandwidthResponseProto getBalancerBandwidth(RpcController controller, GetBalancerBandwidthRequestProto request) throws ServiceException {
+        long bandwidth;
+        try {
+            bandwidth = impl.getBalancerBandwidth();
+        } catch (IOException e) {
+            throw new ServiceException(e);
+        }
+        return GetBalancerBandwidthResponseProto.newBuilder().setBandwidth(bandwidth).build();
     }
-  }
 
-  /**
-   * Cancel an executing plan.
-   * @param controller - RpcController
-   * @param request  - Request
-   * @return Response.
-   * @throws ServiceException
-   */
-  @Override
-  public CancelPlanResponseProto cancelDiskBalancerPlan(
-      RpcController controller, CancelPlanRequestProto request)
-      throws ServiceException {
-    try {
-      impl.cancelDiskBalancePlan(request.getPlanID());
-      return CancelPlanResponseProto.newBuilder().build();
-    } catch (Exception e) {
-      throw new ServiceException(e);
+    /**
+     * Submit a disk balancer plan for execution.
+     * @param controller  - RpcController
+     * @param request   - Request
+     * @return   Response
+     * @throws ServiceException
+     */
+    @Override
+    public SubmitDiskBalancerPlanResponseProto submitDiskBalancerPlan(RpcController controller, SubmitDiskBalancerPlanRequestProto request) throws ServiceException {
+        try {
+            impl.submitDiskBalancerPlan(request.getPlanID(), request.hasPlanVersion() ? request.getPlanVersion() : 1, request.hasPlanFile() ? request.getPlanFile() : "", request.getPlan(), request.hasIgnoreDateCheck() ? request.getIgnoreDateCheck() : false);
+            SubmitDiskBalancerPlanResponseProto response = SubmitDiskBalancerPlanResponseProto.newBuilder().build();
+            return response;
+        } catch (Exception e) {
+            throw new ServiceException(e);
+        }
     }
-  }
 
-  /**
-   * Gets the status of an executing Plan.
-   */
-  @Override
-  public QueryPlanStatusResponseProto queryDiskBalancerPlan(
-      RpcController controller, QueryPlanStatusRequestProto request)
-      throws ServiceException {
-    try {
-      DiskBalancerWorkStatus result = impl.queryDiskBalancerPlan();
-      return QueryPlanStatusResponseProto
-          .newBuilder()
-          .setResult(result.getResult().getIntResult())
-          .setPlanID(result.getPlanID())
-          .setPlanFile(result.getPlanFile())
-          .setCurrentStatus(result.currentStateString())
-          .build();
-    } catch (Exception e) {
-      throw new ServiceException(e);
+    /**
+     * Cancel an executing plan.
+     * @param controller - RpcController
+     * @param request  - Request
+     * @return Response.
+     * @throws ServiceException
+     */
+    @Override
+    public CancelPlanResponseProto cancelDiskBalancerPlan(RpcController controller, CancelPlanRequestProto request) throws ServiceException {
+        try {
+            impl.cancelDiskBalancePlan(request.getPlanID());
+            return CancelPlanResponseProto.newBuilder().build();
+        } catch (Exception e) {
+            throw new ServiceException(e);
+        }
     }
-  }
 
-  /**
-   * Returns a run-time setting from diskbalancer like Bandwidth.
-   */
-  @Override
-  public DiskBalancerSettingResponseProto getDiskBalancerSetting(
-      RpcController controller, DiskBalancerSettingRequestProto request)
-      throws ServiceException {
-    try {
-      String val = impl.getDiskBalancerSetting(request.getKey());
-      return DiskBalancerSettingResponseProto.newBuilder()
-          .setValue(val)
-          .build();
-    } catch (Exception e) {
-      throw new ServiceException(e);
+    /**
+     * Gets the status of an executing Plan.
+     */
+    @Override
+    public QueryPlanStatusResponseProto queryDiskBalancerPlan(RpcController controller, QueryPlanStatusRequestProto request) throws ServiceException {
+        try {
+            DiskBalancerWorkStatus result = impl.queryDiskBalancerPlan();
+            return QueryPlanStatusResponseProto.newBuilder().setResult(result.getResult().getIntResult()).setPlanID(result.getPlanID()).setPlanFile(result.getPlanFile()).setCurrentStatus(result.currentStateString()).build();
+        } catch (Exception e) {
+            throw new ServiceException(e);
+        }
     }
-  }
 
-  @Override
-  public GetVolumeReportResponseProto getVolumeReport(RpcController controller,
-      GetVolumeReportRequestProto request) throws ServiceException {
-    try {
-      Builder builder = GetVolumeReportResponseProto.newBuilder();
-      List<DatanodeVolumeInfo> volumeReport = impl.getVolumeReport();
-      for (DatanodeVolumeInfo info : volumeReport) {
-        builder.addVolumeInfo(DatanodeVolumeInfoProto.newBuilder()
-            .setPath(info.getPath()).setFreeSpace(info.getFreeSpace())
-            .setNumBlocks(info.getNumBlocks())
-            .setReservedSpace(info.getReservedSpace())
-            .setReservedSpaceForReplicas(info.getReservedSpaceForReplicas())
-            .setStorageType(
-                PBHelperClient.convertStorageType(info.getStorageType()))
-            .setUsedSpace(info.getUsedSpace()));
-      }
-      return builder.build();
-    } catch (Exception e) {
-      throw new ServiceException(e);
+    /**
+     * Returns a run-time setting from diskbalancer like Bandwidth.
+     */
+    @Override
+    public DiskBalancerSettingResponseProto getDiskBalancerSetting(RpcController controller, DiskBalancerSettingRequestProto request) throws ServiceException {
+        try {
+            String val = impl.getDiskBalancerSetting(request.getKey());
+            return DiskBalancerSettingResponseProto.newBuilder().setValue(val).build();
+        } catch (Exception e) {
+            throw new ServiceException(e);
+        }
     }
-  }
+
+    @Override
+    public GetVolumeReportResponseProto getVolumeReport(RpcController controller, GetVolumeReportRequestProto request) throws ServiceException {
+        try {
+            Builder builder = GetVolumeReportResponseProto.newBuilder();
+            List<DatanodeVolumeInfo> volumeReport = impl.getVolumeReport();
+            for (DatanodeVolumeInfo info : volumeReport) {
+                builder.addVolumeInfo(DatanodeVolumeInfoProto.newBuilder().setPath(info.getPath()).setFreeSpace(info.getFreeSpace()).setNumBlocks(info.getNumBlocks()).setReservedSpace(info.getReservedSpace()).setReservedSpaceForReplicas(info.getReservedSpaceForReplicas()).setStorageType(PBHelperClient.convertStorageType(info.getStorageType())).setUsedSpace(info.getUsedSpace()));
+            }
+            return builder.build();
+        } catch (Exception e) {
+            throw new ServiceException(e);
+        }
+    }
 }

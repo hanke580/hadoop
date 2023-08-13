@@ -15,14 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.metrics2.filter;
-
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
-
 import com.google.re2j.Pattern;
+
 /**
  * A regex pattern filter for metrics
  */
@@ -30,8 +28,8 @@ import com.google.re2j.Pattern;
 @InterfaceStability.Evolving
 public class RegexFilter extends AbstractPatternFilter {
 
-  @Override
-  protected Pattern compile(String s) {
-    return Pattern.compile(s);
-  }
+    @Override
+    protected Pattern compile(String s) {
+        return Pattern.compile(s);
+    }
 }

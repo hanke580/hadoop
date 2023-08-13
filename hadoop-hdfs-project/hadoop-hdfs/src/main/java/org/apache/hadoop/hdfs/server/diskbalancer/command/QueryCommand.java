@@ -16,7 +16,6 @@
  * limitations under the License.
  *
  */
-
 package org.apache.hadoop.hdfs.server.diskbalancer.command;
 
 import com.google.common.base.Preconditions;
@@ -35,73 +34,58 @@ import org.apache.hadoop.net.NetUtils;
  */
 public class QueryCommand extends Command {
 
-  /**
-   * Constructs QueryCommand.
-   *
-   * @param conf - Configuration.
-   */
-  public QueryCommand(Configuration conf) {
-    super(conf);
-    addValidCommandParameters(DiskBalancerCLI.QUERY,
-        "Queries the status of disk plan running on a given datanode.");
-    addValidCommandParameters(DiskBalancerCLI.VERBOSE,
-        "Prints verbose results.");
-  }
-
-  /**
-   * Executes the Client Calls.
-   *
-   * @param cmd - CommandLine
-   */
-  @Override
-  public void execute(CommandLine cmd) throws Exception {
-    LOG.info("Executing \"query plan\" command.");
-    Preconditions.checkState(cmd.hasOption(DiskBalancerCLI.QUERY));
-    verifyCommandOptions(DiskBalancerCLI.QUERY, cmd);
-    String nodeName = cmd.getOptionValue(DiskBalancerCLI.QUERY);
-    Preconditions.checkNotNull(nodeName);
-    nodeName = nodeName.trim();
-    String nodeAddress = nodeName;
-
-    // if the string is not name:port format use the default port.
-    if (!nodeName.matches("[^\\:]+:[0-9]{2,5}")) {
-      int defaultIPC = NetUtils.createSocketAddr(
-          getConf().getTrimmed(DFSConfigKeys.DFS_DATANODE_IPC_ADDRESS_KEY,
-              DFSConfigKeys.DFS_DATANODE_IPC_ADDRESS_DEFAULT)).getPort();
-      nodeAddress = nodeName + ":" + defaultIPC;
-      LOG.debug("Using default data node port :  {}", nodeAddress);
+    /**
+     * Constructs QueryCommand.
+     *
+     * @param conf - Configuration.
+     */
+    public QueryCommand(Configuration conf) {
+        super(conf);
+        addValidCommandParameters(DiskBalancerCLI.QUERY, "Queries the status of disk plan running on a given datanode.");
+        addValidCommandParameters(DiskBalancerCLI.VERBOSE, "Prints verbose results.");
     }
 
-    ClientDatanodeProtocol dataNode = getDataNodeProxy(nodeAddress);
-    try {
-      DiskBalancerWorkStatus workStatus = dataNode.queryDiskBalancerPlan();
-      System.out.printf("Plan File: %s%nPlan ID: %s%nResult: %s%n",
-              workStatus.getPlanFile(),
-              workStatus.getPlanID(),
-              workStatus.getResult().toString());
-
-      if (cmd.hasOption(DiskBalancerCLI.VERBOSE)) {
-        System.out.printf("%s", workStatus.currentStateString());
-      }
-    } catch (DiskBalancerException ex) {
-      LOG.error("Query plan failed. ex: {}", ex);
-      throw ex;
+    /**
+     * Executes the Client Calls.
+     *
+     * @param cmd - CommandLine
+     */
+    @Override
+    public void execute(CommandLine cmd) throws Exception {
+        LOG.info("Executing \"query plan\" command.");
+        Preconditions.checkState(cmd.hasOption(DiskBalancerCLI.QUERY));
+        verifyCommandOptions(DiskBalancerCLI.QUERY, cmd);
+        String nodeName = cmd.getOptionValue(DiskBalancerCLI.QUERY);
+        Preconditions.checkNotNull(nodeName);
+        nodeName = nodeName.trim();
+        String nodeAddress = nodeName;
+        // if the string is not name:port format use the default port.
+        if (!nodeName.matches("[^\\:]+:[0-9]{2,5}")) {
+            int defaultIPC = NetUtils.createSocketAddr(getConf().getTrimmed(DFSConfigKeys.DFS_DATANODE_IPC_ADDRESS_KEY, DFSConfigKeys.DFS_DATANODE_IPC_ADDRESS_DEFAULT)).getPort();
+            nodeAddress = nodeName + ":" + defaultIPC;
+            LOG.debug("Using default data node port :  {}", nodeAddress);
+        }
+        ClientDatanodeProtocol dataNode = getDataNodeProxy(nodeAddress);
+        try {
+            DiskBalancerWorkStatus workStatus = dataNode.queryDiskBalancerPlan();
+            System.out.printf("Plan File: %s%nPlan ID: %s%nResult: %s%n", workStatus.getPlanFile(), workStatus.getPlanID(), workStatus.getResult().toString());
+            if (cmd.hasOption(DiskBalancerCLI.VERBOSE)) {
+                System.out.printf("%s", workStatus.currentStateString());
+            }
+        } catch (DiskBalancerException ex) {
+            LOG.error("Query plan failed. ex: {}", ex);
+            throw ex;
+        }
     }
-  }
 
-  /**
-   * Gets extended help for this command.
-   */
-  @Override
-  public void printHelp() {
-    String header = "Query Plan queries a given data node about the " +
-        "current state of disk balancer execution.\n\n";
-
-    String footer = "\nQuery command retrievs the plan ID and the current " +
-        "running state. ";
-
-    HelpFormatter helpFormatter = new HelpFormatter();
-    helpFormatter.printHelp("hdfs diskbalancer -query <hostname>  [options]",
-        header, DiskBalancerCLI.getQueryOptions(), footer);
-  }
+    /**
+     * Gets extended help for this command.
+     */
+    @Override
+    public void printHelp() {
+        String header = "Query Plan queries a given data node about the " + "current state of disk balancer execution.\n\n";
+        String footer = "\nQuery command retrievs the plan ID and the current " + "running state. ";
+        HelpFormatter helpFormatter = new HelpFormatter();
+        helpFormatter.printHelp("hdfs diskbalancer -query <hostname>  [options]", header, DiskBalancerCLI.getQueryOptions(), footer);
+    }
 }

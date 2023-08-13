@@ -18,23 +18,19 @@
 package org.apache.hadoop.hdfs;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hdfs.server.blockmanagement
-    .DatanodeAdminBackoffMonitor;
-import org.apache.hadoop.hdfs.server.blockmanagement
-    .DatanodeAdminMonitorInterface;
+import org.apache.hadoop.hdfs.server.blockmanagement.DatanodeAdminBackoffMonitor;
+import org.apache.hadoop.hdfs.server.blockmanagement.DatanodeAdminMonitorInterface;
 
 /**
  * Class to run all the stripped decommission tests with the
  * DatanodeAdminBackoffMonitor.
  */
-public class TestDecommissionWithStripedBackoffMonitor
-    extends TestDecommissionWithStriped{
+public class TestDecommissionWithStripedBackoffMonitor extends TestDecommissionWithStriped {
 
-  @Override
-  protected Configuration createConfiguration() {
-    Configuration conf = new Configuration();
-    conf.setClass(DFSConfigKeys.DFS_NAMENODE_DECOMMISSION_MONITOR_CLASS,
-        DatanodeAdminBackoffMonitor.class, DatanodeAdminMonitorInterface.class);
-    return conf;
-  }
+    @Override
+    protected Configuration createConfiguration() {
+        Configuration conf = new Configuration();
+        conf.setClass(DFSConfigKeys.DFS_NAMENODE_DECOMMISSION_MONITOR_CLASS, DatanodeAdminBackoffMonitor.class, DatanodeAdminMonitorInterface.class);
+        return conf;
+    }
 }

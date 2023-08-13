@@ -15,11 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.datanode.fsdataset.impl;
 
 import java.nio.MappedByteBuffer;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.hdfs.ExtendedBlockId;
@@ -31,35 +29,37 @@ import org.apache.hadoop.io.nativeio.NativeIO;
 @InterfaceAudience.Private
 @InterfaceStability.Unstable
 public class MemoryMappedBlock implements MappableBlock {
-  private MappedByteBuffer mmap;
-  private final long length;
 
-  MemoryMappedBlock(MappedByteBuffer mmap, long length) {
-    this.mmap = mmap;
-    this.length = length;
-    assert length > 0;
-  }
+    private MappedByteBuffer mmap;
 
-  @Override
-  public long getLength() {
-    return length;
-  }
+    private final long length;
 
-  @Override
-  public long getAddress() {
-    return -1L;
-  }
-
-  @Override
-  public ExtendedBlockId getKey() {
-    return null;
-  }
-
-  @Override
-  public void close() {
-    if (mmap != null) {
-      NativeIO.POSIX.munmap(mmap);
-      mmap = null;
+    MemoryMappedBlock(MappedByteBuffer mmap, long length) {
+        this.mmap = mmap;
+        this.length = length;
+        assert length > 0;
     }
-  }
+
+    @Override
+    public long getLength() {
+        return length;
+    }
+
+    @Override
+    public long getAddress() {
+        return -1L;
+    }
+
+    @Override
+    public ExtendedBlockId getKey() {
+        return null;
+    }
+
+    @Override
+    public void close() {
+        if (mmap != null) {
+            NativeIO.POSIX.munmap(mmap);
+            mmap = null;
+        }
+    }
 }

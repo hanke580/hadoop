@@ -19,7 +19,6 @@ package org.apache.hadoop.hdfs.protocolPB;
 
 import java.io.Closeable;
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.hdfs.protocol.proto.JournalProtocolProtos.FenceRequestProto;
@@ -33,7 +32,6 @@ import org.apache.hadoop.ipc.ProtobufHelper;
 import org.apache.hadoop.ipc.ProtocolMetaInterface;
 import org.apache.hadoop.ipc.RPC;
 import org.apache.hadoop.ipc.RpcClientUtil;
-
 import org.apache.hadoop.thirdparty.protobuf.RpcController;
 import org.apache.hadoop.thirdparty.protobuf.ServiceException;
 
@@ -44,71 +42,57 @@ import org.apache.hadoop.thirdparty.protobuf.ServiceException;
  */
 @InterfaceAudience.Private
 @InterfaceStability.Stable
-public class JournalProtocolTranslatorPB implements ProtocolMetaInterface,
-    JournalProtocol, Closeable {
-  /** RpcController is not used and hence is set to null */
-  private final static RpcController NULL_CONTROLLER = null;
-  private final JournalProtocolPB rpcProxy;
-  
-  public JournalProtocolTranslatorPB(JournalProtocolPB rpcProxy) {
-    this.rpcProxy = rpcProxy;
-  }
+public class JournalProtocolTranslatorPB implements ProtocolMetaInterface, JournalProtocol, Closeable {
 
-  @Override
-  public void close() {
-    RPC.stopProxy(rpcProxy);
-  }
+    /**
+     * RpcController is not used and hence is set to null
+     */
+    private final static RpcController NULL_CONTROLLER = null;
 
-  @Override
-  public void journal(JournalInfo journalInfo, long epoch, long firstTxnId,
-      int numTxns, byte[] records) throws IOException {
-    JournalRequestProto req = JournalRequestProto.newBuilder()
-        .setJournalInfo(PBHelper.convert(journalInfo))
-        .setEpoch(epoch)
-        .setFirstTxnId(firstTxnId)
-        .setNumTxns(numTxns)
-        .setRecords(PBHelperClient.getByteString(records))
-        .build();
-    try {
-      rpcProxy.journal(NULL_CONTROLLER, req);
-    } catch (ServiceException e) {
-      throw ProtobufHelper.getRemoteException(e);
+    private final JournalProtocolPB rpcProxy;
+
+    public JournalProtocolTranslatorPB(JournalProtocolPB rpcProxy) {
+        this.rpcProxy = rpcProxy;
     }
-  }
 
-  @Override
-  public void startLogSegment(JournalInfo journalInfo, long epoch, long txid)
-      throws IOException {
-    StartLogSegmentRequestProto req = StartLogSegmentRequestProto.newBuilder()
-        .setJournalInfo(PBHelper.convert(journalInfo))
-        .setEpoch(epoch)
-        .setTxid(txid)
-        .build();
-    try {
-      rpcProxy.startLogSegment(NULL_CONTROLLER, req);
-    } catch (ServiceException e) {
-      throw ProtobufHelper.getRemoteException(e);
+    @Override
+    public void close() {
+        RPC.stopProxy(rpcProxy);
     }
-  }
-  
-  @Override
-  public FenceResponse fence(JournalInfo journalInfo, long epoch,
-      String fencerInfo) throws IOException {
-    FenceRequestProto req = FenceRequestProto.newBuilder().setEpoch(epoch)
-        .setJournalInfo(PBHelper.convert(journalInfo)).build();
-    try {
-      FenceResponseProto resp = rpcProxy.fence(NULL_CONTROLLER, req);
-      return new FenceResponse(resp.getPreviousEpoch(),
-          resp.getLastTransactionId(), resp.getInSync());
-    } catch (ServiceException e) {
-      throw ProtobufHelper.getRemoteException(e);
-    }
-  }
 
-  @Override
-  public boolean isMethodSupported(String methodName) throws IOException {
-    return RpcClientUtil.isMethodSupported(rpcProxy, JournalProtocolPB.class,
-        RPC.RpcKind.RPC_PROTOCOL_BUFFER,
-        RPC.getProtocolVersion(JournalProtocolPB.class), methodName);
-  }
+    @Override
+    public void journal(JournalInfo journalInfo, long epoch, long firstTxnId, int numTxns, byte[] records) throws IOException {
+        JournalRequestProto req = JournalRequestProto.newBuilder().setJournalInfo(PBHelper.convert(journalInfo)).setEpoch(epoch).setFirstTxnId(firstTxnId).setNumTxns(numTxns).setRecords(PBHelperClient.getByteString(records)).build();
+        try {
+            rpcProxy.journal(NULL_CONTROLLER, req);
+        } catch (ServiceException e) {
+            throw ProtobufHelper.getRemoteException(e);
+        }
+    }
+
+    @Override
+    public void startLogSegment(JournalInfo journalInfo, long epoch, long txid) throws IOException {
+        StartLogSegmentRequestProto req = StartLogSegmentRequestProto.newBuilder().setJournalInfo(PBHelper.convert(journalInfo)).setEpoch(epoch).setTxid(txid).build();
+        try {
+            rpcProxy.startLogSegment(NULL_CONTROLLER, req);
+        } catch (ServiceException e) {
+            throw ProtobufHelper.getRemoteException(e);
+        }
+    }
+
+    @Override
+    public FenceResponse fence(JournalInfo journalInfo, long epoch, String fencerInfo) throws IOException {
+        FenceRequestProto req = FenceRequestProto.newBuilder().setEpoch(epoch).setJournalInfo(PBHelper.convert(journalInfo)).build();
+        try {
+            FenceResponseProto resp = rpcProxy.fence(NULL_CONTROLLER, req);
+            return new FenceResponse(resp.getPreviousEpoch(), resp.getLastTransactionId(), resp.getInSync());
+        } catch (ServiceException e) {
+            throw ProtobufHelper.getRemoteException(e);
+        }
+    }
+
+    @Override
+    public boolean isMethodSupported(String methodName) throws IOException {
+        return RpcClientUtil.isMethodSupported(rpcProxy, JournalProtocolPB.class, RPC.RpcKind.RPC_PROTOCOL_BUFFER, RPC.getProtocolVersion(JournalProtocolPB.class), methodName);
+    }
 }

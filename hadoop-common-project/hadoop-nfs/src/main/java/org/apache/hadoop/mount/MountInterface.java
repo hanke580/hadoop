@@ -18,7 +18,6 @@
 package org.apache.hadoop.mount;
 
 import java.net.InetAddress;
-
 import org.apache.hadoop.oncrpc.XDR;
 
 /**
@@ -26,85 +25,94 @@ import org.apache.hadoop.oncrpc.XDR;
  * requests. See RFC 1094 for more details.
  */
 public interface MountInterface {
-  /** Mount procedures */
-  public enum MNTPROC {
-    // the order of the values below are significant.
-    NULL,
-    MNT,
-    DUMP,
-    UMNT,
-    UMNTALL,
-    EXPORT,
-    EXPORTALL,
-    PATHCONF;
 
-    /** @return the int value representing the procedure. */
-    public int getValue() {
-      return ordinal();
-    }
-
-    /** The procedure of given value.
-     * @param value specifies the procedure index
-     * @return the procedure corresponding to the value.
+    /**
+     * Mount procedures
      */
-    public static MNTPROC fromValue(int value) {
-      if (value < 0 || value >= values().length) {
-        return null;
-      }
-      return values()[value];
+    public enum MNTPROC {
+
+        // the order of the values below are significant.
+        NULL,
+        MNT,
+        DUMP,
+        UMNT,
+        UMNTALL,
+        EXPORT,
+        EXPORTALL,
+        PATHCONF;
+
+        /**
+         * @return the int value representing the procedure.
+         */
+        public int getValue() {
+            return ordinal();
+        }
+
+        /**
+         * The procedure of given value.
+         * @param value specifies the procedure index
+         * @return the procedure corresponding to the value.
+         */
+        public static MNTPROC fromValue(int value) {
+            if (value < 0 || value >= values().length) {
+                return null;
+            }
+            return values()[value];
+        }
     }
-  }
 
-  /**
-   * MNTPRC_NULL - Do Nothing.
-   * @param out XDR response used in NFS protocol
-   * @param xid transaction id
-   * @param client represents IP address
-   * @return XDR response
-   */
-  public XDR nullOp(XDR out, int xid, InetAddress client);
+    /**
+     * MNTPRC_NULL - Do Nothing.
+     * @param out XDR response used in NFS protocol
+     * @param xid transaction id
+     * @param client represents IP address
+     * @return XDR response
+     */
+    public XDR nullOp(XDR out, int xid, InetAddress client);
 
-  /**
-   * MNTPROC_MNT - Add mount entry.
-   * @param xdr XDR message used in NFS protocol
-   * @param out XDR response used in NFS protocol
-   * @param xid transaction id
-   * @param client represents IP address
-   * @return XDR response
-   */
-  public XDR mnt(XDR xdr, XDR out, int xid, InetAddress client);
+    /**
+     * MNTPROC_MNT - Add mount entry.
+     * @param xdr XDR message used in NFS protocol
+     * @param out XDR response used in NFS protocol
+     * @param xid transaction id
+     * @param client represents IP address
+     * @return XDR response
+     */
+    public XDR mnt(XDR xdr, XDR out, int xid, InetAddress client);
 
-  /**
-   * MNTPROC_DUMP - Return mount entries.
-   * @param out XDR response used in NFS protocol
-   * @param xid transaction id
-   * @param client represents IP address
-   * @return XDR response
-   */
-  public XDR dump(XDR out, int xid, InetAddress client);
+    /**
+     * MNTPROC_DUMP - Return mount entries.
+     * @param out XDR response used in NFS protocol
+     * @param xid transaction id
+     * @param client represents IP address
+     * @return XDR response
+     */
+    public XDR dump(XDR out, int xid, InetAddress client);
 
-  /**
-   * MNTPROC_UMNT - Remove mount entry.
-   * @param xdr XDR message used in NFS protocol
-   * @param out XDR response used in NFS protocol
-   * @param xid transaction id
-   * @param client represents IP address
-   * @return XDR response
-   */
-  public XDR umnt(XDR xdr, XDR out, int xid, InetAddress client);
+    /**
+     * MNTPROC_UMNT - Remove mount entry.
+     * @param xdr XDR message used in NFS protocol
+     * @param out XDR response used in NFS protocol
+     * @param xid transaction id
+     * @param client represents IP address
+     * @return XDR response
+     */
+    public XDR umnt(XDR xdr, XDR out, int xid, InetAddress client);
 
-  /**
-   * MNTPROC_UMNTALL - Remove all mount entries.
-   * @param out XDR response used in NFS protocol
-   * @param xid transaction id
-   * @param client represents IP address
-   * @return XDR response
-   */
-  public XDR umntall(XDR out, int xid, InetAddress client);
-  
-  /** MNTPROC_EXPORT and MNTPROC_EXPORTALL - Return export list */
-  //public XDR exportall(XDR out, int xid, InetAddress client);
-  
-  /** MNTPROC_PATHCONF - POSIX pathconf information */
-  //public XDR pathconf(XDR out, int xid, InetAddress client);
+    /**
+     * MNTPROC_UMNTALL - Remove all mount entries.
+     * @param out XDR response used in NFS protocol
+     * @param xid transaction id
+     * @param client represents IP address
+     * @return XDR response
+     */
+    public XDR umntall(XDR out, int xid, InetAddress client);
+    /**
+     * MNTPROC_EXPORT and MNTPROC_EXPORTALL - Return export list
+     */
+    //public XDR exportall(XDR out, int xid, InetAddress client);
+    /**
+     * MNTPROC_PATHCONF - POSIX pathconf information
+     */
+    //public XDR pathconf(XDR out, int xid, InetAddress client);
 }

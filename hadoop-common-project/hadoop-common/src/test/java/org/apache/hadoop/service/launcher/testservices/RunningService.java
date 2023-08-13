@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.service.launcher.testservices;
 
 import org.apache.hadoop.conf.Configuration;
@@ -24,61 +23,65 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RunningService extends AbstractService implements Runnable {
-  private static final Logger LOG =
-      LoggerFactory.getLogger(RunningService.class);
-  public static final String NAME =
-      "org.apache.hadoop.service.launcher.testservices.RunningService";
-  public static final int DELAY = 100;
 
-  /**
-   * Property on delay times.
-   */
-  public static final String DELAY_TIME = "delay.time";
-  public static final String FAIL_IN_RUN = "fail.runnable";
-  public static final String FAILURE_MESSAGE = "FAIL_IN_RUN";
-  private boolean interrupted;
+    private static final Logger LOG = LoggerFactory.getLogger(RunningService.class);
 
-  public int delayTime = DELAY;
-  public boolean failInRun;
+    public static final String NAME = "org.apache.hadoop.service.launcher.testservices.RunningService";
 
-  public RunningService() {
-    super("RunningService");
-  }
+    public static final int DELAY = 100;
 
-  public RunningService(String name) {
-    super(name);
-  }
+    /**
+     * Property on delay times.
+     */
+    public static final String DELAY_TIME = "delay.time";
 
-  @Override
-  protected void serviceInit(Configuration conf) throws Exception {
-    super.serviceInit(conf);
-    delayTime = getConfig().getInt(DELAY_TIME, delayTime);
-    failInRun = getConfig().getBoolean(FAIL_IN_RUN, failInRun);
-  }
+    public static final String FAIL_IN_RUN = "fail.runnable";
 
-  @Override
-  protected void serviceStart() throws Exception {
-    Thread thread = new Thread(this);
-    thread.setName(getName());
-    thread.start();
-  }
+    public static final String FAILURE_MESSAGE = "FAIL_IN_RUN";
 
-  @Override
-  public void run() {
-    try {
-      Thread.sleep(delayTime);
-      if (failInRun) {
-        noteFailure(new Exception(FAILURE_MESSAGE));
-      }
-    } catch (InterruptedException e) {
-      interrupted = true;
-      LOG.info("Interrupted");
+    private boolean interrupted;
+
+    public int delayTime = DELAY;
+
+    public boolean failInRun;
+
+    public RunningService() {
+        super("RunningService");
     }
-    stop();
-  }
 
-  public boolean isInterrupted() {
-    return interrupted;
-  }
+    public RunningService(String name) {
+        super(name);
+    }
 
+    @Override
+    protected void serviceInit(Configuration conf) throws Exception {
+        super.serviceInit(conf);
+        delayTime = getConfig().getInt(DELAY_TIME, delayTime);
+        failInRun = getConfig().getBoolean(FAIL_IN_RUN, failInRun);
+    }
+
+    @Override
+    protected void serviceStart() throws Exception {
+        Thread thread = new Thread(this);
+        thread.setName(getName());
+        thread.start();
+    }
+
+    @Override
+    public void run() {
+        try {
+            Thread.sleep(delayTime);
+            if (failInRun) {
+                noteFailure(new Exception(FAILURE_MESSAGE));
+            }
+        } catch (InterruptedException e) {
+            interrupted = true;
+            LOG.info("Interrupted");
+        }
+        stop();
+    }
+
+    public boolean isInterrupted() {
+        return interrupted;
+    }
 }

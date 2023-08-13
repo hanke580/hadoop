@@ -36,7 +36,6 @@ import org.apache.hadoop.io.ElasticByteBufferPool;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.net.NetUtils;
 import org.apache.hadoop.security.token.Token;
-
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -54,167 +53,136 @@ import java.util.EnumSet;
  */
 @InterfaceAudience.Private
 class StripedBlockWriter {
-  private final StripedWriter stripedWriter;
-  private final DataNode datanode;
-  private final Configuration conf;
 
-  private final ExtendedBlock block;
-  private final DatanodeInfo target;
-  private final StorageType storageType;
-  private final String storageId;
+    private final StripedWriter stripedWriter;
 
-  private Socket targetSocket;
-  private DataOutputStream targetOutputStream;
-  private DataInputStream targetInputStream;
-  private ByteBuffer targetBuffer;
-  private long blockOffset4Target = 0;
-  private long seqNo4Target = 0;
-  private static final ByteBufferPool BUFFER_POOL = new ElasticByteBufferPool();
+    private final DataNode datanode;
 
-  StripedBlockWriter(StripedWriter stripedWriter, DataNode datanode,
-                     Configuration conf, ExtendedBlock block,
-                     DatanodeInfo target, StorageType storageType,
-                     String storageId) throws IOException {
-    this.stripedWriter = stripedWriter;
-    this.datanode = datanode;
-    this.conf = conf;
+    private final Configuration conf;
 
-    this.block = block;
-    this.target = target;
-    this.storageType = storageType;
-    this.storageId = storageId;
+    private final ExtendedBlock block;
 
-    this.targetBuffer = stripedWriter.allocateWriteBuffer();
+    private final DatanodeInfo target;
 
-    init();
-  }
+    private final StorageType storageType;
 
-  ByteBuffer getTargetBuffer() {
-    return targetBuffer;
-  }
+    private final String storageId;
 
-  void freeTargetBuffer() {
-    targetBuffer = null;
-  }
+    private Socket targetSocket;
 
-  /**
-   * Initialize  output/input streams for transferring data to target
-   * and send create block request.
-   */
-  private void init() throws IOException {
-    Socket socket = null;
-    DataOutputStream out = null;
-    DataInputStream in = null;
-    boolean success = false;
-    try {
-      InetSocketAddress targetAddr =
-          stripedWriter.getSocketAddress4Transfer(target);
-      socket = datanode.newSocket();
-      NetUtils.connect(socket, targetAddr,
-          datanode.getDnConf().getSocketTimeout());
-      socket.setTcpNoDelay(
-          datanode.getDnConf().getDataTransferServerTcpNoDelay());
-      socket.setSoTimeout(datanode.getDnConf().getSocketTimeout());
+    private DataOutputStream targetOutputStream;
 
-      Token<BlockTokenIdentifier> blockToken =
-          datanode.getBlockAccessToken(block,
-              EnumSet.of(BlockTokenIdentifier.AccessMode.WRITE),
-              new StorageType[]{storageType}, new String[]{storageId});
+    private DataInputStream targetInputStream;
 
-      long writeTimeout = datanode.getDnConf().getSocketWriteTimeout();
-      OutputStream unbufOut = NetUtils.getOutputStream(socket, writeTimeout);
-      InputStream unbufIn = NetUtils.getInputStream(socket);
-      DataEncryptionKeyFactory keyFactory =
-          datanode.getDataEncryptionKeyFactoryForBlock(block);
-      IOStreamPair saslStreams = datanode.getSaslClient().socketSend(
-          socket, unbufOut, unbufIn, keyFactory, blockToken, target);
+    private ByteBuffer targetBuffer;
 
-      unbufOut = saslStreams.out;
-      unbufIn = saslStreams.in;
+    private long blockOffset4Target = 0;
 
-      out = new DataOutputStream(new BufferedOutputStream(unbufOut,
-          DFSUtilClient.getSmallBufferSize(conf)));
-      in = new DataInputStream(unbufIn);
+    private long seqNo4Target = 0;
 
-      DatanodeInfo source = new DatanodeInfoBuilder()
-          .setNodeID(datanode.getDatanodeId()).build();
-      new Sender(out).writeBlock(block, storageType,
-          blockToken, "", new DatanodeInfo[]{target},
-          new StorageType[]{storageType}, source,
-          BlockConstructionStage.PIPELINE_SETUP_CREATE, 0, 0, 0, 0,
-          stripedWriter.getChecksum(), stripedWriter.getCachingStrategy(),
-          false, false, null, storageId, new String[]{storageId});
+    private static final ByteBufferPool BUFFER_POOL = new ElasticByteBufferPool();
 
-      targetSocket = socket;
-      targetOutputStream = out;
-      targetInputStream = in;
-      success = true;
-    } finally {
-      if (!success) {
-        IOUtils.closeStream(out);
-        IOUtils.closeStream(in);
-        IOUtils.closeStream(socket);
-      }
-    }
-  }
-
-  /**
-   * Send data to targets.
-   */
-  void transferData2Target(byte[] packetBuf) throws IOException {
-    if (targetBuffer.remaining() == 0) {
-      return;
+    StripedBlockWriter(StripedWriter stripedWriter, DataNode datanode, Configuration conf, ExtendedBlock block, DatanodeInfo target, StorageType storageType, String storageId) throws IOException {
+        this.stripedWriter = stripedWriter;
+        this.datanode = datanode;
+        this.conf = conf;
+        this.block = block;
+        this.target = target;
+        this.storageType = storageType;
+        this.storageId = storageId;
+        this.targetBuffer = stripedWriter.allocateWriteBuffer();
+        init();
     }
 
-    if (targetBuffer.isDirect()) {
-      ByteBuffer directCheckSumBuf =
-          BUFFER_POOL.getBuffer(true, stripedWriter.getChecksumBuf().length);
-      stripedWriter.getChecksum().calculateChunkedSums(
-          targetBuffer, directCheckSumBuf);
-      directCheckSumBuf.get(stripedWriter.getChecksumBuf());
-      BUFFER_POOL.putBuffer(directCheckSumBuf);
-    } else {
-      stripedWriter.getChecksum().calculateChunkedSums(
-          targetBuffer.array(), 0, targetBuffer.remaining(),
-          stripedWriter.getChecksumBuf(), 0);
+    ByteBuffer getTargetBuffer() {
+        return targetBuffer;
     }
 
-    int ckOff = 0;
-    while (targetBuffer.remaining() > 0) {
-      DFSPacket packet = new DFSPacket(packetBuf,
-          stripedWriter.getMaxChunksPerPacket(),
-          blockOffset4Target, seqNo4Target++,
-          stripedWriter.getChecksumSize(), false);
-      int maxBytesToPacket = stripedWriter.getMaxChunksPerPacket()
-          * stripedWriter.getBytesPerChecksum();
-      int toWrite = targetBuffer.remaining() > maxBytesToPacket ?
-          maxBytesToPacket : targetBuffer.remaining();
-      int ckLen = ((toWrite - 1) / stripedWriter.getBytesPerChecksum() + 1)
-          * stripedWriter.getChecksumSize();
-      packet.writeChecksum(stripedWriter.getChecksumBuf(), ckOff, ckLen);
-      ckOff += ckLen;
-      packet.writeData(targetBuffer, toWrite);
-
-      // Send packet
-      packet.writeTo(targetOutputStream);
-
-      blockOffset4Target += toWrite;
-      stripedWriter.getReconstructor().incrBytesWritten(toWrite);
+    void freeTargetBuffer() {
+        targetBuffer = null;
     }
-  }
 
-  // send an empty packet to mark the end of the block
-  void endTargetBlock(byte[] packetBuf) throws IOException {
-    DFSPacket packet = new DFSPacket(packetBuf, 0,
-        blockOffset4Target, seqNo4Target++,
-        stripedWriter.getChecksumSize(), true);
-    packet.writeTo(targetOutputStream);
-    targetOutputStream.flush();
-  }
+    /**
+     * Initialize  output/input streams for transferring data to target
+     * and send create block request.
+     */
+    private void init() throws IOException {
+        Socket socket = null;
+        DataOutputStream out = null;
+        DataInputStream in = null;
+        boolean success = false;
+        try {
+            InetSocketAddress targetAddr = stripedWriter.getSocketAddress4Transfer(target);
+            socket = datanode.newSocket();
+            NetUtils.connect(socket, targetAddr, datanode.getDnConf().getSocketTimeout());
+            socket.setTcpNoDelay(datanode.getDnConf().getDataTransferServerTcpNoDelay());
+            socket.setSoTimeout(datanode.getDnConf().getSocketTimeout());
+            Token<BlockTokenIdentifier> blockToken = datanode.getBlockAccessToken(block, EnumSet.of(BlockTokenIdentifier.AccessMode.WRITE), new StorageType[] { storageType }, new String[] { storageId });
+            long writeTimeout = datanode.getDnConf().getSocketWriteTimeout();
+            OutputStream unbufOut = NetUtils.getOutputStream(socket, writeTimeout);
+            InputStream unbufIn = NetUtils.getInputStream(socket);
+            DataEncryptionKeyFactory keyFactory = datanode.getDataEncryptionKeyFactoryForBlock(block);
+            IOStreamPair saslStreams = datanode.getSaslClient().socketSend(socket, unbufOut, unbufIn, keyFactory, blockToken, target);
+            unbufOut = saslStreams.out;
+            unbufIn = saslStreams.in;
+            out = new DataOutputStream(new BufferedOutputStream(unbufOut, DFSUtilClient.getSmallBufferSize(conf)));
+            in = new DataInputStream(unbufIn);
+            DatanodeInfo source = new DatanodeInfoBuilder().setNodeID(datanode.getDatanodeId()).build();
+            new Sender(out).writeBlock(block, storageType, blockToken, "", new DatanodeInfo[] { target }, new StorageType[] { storageType }, source, BlockConstructionStage.PIPELINE_SETUP_CREATE, 0, 0, 0, 0, stripedWriter.getChecksum(), stripedWriter.getCachingStrategy(), false, false, null, storageId, new String[] { storageId });
+            targetSocket = socket;
+            targetOutputStream = out;
+            targetInputStream = in;
+            success = true;
+        } finally {
+            if (!success) {
+                IOUtils.closeStream(out);
+                IOUtils.closeStream(in);
+                IOUtils.closeStream(socket);
+            }
+        }
+    }
 
-  void close() {
-    IOUtils.closeStream(targetOutputStream);
-    IOUtils.closeStream(targetInputStream);
-    IOUtils.closeStream(targetSocket);
-  }
+    /**
+     * Send data to targets.
+     */
+    void transferData2Target(byte[] packetBuf) throws IOException {
+        if (targetBuffer.remaining() == 0) {
+            return;
+        }
+        if (targetBuffer.isDirect()) {
+            ByteBuffer directCheckSumBuf = BUFFER_POOL.getBuffer(true, stripedWriter.getChecksumBuf().length);
+            stripedWriter.getChecksum().calculateChunkedSums(targetBuffer, directCheckSumBuf);
+            directCheckSumBuf.get(stripedWriter.getChecksumBuf());
+            BUFFER_POOL.putBuffer(directCheckSumBuf);
+        } else {
+            stripedWriter.getChecksum().calculateChunkedSums(targetBuffer.array(), 0, targetBuffer.remaining(), stripedWriter.getChecksumBuf(), 0);
+        }
+        int ckOff = 0;
+        while (targetBuffer.remaining() > 0) {
+            DFSPacket packet = new DFSPacket(packetBuf, stripedWriter.getMaxChunksPerPacket(), blockOffset4Target, seqNo4Target++, stripedWriter.getChecksumSize(), false);
+            int maxBytesToPacket = stripedWriter.getMaxChunksPerPacket() * stripedWriter.getBytesPerChecksum();
+            int toWrite = targetBuffer.remaining() > maxBytesToPacket ? maxBytesToPacket : targetBuffer.remaining();
+            int ckLen = ((toWrite - 1) / stripedWriter.getBytesPerChecksum() + 1) * stripedWriter.getChecksumSize();
+            packet.writeChecksum(stripedWriter.getChecksumBuf(), ckOff, ckLen);
+            ckOff += ckLen;
+            packet.writeData(targetBuffer, toWrite);
+            // Send packet
+            packet.writeTo(targetOutputStream);
+            blockOffset4Target += toWrite;
+            stripedWriter.getReconstructor().incrBytesWritten(toWrite);
+        }
+    }
+
+    // send an empty packet to mark the end of the block
+    void endTargetBlock(byte[] packetBuf) throws IOException {
+        DFSPacket packet = new DFSPacket(packetBuf, 0, blockOffset4Target, seqNo4Target++, stripedWriter.getChecksumSize(), true);
+        packet.writeTo(targetOutputStream);
+        targetOutputStream.flush();
+    }
+
+    void close() {
+        IOUtils.closeStream(targetOutputStream);
+        IOUtils.closeStream(targetInputStream);
+        IOUtils.closeStream(targetSocket);
+    }
 }

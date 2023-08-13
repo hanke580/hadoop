@@ -30,116 +30,109 @@ import org.apache.hadoop.net.ServerSocketUtil;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
-
 import java.io.IOException;
 
 public class TestBlockTokenWithDFSStriped extends TestBlockTokenWithDFS {
-  private final ErasureCodingPolicy ecPolicy =
-      StripedFileTestUtil.getDefaultECPolicy();
-  private final int dataBlocks = ecPolicy.getNumDataUnits();
-  private final int parityBlocks = ecPolicy.getNumParityUnits();
-  private final int cellSize = ecPolicy.getCellSize();
-  private final int stripesPerBlock = 4;
-  private final int numDNs = dataBlocks + parityBlocks + 2;
-  private MiniDFSCluster cluster;
-  private Configuration conf;
 
-  {
-    BLOCK_SIZE = cellSize * stripesPerBlock;
-    FILE_SIZE =  BLOCK_SIZE * dataBlocks * 3;
-  }
+    private final ErasureCodingPolicy ecPolicy = StripedFileTestUtil.getDefaultECPolicy();
 
-  @Rule
-  public Timeout globalTimeout = new Timeout(300000);
+    private final int dataBlocks = ecPolicy.getNumDataUnits();
 
-  private Configuration getConf() {
-    Configuration conf = super.getConf(numDNs);
-    conf.setInt("io.bytes.per.checksum", cellSize);
-    return conf;
-  }
+    private final int parityBlocks = ecPolicy.getNumParityUnits();
 
-  @Test
-  @Override
-  public void testRead() throws Exception {
-    conf = getConf();
+    private final int cellSize = ecPolicy.getCellSize();
 
-    /*
+    private final int stripesPerBlock = 4;
+
+    private final int numDNs = dataBlocks + parityBlocks + 2;
+
+    private MiniDFSCluster cluster;
+
+    private Configuration conf;
+
+    {
+        BLOCK_SIZE = cellSize * stripesPerBlock;
+        FILE_SIZE = BLOCK_SIZE * dataBlocks * 3;
+    }
+
+    @Rule
+    public Timeout globalTimeout = new Timeout(300000);
+
+    private Configuration getConf() {
+        Configuration conf = super.getConf(numDNs);
+        conf.setInt("io.bytes.per.checksum", cellSize);
+        return conf;
+    }
+
+    @Test
+    @Override
+    public void testRead() throws Exception {
+        conf = getConf();
+        /*
      * prefer non-ephemeral port to avoid conflict with tests using
      * ephemeral ports on MiniDFSCluster#restartDataNode(true).
      */
-    Configuration[] overlays = new Configuration[numDNs];
-    for (int i = 0; i < overlays.length; i++) {
-      int offset = i * 10;
-      Configuration c = new Configuration();
-      c.set(DFSConfigKeys.DFS_DATANODE_ADDRESS_KEY, "127.0.0.1:"
-          + ServerSocketUtil.getPort(19866 + offset, 100));
-      c.set(DFSConfigKeys.DFS_DATANODE_IPC_ADDRESS_KEY, "127.0.0.1:"
-          + ServerSocketUtil.getPort(19867 + offset, 100));
-      overlays[i] = c;
+        Configuration[] overlays = new Configuration[numDNs];
+        for (int i = 0; i < overlays.length; i++) {
+            int offset = i * 10;
+            Configuration c = new Configuration();
+            c.set(DFSConfigKeys.DFS_DATANODE_ADDRESS_KEY, "127.0.0.1:" + ServerSocketUtil.getPort(19866 + offset, 100));
+            c.set(DFSConfigKeys.DFS_DATANODE_IPC_ADDRESS_KEY, "127.0.0.1:" + ServerSocketUtil.getPort(19867 + offset, 100));
+            overlays[i] = c;
+        }
+        cluster = new MiniDFSCluster.Builder(conf).nameNodePort(ServerSocketUtil.getPort(18020, 100)).nameNodeHttpPort(ServerSocketUtil.getPort(19870, 100)).numDataNodes(numDNs).build();
+        cluster.getFileSystem().enableErasureCodingPolicy(StripedFileTestUtil.getDefaultECPolicy().getName());
+        cluster.getFileSystem().getClient().setErasureCodingPolicy("/", StripedFileTestUtil.getDefaultECPolicy().getName());
+        try {
+            cluster.waitActive();
+            doTestRead(conf, cluster, true);
+        } finally {
+            if (cluster != null) {
+                cluster.shutdown();
+            }
+        }
     }
 
-    cluster = new MiniDFSCluster.Builder(conf)
-        .nameNodePort(ServerSocketUtil.getPort(18020, 100))
-        .nameNodeHttpPort(ServerSocketUtil.getPort(19870, 100))
-        .numDataNodes(numDNs)
-        .build();
-    cluster.getFileSystem().enableErasureCodingPolicy(
-        StripedFileTestUtil.getDefaultECPolicy().getName());
-    cluster.getFileSystem().getClient().setErasureCodingPolicy("/",
-        StripedFileTestUtil.getDefaultECPolicy().getName());
-    try {
-      cluster.waitActive();
-      doTestRead(conf, cluster, true);
-    } finally {
-      if (cluster != null) {
-        cluster.shutdown();
-      }
+    /**
+     * tested at {@link org.apache.hadoop.hdfs.TestDFSStripedOutputStreamWithFailure#testBlockTokenExpired()}
+     */
+    @Test
+    @Override
+    public void testWrite() {
     }
-  }
 
-  /**
-   * tested at {@link org.apache.hadoop.hdfs.TestDFSStripedOutputStreamWithFailure#testBlockTokenExpired()}
-   */
-  @Test
-  @Override
-  public void testWrite(){
-  }
-
-  @Test
-  @Override
-  public void testAppend() throws Exception {
-    //TODO: support Append for striped file
-  }
-
-  @Test
-  @Override
-  public void testEnd2End() throws Exception {
-    Configuration conf = new Configuration();
-    conf.setBoolean(DFSConfigKeys.DFS_BLOCK_ACCESS_TOKEN_ENABLE_KEY, true);
-    new TestBalancer().integrationTestWithStripedFile(conf);
-  }
-
-  @Override
-  protected void tryRead(final Configuration conf, LocatedBlock lblock,
-                         boolean shouldSucceed) {
-    LocatedStripedBlock lsb = (LocatedStripedBlock) lblock;
-    LocatedBlock[] internalBlocks = StripedBlockUtil.parseStripedBlockGroup
-        (lsb, cellSize, dataBlocks, parityBlocks);
-    for (LocatedBlock internalBlock : internalBlocks) {
-      super.tryRead(conf, internalBlock, shouldSucceed);
+    @Test
+    @Override
+    public void testAppend() throws Exception {
+        //TODO: support Append for striped file
     }
-  }
 
-  @Override
-  protected boolean isBlockTokenExpired(LocatedBlock lb) throws IOException {
-    LocatedStripedBlock lsb = (LocatedStripedBlock) lb;
-    LocatedBlock[] internalBlocks = StripedBlockUtil.parseStripedBlockGroup
-        (lsb, cellSize, dataBlocks, parityBlocks);
-    for (LocatedBlock internalBlock : internalBlocks) {
-      if(super.isBlockTokenExpired(internalBlock)){
-        return true;
-      }
+    @Test
+    @Override
+    public void testEnd2End() throws Exception {
+        Configuration conf = new Configuration();
+        conf.setBoolean(DFSConfigKeys.DFS_BLOCK_ACCESS_TOKEN_ENABLE_KEY, true);
+        new TestBalancer().integrationTestWithStripedFile(conf);
     }
-    return false;
-  }
+
+    @Override
+    protected void tryRead(final Configuration conf, LocatedBlock lblock, boolean shouldSucceed) {
+        LocatedStripedBlock lsb = (LocatedStripedBlock) lblock;
+        LocatedBlock[] internalBlocks = StripedBlockUtil.parseStripedBlockGroup(lsb, cellSize, dataBlocks, parityBlocks);
+        for (LocatedBlock internalBlock : internalBlocks) {
+            super.tryRead(conf, internalBlock, shouldSucceed);
+        }
+    }
+
+    @Override
+    protected boolean isBlockTokenExpired(LocatedBlock lb) throws IOException {
+        LocatedStripedBlock lsb = (LocatedStripedBlock) lb;
+        LocatedBlock[] internalBlocks = StripedBlockUtil.parseStripedBlockGroup(lsb, cellSize, dataBlocks, parityBlocks);
+        for (LocatedBlock internalBlock : internalBlocks) {
+            if (super.isBlockTokenExpired(internalBlock)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.fs;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -32,70 +31,70 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
 public interface StreamCapabilities {
-  /**
-   * Stream hflush capability implemented by {@link Syncable#hflush()}.
-   */
-  String HFLUSH = "hflush";
 
-  /**
-   * Stream hsync capability implemented by {@link Syncable#hsync()}.
-   */
-  String HSYNC = "hsync";
+    /**
+     * Stream hflush capability implemented by {@link Syncable#hflush()}.
+     */
+    String HFLUSH = "hflush";
 
-  /**
-   * Stream setReadahead capability implemented by
-   * {@link CanSetReadahead#setReadahead(Long)}.
-   */
-  String READAHEAD = "in:readahead";
+    /**
+     * Stream hsync capability implemented by {@link Syncable#hsync()}.
+     */
+    String HSYNC = "hsync";
 
-  /**
-   * Stream setDropBehind capability implemented by
-   * {@link CanSetDropBehind#setDropBehind(Boolean)}.
-   */
-  String DROPBEHIND = "dropbehind";
+    /**
+     * Stream setReadahead capability implemented by
+     * {@link CanSetReadahead#setReadahead(Long)}.
+     */
+    String READAHEAD = "in:readahead";
 
-  /**
-   * Stream unbuffer capability implemented by {@link CanUnbuffer#unbuffer()}.
-   */
-  String UNBUFFER = "in:unbuffer";
+    /**
+     * Stream setDropBehind capability implemented by
+     * {@link CanSetDropBehind#setDropBehind(Boolean)}.
+     */
+    String DROPBEHIND = "dropbehind";
 
-  /**
-   * Stream read(ByteBuffer) capability implemented by
-   * {@link ByteBufferReadable#read(java.nio.ByteBuffer)}.
-   */
-  String READBYTEBUFFER = "in:readbytebuffer";
+    /**
+     * Stream unbuffer capability implemented by {@link CanUnbuffer#unbuffer()}.
+     */
+    String UNBUFFER = "in:unbuffer";
 
-  /**
-   * Stream read(long, ByteBuffer) capability implemented by
-   * {@link ByteBufferPositionedReadable#read(long, java.nio.ByteBuffer)}.
-   */
-  String PREADBYTEBUFFER = "in:preadbytebuffer";
+    /**
+     * Stream read(ByteBuffer) capability implemented by
+     * {@link ByteBufferReadable#read(java.nio.ByteBuffer)}.
+     */
+    String READBYTEBUFFER = "in:readbytebuffer";
 
-  /**
-   * Capabilities that a stream can support and be queried for.
-   */
-  @Deprecated
-  enum StreamCapability {
-    HFLUSH(StreamCapabilities.HFLUSH),
-    HSYNC(StreamCapabilities.HSYNC);
+    /**
+     * Stream read(long, ByteBuffer) capability implemented by
+     * {@link ByteBufferPositionedReadable#read(long, java.nio.ByteBuffer)}.
+     */
+    String PREADBYTEBUFFER = "in:preadbytebuffer";
 
-    private final String capability;
+    /**
+     * Capabilities that a stream can support and be queried for.
+     */
+    @Deprecated
+    enum StreamCapability {
 
-    StreamCapability(String value) {
-      this.capability = value;
+        HFLUSH(StreamCapabilities.HFLUSH), HSYNC(StreamCapabilities.HSYNC);
+
+        private final String capability;
+
+        StreamCapability(String value) {
+            this.capability = value;
+        }
+
+        public final String getValue() {
+            return capability;
+        }
     }
 
-    public final String getValue() {
-      return capability;
-    }
-  }
-
-  /**
-   * Query the stream for a specific capability.
-   *
-   * @param capability string to query the stream support for.
-   * @return True if the stream supports capability.
-   */
-  boolean hasCapability(String capability);
+    /**
+     * Query the stream for a specific capability.
+     *
+     * @param capability string to query the stream support for.
+     * @return True if the stream supports capability.
+     */
+    boolean hasCapability(String capability);
 }
-

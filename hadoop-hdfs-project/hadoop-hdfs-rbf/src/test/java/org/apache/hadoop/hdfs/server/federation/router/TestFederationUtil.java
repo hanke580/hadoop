@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.federation.router;
 
 import org.apache.hadoop.conf.Configuration;
@@ -25,7 +24,6 @@ import org.apache.hadoop.hdfs.server.federation.resolver.ActiveNamenodeResolver;
 import org.apache.hadoop.hdfs.server.federation.resolver.FileSubclusterResolver;
 import org.apache.hadoop.hdfs.server.federation.store.StateStoreService;
 import org.junit.Test;
-
 import static org.junit.Assert.assertNotNull;
 import static org.apache.hadoop.hdfs.server.federation.router.RBFConfigKeys.FEDERATION_FILE_RESOLVER_CLIENT_CLASS;
 import static org.apache.hadoop.hdfs.server.federation.router.RBFConfigKeys.FEDERATION_NAMENODE_RESOLVER_CLIENT_CLASS;
@@ -35,35 +33,22 @@ import static org.apache.hadoop.hdfs.server.federation.router.RBFConfigKeys.FEDE
  */
 public class TestFederationUtil {
 
-  @Test
-  public void testInstanceCreation() {
-    Configuration conf = new HdfsConfiguration();
-
-    // Use mock resolver classes
-    conf.setClass(FEDERATION_NAMENODE_RESOLVER_CLIENT_CLASS,
-        MockResolver.class, ActiveNamenodeResolver.class);
-    conf.setClass(FEDERATION_FILE_RESOLVER_CLIENT_CLASS,
-        MockResolver.class, FileSubclusterResolver.class);
-
-    Router router = new Router();
-    StateStoreService stateStore = new StateStoreService();
-
-    ActiveNamenodeResolver namenodeResolverWithContext =
-        FederationUtil.newActiveNamenodeResolver(conf, stateStore);
-
-    ActiveNamenodeResolver namenodeResolverWithoutContext =
-        FederationUtil.newActiveNamenodeResolver(conf, null);
-
-    FileSubclusterResolver subclusterResolverWithContext =
-        FederationUtil.newFileSubclusterResolver(conf, router);
-
-    FileSubclusterResolver subclusterResolverWithoutContext =
-        FederationUtil.newFileSubclusterResolver(conf, null);
-
-    // Check all instances are created successfully.
-    assertNotNull(namenodeResolverWithContext);
-    assertNotNull(namenodeResolverWithoutContext);
-    assertNotNull(subclusterResolverWithContext);
-    assertNotNull(subclusterResolverWithoutContext);
-  }
+    @Test
+    public void testInstanceCreation() {
+        Configuration conf = new HdfsConfiguration();
+        // Use mock resolver classes
+        conf.setClass(FEDERATION_NAMENODE_RESOLVER_CLIENT_CLASS, MockResolver.class, ActiveNamenodeResolver.class);
+        conf.setClass(FEDERATION_FILE_RESOLVER_CLIENT_CLASS, MockResolver.class, FileSubclusterResolver.class);
+        Router router = new Router();
+        StateStoreService stateStore = new StateStoreService();
+        ActiveNamenodeResolver namenodeResolverWithContext = FederationUtil.newActiveNamenodeResolver(conf, stateStore);
+        ActiveNamenodeResolver namenodeResolverWithoutContext = FederationUtil.newActiveNamenodeResolver(conf, null);
+        FileSubclusterResolver subclusterResolverWithContext = FederationUtil.newFileSubclusterResolver(conf, router);
+        FileSubclusterResolver subclusterResolverWithoutContext = FederationUtil.newFileSubclusterResolver(conf, null);
+        // Check all instances are created successfully.
+        assertNotNull(namenodeResolverWithContext);
+        assertNotNull(namenodeResolverWithoutContext);
+        assertNotNull(subclusterResolverWithContext);
+        assertNotNull(subclusterResolverWithoutContext);
+    }
 }

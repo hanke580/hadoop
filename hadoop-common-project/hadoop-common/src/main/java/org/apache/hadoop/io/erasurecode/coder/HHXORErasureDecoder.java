@@ -39,59 +39,52 @@ import org.apache.hadoop.io.erasurecode.rawcoder.RawErasureEncoder;
  */
 @InterfaceAudience.Private
 public class HHXORErasureDecoder extends ErasureDecoder {
-  private RawErasureDecoder rsRawDecoder;
-  private RawErasureEncoder xorRawEncoder;
 
-  public HHXORErasureDecoder(ErasureCoderOptions options) {
-    super(options);
-  }
+    private RawErasureDecoder rsRawDecoder;
 
-  @Override
-  protected ErasureCodingStep prepareDecodingStep(
-          final ECBlockGroup blockGroup) {
+    private RawErasureEncoder xorRawEncoder;
 
-    RawErasureDecoder rawDecoder;
-    RawErasureEncoder rawEncoder;
-
-    ECBlock[] inputBlocks = getInputBlocks(blockGroup);
-    ECBlock[] outputBlocks = getOutputBlocks(blockGroup);
-
-    rawDecoder = checkCreateRSRawDecoder();
-    rawEncoder = checkCreateXorRawEncoder();
-
-    return new HHXORErasureDecodingStep(inputBlocks,
-            getErasedIndexes(inputBlocks), outputBlocks, rawDecoder,
-            rawEncoder);
-  }
-
-  private RawErasureDecoder checkCreateRSRawDecoder() {
-    if (rsRawDecoder == null) {
-      rsRawDecoder = CodecUtil.createRawDecoder(getConf(),
-              ErasureCodeConstants.RS_CODEC_NAME, getOptions());
+    public HHXORErasureDecoder(ErasureCoderOptions options) {
+        super(options);
     }
-    return rsRawDecoder;
-  }
 
-  private RawErasureEncoder checkCreateXorRawEncoder() {
-    if (xorRawEncoder == null) {
-      xorRawEncoder = CodecUtil.createRawEncoder(getConf(),
-          ErasureCodeConstants.XOR_CODEC_NAME, getOptions());
+    @Override
+    protected ErasureCodingStep prepareDecodingStep(final ECBlockGroup blockGroup) {
+        RawErasureDecoder rawDecoder;
+        RawErasureEncoder rawEncoder;
+        ECBlock[] inputBlocks = getInputBlocks(blockGroup);
+        ECBlock[] outputBlocks = getOutputBlocks(blockGroup);
+        rawDecoder = checkCreateRSRawDecoder();
+        rawEncoder = checkCreateXorRawEncoder();
+        return new HHXORErasureDecodingStep(inputBlocks, getErasedIndexes(inputBlocks), outputBlocks, rawDecoder, rawEncoder);
     }
-    return xorRawEncoder;
-  }
 
-  @Override
-  public boolean preferDirectBuffer() {
-    return false;
-  }
+    private RawErasureDecoder checkCreateRSRawDecoder() {
+        if (rsRawDecoder == null) {
+            rsRawDecoder = CodecUtil.createRawDecoder(getConf(), ErasureCodeConstants.RS_CODEC_NAME, getOptions());
+        }
+        return rsRawDecoder;
+    }
 
-  @Override
-  public void release() {
-    if (rsRawDecoder != null) {
-      rsRawDecoder.release();
+    private RawErasureEncoder checkCreateXorRawEncoder() {
+        if (xorRawEncoder == null) {
+            xorRawEncoder = CodecUtil.createRawEncoder(getConf(), ErasureCodeConstants.XOR_CODEC_NAME, getOptions());
+        }
+        return xorRawEncoder;
     }
-    if (xorRawEncoder != null) {
-      xorRawEncoder.release();
+
+    @Override
+    public boolean preferDirectBuffer() {
+        return false;
     }
-  }
+
+    @Override
+    public void release() {
+        if (rsRawDecoder != null) {
+            rsRawDecoder.release();
+        }
+        if (xorRawEncoder != null) {
+            xorRawEncoder.release();
+        }
+    }
 }

@@ -15,25 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.cli.util;
 
 /**
- *
  * Comparator interface. To define a new comparator, implement the compare
  * method
  */
 public abstract class ComparatorBase {
-  public ComparatorBase() {
-    
-  }
-  
-  /**
-   * Compare method for the comparator class.
-   * @param actual output. can be null
-   * @param expected output. can be null
-   * @return true if expected output compares with the actual output, else
-   *         return false. If actual or expected is null, return false
-   */
-  public abstract boolean compare(String actual, String expected);
+
+    public ComparatorBase() {
+    }
+
+    /**
+     * Compare method for the comparator class.
+     * @param actual output. can be null
+     * @param expected output. can be null
+     * @return true if expected output compares with the actual output, else
+     *         return false. If actual or expected is null, return false
+     */
+    public abstract boolean compare(String actual, String expected);
 }

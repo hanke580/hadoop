@@ -32,4 +32,5 @@ import org.apache.hadoop.classification.InterfaceStability;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 @InterfaceStability.Evolving
-public @interface Idempotent {}
+public @interface Idempotent {
+}

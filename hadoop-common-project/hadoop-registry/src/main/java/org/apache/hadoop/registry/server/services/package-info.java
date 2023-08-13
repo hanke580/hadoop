@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * Basic services for the YARN registry
  * <ul>
@@ -37,3 +36,4 @@
  * </ul>
  */
 package org.apache.hadoop.registry.server.services;
+

@@ -25,15 +25,19 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Private
 @InterfaceStability.Unstable
 public final class DiskBalancerConstants {
-  public static final String DISKBALANCER_BANDWIDTH = "DiskBalancerBandwidth";
-  public static final String DISKBALANCER_VOLUME_NAME =
-      "DiskBalancerVolumeName";
 
-  /** Min and Max Plan file versions that we know of. **/
-  public static final int DISKBALANCER_MIN_VERSION = 1;
-  public static final int DISKBALANCER_MAX_VERSION = 1;
+    public static final String DISKBALANCER_BANDWIDTH = "DiskBalancerBandwidth";
 
-  // never constructed.
-  private DiskBalancerConstants() {
-  }
+    public static final String DISKBALANCER_VOLUME_NAME = "DiskBalancerVolumeName";
+
+    /**
+     * Min and Max Plan file versions that we know of. *
+     */
+    public static final int DISKBALANCER_MIN_VERSION = 1;
+
+    public static final int DISKBALANCER_MAX_VERSION = 1;
+
+    // never constructed.
+    private DiskBalancerConstants() {
+    }
 }

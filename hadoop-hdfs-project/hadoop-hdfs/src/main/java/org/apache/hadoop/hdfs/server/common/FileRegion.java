@@ -33,53 +33,46 @@ import org.apache.hadoop.hdfs.protocol.ProvidedStorageLocation;
 @InterfaceStability.Unstable
 public class FileRegion implements BlockAlias {
 
-  private final Pair<Block, ProvidedStorageLocation> pair;
+    private final Pair<Block, ProvidedStorageLocation> pair;
 
-  public FileRegion(long blockId, Path path, long offset,
-      long length, long genStamp) {
-    this(blockId, path, offset, length, genStamp, new byte[0]);
-  }
-
-  public FileRegion(long blockId, Path path, long offset,
-                    long length, long genStamp, byte[] nonce) {
-    this(new Block(blockId, length, genStamp),
-            new ProvidedStorageLocation(path, offset, length, nonce));
-  }
-
-  public FileRegion(long blockId, Path path, long offset, long length) {
-    this(blockId, path, offset, length,
-        HdfsConstants.GRANDFATHER_GENERATION_STAMP);
-  }
-
-  public FileRegion(Block block,
-      ProvidedStorageLocation providedStorageLocation) {
-    this.pair  = Pair.of(block, providedStorageLocation);
-  }
-
-  public Block getBlock() {
-    return pair.getKey();
-  }
-
-  public ProvidedStorageLocation getProvidedStorageLocation() {
-    return pair.getValue();
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+    public FileRegion(long blockId, Path path, long offset, long length, long genStamp) {
+        this(blockId, path, offset, length, genStamp, new byte[0]);
     }
 
-    FileRegion that = (FileRegion) o;
+    public FileRegion(long blockId, Path path, long offset, long length, long genStamp, byte[] nonce) {
+        this(new Block(blockId, length, genStamp), new ProvidedStorageLocation(path, offset, length, nonce));
+    }
 
-    return pair.equals(that.pair);
-  }
+    public FileRegion(long blockId, Path path, long offset, long length) {
+        this(blockId, path, offset, length, HdfsConstants.GRANDFATHER_GENERATION_STAMP);
+    }
 
-  @Override
-  public int hashCode() {
-    return pair.hashCode();
-  }
+    public FileRegion(Block block, ProvidedStorageLocation providedStorageLocation) {
+        this.pair = Pair.of(block, providedStorageLocation);
+    }
+
+    public Block getBlock() {
+        return pair.getKey();
+    }
+
+    public ProvidedStorageLocation getProvidedStorageLocation() {
+        return pair.getValue();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        FileRegion that = (FileRegion) o;
+        return pair.equals(that.pair);
+    }
+
+    @Override
+    public int hashCode() {
+        return pair.hashCode();
+    }
 }

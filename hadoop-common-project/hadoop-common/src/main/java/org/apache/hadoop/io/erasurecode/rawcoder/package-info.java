@@ -15,9 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
- *
  * Raw erasure coders.
  *
  * Raw erasure coder is part of erasure codec framework, where erasure coder is
@@ -36,3 +34,4 @@ package org.apache.hadoop.io.erasurecode.rawcoder;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

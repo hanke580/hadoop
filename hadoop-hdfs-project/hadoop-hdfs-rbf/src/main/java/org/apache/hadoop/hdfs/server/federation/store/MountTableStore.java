@@ -44,40 +44,43 @@ import org.slf4j.LoggerFactory;
  */
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
-public abstract class MountTableStore extends CachedRecordStore<MountTable>
-    implements MountTableManager {
-  private static final Logger LOG =
-      LoggerFactory.getLogger(MountTableStore.class);
-  private MountTableRefresherService refreshService;
-  /** Router quota manager to update quota usage in mount table. */
-  private RouterQuotaManager quotaManager;
-  public MountTableStore(StateStoreDriver driver) {
-    super(MountTable.class, driver);
-  }
+public abstract class MountTableStore extends CachedRecordStore<MountTable> implements MountTableManager {
 
-  public void setRefreshService(MountTableRefresherService refreshService) {
-    this.refreshService = refreshService;
-  }
+    private static final Logger LOG = LoggerFactory.getLogger(MountTableStore.class);
 
-  public void setQuotaManager(RouterQuotaManager quotaManager) {
-    this.quotaManager = quotaManager;
-  }
+    private MountTableRefresherService refreshService;
 
-  public RouterQuotaManager getQuotaManager() {
-    return quotaManager;
-  }
+    /**
+     * Router quota manager to update quota usage in mount table.
+     */
+    private RouterQuotaManager quotaManager;
 
-  /**
-   * Update mount table cache of this router as well as all other routers.
-   */
-  protected void updateCacheAllRouters() {
-    if (refreshService != null) {
-      try {
-        refreshService.refresh();
-      } catch (StateStoreUnavailableException e) {
-        LOG.error("Cannot refresh mount table: state store not available", e);
-      }
+    public MountTableStore(StateStoreDriver driver) {
+        super(MountTable.class, driver);
     }
-  }
 
+    public void setRefreshService(MountTableRefresherService refreshService) {
+        this.refreshService = refreshService;
+    }
+
+    public void setQuotaManager(RouterQuotaManager quotaManager) {
+        this.quotaManager = quotaManager;
+    }
+
+    public RouterQuotaManager getQuotaManager() {
+        return quotaManager;
+    }
+
+    /**
+     * Update mount table cache of this router as well as all other routers.
+     */
+    protected void updateCacheAllRouters() {
+        if (refreshService != null) {
+            try {
+                refreshService.refresh();
+            } catch (StateStoreUnavailableException e) {
+                LOG.error("Cannot refresh mount table: state store not available", e);
+            }
+        }
+    }
 }

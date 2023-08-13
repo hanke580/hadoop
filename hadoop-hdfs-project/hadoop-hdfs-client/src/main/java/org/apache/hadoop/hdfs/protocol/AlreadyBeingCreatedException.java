@@ -15,11 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.protocol;
 
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
@@ -30,8 +28,10 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
 public class AlreadyBeingCreatedException extends IOException {
-  static final long serialVersionUID = 0x12308AD009L;
-  public AlreadyBeingCreatedException(String msg) {
-    super(msg);
-  }
+
+    static final long serialVersionUID = 0x12308AD009L;
+
+    public AlreadyBeingCreatedException(String msg) {
+        super(msg);
+    }
 }

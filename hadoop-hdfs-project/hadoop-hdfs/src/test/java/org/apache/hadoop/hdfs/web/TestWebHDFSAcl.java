@@ -28,44 +28,42 @@ import org.junit.Test;
  */
 public class TestWebHDFSAcl extends FSAclBaseTest {
 
-  @BeforeClass
-  public static void init() throws Exception {
-    conf = WebHdfsTestUtil.createConf();
-    startCluster();
-  }
+    @BeforeClass
+    public static void init() throws Exception {
+        conf = WebHdfsTestUtil.createConf();
+        startCluster();
+    }
 
-  /**
-   * We need to skip this test on WebHDFS, because WebHDFS currently cannot
-   * resolve symlinks.
-   */
-  @Override
-  @Test
-  @Ignore
-  public void testDefaultAclNewSymlinkIntermediate() {
-  }
+    /**
+     * We need to skip this test on WebHDFS, because WebHDFS currently cannot
+     * resolve symlinks.
+     */
+    @Override
+    @Test
+    @Ignore
+    public void testDefaultAclNewSymlinkIntermediate() {
+    }
 
-  /**
-   * Overridden to provide a WebHdfsFileSystem wrapper for the super-user.
-   *
-   * @return WebHdfsFileSystem for super-user
-   * @throws Exception if creation fails
-   */
-  @Override
-  protected WebHdfsFileSystem createFileSystem() throws Exception {
-    return WebHdfsTestUtil.getWebHdfsFileSystem(conf, WebHdfsConstants.WEBHDFS_SCHEME);
-  }
+    /**
+     * Overridden to provide a WebHdfsFileSystem wrapper for the super-user.
+     *
+     * @return WebHdfsFileSystem for super-user
+     * @throws Exception if creation fails
+     */
+    @Override
+    protected WebHdfsFileSystem createFileSystem() throws Exception {
+        return WebHdfsTestUtil.getWebHdfsFileSystem(conf, WebHdfsConstants.WEBHDFS_SCHEME);
+    }
 
-  /**
-   * Overridden to provide a WebHdfsFileSystem wrapper for a specific user.
-   *
-   * @param user UserGroupInformation specific user
-   * @return WebHdfsFileSystem for specific user
-   * @throws Exception if creation fails
-   */
-  @Override
-  protected WebHdfsFileSystem createFileSystem(UserGroupInformation user)
-      throws Exception {
-    return WebHdfsTestUtil.getWebHdfsFileSystemAs(user, conf,
-      WebHdfsConstants.WEBHDFS_SCHEME);
-  }
+    /**
+     * Overridden to provide a WebHdfsFileSystem wrapper for a specific user.
+     *
+     * @param user UserGroupInformation specific user
+     * @return WebHdfsFileSystem for specific user
+     * @throws Exception if creation fails
+     */
+    @Override
+    protected WebHdfsFileSystem createFileSystem(UserGroupInformation user) throws Exception {
+        return WebHdfsTestUtil.getWebHdfsFileSystemAs(user, conf, WebHdfsConstants.WEBHDFS_SCHEME);
+    }
 }

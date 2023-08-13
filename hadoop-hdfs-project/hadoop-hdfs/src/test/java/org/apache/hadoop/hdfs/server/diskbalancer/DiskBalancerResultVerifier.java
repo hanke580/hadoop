@@ -14,7 +14,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package org.apache.hadoop.hdfs.server.diskbalancer;
 
 import org.hamcrest.Description;
@@ -23,23 +22,21 @@ import org.hamcrest.TypeSafeMatcher;
 /**
  * Helps in verifying test results.
  */
-public class DiskBalancerResultVerifier
-    extends TypeSafeMatcher<DiskBalancerException> {
-  private final DiskBalancerException.Result expectedResult;
+public class DiskBalancerResultVerifier extends TypeSafeMatcher<DiskBalancerException> {
 
-  DiskBalancerResultVerifier(DiskBalancerException.Result expectedResult) {
-    this.expectedResult = expectedResult;
-  }
+    private final DiskBalancerException.Result expectedResult;
 
-  @Override
-  protected boolean matchesSafely(DiskBalancerException exception) {
-    return (this.expectedResult == exception.getResult());
-  }
+    DiskBalancerResultVerifier(DiskBalancerException.Result expectedResult) {
+        this.expectedResult = expectedResult;
+    }
 
-  @Override
-  public void describeTo(Description description) {
-    description.appendText("expects Result: ")
-        .appendValue(this.expectedResult);
+    @Override
+    protected boolean matchesSafely(DiskBalancerException exception) {
+        return (this.expectedResult == exception.getResult());
+    }
 
-  }
+    @Override
+    public void describeTo(Description description) {
+        description.appendText("expects Result: ").appendValue(this.expectedResult);
+    }
 }

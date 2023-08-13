@@ -25,21 +25,19 @@ import org.apache.hadoop.hdfs.protocol.ErasureCodingPolicy;
  * This tests read operation of DFS striped file with a random erasure code
  * policy except for the default policy.
  */
-public class TestDFSStripedInputStreamWithRandomECPolicy extends
-    TestDFSStripedInputStream {
+public class TestDFSStripedInputStreamWithRandomECPolicy extends TestDFSStripedInputStream {
 
-  private static final Logger LOG = LoggerFactory.getLogger(
-      TestDFSStripedInputStreamWithRandomECPolicy.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(TestDFSStripedInputStreamWithRandomECPolicy.class.getName());
 
-  private ErasureCodingPolicy ecPolicy;
+    private ErasureCodingPolicy ecPolicy;
 
-  public TestDFSStripedInputStreamWithRandomECPolicy() {
-    ecPolicy = StripedFileTestUtil.getRandomNonDefaultECPolicy();
-    LOG.info("{}", ecPolicy.toString());
-  }
+    public TestDFSStripedInputStreamWithRandomECPolicy() {
+        ecPolicy = StripedFileTestUtil.getRandomNonDefaultECPolicy();
+        LOG.info("{}", ecPolicy.toString());
+    }
 
-  @Override
-  public ErasureCodingPolicy getEcPolicy() {
-    return ecPolicy;
-  }
+    @Override
+    public ErasureCodingPolicy getEcPolicy() {
+        return ecPolicy;
+    }
 }

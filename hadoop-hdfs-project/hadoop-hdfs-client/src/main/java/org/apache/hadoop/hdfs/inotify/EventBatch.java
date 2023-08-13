@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.inotify;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -25,17 +24,21 @@ import org.apache.hadoop.classification.InterfaceAudience;
  */
 @InterfaceAudience.Public
 public class EventBatch {
-  private final long txid;
-  private final Event[] events;
 
-  public EventBatch(long txid, Event[] events) {
-    this.txid = txid;
-    this.events = events;
-  }
+    private final long txid;
 
-  public long getTxid() {
-    return txid;
-  }
+    private final Event[] events;
 
-  public Event[] getEvents() { return events; }
+    public EventBatch(long txid, Event[] events) {
+        this.txid = txid;
+        this.events = events;
+    }
+
+    public long getTxid() {
+        return txid;
+    }
+
+    public Event[] getEvents() {
+        return events;
+    }
 }

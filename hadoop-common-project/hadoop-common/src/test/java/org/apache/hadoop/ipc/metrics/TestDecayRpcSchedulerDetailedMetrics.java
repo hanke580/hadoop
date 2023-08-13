@@ -19,7 +19,6 @@ package org.apache.hadoop.ipc.metrics;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.ipc.DecayRpcScheduler;
 import org.apache.hadoop.metrics2.MetricsSystem;
@@ -28,18 +27,14 @@ import org.junit.Test;
 
 public class TestDecayRpcSchedulerDetailedMetrics {
 
-  @Test
-  public void metricsRegistered() {
-    Configuration conf = new Configuration();
-    DecayRpcScheduler scheduler = new DecayRpcScheduler(4, "ipc.8020", conf);
-    MetricsSystem metricsSystem = DefaultMetricsSystem.instance();
-    DecayRpcSchedulerDetailedMetrics metrics =
-        scheduler.getDecayRpcSchedulerDetailedMetrics();
-
-    assertNotNull(metricsSystem.getSource(metrics.getName()));
-
-    scheduler.stop();
-
-    assertNull(metricsSystem.getSource(metrics.getName()));
-  }
+    @Test
+    public void metricsRegistered() {
+        Configuration conf = new Configuration();
+        DecayRpcScheduler scheduler = new DecayRpcScheduler(4, "ipc.8020", conf);
+        MetricsSystem metricsSystem = DefaultMetricsSystem.instance();
+        DecayRpcSchedulerDetailedMetrics metrics = scheduler.getDecayRpcSchedulerDetailedMetrics();
+        assertNotNull(metricsSystem.getSource(metrics.getName()));
+        scheduler.stop();
+        assertNull(metricsSystem.getSource(metrics.getName()));
+    }
 }

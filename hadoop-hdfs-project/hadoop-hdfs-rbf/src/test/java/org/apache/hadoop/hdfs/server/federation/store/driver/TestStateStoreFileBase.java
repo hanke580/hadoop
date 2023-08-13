@@ -20,9 +20,7 @@ package org.apache.hadoop.hdfs.server.federation.store.driver;
 import static org.apache.hadoop.hdfs.server.federation.store.driver.impl.StateStoreFileBaseImpl.isOldTempRecord;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
 import java.util.concurrent.TimeUnit;
-
 import org.apache.hadoop.util.Time;
 import org.junit.Test;
 
@@ -31,17 +29,15 @@ import org.junit.Test;
  */
 public class TestStateStoreFileBase {
 
-  @Test
-  public void testTempOld() {
-    assertFalse(isOldTempRecord("test.txt"));
-    assertFalse(isOldTempRecord("testfolder/test.txt"));
-
-    long tnow = Time.now();
-    String tmpFile1 = "test." + tnow + ".tmp";
-    assertFalse(isOldTempRecord(tmpFile1));
-
-    long told = Time.now() - TimeUnit.MINUTES.toMillis(1);
-    String tmpFile2 = "test." + told + ".tmp";
-    assertTrue(isOldTempRecord(tmpFile2));
-  }
+    @Test
+    public void testTempOld() {
+        assertFalse(isOldTempRecord("test.txt"));
+        assertFalse(isOldTempRecord("testfolder/test.txt"));
+        long tnow = Time.now();
+        String tmpFile1 = "test." + tnow + ".tmp";
+        assertFalse(isOldTempRecord(tmpFile1));
+        long told = Time.now() - TimeUnit.MINUTES.toMillis(1);
+        String tmpFile2 = "test." + told + ".tmp";
+        assertTrue(isOldTempRecord(tmpFile2));
+    }
 }

@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.metrics2;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -27,37 +26,38 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
 public interface MetricsSystemMXBean {
-  /**
-   * Start the metrics system
-   * @throws MetricsException
-   */
-  public void start();
 
-  /**
-   * Stop the metrics system
-   * @throws MetricsException
-   */
-  public void stop();
+    /**
+     * Start the metrics system
+     * @throws MetricsException
+     */
+    public void start();
 
-  /**
-   * Start metrics MBeans
-   * @throws MetricsException
-   */
-  public void startMetricsMBeans();
+    /**
+     * Stop the metrics system
+     * @throws MetricsException
+     */
+    public void stop();
 
-  /**
-   * Stop metrics MBeans.
-   * Note, it doesn't stop the metrics system control MBean,
-   * i.e this interface.
-   * @throws MetricsException
-   */
-  public void stopMetricsMBeans();
+    /**
+     * Start metrics MBeans
+     * @throws MetricsException
+     */
+    public void startMetricsMBeans();
 
-  /**
-   * @return the current config
-   * Avoided getConfig, as it'll turn into a "Config" attribute,
-   * which doesn't support multiple line values in jconsole.
-   * @throws MetricsException
-   */
-  public String currentConfig();
+    /**
+     * Stop metrics MBeans.
+     * Note, it doesn't stop the metrics system control MBean,
+     * i.e this interface.
+     * @throws MetricsException
+     */
+    public void stopMetricsMBeans();
+
+    /**
+     * @return the current config
+     * Avoided getConfig, as it'll turn into a "Config" attribute,
+     * which doesn't support multiple line values in jconsole.
+     * @throws MetricsException
+     */
+    public String currentConfig();
 }

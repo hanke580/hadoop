@@ -25,6 +25,9 @@ import org.apache.hadoop.classification.InterfaceAudience;
  */
 @InterfaceAudience.Private
 public enum BlockChecksumType {
-  MD5CRC,  // BlockChecksum obtained by taking the MD5 digest of chunk CRCs
-  COMPOSITE_CRC  // Chunk-independent CRC, optionally striped
+
+    // BlockChecksum obtained by taking the MD5 digest of chunk CRCs
+    MD5CRC,
+    // Chunk-independent CRC, optionally striped
+    COMPOSITE_CRC
 }

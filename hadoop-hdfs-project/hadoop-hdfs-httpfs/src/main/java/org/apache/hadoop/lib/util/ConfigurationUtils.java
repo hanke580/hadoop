@@ -15,12 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.lib.util;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.conf.Configuration;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -31,63 +29,62 @@ import java.util.Map;
 @InterfaceAudience.Private
 public abstract class ConfigurationUtils {
 
-  /**
-   * Copy configuration key/value pairs from one configuration to another if a property exists in the target, it gets
-   * replaced.
-   *
-   * @param source source configuration.
-   * @param target target configuration.
-   */
-  public static void copy(Configuration source, Configuration target) {
-    Check.notNull(source, "source");
-    Check.notNull(target, "target");
-    for (Map.Entry<String, String> entry : source) {
-      target.set(entry.getKey(), entry.getValue());
+    /**
+     * Copy configuration key/value pairs from one configuration to another if a property exists in the target, it gets
+     * replaced.
+     *
+     * @param source source configuration.
+     * @param target target configuration.
+     */
+    public static void copy(Configuration source, Configuration target) {
+        Check.notNull(source, "source");
+        Check.notNull(target, "target");
+        for (Map.Entry<String, String> entry : source) {
+            target.set(entry.getKey(), entry.getValue());
+        }
     }
-  }
 
-  /**
-   * Injects configuration key/value pairs from one configuration to another if the key does not exist in the target
-   * configuration.
-   *
-   * @param source source configuration.
-   * @param target target configuration.
-   */
-  public static void injectDefaults(Configuration source, Configuration target) {
-    Check.notNull(source, "source");
-    Check.notNull(target, "target");
-    for (Map.Entry<String, String> entry : source) {
-      if (target.get(entry.getKey()) == null) {
-        target.set(entry.getKey(), entry.getValue());
-      }
+    /**
+     * Injects configuration key/value pairs from one configuration to another if the key does not exist in the target
+     * configuration.
+     *
+     * @param source source configuration.
+     * @param target target configuration.
+     */
+    public static void injectDefaults(Configuration source, Configuration target) {
+        Check.notNull(source, "source");
+        Check.notNull(target, "target");
+        for (Map.Entry<String, String> entry : source) {
+            if (target.get(entry.getKey()) == null) {
+                target.set(entry.getKey(), entry.getValue());
+            }
+        }
     }
-  }
 
-  /**
-   * Returns a new ConfigurationUtils instance with all inline values resolved.
-   *
-   * @return a new ConfigurationUtils instance with all inline values resolved.
-   */
-  public static Configuration resolve(Configuration conf) {
-    Configuration resolved = new Configuration(false);
-    for (Map.Entry<String, String> entry : conf) {
-      resolved.set(entry.getKey(), conf.get(entry.getKey()));
+    /**
+     * Returns a new ConfigurationUtils instance with all inline values resolved.
+     *
+     * @return a new ConfigurationUtils instance with all inline values resolved.
+     */
+    public static Configuration resolve(Configuration conf) {
+        Configuration resolved = new Configuration(false);
+        for (Map.Entry<String, String> entry : conf) {
+            resolved.set(entry.getKey(), conf.get(entry.getKey()));
+        }
+        return resolved;
     }
-    return resolved;
-  }
 
-  // Canibalized from FileSystemAccess <code>Configuration.loadResource()</code>.
-
-  /**
-   * Create a configuration from an InputStream.
-   * <p>
-   * ERROR canibalized from <code>Configuration.loadResource()</code>.
-   *
-   * @param is inputstream to read the configuration from.
-   *
-   * @throws IOException thrown if the configuration could not be read.
-   */
-  public static void load(Configuration conf, InputStream is) throws IOException {
-    conf.addResource(is);
-  }
+    // Canibalized from FileSystemAccess <code>Configuration.loadResource()</code>.
+    /**
+     * Create a configuration from an InputStream.
+     * <p>
+     * ERROR canibalized from <code>Configuration.loadResource()</code>.
+     *
+     * @param is inputstream to read the configuration from.
+     *
+     * @throws IOException thrown if the configuration could not be read.
+     */
+    public static void load(Configuration conf, InputStream is) throws IOException {
+        conf.addResource(is);
+    }
 }

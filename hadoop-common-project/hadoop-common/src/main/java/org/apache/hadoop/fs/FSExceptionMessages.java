@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.fs;
 
 /**
@@ -24,31 +23,26 @@ package org.apache.hadoop.fs;
  */
 public class FSExceptionMessages {
 
-  /**
-   * The operation failed because the stream is closed: {@value}
-   */
-  public static final String STREAM_IS_CLOSED = "Stream is closed!";
+    /**
+     * The operation failed because the stream is closed: {@value}
+     */
+    public static final String STREAM_IS_CLOSED = "Stream is closed!";
 
-  /**
-   * Negative offset seek forbidden : {@value}
-   */
-  public static final String NEGATIVE_SEEK =
-    "Cannot seek to a negative offset";
+    /**
+     * Negative offset seek forbidden : {@value}
+     */
+    public static final String NEGATIVE_SEEK = "Cannot seek to a negative offset";
 
-  /**
-   * Seeks : {@value}
-   */
-  public static final String CANNOT_SEEK_PAST_EOF =
-      "Attempted to seek or read past the end of the file";
+    /**
+     * Seeks : {@value}
+     */
+    public static final String CANNOT_SEEK_PAST_EOF = "Attempted to seek or read past the end of the file";
 
-  public static final String EOF_IN_READ_FULLY =
-      "End of file reached before reading fully.";
+    public static final String EOF_IN_READ_FULLY = "End of file reached before reading fully.";
 
-  public static final String TOO_MANY_BYTES_FOR_DEST_BUFFER
-      = "Requested more bytes than destination buffer size";
+    public static final String TOO_MANY_BYTES_FOR_DEST_BUFFER = "Requested more bytes than destination buffer size";
 
-  public static final String PERMISSION_DENIED = "Permission denied";
+    public static final String PERMISSION_DENIED = "Permission denied";
 
-  public static final String PERMISSION_DENIED_BY_STICKY_BIT =
-      "Permission denied by sticky bit";
+    public static final String PERMISSION_DENIED_BY_STICKY_BIT = "Permission denied by sticky bit";
 }

@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * This package contains all the data types which can be saved to the registry
  * and/or marshalled to and from JSON.
@@ -36,6 +35,6 @@
  * entry that can be retrieved from the API call. It is still
  * designed to be marshalled to and from JSON, as it can be served up
  * from REST front ends to the registry.
- *
  */
 package org.apache.hadoop.registry.client.types;
+

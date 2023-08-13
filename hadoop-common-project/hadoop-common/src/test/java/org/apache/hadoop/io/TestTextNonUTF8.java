@@ -15,36 +15,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.io;
 
 import org.junit.Test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
 import java.nio.charset.MalformedInputException;
 import java.util.Arrays;
 
-/** Unit tests for NonUTF8. */
+/**
+ * Unit tests for NonUTF8.
+ */
 public class TestTextNonUTF8 {
 
-  @Test
-  public void testNonUTF8() throws Exception{
-    // this is a non UTF8 byte array
-    byte b[] = {-0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01};
-    boolean nonUTF8 = false;
-    Text t = new Text(b);
-    try{
-      Text.validateUTF8(b);
-    }catch(MalformedInputException me){
-      nonUTF8 = false;
+    @Test
+    public void testNonUTF8() throws Exception {
+        // this is a non UTF8 byte array
+        byte[] b = { -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01 };
+        boolean nonUTF8 = false;
+        Text t = new Text(b);
+        try {
+            Text.validateUTF8(b);
+        } catch (MalformedInputException me) {
+            nonUTF8 = false;
+        }
+        // asserting that the byte array is non utf8
+        assertFalse(nonUTF8);
+        byte[] ret = t.getBytes();
+        // asseting that the byte array are the same when the Text
+        // object is created.
+        assertTrue(Arrays.equals(b, ret));
     }
-    // asserting that the byte array is non utf8
-    assertFalse(nonUTF8);
-    byte ret[] = t.getBytes();
-    // asseting that the byte array are the same when the Text
-    // object is created.
-    assertTrue(Arrays.equals(b, ret));
-  }
-
 }

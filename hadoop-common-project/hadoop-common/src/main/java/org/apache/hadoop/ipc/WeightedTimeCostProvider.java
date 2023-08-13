@@ -15,12 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.ipc;
 
 import java.util.Locale;
 import org.apache.hadoop.conf.Configuration;
-
 import static org.apache.hadoop.ipc.ProcessingDetails.Timing;
 
 /**
@@ -51,60 +49,62 @@ import static org.apache.hadoop.ipc.ProcessingDetails.Timing;
  */
 public class WeightedTimeCostProvider implements CostProvider {
 
-  /**
-   * The prefix used in configuration values specifying the weight to use when
-   * determining the cost of an operation. See the class Javadoc for more info.
-   */
-  public static final String WEIGHT_CONFIG_PREFIX = ".weighted-cost.";
-  static final int DEFAULT_LOCKFREE_WEIGHT = 1;
-  static final int DEFAULT_LOCKSHARED_WEIGHT = 10;
-  static final int DEFAULT_LOCKEXCLUSIVE_WEIGHT = 100;
+    /**
+     * The prefix used in configuration values specifying the weight to use when
+     * determining the cost of an operation. See the class Javadoc for more info.
+     */
+    public static final String WEIGHT_CONFIG_PREFIX = ".weighted-cost.";
 
-  private long[] weights;
+    static final int DEFAULT_LOCKFREE_WEIGHT = 1;
 
-  @Override
-  public void init(String namespace, Configuration conf) {
-    weights = new long[Timing.values().length];
-    for (Timing timing : ProcessingDetails.Timing.values()) {
-      final int defaultValue;
-      switch (timing) {
-      case LOCKFREE:
-      case RESPONSE:
-      case HANDLER:
-        defaultValue = DEFAULT_LOCKFREE_WEIGHT;
-        break;
-      case LOCKSHARED:
-        defaultValue = DEFAULT_LOCKSHARED_WEIGHT;
-        break;
-      case LOCKEXCLUSIVE:
-        defaultValue = DEFAULT_LOCKEXCLUSIVE_WEIGHT;
-        break;
-      default:
-        // by default don't bill for queueing or lock wait time
-        defaultValue = 0;
-      }
-      String key = namespace + WEIGHT_CONFIG_PREFIX
-          + timing.name().toLowerCase(Locale.ENGLISH);
-      weights[timing.ordinal()] = conf.getInt(key, defaultValue);
+    static final int DEFAULT_LOCKSHARED_WEIGHT = 10;
+
+    static final int DEFAULT_LOCKEXCLUSIVE_WEIGHT = 100;
+
+    private long[] weights;
+
+    @Override
+    public void init(String namespace, Configuration conf) {
+        weights = new long[Timing.values().length];
+        for (Timing timing : ProcessingDetails.Timing.values()) {
+            final int defaultValue;
+            switch(timing) {
+                case LOCKFREE:
+                case RESPONSE:
+                case HANDLER:
+                    defaultValue = DEFAULT_LOCKFREE_WEIGHT;
+                    break;
+                case LOCKSHARED:
+                    defaultValue = DEFAULT_LOCKSHARED_WEIGHT;
+                    break;
+                case LOCKEXCLUSIVE:
+                    defaultValue = DEFAULT_LOCKEXCLUSIVE_WEIGHT;
+                    break;
+                default:
+                    // by default don't bill for queueing or lock wait time
+                    defaultValue = 0;
+            }
+            String key = namespace + WEIGHT_CONFIG_PREFIX + timing.name().toLowerCase(Locale.ENGLISH);
+            weights[timing.ordinal()] = conf.getInt(key, defaultValue);
+        }
     }
-  }
 
-  /**
-   * Calculates a weighted sum of the times stored on the provided processing
-   * details to be used as the cost in {@link DecayRpcScheduler}.
-   *
-   * @param details Processing details
-   * @return The weighted sum of the times. The returned unit is the same
-   *         as the default unit used by the provided processing details.
-   */
-  @Override
-  public long getCost(ProcessingDetails details) {
-    assert weights != null : "Cost provider must be initialized before use";
-    long cost = 0;
-    // weights was initialized to the same length as Timing.values()
-    for (int i = 0; i < Timing.values().length; i++) {
-      cost += details.get(Timing.values()[i]) * weights[i];
+    /**
+     * Calculates a weighted sum of the times stored on the provided processing
+     * details to be used as the cost in {@link DecayRpcScheduler}.
+     *
+     * @param details Processing details
+     * @return The weighted sum of the times. The returned unit is the same
+     *         as the default unit used by the provided processing details.
+     */
+    @Override
+    public long getCost(ProcessingDetails details) {
+        assert weights != null : "Cost provider must be initialized before use";
+        long cost = 0;
+        // weights was initialized to the same length as Timing.values()
+        for (int i = 0; i < Timing.values().length; i++) {
+            cost += details.get(Timing.values()[i]) * weights[i];
+        }
+        return cost;
     }
-    return cost;
-  }
 }

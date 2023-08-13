@@ -33,48 +33,40 @@ import org.junit.Test;
  */
 public class TestAddBlockPoolException {
 
-  @Test
-  public void testHasExeceptionsReturnsCorrectValue() {
-    AddBlockPoolException e = new AddBlockPoolException();
-    assertFalse(e.hasExceptions());
+    @Test
+    public void testHasExeceptionsReturnsCorrectValue() {
+        AddBlockPoolException e = new AddBlockPoolException();
+        assertFalse(e.hasExceptions());
+        FsVolumeImpl fakeVol = mock(FsVolumeImpl.class);
+        ConcurrentHashMap<FsVolumeSpi, IOException> vols = new ConcurrentHashMap<FsVolumeSpi, IOException>();
+        vols.put(fakeVol, new IOException("Error 1"));
+        e = new AddBlockPoolException(vols);
+        assertTrue(e.hasExceptions());
+    }
 
-    FsVolumeImpl fakeVol = mock(FsVolumeImpl.class);
-    ConcurrentHashMap<FsVolumeSpi, IOException> vols =
-        new ConcurrentHashMap<FsVolumeSpi, IOException>();
-    vols.put(fakeVol, new IOException("Error 1"));
-    e = new AddBlockPoolException(vols);
-    assertTrue(e.hasExceptions());
-  }
+    @Test
+    public void testExceptionsCanBeMerged() {
+        FsVolumeImpl vol1 = mock(FsVolumeImpl.class);
+        FsVolumeImpl vol2 = mock(FsVolumeImpl.class);
+        ConcurrentHashMap<FsVolumeSpi, IOException> first = new ConcurrentHashMap<FsVolumeSpi, IOException>();
+        ConcurrentHashMap<FsVolumeSpi, IOException> second = new ConcurrentHashMap<FsVolumeSpi, IOException>();
+        first.put(vol1, new IOException("First Error"));
+        second.put(vol1, new IOException("Second Error"));
+        second.put(vol2, new IOException("V2 Error"));
+        AddBlockPoolException e = new AddBlockPoolException(first);
+        e.mergeException(new AddBlockPoolException(second));
+        // Ensure there are two exceptions in the map
+        assertEquals(e.getFailingVolumes().size(), 2);
+        // Ensure the first exception added for a volume is the one retained
+        // when multiple errors
+        assertEquals(e.getFailingVolumes().get(vol1).getMessage(), "First Error");
+        assertEquals(e.getFailingVolumes().get(vol2).getMessage(), "V2 Error");
+    }
 
-  @Test
-  public void testExceptionsCanBeMerged() {
-    FsVolumeImpl vol1 = mock(FsVolumeImpl.class);
-    FsVolumeImpl vol2 = mock(FsVolumeImpl.class);
-
-    ConcurrentHashMap<FsVolumeSpi, IOException> first =
-        new ConcurrentHashMap<FsVolumeSpi, IOException>();
-    ConcurrentHashMap<FsVolumeSpi, IOException> second =
-        new ConcurrentHashMap<FsVolumeSpi, IOException>();
-    first.put(vol1, new IOException("First Error"));
-    second.put(vol1, new IOException("Second Error"));
-    second.put(vol2, new IOException("V2 Error"));
-
-    AddBlockPoolException e = new AddBlockPoolException(first);
-    e.mergeException(new AddBlockPoolException(second));
-
-    // Ensure there are two exceptions in the map
-    assertEquals(e.getFailingVolumes().size(), 2);
-    // Ensure the first exception added for a volume is the one retained
-    // when multiple errors
-    assertEquals(e.getFailingVolumes().get(vol1).getMessage(), "First Error");
-    assertEquals(e.getFailingVolumes().get(vol2).getMessage(), "V2 Error");
-  }
-
-  @Test
-  public void testEmptyExceptionsCanBeMerged() {
-    AddBlockPoolException e = new AddBlockPoolException();
-    e.mergeException(new AddBlockPoolException());
-    assertFalse(e.hasExceptions());
-  }
-
+    @Test
+    public void testEmptyExceptionsCanBeMerged() {
+        AddBlockPoolException e = new AddBlockPoolException();
+        e.mergeException(new AddBlockPoolException());
+        assertFalse(e.hasExceptions());
+    }
 }

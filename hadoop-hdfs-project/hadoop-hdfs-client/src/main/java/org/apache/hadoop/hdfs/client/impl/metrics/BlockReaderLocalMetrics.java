@@ -30,49 +30,43 @@ import org.apache.hadoop.metrics2.lib.MutableRollingAverages;
  * reads.
  */
 @InterfaceAudience.Private
-@Metrics(name="HdfsShortCircuitReads",
-         about="Block Reader Local's Short Circuit Read latency",
-         context="dfs")
+@Metrics(name = "HdfsShortCircuitReads", about = "Block Reader Local's Short Circuit Read latency", context = "dfs")
 public class BlockReaderLocalMetrics {
 
-  @Metric(value = "short circuit read operation rate", valueName = "LatencyMs")
-  private MutableRollingAverages shortCircuitReadRollingAverages;
+    @Metric(value = "short circuit read operation rate", valueName = "LatencyMs")
+    private MutableRollingAverages shortCircuitReadRollingAverages;
 
-  private static final String SHORT_CIRCUIT_READ_METRIC_REGISTERED_NAME =
-      "HdfsShortCircuitReads";
-  private static final String SHORT_CIRCUIT_LOCAL_READS_METRIC_VALUE_NAME =
-      "ShortCircuitLocalReads";
+    private static final String SHORT_CIRCUIT_READ_METRIC_REGISTERED_NAME = "HdfsShortCircuitReads";
 
-  public static BlockReaderLocalMetrics create() {
-    MetricsSystem ms = DefaultMetricsSystem.instance();
-    BlockReaderLocalMetrics metrics = new BlockReaderLocalMetrics();
+    private static final String SHORT_CIRCUIT_LOCAL_READS_METRIC_VALUE_NAME = "ShortCircuitLocalReads";
 
-    ms.register(
-        SHORT_CIRCUIT_READ_METRIC_REGISTERED_NAME, null, metrics);
-    return metrics;
-  }
+    public static BlockReaderLocalMetrics create() {
+        MetricsSystem ms = DefaultMetricsSystem.instance();
+        BlockReaderLocalMetrics metrics = new BlockReaderLocalMetrics();
+        ms.register(SHORT_CIRCUIT_READ_METRIC_REGISTERED_NAME, null, metrics);
+        return metrics;
+    }
 
-  /**
-   * Adds short circuit read elapsed time.
-   */
-  public void addShortCircuitReadLatency(final long latency) {
-    shortCircuitReadRollingAverages.add(
-        SHORT_CIRCUIT_LOCAL_READS_METRIC_VALUE_NAME, latency);
-  }
+    /**
+     * Adds short circuit read elapsed time.
+     */
+    public void addShortCircuitReadLatency(final long latency) {
+        shortCircuitReadRollingAverages.add(SHORT_CIRCUIT_LOCAL_READS_METRIC_VALUE_NAME, latency);
+    }
 
-  /**
-   * Collects states maintained in {@link ThreadLocal}, if any.
-   */
-  public void collectThreadLocalStates() {
-    shortCircuitReadRollingAverages.collectThreadLocalStates();
-  }
+    /**
+     * Collects states maintained in {@link ThreadLocal}, if any.
+     */
+    public void collectThreadLocalStates() {
+        shortCircuitReadRollingAverages.collectThreadLocalStates();
+    }
 
-  /**
-   * Get the MutableRollingAverage metric for testing only.
-   * @return
-   */
-  @VisibleForTesting
-  public MutableRollingAverages getShortCircuitReadRollingAverages() {
-    return shortCircuitReadRollingAverages;
-  }
+    /**
+     * Get the MutableRollingAverage metric for testing only.
+     * @return
+     */
+    @VisibleForTesting
+    public MutableRollingAverages getShortCircuitReadRollingAverages() {
+        return shortCircuitReadRollingAverages;
+    }
 }

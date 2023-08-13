@@ -15,15 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.fs.impl;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.apache.hadoop.test.HadoopTestBase;
 import org.apache.hadoop.util.LambdaUtils;
 
@@ -33,44 +30,41 @@ import org.apache.hadoop.util.LambdaUtils;
  */
 public class TestFutureIO extends HadoopTestBase {
 
-  private ThreadLocal<AtomicInteger> local;
+    private ThreadLocal<AtomicInteger> local;
 
-  @Before
-  public void setup() throws Exception {
-    local = ThreadLocal.withInitial(() -> new AtomicInteger(1));
-  }
+    @Before
+    public void setup() throws Exception {
+        local = ThreadLocal.withInitial(() -> new AtomicInteger(1));
+    }
 
-  /**
-   * Simple eval is blocking and executes in the same thread.
-   */
-  @Test
-  public void testEvalInCurrentThread() throws Throwable {
-    CompletableFuture<Integer> result = new CompletableFuture<>();
-    CompletableFuture<Integer> eval = LambdaUtils.eval(result,
-        () -> {
-          return getLocal().addAndGet(2);
+    /**
+     * Simple eval is blocking and executes in the same thread.
+     */
+    @Test
+    public void testEvalInCurrentThread() throws Throwable {
+        CompletableFuture<Integer> result = new CompletableFuture<>();
+        CompletableFuture<Integer> eval = LambdaUtils.eval(result, () -> {
+            return getLocal().addAndGet(2);
         });
-    assertEquals("Thread local value", 3, getLocalValue());
-    assertEquals("Evaluated Value", 3, eval.get().intValue());
-  }
+        assertEquals("Thread local value", 3, getLocalValue());
+        assertEquals("Evaluated Value", 3, eval.get().intValue());
+    }
 
-  /**
-   * A supply async call runs things in a shared thread pool.
-   */
-  @Test
-  public void testEvalAsync() throws Throwable {
-    final CompletableFuture<Integer> eval = CompletableFuture.supplyAsync(
-        () -> getLocal().addAndGet(2));
-    assertEquals("Thread local value", 1, getLocalValue());
-    assertEquals("Evaluated Value", 3, eval.get().intValue());
-  }
+    /**
+     * A supply async call runs things in a shared thread pool.
+     */
+    @Test
+    public void testEvalAsync() throws Throwable {
+        final CompletableFuture<Integer> eval = CompletableFuture.supplyAsync(() -> getLocal().addAndGet(2));
+        assertEquals("Thread local value", 1, getLocalValue());
+        assertEquals("Evaluated Value", 3, eval.get().intValue());
+    }
 
+    protected AtomicInteger getLocal() {
+        return local.get();
+    }
 
-  protected AtomicInteger getLocal() {
-    return local.get();
-  }
-
-  protected int getLocalValue() {
-    return local.get().get();
-  }
+    protected int getLocalValue() {
+        return local.get().get();
+    }
 }

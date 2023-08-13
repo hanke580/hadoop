@@ -18,14 +18,12 @@
 package org.apache.hadoop.hdfs.server.federation.router;
 
 import java.net.InetSocketAddress;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.DFSUtil;
 import org.apache.hadoop.hdfs.server.common.JspHelper;
 import org.apache.hadoop.hdfs.server.namenode.NameNodeHttpServer;
 import org.apache.hadoop.http.HttpServer2;
 import org.apache.hadoop.service.AbstractService;
-
 import javax.servlet.ServletContext;
 
 /**
@@ -34,112 +32,91 @@ import javax.servlet.ServletContext;
  */
 public class RouterHttpServer extends AbstractService {
 
-  protected static final String NAMENODE_ATTRIBUTE_KEY = "name.node";
+    protected static final String NAMENODE_ATTRIBUTE_KEY = "name.node";
 
+    /**
+     * Configuration for the Router HTTP server.
+     */
+    private Configuration conf;
 
-  /** Configuration for the Router HTTP server. */
-  private Configuration conf;
+    /**
+     * Router using this HTTP server.
+     */
+    private final Router router;
 
-  /** Router using this HTTP server. */
-  private final Router router;
+    /**
+     * HTTP server.
+     */
+    private HttpServer2 httpServer;
 
-  /** HTTP server. */
-  private HttpServer2 httpServer;
+    /**
+     * HTTP addresses.
+     */
+    private InetSocketAddress httpAddress;
 
-  /** HTTP addresses. */
-  private InetSocketAddress httpAddress;
-  private InetSocketAddress httpsAddress;
+    private InetSocketAddress httpsAddress;
 
-
-  public RouterHttpServer(Router router) {
-    super(RouterHttpServer.class.getName());
-    this.router = router;
-  }
-
-  @Override
-  protected void serviceInit(Configuration configuration) throws Exception {
-    this.conf = configuration;
-
-    // Get HTTP address
-    this.httpAddress = conf.getSocketAddr(
-        RBFConfigKeys.DFS_ROUTER_HTTP_BIND_HOST_KEY,
-        RBFConfigKeys.DFS_ROUTER_HTTP_ADDRESS_KEY,
-        RBFConfigKeys.DFS_ROUTER_HTTP_ADDRESS_DEFAULT,
-        RBFConfigKeys.DFS_ROUTER_HTTP_PORT_DEFAULT);
-
-    // Get HTTPs address
-    this.httpsAddress = conf.getSocketAddr(
-        RBFConfigKeys.DFS_ROUTER_HTTPS_BIND_HOST_KEY,
-        RBFConfigKeys.DFS_ROUTER_HTTPS_ADDRESS_KEY,
-        RBFConfigKeys.DFS_ROUTER_HTTPS_ADDRESS_DEFAULT,
-        RBFConfigKeys.DFS_ROUTER_HTTPS_PORT_DEFAULT);
-
-    super.serviceInit(conf);
-  }
-
-  @Override
-  protected void serviceStart() throws Exception {
-    // Build and start server
-    String webApp = "router";
-    HttpServer2.Builder builder = DFSUtil.httpServerTemplateForNNAndJN(
-        this.conf, this.httpAddress, this.httpsAddress, webApp,
-        RBFConfigKeys.DFS_ROUTER_KERBEROS_INTERNAL_SPNEGO_PRINCIPAL_KEY,
-        RBFConfigKeys.DFS_ROUTER_KEYTAB_FILE_KEY);
-
-    this.httpServer = builder.build();
-
-    String httpKeytab = conf.get(DFSUtil.getSpnegoKeytabKey(conf,
-        RBFConfigKeys.DFS_ROUTER_KEYTAB_FILE_KEY));
-    NameNodeHttpServer.initWebHdfs(conf, httpAddress.getHostName(), httpKeytab,
-        httpServer, RouterWebHdfsMethods.class.getPackage().getName());
-
-    this.httpServer.setAttribute(NAMENODE_ATTRIBUTE_KEY, this.router);
-    this.httpServer.setAttribute(JspHelper.CURRENT_CONF, this.conf);
-    setupServlets(this.httpServer, this.conf);
-
-    this.httpServer.start();
-
-    // The server port can be ephemeral... ensure we have the correct info
-    InetSocketAddress listenAddress = this.httpServer.getConnectorAddress(0);
-    if (listenAddress != null) {
-      this.httpAddress = new InetSocketAddress(this.httpAddress.getHostName(),
-          listenAddress.getPort());
+    public RouterHttpServer(Router router) {
+        super(RouterHttpServer.class.getName());
+        this.router = router;
     }
-    super.serviceStart();
-  }
 
-  @Override
-  protected void serviceStop() throws Exception {
-    if(this.httpServer != null) {
-      this.httpServer.stop();
+    @Override
+    protected void serviceInit(Configuration configuration) throws Exception {
+        this.conf = configuration;
+        // Get HTTP address
+        this.httpAddress = conf.getSocketAddr(RBFConfigKeys.DFS_ROUTER_HTTP_BIND_HOST_KEY, RBFConfigKeys.DFS_ROUTER_HTTP_ADDRESS_KEY, RBFConfigKeys.DFS_ROUTER_HTTP_ADDRESS_DEFAULT, RBFConfigKeys.DFS_ROUTER_HTTP_PORT_DEFAULT);
+        // Get HTTPs address
+        this.httpsAddress = conf.getSocketAddr(RBFConfigKeys.DFS_ROUTER_HTTPS_BIND_HOST_KEY, RBFConfigKeys.DFS_ROUTER_HTTPS_ADDRESS_KEY, RBFConfigKeys.DFS_ROUTER_HTTPS_ADDRESS_DEFAULT, RBFConfigKeys.DFS_ROUTER_HTTPS_PORT_DEFAULT);
+        super.serviceInit(conf);
     }
-    super.serviceStop();
-  }
 
-  private static void setupServlets(
-      HttpServer2 httpServer, Configuration conf) {
-    httpServer.addInternalServlet(IsRouterActiveServlet.SERVLET_NAME,
-        IsRouterActiveServlet.PATH_SPEC,
-        IsRouterActiveServlet.class);
-    httpServer.addInternalServlet(RouterFsckServlet.SERVLET_NAME,
-        RouterFsckServlet.PATH_SPEC,
-        RouterFsckServlet.class,
-        true);
-  }
+    @Override
+    protected void serviceStart() throws Exception {
+        // Build and start server
+        String webApp = "router";
+        HttpServer2.Builder builder = DFSUtil.httpServerTemplateForNNAndJN(this.conf, this.httpAddress, this.httpsAddress, webApp, RBFConfigKeys.DFS_ROUTER_KERBEROS_INTERNAL_SPNEGO_PRINCIPAL_KEY, RBFConfigKeys.DFS_ROUTER_KEYTAB_FILE_KEY);
+        this.httpServer = builder.build();
+        String httpKeytab = conf.get(DFSUtil.getSpnegoKeytabKey(conf, RBFConfigKeys.DFS_ROUTER_KEYTAB_FILE_KEY));
+        NameNodeHttpServer.initWebHdfs(conf, httpAddress.getHostName(), httpKeytab, httpServer, RouterWebHdfsMethods.class.getPackage().getName());
+        this.httpServer.setAttribute(NAMENODE_ATTRIBUTE_KEY, this.router);
+        this.httpServer.setAttribute(JspHelper.CURRENT_CONF, this.conf);
+        setupServlets(this.httpServer, this.conf);
+        this.httpServer.start();
+        // The server port can be ephemeral... ensure we have the correct info
+        InetSocketAddress listenAddress = this.httpServer.getConnectorAddress(0);
+        if (listenAddress != null) {
+            this.httpAddress = new InetSocketAddress(this.httpAddress.getHostName(), listenAddress.getPort());
+        }
+        super.serviceStart();
+    }
 
-  public InetSocketAddress getHttpAddress() {
-    return this.httpAddress;
-  }
+    @Override
+    protected void serviceStop() throws Exception {
+        if (this.httpServer != null) {
+            this.httpServer.stop();
+        }
+        super.serviceStop();
+    }
 
-  public InetSocketAddress getHttpsAddress() {
-    return this.httpsAddress;
-  }
+    private static void setupServlets(HttpServer2 httpServer, Configuration conf) {
+        httpServer.addInternalServlet(IsRouterActiveServlet.SERVLET_NAME, IsRouterActiveServlet.PATH_SPEC, IsRouterActiveServlet.class);
+        httpServer.addInternalServlet(RouterFsckServlet.SERVLET_NAME, RouterFsckServlet.PATH_SPEC, RouterFsckServlet.class, true);
+    }
 
-  static Configuration getConfFromContext(ServletContext context) {
-    return (Configuration)context.getAttribute(JspHelper.CURRENT_CONF);
-  }
+    public InetSocketAddress getHttpAddress() {
+        return this.httpAddress;
+    }
 
-  public static Router getRouterFromContext(ServletContext context) {
-    return (Router)context.getAttribute(NAMENODE_ATTRIBUTE_KEY);
-  }
+    public InetSocketAddress getHttpsAddress() {
+        return this.httpsAddress;
+    }
+
+    static Configuration getConfFromContext(ServletContext context) {
+        return (Configuration) context.getAttribute(JspHelper.CURRENT_CONF);
+    }
+
+    public static Router getRouterFromContext(ServletContext context) {
+        return (Router) context.getAttribute(NAMENODE_ATTRIBUTE_KEY);
+    }
 }

@@ -29,17 +29,18 @@ import org.apache.hadoop.io.erasurecode.coder.ErasureEncoder;
  * test or performance comparison with other erasure coders.
  */
 public class DummyErasureCodec extends ErasureCodec {
-  public DummyErasureCodec(Configuration conf, ErasureCodecOptions options) {
-    super(conf, options);
-  }
 
-  @Override
-  public ErasureEncoder createEncoder() {
-    return new DummyErasureEncoder(getCoderOptions());
-  }
+    public DummyErasureCodec(Configuration conf, ErasureCodecOptions options) {
+        super(conf, options);
+    }
 
-  @Override
-  public ErasureDecoder createDecoder() {
-    return new DummyErasureDecoder(getCoderOptions());
-  }
+    @Override
+    public ErasureEncoder createEncoder() {
+        return new DummyErasureEncoder(getCoderOptions());
+    }
+
+    @Override
+    public ErasureDecoder createDecoder() {
+        return new DummyErasureDecoder(getCoderOptions());
+    }
 }

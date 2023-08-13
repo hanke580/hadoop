@@ -50,51 +50,44 @@ import org.slf4j.LoggerFactory;
  */
 public class IngressPortBasedResolver extends SaslPropertiesResolver {
 
-  public static final Logger LOG =
-      LoggerFactory.getLogger(IngressPortBasedResolver.class.getName());
+    public static final Logger LOG = LoggerFactory.getLogger(IngressPortBasedResolver.class.getName());
 
-  static final String INGRESS_PORT_SASL_PROP_PREFIX = "ingress.port.sasl.prop";
+    static final String INGRESS_PORT_SASL_PROP_PREFIX = "ingress.port.sasl.prop";
 
-  static final String INGRESS_PORT_SASL_CONFIGURED_PORTS =
-      "ingress.port.sasl.configured.ports";
+    static final String INGRESS_PORT_SASL_CONFIGURED_PORTS = "ingress.port.sasl.configured.ports";
 
-  // no need to concurrent map, because after setConf() it never change,
-  // only for read.
-  private HashMap<Integer, Map<String, String>> portPropMapping;
+    // no need to concurrent map, because after setConf() it never change,
+    // only for read.
+    private HashMap<Integer, Map<String, String>> portPropMapping;
 
-  @Override
-  public void setConf(Configuration conf) {
-    super.setConf(conf);
-    portPropMapping = new HashMap<>();
-    Collection<String> portStrings =
-        conf.getTrimmedStringCollection(INGRESS_PORT_SASL_CONFIGURED_PORTS);
-    for (String portString : portStrings) {
-      int port = Integer.parseInt(portString);
-      String configKey = INGRESS_PORT_SASL_PROP_PREFIX + "." + portString;
-      Map<String, String> props = getSaslProperties(conf, configKey,
-          SaslRpcServer.QualityOfProtection.PRIVACY);
-      portPropMapping.put(port, props);
+    @Override
+    public void setConf(Configuration conf) {
+        super.setConf(conf);
+        portPropMapping = new HashMap<>();
+        Collection<String> portStrings = conf.getTrimmedStringCollection(INGRESS_PORT_SASL_CONFIGURED_PORTS);
+        for (String portString : portStrings) {
+            int port = Integer.parseInt(portString);
+            String configKey = INGRESS_PORT_SASL_PROP_PREFIX + "." + portString;
+            Map<String, String> props = getSaslProperties(conf, configKey, SaslRpcServer.QualityOfProtection.PRIVACY);
+            portPropMapping.put(port, props);
+        }
+        LOG.debug("Configured with port to QOP mapping as:" + portPropMapping);
     }
-    LOG.debug("Configured with port to QOP mapping as:" + portPropMapping);
-  }
 
-  /**
-   * Identify the Sasl Properties to be used for a connection with a client.
-   * @param clientAddress client's address
-   * @param ingressPort the port that the client is connecting
-   * @return the sasl properties to be used for the connection.
-   */
-  @Override
-  @VisibleForTesting
-  public Map<String, String> getServerProperties(InetAddress clientAddress,
-      int ingressPort) {
-    LOG.debug("Resolving SASL properties for " + clientAddress + " "
-        + ingressPort);
-    if (!portPropMapping.containsKey(ingressPort)) {
-      LOG.warn("An un-configured port is being requested " + ingressPort
-          + " using default");
-      return getDefaultProperties();
+    /**
+     * Identify the Sasl Properties to be used for a connection with a client.
+     * @param clientAddress client's address
+     * @param ingressPort the port that the client is connecting
+     * @return the sasl properties to be used for the connection.
+     */
+    @Override
+    @VisibleForTesting
+    public Map<String, String> getServerProperties(InetAddress clientAddress, int ingressPort) {
+        LOG.debug("Resolving SASL properties for " + clientAddress + " " + ingressPort);
+        if (!portPropMapping.containsKey(ingressPort)) {
+            LOG.warn("An un-configured port is being requested " + ingressPort + " using default");
+            return getDefaultProperties();
+        }
+        return portPropMapping.get(ingressPort);
     }
-    return portPropMapping.get(ingressPort);
-  }
 }

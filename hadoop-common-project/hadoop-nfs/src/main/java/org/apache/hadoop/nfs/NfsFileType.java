@@ -21,21 +21,29 @@ package org.apache.hadoop.nfs;
  * Class encapsulates different types of files
  */
 public enum NfsFileType {
-  NFSREG(1),    // a regular file
-  NFSDIR(2),    // a directory
-  NFSBLK(3),    // a block special device file
-  NFSCHR(4),    // a character special device
-  NFSLNK(5),    // a symbolic link
-  NFSSOCK(6),   // a socket
-  NFSFIFO(7);   // a named pipe
-  
-  private final int value;
-  
-  NfsFileType(int val) {
-    value = val;
-  }
-  
-  public int toValue() {
-    return value;
-  }
+
+    // a regular file
+    NFSREG(1),
+    // a directory
+    NFSDIR(2),
+    // a block special device file
+    NFSBLK(3),
+    // a character special device
+    NFSCHR(4),
+    // a symbolic link
+    NFSLNK(5),
+    // a socket
+    NFSSOCK(6),
+    // a named pipe
+    NFSFIFO(7);
+
+    private final int value;
+
+    NfsFileType(int val) {
+        value = val;
+    }
+
+    public int toValue() {
+        return value;
+    }
 }

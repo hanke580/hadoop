@@ -32,7 +32,6 @@ import org.junit.Before;
 import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
-
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -42,80 +41,58 @@ import static org.mockito.Mockito.when;
  * Tests the in-memory alias map with a mock level-db implementation.
  */
 public class TestLevelDbMockAliasMapClient {
-  private InMemoryLevelDBAliasMapServer levelDBAliasMapServer;
-  private InMemoryLevelDBAliasMapClient inMemoryLevelDBAliasMapClient;
-  private File tempDir;
-  private Configuration conf;
-  private InMemoryAliasMap aliasMapMock;
-  private final String bpid = "BPID-0";
 
-  @Before
-  public void setUp() throws IOException {
-    aliasMapMock = mock(InMemoryAliasMap.class);
-    when(aliasMapMock.getBlockPoolId()).thenReturn(bpid);
-    levelDBAliasMapServer = new InMemoryLevelDBAliasMapServer(
-        (config, blockPoolID) -> aliasMapMock, bpid);
-    conf = new Configuration();
-    int port = 9877;
+    private InMemoryLevelDBAliasMapServer levelDBAliasMapServer;
 
-    conf.set(DFSConfigKeys.DFS_PROVIDED_ALIASMAP_INMEMORY_RPC_ADDRESS,
-        "localhost:" + port);
-    tempDir = Files.createTempDir();
-    conf.set(DFSConfigKeys.DFS_PROVIDED_ALIASMAP_INMEMORY_LEVELDB_DIR,
-        tempDir.getAbsolutePath());
-    levelDBAliasMapServer.setConf(conf);
-    levelDBAliasMapServer.start();
-    inMemoryLevelDBAliasMapClient = new InMemoryLevelDBAliasMapClient();
-    inMemoryLevelDBAliasMapClient.setConf(conf);
-  }
+    private InMemoryLevelDBAliasMapClient inMemoryLevelDBAliasMapClient;
 
-  @After
-  public void tearDown() throws IOException {
-    levelDBAliasMapServer.close();
-    inMemoryLevelDBAliasMapClient.close();
-    FileUtils.deleteDirectory(tempDir);
-  }
+    private File tempDir;
 
-  @Test
-  public void readFailure() throws Exception {
-    Block block = new Block(42, 43, 44);
-    doThrow(new IOException())
-        .doThrow(new DBException())
-        .when(aliasMapMock)
-        .read(block);
+    private Configuration conf;
 
-    assertThatExceptionOfType(IOException.class)
-        .isThrownBy(() ->
-            inMemoryLevelDBAliasMapClient.getReader(null, bpid)
-                .resolve(block));
+    private InMemoryAliasMap aliasMapMock;
 
-    assertThatExceptionOfType(IOException.class)
-        .isThrownBy(() ->
-            inMemoryLevelDBAliasMapClient.getReader(null, bpid)
-                .resolve(block));
-  }
+    private final String bpid = "BPID-0";
 
-  @Test
-  public void writeFailure() throws IOException {
-    Block block = new Block(42, 43, 44);
-    byte[] nonce = new byte[0];
-    Path path = new Path("koekoek");
-    ProvidedStorageLocation providedStorageLocation =
-        new ProvidedStorageLocation(path, 45, 46, nonce);
+    @Before
+    public void setUp() throws IOException {
+        aliasMapMock = mock(InMemoryAliasMap.class);
+        when(aliasMapMock.getBlockPoolId()).thenReturn(bpid);
+        levelDBAliasMapServer = new InMemoryLevelDBAliasMapServer((config, blockPoolID) -> aliasMapMock, bpid);
+        conf = new Configuration();
+        int port = 9877;
+        conf.set(DFSConfigKeys.DFS_PROVIDED_ALIASMAP_INMEMORY_RPC_ADDRESS, "localhost:" + port);
+        tempDir = Files.createTempDir();
+        conf.set(DFSConfigKeys.DFS_PROVIDED_ALIASMAP_INMEMORY_LEVELDB_DIR, tempDir.getAbsolutePath());
+        levelDBAliasMapServer.setConf(conf);
+        levelDBAliasMapServer.start();
+        inMemoryLevelDBAliasMapClient = new InMemoryLevelDBAliasMapClient();
+        inMemoryLevelDBAliasMapClient.setConf(conf);
+    }
 
-    doThrow(new IOException())
-        .when(aliasMapMock)
-        .write(block, providedStorageLocation);
+    @After
+    public void tearDown() throws IOException {
+        levelDBAliasMapServer.close();
+        inMemoryLevelDBAliasMapClient.close();
+        FileUtils.deleteDirectory(tempDir);
+    }
 
-    assertThatExceptionOfType(IOException.class)
-        .isThrownBy(() ->
-            inMemoryLevelDBAliasMapClient.getWriter(null, bpid)
-                .store(new FileRegion(block, providedStorageLocation)));
+    @Test
+    public void readFailure() throws Exception {
+        Block block = new Block(42, 43, 44);
+        doThrow(new IOException()).doThrow(new DBException()).when(aliasMapMock).read(block);
+        assertThatExceptionOfType(IOException.class).isThrownBy(() -> inMemoryLevelDBAliasMapClient.getReader(null, bpid).resolve(block));
+        assertThatExceptionOfType(IOException.class).isThrownBy(() -> inMemoryLevelDBAliasMapClient.getReader(null, bpid).resolve(block));
+    }
 
-    assertThatExceptionOfType(IOException.class)
-        .isThrownBy(() ->
-            inMemoryLevelDBAliasMapClient.getWriter(null, bpid)
-                .store(new FileRegion(block, providedStorageLocation)));
-  }
-
+    @Test
+    public void writeFailure() throws IOException {
+        Block block = new Block(42, 43, 44);
+        byte[] nonce = new byte[0];
+        Path path = new Path("koekoek");
+        ProvidedStorageLocation providedStorageLocation = new ProvidedStorageLocation(path, 45, 46, nonce);
+        doThrow(new IOException()).when(aliasMapMock).write(block, providedStorageLocation);
+        assertThatExceptionOfType(IOException.class).isThrownBy(() -> inMemoryLevelDBAliasMapClient.getWriter(null, bpid).store(new FileRegion(block, providedStorageLocation)));
+        assertThatExceptionOfType(IOException.class).isThrownBy(() -> inMemoryLevelDBAliasMapClient.getWriter(null, bpid).store(new FileRegion(block, providedStorageLocation)));
+    }
 }

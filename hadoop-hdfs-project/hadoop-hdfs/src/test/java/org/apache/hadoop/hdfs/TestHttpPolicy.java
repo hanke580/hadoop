@@ -23,10 +23,10 @@ import org.junit.Test;
 
 public final class TestHttpPolicy {
 
-  @Test(expected = HadoopIllegalArgumentException.class)
-  public void testInvalidPolicyValue() {
-    Configuration conf = new Configuration();
-    conf.set(DFSConfigKeys.DFS_HTTP_POLICY_KEY, "invalid");
-    DFSUtil.getHttpPolicy(conf);
-  }
+    @Test(expected = HadoopIllegalArgumentException.class)
+    public void testInvalidPolicyValue() {
+        Configuration conf = new Configuration();
+        conf.set(DFSConfigKeys.DFS_HTTP_POLICY_KEY, "invalid");
+        DFSUtil.getHttpPolicy(conf);
+    }
 }

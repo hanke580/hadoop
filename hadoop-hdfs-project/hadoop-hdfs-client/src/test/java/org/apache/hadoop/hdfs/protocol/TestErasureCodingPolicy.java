@@ -20,7 +20,6 @@ package org.apache.hadoop.hdfs.protocol;
 import org.apache.hadoop.io.erasurecode.ECSchema;
 import org.apache.hadoop.test.GenericTestUtils;
 import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.fail;
@@ -30,79 +29,72 @@ import static org.junit.Assert.fail;
  */
 public class TestErasureCodingPolicy {
 
-  private static final ECSchema SCHEMA_1 = new ECSchema("one", 1, 2, null);
-  private static final ECSchema SCHEMA_2 = new ECSchema("two", 1, 2, null);
+    private static final ECSchema SCHEMA_1 = new ECSchema("one", 1, 2, null);
 
-  @Test
-  public void testInvalid() {
-    try {
-      new ErasureCodingPolicy(null, SCHEMA_1, 123, (byte) -1);
-      fail("Instantiated invalid ErasureCodingPolicy");
-    } catch (NullPointerException e) {
-    }
-    try {
-      new ErasureCodingPolicy("policy", null, 123, (byte) -1);
-      fail("Instantiated invalid ErasureCodingPolicy");
-    } catch (NullPointerException e) {
-    }
-    try {
-      new ErasureCodingPolicy("policy", SCHEMA_1, -1, (byte) -1);
-      fail("Instantiated invalid ErasureCodingPolicy");
-    } catch (IllegalArgumentException e) {
-      GenericTestUtils.assertExceptionContains("cellSize", e);
-    }
-    try {
-      new ErasureCodingPolicy(null, 1024, (byte) -1);
-      fail("Instantiated invalid ErasureCodingPolicy");
-    } catch (NullPointerException e) {
-    }
-    try {
-      new ErasureCodingPolicy(SCHEMA_1, -1, (byte) -1);
-      fail("Instantiated invalid ErasureCodingPolicy");
-    } catch (IllegalArgumentException e) {
-      GenericTestUtils.assertExceptionContains("cellSize", e);
-    }
-    try {
-      new ErasureCodingPolicy(null, 1024);
-      fail("Instantiated invalid ErasureCodingPolicy");
-    } catch (NullPointerException e) {
-    }
-    try {
-      new ErasureCodingPolicy(SCHEMA_1, -1);
-      fail("Instantiated invalid ErasureCodingPolicy");
-    } catch (IllegalArgumentException e) {
-      GenericTestUtils.assertExceptionContains("cellSize", e);
-    }
-  }
+    private static final ECSchema SCHEMA_2 = new ECSchema("two", 1, 2, null);
 
-  @Test
-  public void testEqualsAndHashCode() {
-    ErasureCodingPolicy[] policies = new ErasureCodingPolicy[]{
-        new ErasureCodingPolicy("one", SCHEMA_1, 1024, (byte) 1),
-        new ErasureCodingPolicy("two", SCHEMA_1, 1024, (byte) 1),
-        new ErasureCodingPolicy("one", SCHEMA_2, 1024, (byte) 1),
-        new ErasureCodingPolicy("one", SCHEMA_1, 2048, (byte) 1),
-        new ErasureCodingPolicy("one", SCHEMA_1, 1024, (byte) 3),
-    };
-
-    for (int i = 0; i < policies.length; i++) {
-      final ErasureCodingPolicy ei = policies[i];
-      // Check identity
-      ErasureCodingPolicy temp = new ErasureCodingPolicy(ei.getName(), ei
-          .getSchema(), ei.getCellSize(), ei.getId());
-      assertEquals(ei, temp);
-      assertEquals(ei.hashCode(), temp.hashCode());
-      // Check against other policies
-      for (int j = 0; j < policies.length; j++) {
-        final ErasureCodingPolicy ej = policies[j];
-        if (i == j) {
-          assertEquals(ei, ej);
-          assertEquals(ei.hashCode(), ej.hashCode());
-        } else {
-          assertNotEquals(ei, ej);
-          assertNotEquals(ei, ej.hashCode());
+    @Test
+    public void testInvalid() {
+        try {
+            new ErasureCodingPolicy(null, SCHEMA_1, 123, (byte) -1);
+            fail("Instantiated invalid ErasureCodingPolicy");
+        } catch (NullPointerException e) {
         }
-      }
+        try {
+            new ErasureCodingPolicy("policy", null, 123, (byte) -1);
+            fail("Instantiated invalid ErasureCodingPolicy");
+        } catch (NullPointerException e) {
+        }
+        try {
+            new ErasureCodingPolicy("policy", SCHEMA_1, -1, (byte) -1);
+            fail("Instantiated invalid ErasureCodingPolicy");
+        } catch (IllegalArgumentException e) {
+            GenericTestUtils.assertExceptionContains("cellSize", e);
+        }
+        try {
+            new ErasureCodingPolicy(null, 1024, (byte) -1);
+            fail("Instantiated invalid ErasureCodingPolicy");
+        } catch (NullPointerException e) {
+        }
+        try {
+            new ErasureCodingPolicy(SCHEMA_1, -1, (byte) -1);
+            fail("Instantiated invalid ErasureCodingPolicy");
+        } catch (IllegalArgumentException e) {
+            GenericTestUtils.assertExceptionContains("cellSize", e);
+        }
+        try {
+            new ErasureCodingPolicy(null, 1024);
+            fail("Instantiated invalid ErasureCodingPolicy");
+        } catch (NullPointerException e) {
+        }
+        try {
+            new ErasureCodingPolicy(SCHEMA_1, -1);
+            fail("Instantiated invalid ErasureCodingPolicy");
+        } catch (IllegalArgumentException e) {
+            GenericTestUtils.assertExceptionContains("cellSize", e);
+        }
     }
-  }
+
+    @Test
+    public void testEqualsAndHashCode() {
+        ErasureCodingPolicy[] policies = new ErasureCodingPolicy[] { new ErasureCodingPolicy("one", SCHEMA_1, 1024, (byte) 1), new ErasureCodingPolicy("two", SCHEMA_1, 1024, (byte) 1), new ErasureCodingPolicy("one", SCHEMA_2, 1024, (byte) 1), new ErasureCodingPolicy("one", SCHEMA_1, 2048, (byte) 1), new ErasureCodingPolicy("one", SCHEMA_1, 1024, (byte) 3) };
+        for (int i = 0; i < policies.length; i++) {
+            final ErasureCodingPolicy ei = policies[i];
+            // Check identity
+            ErasureCodingPolicy temp = new ErasureCodingPolicy(ei.getName(), ei.getSchema(), ei.getCellSize(), ei.getId());
+            assertEquals(ei, temp);
+            assertEquals(ei.hashCode(), temp.hashCode());
+            // Check against other policies
+            for (int j = 0; j < policies.length; j++) {
+                final ErasureCodingPolicy ej = policies[j];
+                if (i == j) {
+                    assertEquals(ei, ej);
+                    assertEquals(ei.hashCode(), ej.hashCode());
+                } else {
+                    assertNotEquals(ei, ej);
+                    assertNotEquals(ei, ej.hashCode());
+                }
+            }
+        }
+    }
 }

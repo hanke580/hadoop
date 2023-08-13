@@ -15,11 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.cli.util;
 
 import org.apache.hadoop.cli.CLITestHelper;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
@@ -29,94 +27,85 @@ import java.util.regex.Pattern;
 import java.util.ArrayList;
 
 /**
- *
  * This class execute commands and captures the output
  */
-public abstract class CommandExecutor {  
-  protected String[] getCommandAsArgs(final String cmd, final String masterKey,
-		                                       final String master) {
-    String regex = "\'([^\']*)\'|\"([^\"]*)\"|(\\S+)";
-    Matcher matcher = Pattern.compile(regex).matcher(cmd);
+public abstract class CommandExecutor {
 
-    ArrayList<String> args = new ArrayList<String>();
-    String arg = null;
-
-    while (matcher.find()) {
-      if (matcher.group(1) != null) {
-        arg = matcher.group(1);
-      } else if (matcher.group(2) != null) {
-        arg = matcher.group(2);
-      } else {
-        arg = matcher.group(3);
-      }
-
-      arg = arg.replaceAll(masterKey, master);
-      arg = arg.replaceAll("CLITEST_DATA",
-         new File(CLITestHelper.TEST_CACHE_DATA_DIR).
-         toURI().toString().replace(' ', '+'));
-      arg = arg.replaceAll("USERNAME", System.getProperty("user.name"));
-
-      args.add(arg);
-     }
-
-    return args.toArray(new String[0]);
-  }
-  
-  public Result executeCommand(final String cmd) throws Exception {
-    int exitCode = 0;
-    Exception lastException = null;
-    
-    
-    ByteArrayOutputStream bao = new ByteArrayOutputStream();
-    PrintStream origOut = System.out;
-    PrintStream origErr = System.err;
-    
-    System.setOut(new PrintStream(bao));
-    System.setErr(new PrintStream(bao));
-    
-    try {
-      exitCode = execute(cmd);
-    } catch (Exception e) {
-      e.printStackTrace();
-      lastException = e;
-      exitCode = -1;
-    } finally {
-      System.setOut(origOut);
-      System.setErr(origErr);
-    }
-    return new Result(bao.toString(), exitCode, lastException, cmd);
-  }
-  
-  protected abstract int execute(String cmd) throws Exception;
-  
-  public static class Result {
-    final String commandOutput;
-    final int exitCode;
-    final Exception exception;
-    final String cmdExecuted;
-    public Result(String commandOutput, int exitCode, Exception exception,
-        String cmdExecuted) {
-      this.commandOutput = commandOutput;
-      this.exitCode = exitCode;
-      this.exception = exception;
-      this.cmdExecuted = cmdExecuted;
-    }
-    
-    public String getCommandOutput() {
-      return commandOutput;
+    protected String[] getCommandAsArgs(final String cmd, final String masterKey, final String master) {
+        String regex = "\'([^\']*)\'|\"([^\"]*)\"|(\\S+)";
+        Matcher matcher = Pattern.compile(regex).matcher(cmd);
+        ArrayList<String> args = new ArrayList<String>();
+        String arg = null;
+        while (matcher.find()) {
+            if (matcher.group(1) != null) {
+                arg = matcher.group(1);
+            } else if (matcher.group(2) != null) {
+                arg = matcher.group(2);
+            } else {
+                arg = matcher.group(3);
+            }
+            arg = arg.replaceAll(masterKey, master);
+            arg = arg.replaceAll("CLITEST_DATA", new File(CLITestHelper.TEST_CACHE_DATA_DIR).toURI().toString().replace(' ', '+'));
+            arg = arg.replaceAll("USERNAME", System.getProperty("user.name"));
+            args.add(arg);
+        }
+        return args.toArray(new String[0]);
     }
 
-    public int getExitCode() {
-      return exitCode;
+    public Result executeCommand(final String cmd) throws Exception {
+        int exitCode = 0;
+        Exception lastException = null;
+        ByteArrayOutputStream bao = new ByteArrayOutputStream();
+        PrintStream origOut = System.out;
+        PrintStream origErr = System.err;
+        System.setOut(new PrintStream(bao));
+        System.setErr(new PrintStream(bao));
+        try {
+            exitCode = execute(cmd);
+        } catch (Exception e) {
+            e.printStackTrace();
+            lastException = e;
+            exitCode = -1;
+        } finally {
+            System.setOut(origOut);
+            System.setErr(origErr);
+        }
+        return new Result(bao.toString(), exitCode, lastException, cmd);
     }
 
-    public Exception getException() {
-      return exception;
-    }
+    protected abstract int execute(String cmd) throws Exception;
 
-    public String getCommand() {
-      return cmdExecuted;
-    }
-  }
+    public static class Result {
 
+        final String commandOutput;
+
+        final int exitCode;
+
+        final Exception exception;
+
+        final String cmdExecuted;
+
+        public Result(String commandOutput, int exitCode, Exception exception, String cmdExecuted) {
+            this.commandOutput = commandOutput;
+            this.exitCode = exitCode;
+            this.exception = exception;
+            this.cmdExecuted = cmdExecuted;
+        }
+
+        public String getCommandOutput() {
+            return commandOutput;
+        }
+
+        public int getExitCode() {
+            return exitCode;
+        }
+
+        public Exception getException() {
+            return exception;
+        }
+
+        public String getCommand() {
+            return cmdExecuted;
+        }
+    }
 }

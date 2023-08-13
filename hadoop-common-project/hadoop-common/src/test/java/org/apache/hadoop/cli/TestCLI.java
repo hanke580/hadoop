@@ -1,4 +1,4 @@
- /**
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.cli;
 
 import org.apache.hadoop.cli.util.CLICommand;
@@ -28,32 +27,32 @@ import org.junit.Test;
  * Tests for the Command Line Interface (CLI)
  */
 public class TestCLI extends CLITestHelper {
-  @Before
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-  }
 
-  @After
-  @Override
-  public void tearDown() throws Exception {
-    super.tearDown();
-  }
+    @Before
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+    }
 
-  @Override
-  protected CommandExecutor.Result execute(CLICommand cmd) throws Exception {
-    return cmd.getExecutor("", conf).executeCommand(cmd.getCmd());
+    @After
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+    }
 
-  }
-  
-  @Override
-  protected String getTestFile() {
-    return "testConf.xml";
-  }
-  
-  @Test
-  @Override
-  public void testAll() {
-    super.testAll();
-  }
+    @Override
+    protected CommandExecutor.Result execute(CLICommand cmd) throws Exception {
+        return cmd.getExecutor("", conf).executeCommand(cmd.getCmd());
+    }
+
+    @Override
+    protected String getTestFile() {
+        return "testConf.xml";
+    }
+
+    @Test
+    @Override
+    public void testAll() {
+        super.testAll();
+    }
 }

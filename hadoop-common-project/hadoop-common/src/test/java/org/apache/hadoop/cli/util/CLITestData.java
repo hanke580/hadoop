@@ -15,93 +15,95 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.cli.util;
 
 import java.util.ArrayList;
 
 /**
- *
  * Class to store CLI Test Data
  */
 public class CLITestData {
-  private String testDesc = null;
-  private ArrayList<CLICommand> testCommands = null;
-  private ArrayList<CLICommand> cleanupCommands = null;
-  private ArrayList<ComparatorData> comparatorData = null;
-  private boolean testResult = false;
-  
-  public CLITestData() {
 
-  }
+    private String testDesc = null;
 
-  /**
-   * @return the testDesc
-   */
-  public String getTestDesc() {
-    return testDesc;
-  }
+    private ArrayList<CLICommand> testCommands = null;
 
-  /**
-   * @param testDesc the testDesc to set
-   */
-  public void setTestDesc(String testDesc) {
-    this.testDesc = testDesc;
-  }
+    private ArrayList<CLICommand> cleanupCommands = null;
 
-  /**
-   * @return the testCommands
-   */
-  public ArrayList<CLICommand> getTestCommands() {
-    return testCommands;
-  }
+    private ArrayList<ComparatorData> comparatorData = null;
 
-  /**
-   * @param testCommands the testCommands to set
-   */
-  public void setTestCommands(ArrayList<CLICommand> testCommands) {
-    this.testCommands = testCommands;
-  }
+    private boolean testResult = false;
 
-  /**
-   * @return the comparatorData
-   */
-  public ArrayList<ComparatorData> getComparatorData() {
-    return comparatorData;
-  }
+    public CLITestData() {
+    }
 
-  /**
-   * @param comparatorData the comparatorData to set
-   */
-  public void setComparatorData(ArrayList<ComparatorData> comparatorData) {
-    this.comparatorData = comparatorData;
-  }
+    /**
+     * @return the testDesc
+     */
+    public String getTestDesc() {
+        return testDesc;
+    }
 
-  /**
-   * @return the testResult
-   */
-  public boolean getTestResult() {
-    return testResult;
-  }
+    /**
+     * @param testDesc the testDesc to set
+     */
+    public void setTestDesc(String testDesc) {
+        this.testDesc = testDesc;
+    }
 
-  /**
-   * @param testResult the testResult to set
-   */
-  public void setTestResult(boolean testResult) {
-    this.testResult = testResult;
-  }
+    /**
+     * @return the testCommands
+     */
+    public ArrayList<CLICommand> getTestCommands() {
+        return testCommands;
+    }
 
-  /**
-   * @return the cleanupCommands
-   */
-  public ArrayList<CLICommand> getCleanupCommands() {
-    return cleanupCommands;
-  }
+    /**
+     * @param testCommands the testCommands to set
+     */
+    public void setTestCommands(ArrayList<CLICommand> testCommands) {
+        this.testCommands = testCommands;
+    }
 
-  /**
-   * @param cleanupCommands the cleanupCommands to set
-   */
-  public void setCleanupCommands(ArrayList<CLICommand> cleanupCommands) {
-    this.cleanupCommands = cleanupCommands;
-  }
+    /**
+     * @return the comparatorData
+     */
+    public ArrayList<ComparatorData> getComparatorData() {
+        return comparatorData;
+    }
+
+    /**
+     * @param comparatorData the comparatorData to set
+     */
+    public void setComparatorData(ArrayList<ComparatorData> comparatorData) {
+        this.comparatorData = comparatorData;
+    }
+
+    /**
+     * @return the testResult
+     */
+    public boolean getTestResult() {
+        return testResult;
+    }
+
+    /**
+     * @param testResult the testResult to set
+     */
+    public void setTestResult(boolean testResult) {
+        this.testResult = testResult;
+    }
+
+    /**
+     * @return the cleanupCommands
+     */
+    public ArrayList<CLICommand> getCleanupCommands() {
+        return cleanupCommands;
+    }
+
+    /**
+     * @param cleanupCommands the cleanupCommands to set
+     */
+    public void setCleanupCommands(ArrayList<CLICommand> cleanupCommands) {
+        this.cleanupCommands = cleanupCommands;
+    }
 }

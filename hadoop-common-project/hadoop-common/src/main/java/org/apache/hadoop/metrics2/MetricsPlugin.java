@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.metrics2;
 
 import org.apache.commons.configuration2.SubsetConfiguration;
@@ -28,9 +27,10 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
 public interface MetricsPlugin {
-  /**
-   * Initialize the plugin
-   * @param conf  the configuration object for the plugin
-   */
-  void init(SubsetConfiguration conf);
+
+    /**
+     * Initialize the plugin
+     * @param conf  the configuration object for the plugin
+     */
+    void init(SubsetConfiguration conf);
 }

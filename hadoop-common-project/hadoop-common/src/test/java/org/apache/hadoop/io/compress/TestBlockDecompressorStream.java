@@ -20,7 +20,6 @@ package org.apache.hadoop.io.compress;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -28,79 +27,69 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-
 import org.junit.Test;
 
 public class TestBlockDecompressorStream {
-  
-  private byte[] buf;
-  private ByteArrayInputStream bytesIn;
-  private ByteArrayOutputStream bytesOut;
 
-  @Test
-  public void testRead1() throws IOException {
-    testRead(0);
-  }
+    private byte[] buf;
 
-  @Test
-  public void testRead2() throws IOException {
-    // Test eof after getting non-zero block size info
-    testRead(4);
-  }
+    private ByteArrayInputStream bytesIn;
 
-  private void testRead(int bufLen) throws IOException {
-    // compress empty stream
-    bytesOut = new ByteArrayOutputStream();
-    if (bufLen > 0) {
-      bytesOut.write(ByteBuffer.allocate(bufLen).putInt(1024).array(), 0,
-          bufLen);
+    private ByteArrayOutputStream bytesOut;
+
+    @Test
+    public void testRead1() throws IOException {
+        testRead(0);
     }
-    BlockCompressorStream blockCompressorStream = 
-      new BlockCompressorStream(bytesOut, 
-          new FakeCompressor(), 1024, 0);
-    // close without any write
-    blockCompressorStream.close();
-    
-    // check compressed output 
-    buf = bytesOut.toByteArray();
-    assertEquals("empty file compressed output size is not " + (bufLen + 4),
-        bufLen + 4, buf.length);
-    
-    // use compressed output as input for decompression
-    bytesIn = new ByteArrayInputStream(buf);
-    
-    // get decompression stream
-    try (BlockDecompressorStream blockDecompressorStream =
-      new BlockDecompressorStream(bytesIn, new FakeDecompressor(), 1024)) {
-      assertEquals("return value is not -1", 
-          -1 , blockDecompressorStream.read());
-    } catch (IOException e) {
-      fail("unexpected IOException : " + e);
-    }
-  }
 
-  @Test
-  public void testReadWhenIoExceptionOccure() throws IOException {
-    File file = new File("testReadWhenIOException");
-    try {
-      file.createNewFile();
-      InputStream io = new FileInputStream(file) {
-        @Override
-        public int read() throws IOException {
-          throw new IOException("File blocks missing");
+    @Test
+    public void testRead2() throws IOException {
+        // Test eof after getting non-zero block size info
+        testRead(4);
+    }
+
+    private void testRead(int bufLen) throws IOException {
+        // compress empty stream
+        bytesOut = new ByteArrayOutputStream();
+        if (bufLen > 0) {
+            bytesOut.write(ByteBuffer.allocate(bufLen).putInt(1024).array(), 0, bufLen);
         }
-      };
-
-      try (BlockDecompressorStream blockDecompressorStream =
-          new BlockDecompressorStream(io, new FakeDecompressor(), 1024)) {
-        int byteRead = blockDecompressorStream.read();
-        fail("Should not return -1 in case of IOException. Byte read "
-            + byteRead);
-      } catch (IOException e) {
-        assertTrue(e.getMessage().contains("File blocks missing"));
-      }
-    } finally {
-      file.delete();
+        BlockCompressorStream blockCompressorStream = new BlockCompressorStream(bytesOut, new FakeCompressor(), 1024, 0);
+        // close without any write
+        blockCompressorStream.close();
+        // check compressed output
+        buf = bytesOut.toByteArray();
+        assertEquals("empty file compressed output size is not " + (bufLen + 4), bufLen + 4, buf.length);
+        // use compressed output as input for decompression
+        bytesIn = new ByteArrayInputStream(buf);
+        // get decompression stream
+        try (BlockDecompressorStream blockDecompressorStream = new BlockDecompressorStream(bytesIn, new FakeDecompressor(), 1024)) {
+            assertEquals("return value is not -1", -1, blockDecompressorStream.read());
+        } catch (IOException e) {
+            fail("unexpected IOException : " + e);
+        }
     }
-  }
+
+    @Test
+    public void testReadWhenIoExceptionOccure() throws IOException {
+        File file = new File("testReadWhenIOException");
+        try {
+            file.createNewFile();
+            InputStream io = new FileInputStream(file) {
+
+                @Override
+                public int read() throws IOException {
+                    throw new IOException("File blocks missing");
+                }
+            };
+            try (BlockDecompressorStream blockDecompressorStream = new BlockDecompressorStream(io, new FakeDecompressor(), 1024)) {
+                int byteRead = blockDecompressorStream.read();
+                fail("Should not return -1 in case of IOException. Byte read " + byteRead);
+            } catch (IOException e) {
+                assertTrue(e.getMessage().contains("File blocks missing"));
+            }
+        } finally {
+            file.delete();
+        }
+    }
 }

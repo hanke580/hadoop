@@ -24,7 +24,7 @@ import org.apache.hadoop.hdfs.server.federation.store.driver.StateStoreSerialize
  */
 public abstract class GetDisabledNameservicesRequest {
 
-  public static GetDisabledNameservicesRequest newInstance() {
-    return StateStoreSerializer.newRecord(GetDisabledNameservicesRequest.class);
-  }
+    public static GetDisabledNameservicesRequest newInstance() {
+        return StateStoreSerializer.newRecord(GetDisabledNameservicesRequest.class);
+    }
 }

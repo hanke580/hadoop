@@ -21,7 +21,6 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.FileUtil;
 
@@ -31,29 +30,29 @@ import org.apache.hadoop.fs.FileUtil;
  * must be fairly short (around 110 bytes on most platforms).
  */
 public class TemporarySocketDirectory implements Closeable {
-  private File dir;
 
-  public TemporarySocketDirectory() {
-    String tmp = System.getProperty("java.io.tmpdir", "/tmp");
-    dir = new File(tmp, "socks." + (System.currentTimeMillis() +
-        "." + (new Random().nextInt())));
-    dir.mkdirs();
-    FileUtil.setWritable(dir, true);
-  }
+    private File dir;
 
-  public File getDir() {
-    return dir;
-  }
-
-  @Override
-  public void close() throws IOException {
-    if (dir != null) {
-      FileUtils.deleteDirectory(dir);
-      dir = null;
+    public TemporarySocketDirectory() {
+        String tmp = System.getProperty("java.io.tmpdir", "/tmp");
+        dir = new File(tmp, "socks." + (System.currentTimeMillis() + "." + (new Random().nextInt())));
+        dir.mkdirs();
+        FileUtil.setWritable(dir, true);
     }
-  }
 
-  protected void finalize() throws IOException {
-    close();
-  }
+    public File getDir() {
+        return dir;
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (dir != null) {
+            FileUtils.deleteDirectory(dir);
+            dir = null;
+        }
+    }
+
+    protected void finalize() throws IOException {
+        close();
+    }
 }

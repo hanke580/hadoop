@@ -18,22 +18,20 @@
 package org.apache.hadoop.fs;
 
 import org.junit.BeforeClass;
-
 import java.io.IOException;
-
 import static org.apache.hadoop.test.PlatformAssumptions.assumeNotWindows;
 
 public class TestSymlinkLocalFSFileContext extends TestSymlinkLocalFS {
 
-  @BeforeClass
-  public static void testSetup() throws Exception {
-    FileContext context = FileContext.getLocalFSFileContext();
-    wrapper = new FileContextTestWrapper(context);
-  }
+    @BeforeClass
+    public static void testSetup() throws Exception {
+        FileContext context = FileContext.getLocalFSFileContext();
+        wrapper = new FileContextTestWrapper(context);
+    }
 
-  @Override
-  public void testRenameFileWithDestParentSymlink() throws IOException {
-    assumeNotWindows();
-    super.testRenameFileWithDestParentSymlink();
-  }
+    @Override
+    public void testRenameFileWithDestParentSymlink() throws IOException {
+        assumeNotWindows();
+        super.testRenameFileWithDestParentSymlink();
+    }
 }

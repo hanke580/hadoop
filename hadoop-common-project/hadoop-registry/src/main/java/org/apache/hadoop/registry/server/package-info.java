@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * Server-side classes for the registry
  * <p>
@@ -25,3 +24,4 @@
  *   Example components are: server-side ZK support, a REST service, etc.
  */
 package org.apache.hadoop.registry.server;
+

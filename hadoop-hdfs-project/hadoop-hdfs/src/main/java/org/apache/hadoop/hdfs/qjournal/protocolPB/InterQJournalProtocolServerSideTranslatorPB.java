@@ -15,18 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-
 package org.apache.hadoop.hdfs.qjournal.protocolPB;
 
 import org.apache.hadoop.thirdparty.protobuf.RpcController;
 import org.apache.hadoop.thirdparty.protobuf.ServiceException;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.hdfs.qjournal.protocol.InterQJournalProtocol;
 import org.apache.hadoop.hdfs.qjournal.protocol.QJournalProtocolProtos.GetEditLogManifestRequestProto;
 import org.apache.hadoop.hdfs.qjournal.protocol.QJournalProtocolProtos.GetEditLogManifestResponseProto;
-
 import java.io.IOException;
 
 /**
@@ -35,29 +31,21 @@ import java.io.IOException;
  * {@link InterQJournalProtocol} server implementation.
  */
 @InterfaceAudience.Private
-public class InterQJournalProtocolServerSideTranslatorPB implements
-    InterQJournalProtocolPB{
+public class InterQJournalProtocolServerSideTranslatorPB implements InterQJournalProtocolPB {
 
-  /* Server side implementation to delegate the requests to. */
-  private final InterQJournalProtocol impl;
+    /* Server side implementation to delegate the requests to. */
+    private final InterQJournalProtocol impl;
 
-  public InterQJournalProtocolServerSideTranslatorPB(InterQJournalProtocol
-                                                         impl) {
-    this.impl = impl;
-  }
-
-  @Override
-  public GetEditLogManifestResponseProto getEditLogManifestFromJournal(
-      RpcController controller, GetEditLogManifestRequestProto request)
-      throws ServiceException {
-    try {
-      return impl.getEditLogManifestFromJournal(
-          request.getJid().getIdentifier(),
-          request.hasNameServiceId() ? request.getNameServiceId() : null,
-          request.getSinceTxId(),
-          request.getInProgressOk());
-    } catch (IOException e) {
-      throw new ServiceException(e);
+    public InterQJournalProtocolServerSideTranslatorPB(InterQJournalProtocol impl) {
+        this.impl = impl;
     }
-  }
+
+    @Override
+    public GetEditLogManifestResponseProto getEditLogManifestFromJournal(RpcController controller, GetEditLogManifestRequestProto request) throws ServiceException {
+        try {
+            return impl.getEditLogManifestFromJournal(request.getJid().getIdentifier(), request.hasNameServiceId() ? request.getNameServiceId() : null, request.getSinceTxId(), request.getInProgressOk());
+        } catch (IOException e) {
+            throw new ServiceException(e);
+        }
+    }
 }

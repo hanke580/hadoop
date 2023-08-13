@@ -18,7 +18,6 @@
 package org.apache.hadoop.fs.contract.localfs;
 
 import org.junit.Assume;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.contract.AbstractContractMultipartUploaderTest;
 import org.apache.hadoop.fs.contract.AbstractFSContract;
@@ -26,36 +25,35 @@ import org.apache.hadoop.fs.contract.AbstractFSContract;
 /**
  * Test the FileSystemMultipartUploader on local file system.
  */
-public class TestLocalFSContractMultipartUploader
-    extends AbstractContractMultipartUploaderTest {
+public class TestLocalFSContractMultipartUploader extends AbstractContractMultipartUploaderTest {
 
-  @Override
-  public void setup() throws Exception {
-    Assume.assumeTrue("Skipping until HDFS-13934", false);
-    super.setup();
-  }
+    @Override
+    public void setup() throws Exception {
+        Assume.assumeTrue("Skipping until HDFS-13934", false);
+        super.setup();
+    }
 
-  @Override
-  protected AbstractFSContract createContract(Configuration conf) {
-    return new LocalFSContract(conf);
-  }
+    @Override
+    protected AbstractFSContract createContract(Configuration conf) {
+        return new LocalFSContract(conf);
+    }
 
-  /**
-   * There is no real need to upload any particular size.
-   * @return 1 kilobyte
-   */
-  @Override
-  protected int partSizeInBytes() {
-    return 1024;
-  }
+    /**
+     * There is no real need to upload any particular size.
+     * @return 1 kilobyte
+     */
+    @Override
+    protected int partSizeInBytes() {
+        return 1024;
+    }
 
-  @Override
-  protected boolean finalizeConsumesUploadIdImmediately() {
-    return true;
-  }
+    @Override
+    protected boolean finalizeConsumesUploadIdImmediately() {
+        return true;
+    }
 
-  @Override
-  protected boolean supportsConcurrentUploadsToSamePath() {
-    return true;
-  }
+    @Override
+    protected boolean supportsConcurrentUploadsToSamePath() {
+        return true;
+    }
 }

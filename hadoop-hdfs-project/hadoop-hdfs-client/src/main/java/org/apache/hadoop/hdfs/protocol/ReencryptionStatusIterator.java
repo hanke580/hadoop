@@ -15,14 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.protocol;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.fs.BatchedRemoteIterator;
 import org.apache.htrace.core.TraceScope;
 import org.apache.htrace.core.Tracer;
-
 import java.io.IOException;
 
 /**
@@ -31,28 +29,27 @@ import java.io.IOException;
  * It supports retrying in case of namenode failover.
  */
 @InterfaceAudience.Private
-public class ReencryptionStatusIterator
-    extends BatchedRemoteIterator<Long, ZoneReencryptionStatus> {
+public class ReencryptionStatusIterator extends BatchedRemoteIterator<Long, ZoneReencryptionStatus> {
 
-  private final ClientProtocol namenode;
-  private final Tracer tracer;
+    private final ClientProtocol namenode;
 
-  public ReencryptionStatusIterator(ClientProtocol namenode, Tracer tracer) {
-    super((long) 0);
-    this.namenode = namenode;
-    this.tracer = tracer;
-  }
+    private final Tracer tracer;
 
-  @Override
-  public BatchedEntries<ZoneReencryptionStatus> makeRequest(Long prevId)
-      throws IOException {
-    try (TraceScope ignored = tracer.newScope("listReencryptionStatus")) {
-      return namenode.listReencryptionStatus(prevId);
+    public ReencryptionStatusIterator(ClientProtocol namenode, Tracer tracer) {
+        super((long) 0);
+        this.namenode = namenode;
+        this.tracer = tracer;
     }
-  }
 
-  @Override
-  public Long elementToPrevKey(ZoneReencryptionStatus entry) {
-    return entry.getId();
-  }
+    @Override
+    public BatchedEntries<ZoneReencryptionStatus> makeRequest(Long prevId) throws IOException {
+        try (TraceScope ignored = tracer.newScope("listReencryptionStatus")) {
+            return namenode.listReencryptionStatus(prevId);
+        }
+    }
+
+    @Override
+    public Long elementToPrevKey(ZoneReencryptionStatus entry) {
+        return entry.getId();
+    }
 }

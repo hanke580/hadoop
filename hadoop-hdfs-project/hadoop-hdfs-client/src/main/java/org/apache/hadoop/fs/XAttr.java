@@ -18,7 +18,6 @@
 package org.apache.hadoop.fs;
 
 import java.util.Arrays;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -52,112 +51,109 @@ import org.apache.hadoop.classification.InterfaceAudience;
  * <p>
  * @see <a href="http://en.wikipedia.org/wiki/Extended_file_attributes">
  * http://en.wikipedia.org/wiki/Extended_file_attributes</a>
- *
  */
 @InterfaceAudience.Private
 public class XAttr {
 
-  public enum NameSpace {
-    USER,
-    TRUSTED,
-    SECURITY,
-    SYSTEM,
-    RAW
-  }
+    public enum NameSpace {
 
-  private final NameSpace ns;
-  private final String name;
-  private final byte[] value;
-
-  public static class Builder {
-    private NameSpace ns = NameSpace.USER;
-    private String name;
-    private byte[] value;
-
-    public Builder setNameSpace(NameSpace ns) {
-      this.ns = ns;
-      return this;
+        USER, TRUSTED, SECURITY, SYSTEM, RAW
     }
 
-    public Builder setName(String name) {
-      this.name = name;
-      return this;
+    private final NameSpace ns;
+
+    private final String name;
+
+    private final byte[] value;
+
+    public static class Builder {
+
+        private NameSpace ns = NameSpace.USER;
+
+        private String name;
+
+        private byte[] value;
+
+        public Builder setNameSpace(NameSpace ns) {
+            this.ns = ns;
+            return this;
+        }
+
+        public Builder setName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder setValue(byte[] value) {
+            this.value = value;
+            return this;
+        }
+
+        public XAttr build() {
+            return new XAttr(ns, name, value);
+        }
     }
 
-    public Builder setValue(byte[] value) {
-      this.value = value;
-      return this;
+    private XAttr(NameSpace ns, String name, byte[] value) {
+        this.ns = ns;
+        this.name = name;
+        this.value = value;
     }
 
-    public XAttr build() {
-      return new XAttr(ns, name, value);
+    public NameSpace getNameSpace() {
+        return ns;
     }
-  }
 
-  private XAttr(NameSpace ns, String name, byte[] value) {
-    this.ns = ns;
-    this.name = name;
-    this.value = value;
-  }
-
-  public NameSpace getNameSpace() {
-    return ns;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public byte[] getValue() {
-    return value;
-  }
-
-  @Override
-  public int hashCode() {
-    return new HashCodeBuilder(811, 67)
-        .append(name)
-        .append(ns)
-        .append(value)
-        .toHashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null) { return false; }
-    if (obj == this) { return true; }
-    if (obj.getClass() != getClass()) {
-      return false;
+    public String getName() {
+        return name;
     }
-    XAttr rhs = (XAttr) obj;
-    return new EqualsBuilder()
-        .append(ns, rhs.ns)
-        .append(name, rhs.name)
-        .append(value, rhs.value)
-        .isEquals();
-  }
 
-  /**
-   * Similar to {@link #equals(Object)}, except ignores the XAttr value.
-   *
-   * @param obj to compare equality
-   * @return if the XAttrs are equal, ignoring the XAttr value
-   */
-  public boolean equalsIgnoreValue(Object obj) {
-    if (obj == null) { return false; }
-    if (obj == this) { return true; }
-    if (obj.getClass() != getClass()) {
-      return false;
+    public byte[] getValue() {
+        return value;
     }
-    XAttr rhs = (XAttr) obj;
-    return new EqualsBuilder()
-        .append(ns, rhs.ns)
-        .append(name, rhs.name)
-        .isEquals();
-  }
 
-  @Override
-  public String toString() {
-    return "XAttr [ns=" + ns + ", name=" + name + ", value="
-        + Arrays.toString(value) + "]";
-  }
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(811, 67).append(name).append(ns).append(value).toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        XAttr rhs = (XAttr) obj;
+        return new EqualsBuilder().append(ns, rhs.ns).append(name, rhs.name).append(value, rhs.value).isEquals();
+    }
+
+    /**
+     * Similar to {@link #equals(Object)}, except ignores the XAttr value.
+     *
+     * @param obj to compare equality
+     * @return if the XAttrs are equal, ignoring the XAttr value
+     */
+    public boolean equalsIgnoreValue(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        XAttr rhs = (XAttr) obj;
+        return new EqualsBuilder().append(ns, rhs.ns).append(name, rhs.name).isEquals();
+    }
+
+    @Override
+    public String toString() {
+        return "XAttr [ns=" + ns + ", name=" + name + ", value=" + Arrays.toString(value) + "]";
+    }
 }

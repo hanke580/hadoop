@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.metrics2.sink.ganglia;
 
 import java.net.DatagramSocket;
@@ -25,15 +24,13 @@ import java.net.DatagramSocket;
  */
 public class GangliaMetricsTestHelper {
 
-  /**
-   * Helper method to access package private method to set DatagramSocket
-   * needed for Unit test
-   * @param gangliaSink
-   * @param datagramSocket
-   */
-  public static void setDatagramSocket(AbstractGangliaSink gangliaSink,
-      DatagramSocket datagramSocket) {
-
-    gangliaSink.setDatagramSocket(datagramSocket);
-  }
+    /**
+     * Helper method to access package private method to set DatagramSocket
+     * needed for Unit test
+     * @param gangliaSink
+     * @param datagramSocket
+     */
+    public static void setDatagramSocket(AbstractGangliaSink gangliaSink, DatagramSocket datagramSocket) {
+        gangliaSink.setDatagramSocket(datagramSocket);
+    }
 }

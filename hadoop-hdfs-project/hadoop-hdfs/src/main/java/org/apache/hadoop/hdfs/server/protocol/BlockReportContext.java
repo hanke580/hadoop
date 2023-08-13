@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.protocol;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -31,56 +30,55 @@ import org.apache.hadoop.classification.InterfaceAudience;
  */
 @InterfaceAudience.Private
 public class BlockReportContext {
-  /**
-   * The total number of RPCs contained in the block report.
-   */
-  private final int totalRpcs;
 
-  /**
-   * The index of this particular RPC.
-   */
-  private final int curRpc;
+    /**
+     * The total number of RPCs contained in the block report.
+     */
+    private final int totalRpcs;
 
-  /**
-   * A 64-bit ID which identifies the block report as a whole.
-   */
-  private final long reportId;
+    /**
+     * The index of this particular RPC.
+     */
+    private final int curRpc;
 
-  /**
-   * The lease ID which this block report is using, or 0 if this block report is
-   * bypassing rate-limiting.
-   */
-  private final long leaseId;
+    /**
+     * A 64-bit ID which identifies the block report as a whole.
+     */
+    private final long reportId;
 
-  private final boolean sorted;
+    /**
+     * The lease ID which this block report is using, or 0 if this block report is
+     * bypassing rate-limiting.
+     */
+    private final long leaseId;
 
-  public BlockReportContext(int totalRpcs, int curRpc,
-                            long reportId, long leaseId,
-                            boolean sorted) {
-    this.totalRpcs = totalRpcs;
-    this.curRpc = curRpc;
-    this.reportId = reportId;
-    this.leaseId = leaseId;
-    this.sorted = sorted;
-  }
+    private final boolean sorted;
 
-  public int getTotalRpcs() {
-    return totalRpcs;
-  }
+    public BlockReportContext(int totalRpcs, int curRpc, long reportId, long leaseId, boolean sorted) {
+        this.totalRpcs = totalRpcs;
+        this.curRpc = curRpc;
+        this.reportId = reportId;
+        this.leaseId = leaseId;
+        this.sorted = sorted;
+    }
 
-  public int getCurRpc() {
-    return curRpc;
-  }
+    public int getTotalRpcs() {
+        return totalRpcs;
+    }
 
-  public long getReportId() {
-    return reportId;
-  }
+    public int getCurRpc() {
+        return curRpc;
+    }
 
-  public long getLeaseId() {
-    return leaseId;
-  }
+    public long getReportId() {
+        return reportId;
+    }
 
-  public boolean isSorted() {
-    return sorted;
-  }
+    public long getLeaseId() {
+        return leaseId;
+    }
+
+    public boolean isSorted() {
+        return sorted;
+    }
 }

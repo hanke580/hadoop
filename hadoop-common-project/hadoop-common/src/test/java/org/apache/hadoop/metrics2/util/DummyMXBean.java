@@ -14,7 +14,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package org.apache.hadoop.metrics2.util;
 
 /**
@@ -22,5 +21,5 @@ package org.apache.hadoop.metrics2.util;
  */
 public interface DummyMXBean {
 
-  int getCounter();
+    int getCounter();
 }

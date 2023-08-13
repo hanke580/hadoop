@@ -15,12 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs;
 
 import java.io.File;
 import java.io.IOException;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CommonConfigurationKeys;
 import org.apache.hadoop.fs.FileSystemContractBaseTest;
@@ -32,39 +30,37 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class TestHDFSFileSystemContract extends FileSystemContractBaseTest {
-  
-  private MiniDFSCluster cluster;
-  private String defaultWorkingDirectory;
 
-  @Before
-  public void setUp() throws Exception {
-    Configuration conf = new HdfsConfiguration();
-    conf.set(CommonConfigurationKeys.FS_PERMISSIONS_UMASK_KEY,
-        FileSystemContractBaseTest.TEST_UMASK);
-    File basedir = GenericTestUtils.getRandomizedTestDir();
-    cluster = new MiniDFSCluster.Builder(conf, basedir).numDataNodes(2)
-        .build();
-    fs = cluster.getFileSystem();
-    defaultWorkingDirectory = "/user/" + 
-           UserGroupInformation.getCurrentUser().getShortUserName();
-  }
-  
-  @After
-  public void tearDown() throws Exception {
-    super.tearDown();
-    if (cluster != null) {
-      cluster.shutdown();
-      cluster = null;
+    private MiniDFSCluster cluster;
+
+    private String defaultWorkingDirectory;
+
+    @Before
+    public void setUp() throws Exception {
+        Configuration conf = new HdfsConfiguration();
+        conf.set(CommonConfigurationKeys.FS_PERMISSIONS_UMASK_KEY, FileSystemContractBaseTest.TEST_UMASK);
+        File basedir = GenericTestUtils.getRandomizedTestDir();
+        cluster = new MiniDFSCluster.Builder(conf, basedir).numDataNodes(2).build();
+        fs = cluster.getFileSystem();
+        defaultWorkingDirectory = "/user/" + UserGroupInformation.getCurrentUser().getShortUserName();
     }
-  }
 
-  @Override
-  protected String getDefaultWorkingDirectory() {
-    return defaultWorkingDirectory;
-  }
+    @After
+    public void tearDown() throws Exception {
+        super.tearDown();
+        if (cluster != null) {
+            cluster.shutdown();
+            cluster = null;
+        }
+    }
 
-  @Test
-  public void testAppend() throws IOException {
-    AppendTestUtil.testAppend(fs, new Path("/testAppend/f"));
-  }
+    @Override
+    protected String getDefaultWorkingDirectory() {
+        return defaultWorkingDirectory;
+    }
+
+    @Test
+    public void testAppend() throws IOException {
+        AppendTestUtil.testAppend(fs, new Path("/testAppend/f"));
+    }
 }

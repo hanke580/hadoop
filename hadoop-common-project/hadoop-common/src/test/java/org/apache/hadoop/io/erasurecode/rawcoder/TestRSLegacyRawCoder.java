@@ -24,10 +24,11 @@ import org.junit.Before;
  */
 public class TestRSLegacyRawCoder extends TestRSRawCoderBase {
 
-  @Before
-  public void setup() {
-    this.encoderFactoryClass = RSLegacyRawErasureCoderFactory.class;
-    this.decoderFactoryClass = RSLegacyRawErasureCoderFactory.class;
-    setAllowDump(false); // Change to true to allow verbose dump for debugging
-  }
+    @Before
+    public void setup() {
+        this.encoderFactoryClass = RSLegacyRawErasureCoderFactory.class;
+        this.decoderFactoryClass = RSLegacyRawErasureCoderFactory.class;
+        // Change to true to allow verbose dump for debugging
+        setAllowDump(false);
+    }
 }

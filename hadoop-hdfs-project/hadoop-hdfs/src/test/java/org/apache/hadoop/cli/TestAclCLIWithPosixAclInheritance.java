@@ -18,7 +18,6 @@
 package org.apache.hadoop.cli;
 
 import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_NAMENODE_POSIX_ACL_INHERITANCE_ENABLED_KEY;
-
 import org.junit.Test;
 
 /**
@@ -26,20 +25,20 @@ import org.junit.Test;
  */
 public class TestAclCLIWithPosixAclInheritance extends TestAclCLI {
 
-  @Override
-  protected void initConf() {
-    super.initConf();
-    conf.setBoolean(DFS_NAMENODE_POSIX_ACL_INHERITANCE_ENABLED_KEY, true);
-  }
+    @Override
+    protected void initConf() {
+        super.initConf();
+        conf.setBoolean(DFS_NAMENODE_POSIX_ACL_INHERITANCE_ENABLED_KEY, true);
+    }
 
-  @Override
-  protected String getTestFile() {
-    return "testAclCLIWithPosixAclInheritance.xml";
-  }
+    @Override
+    protected String getTestFile() {
+        return "testAclCLIWithPosixAclInheritance.xml";
+    }
 
-  @Test
-  @Override
-  public void testAll() {
-    super.testAll();
-  }
+    @Test
+    @Override
+    public void testAll() {
+        super.testAll();
+    }
 }

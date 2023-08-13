@@ -19,7 +19,6 @@ package org.apache.hadoop.nfs.nfs3.request;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-
 import org.apache.hadoop.nfs.nfs3.FileHandle;
 import org.apache.hadoop.oncrpc.XDR;
 
@@ -27,27 +26,28 @@ import org.apache.hadoop.oncrpc.XDR;
  * RMDIR3 Request
  */
 public class RMDIR3Request extends RequestWithHandle {
-  private final String name;
 
-  public static RMDIR3Request deserialize(XDR xdr) throws IOException {
-    FileHandle handle = readHandle(xdr);
-    String name = xdr.readString();
-    return new RMDIR3Request(handle, name);
-  }
+    private final String name;
 
-  public RMDIR3Request(FileHandle handle, String name) {
-    super(handle);
-    this.name = name;
-  }
-  
-  public String getName() {
-    return this.name;
-  }
+    public static RMDIR3Request deserialize(XDR xdr) throws IOException {
+        FileHandle handle = readHandle(xdr);
+        String name = xdr.readString();
+        return new RMDIR3Request(handle, name);
+    }
 
-  @Override
-  public void serialize(XDR xdr) {
-    handle.serialize(xdr);
-    xdr.writeInt(name.getBytes(StandardCharsets.UTF_8).length);
-    xdr.writeFixedOpaque(name.getBytes(StandardCharsets.UTF_8));
-  }
+    public RMDIR3Request(FileHandle handle, String name) {
+        super(handle);
+        this.name = name;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public void serialize(XDR xdr) {
+        handle.serialize(xdr);
+        xdr.writeInt(name.getBytes(StandardCharsets.UTF_8).length);
+        xdr.writeFixedOpaque(name.getBytes(StandardCharsets.UTF_8));
+    }
 }

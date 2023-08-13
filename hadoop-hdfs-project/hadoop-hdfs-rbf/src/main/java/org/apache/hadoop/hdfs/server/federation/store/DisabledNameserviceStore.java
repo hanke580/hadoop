@@ -19,7 +19,6 @@ package org.apache.hadoop.hdfs.server.federation.store;
 
 import java.io.IOException;
 import java.util.Set;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.hdfs.server.federation.store.driver.StateStoreDriver;
@@ -30,36 +29,35 @@ import org.apache.hadoop.hdfs.server.federation.store.records.DisabledNameservic
  */
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
-public abstract class DisabledNameserviceStore
-    extends CachedRecordStore<DisabledNameservice> {
+public abstract class DisabledNameserviceStore extends CachedRecordStore<DisabledNameservice> {
 
-  public DisabledNameserviceStore(StateStoreDriver driver) {
-    super(DisabledNameservice.class, driver);
-  }
+    public DisabledNameserviceStore(StateStoreDriver driver) {
+        super(DisabledNameservice.class, driver);
+    }
 
-  /**
-   * Disable a name service.
-   *
-   * @param nsId Identifier of the name service.
-   * @return If the name service was successfully disabled.
-   * @throws IOException If the state store could not be queried.
-   */
-  public abstract boolean disableNameservice(String nsId) throws IOException;
+    /**
+     * Disable a name service.
+     *
+     * @param nsId Identifier of the name service.
+     * @return If the name service was successfully disabled.
+     * @throws IOException If the state store could not be queried.
+     */
+    public abstract boolean disableNameservice(String nsId) throws IOException;
 
-  /**
-   * Enable a name service.
-   *
-   * @param nsId Identifier of the name service.
-   * @return If the name service was successfully brought back.
-   * @throws IOException If the state store could not be queried.
-   */
-  public abstract boolean enableNameservice(String nsId) throws IOException;
+    /**
+     * Enable a name service.
+     *
+     * @param nsId Identifier of the name service.
+     * @return If the name service was successfully brought back.
+     * @throws IOException If the state store could not be queried.
+     */
+    public abstract boolean enableNameservice(String nsId) throws IOException;
 
-  /**
-   * Get a list of disabled name services.
-   *
-   * @return List of disabled name services.
-   * @throws IOException If the state store could not be queried.
-   */
-  public abstract Set<String> getDisabledNameservices() throws IOException;
+    /**
+     * Get a list of disabled name services.
+     *
+     * @return List of disabled name services.
+     * @throws IOException If the state store could not be queried.
+     */
+    public abstract Set<String> getDisabledNameservices() throws IOException;
 }

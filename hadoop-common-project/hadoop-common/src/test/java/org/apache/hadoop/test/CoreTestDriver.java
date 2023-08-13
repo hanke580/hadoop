@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.test;
 
 import org.apache.hadoop.io.TestArrayFile;
@@ -29,38 +28,35 @@ import org.apache.hadoop.util.ProgramDriver;
  */
 public class CoreTestDriver {
 
-  private ProgramDriver pgd;
-  
-  public CoreTestDriver() {
-    this(new ProgramDriver());
-  }
-  
-  public CoreTestDriver(ProgramDriver pgd) {
-    this.pgd = pgd;
-    try {
-      pgd.addClass("testsetfile", TestSetFile.class, 
-          "A test for flat files of binary key/value pairs.");
-      pgd.addClass("testarrayfile", TestArrayFile.class, 
-          "A test for flat files of binary key/value pairs.");
-      pgd.addClass("testrpc", TestRPC.class, "A test for rpc.");
-      pgd.addClass("testipc", TestIPC.class, "A test for ipc.");
-    } catch(Throwable e) {
-      e.printStackTrace();
-    }
-  }
+    private ProgramDriver pgd;
 
-  public void run(String argv[]) {
-    int exitCode = -1;
-    try {
-      exitCode = pgd.run(argv);
-    } catch(Throwable e) {
-      e.printStackTrace();
+    public CoreTestDriver() {
+        this(new ProgramDriver());
     }
 
-    System.exit(exitCode);
-  }
+    public CoreTestDriver(ProgramDriver pgd) {
+        this.pgd = pgd;
+        try {
+            pgd.addClass("testsetfile", TestSetFile.class, "A test for flat files of binary key/value pairs.");
+            pgd.addClass("testarrayfile", TestArrayFile.class, "A test for flat files of binary key/value pairs.");
+            pgd.addClass("testrpc", TestRPC.class, "A test for rpc.");
+            pgd.addClass("testipc", TestIPC.class, "A test for ipc.");
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
 
-  public static void main(String argv[]){
-    new CoreTestDriver().run(argv);
-  }
+    public void run(String[] argv) {
+        int exitCode = -1;
+        try {
+            exitCode = pgd.run(argv);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        System.exit(exitCode);
+    }
+
+    public static void main(String[] argv) {
+        new CoreTestDriver().run(argv);
+    }
 }

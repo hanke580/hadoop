@@ -21,4 +21,5 @@ package org.apache.hadoop.util;
  * A class {@link ClassLoaderCheckMain} depends on that should be loaded by the
  * application classloader.
  */
-public class ClassLoaderCheckThird {}
+public class ClassLoaderCheckThird {
+}

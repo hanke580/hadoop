@@ -18,7 +18,6 @@
 package org.apache.hadoop.ha;
 
 import java.io.IOException;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
@@ -28,13 +27,14 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
 public class HealthCheckFailedException extends IOException {
-  private static final long serialVersionUID = 1L;
 
-  public HealthCheckFailedException(final String message) {
-    super(message);
-  }
-  
-  public HealthCheckFailedException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    private static final long serialVersionUID = 1L;
+
+    public HealthCheckFailedException(final String message) {
+        super(message);
+    }
+
+    public HealthCheckFailedException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

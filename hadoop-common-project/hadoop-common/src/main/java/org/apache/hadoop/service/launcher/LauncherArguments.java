@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.service.launcher;
 
 /**
@@ -23,37 +22,40 @@ package org.apache.hadoop.service.launcher;
  * the {@code GenericOptionsParser}, simply extracted to constants.
  */
 public interface LauncherArguments {
-  /**
-   * Name of the configuration argument on the CLI.
-   * Value: {@value}
-   */
-  String ARG_CONF = "conf";
-  String ARG_CONF_SHORT = "conf";
 
-  /**
-   * prefixed version of {@link #ARG_CONF}.
-   * Value: {@value}
-   */
-  String ARG_CONF_PREFIXED = "--" + ARG_CONF;
+    /**
+     * Name of the configuration argument on the CLI.
+     * Value: {@value}
+     */
+    String ARG_CONF = "conf";
 
-  /**
-   * Name of a configuration class which is loaded before any
-   * attempt is made to load the class.
-   * <p>
-   * Value: {@value}
-   */
-  String ARG_CONFCLASS = "hadoopconf";
-  String ARG_CONFCLASS_SHORT = "hadoopconf";
+    String ARG_CONF_SHORT = "conf";
 
-  /**
-   * Prefixed version of {@link #ARG_CONFCLASS}.
-   * Value: {@value}
-   */
-  String ARG_CONFCLASS_PREFIXED = "--" + ARG_CONFCLASS;
+    /**
+     * prefixed version of {@link #ARG_CONF}.
+     * Value: {@value}
+     */
+    String ARG_CONF_PREFIXED = "--" + ARG_CONF;
 
-  /**
-   * Error string on a parse failure.
-   * Value: {@value}
-   */
-  String E_PARSE_FAILED = "Failed to parse: ";
+    /**
+     * Name of a configuration class which is loaded before any
+     * attempt is made to load the class.
+     * <p>
+     * Value: {@value}
+     */
+    String ARG_CONFCLASS = "hadoopconf";
+
+    String ARG_CONFCLASS_SHORT = "hadoopconf";
+
+    /**
+     * Prefixed version of {@link #ARG_CONFCLASS}.
+     * Value: {@value}
+     */
+    String ARG_CONFCLASS_PREFIXED = "--" + ARG_CONFCLASS;
+
+    /**
+     * Error string on a parse failure.
+     * Value: {@value}
+     */
+    String E_PARSE_FAILED = "Failed to parse: ";
 }

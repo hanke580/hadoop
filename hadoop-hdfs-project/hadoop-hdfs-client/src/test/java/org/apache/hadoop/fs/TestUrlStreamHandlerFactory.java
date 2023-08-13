@@ -15,14 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.fs;
 
 import org.apache.hadoop.test.GenericTestUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -37,64 +35,60 @@ import java.util.concurrent.Future;
  */
 public class TestUrlStreamHandlerFactory {
 
-  private static final int RUNS = 20;
-  private static final int THREADS = 10;
-  private static final int TASKS = 200;
+    private static final int RUNS = 20;
 
-  @Rule
-  public Timeout globalTimeout = new Timeout(30000);
+    private static final int THREADS = 10;
 
-  @Test
-  public void testConcurrency() throws Exception {
-    for (int i = 0; i < RUNS; i++) {
-      singleRun();
-    }
-  }
+    private static final int TASKS = 200;
 
-  private void singleRun() throws Exception {
-    final FsUrlStreamHandlerFactory factory = new FsUrlStreamHandlerFactory();
-    final Random random = new Random();
-    ExecutorService executor = Executors.newFixedThreadPool(THREADS);
-    ArrayList<Future<?>> futures = new ArrayList<Future<?>>(TASKS);
+    @Rule
+    public Timeout globalTimeout = new Timeout(30000);
 
-    for (int i = 0; i < TASKS ; i++) {
-      final int aux = i;
-      futures.add(executor.submit(new Runnable() {
-        @Override
-        public void run() {
-          int rand = aux + random.nextInt(3);
-          factory.createURLStreamHandler(String.valueOf(rand));
+    @Test
+    public void testConcurrency() throws Exception {
+        for (int i = 0; i < RUNS; i++) {
+            singleRun();
         }
-      }));
     }
 
-    executor.shutdown();
+    private void singleRun() throws Exception {
+        final FsUrlStreamHandlerFactory factory = new FsUrlStreamHandlerFactory();
+        final Random random = new Random();
+        ExecutorService executor = Executors.newFixedThreadPool(THREADS);
+        ArrayList<Future<?>> futures = new ArrayList<Future<?>>(TASKS);
+        for (int i = 0; i < TASKS; i++) {
+            final int aux = i;
+            futures.add(executor.submit(new Runnable() {
 
-    // check for exceptions
-    for (Future future : futures) {
-      if (!future.isDone()) {
-        break; // timed out
-      }
-      future.get();
+                @Override
+                public void run() {
+                    int rand = aux + random.nextInt(3);
+                    factory.createURLStreamHandler(String.valueOf(rand));
+                }
+            }));
+        }
+        executor.shutdown();
+        // check for exceptions
+        for (Future future : futures) {
+            if (!future.isDone()) {
+                // timed out
+                break;
+            }
+            future.get();
+        }
     }
-  }
 
-  @Test
-  public void testFsUrlStreamHandlerFactory() throws IOException {
-    File myFile = new File(GenericTestUtils.getTestDir(), "foo bar.txt");
-    myFile.createNewFile();
-
-    // Create URL directly from File (JRE builds it).
-    URL myUrl = myFile.toURI().toURL();
-
-    // Succeeds.
-    myUrl.openStream().close();
-
-    // Replace handling of file: scheme with FsUrlStreamHandler.
-    URL.setURLStreamHandlerFactory(new FsUrlStreamHandlerFactory());
-
-    URL myUrl2 = myFile.toURI().toURL();
-
-    myUrl2.openStream();
-  }
+    @Test
+    public void testFsUrlStreamHandlerFactory() throws IOException {
+        File myFile = new File(GenericTestUtils.getTestDir(), "foo bar.txt");
+        myFile.createNewFile();
+        // Create URL directly from File (JRE builds it).
+        URL myUrl = myFile.toURI().toURL();
+        // Succeeds.
+        myUrl.openStream().close();
+        // Replace handling of file: scheme with FsUrlStreamHandler.
+        URL.setURLStreamHandlerFactory(new FsUrlStreamHandlerFactory());
+        URL myUrl2 = myFile.toURI().toURL();
+        myUrl2.openStream();
+    }
 }

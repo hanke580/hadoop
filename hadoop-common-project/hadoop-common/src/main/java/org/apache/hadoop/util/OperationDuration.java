@@ -15,7 +15,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.hadoop.util;
 
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -28,38 +27,39 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceStability.Unstable
 public class OperationDuration {
 
-  private final long started;
-  private long finished;
+    private final long started;
 
-  public OperationDuration() {
-    started = time();
-    finished = started;
-  }
+    private long finished;
 
-  protected long time() {
-    return System.currentTimeMillis();
-  }
+    public OperationDuration() {
+        started = time();
+        finished = started;
+    }
 
-  public void finished() {
-    finished = time();
-  }
+    protected long time() {
+        return System.currentTimeMillis();
+    }
 
-  public String getDurationString() {
-    return humanTime(value());
-  }
+    public void finished() {
+        finished = time();
+    }
 
-  public static String humanTime(long time) {
-    long seconds = (time / 1000);
-    long minutes = (seconds / 60);
-    return String.format("%d:%02d.%03ds", minutes, seconds % 60, time % 1000);
-  }
+    public String getDurationString() {
+        return humanTime(value());
+    }
 
-  @Override
-  public String toString() {
-    return getDurationString();
-  }
+    public static String humanTime(long time) {
+        long seconds = (time / 1000);
+        long minutes = (seconds / 60);
+        return String.format("%d:%02d.%03ds", minutes, seconds % 60, time % 1000);
+    }
 
-  public long value() {
-    return finished -started;
-  }
+    @Override
+    public String toString() {
+        return getDurationString();
+    }
+
+    public long value() {
+        return finished - started;
+    }
 }

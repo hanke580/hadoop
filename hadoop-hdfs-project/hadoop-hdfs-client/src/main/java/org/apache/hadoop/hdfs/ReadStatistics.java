@@ -23,113 +23,118 @@ import org.apache.hadoop.hdfs.protocol.BlockType;
  * A utility class that maintains statistics for reading.
  */
 public class ReadStatistics {
-  private long totalBytesRead;
-  private long totalLocalBytesRead;
-  private long totalShortCircuitBytesRead;
-  private long totalZeroCopyBytesRead;
 
-  private BlockType blockType = BlockType.CONTIGUOUS;
-  private long totalEcDecodingTimeMillis;
+    private long totalBytesRead;
 
-  public ReadStatistics() {
-    clear();
-  }
+    private long totalLocalBytesRead;
 
-  public ReadStatistics(ReadStatistics rhs) {
-    this.totalBytesRead = rhs.getTotalBytesRead();
-    this.totalLocalBytesRead = rhs.getTotalLocalBytesRead();
-    this.totalShortCircuitBytesRead = rhs.getTotalShortCircuitBytesRead();
-    this.totalZeroCopyBytesRead = rhs.getTotalZeroCopyBytesRead();
-  }
+    private long totalShortCircuitBytesRead;
 
-  /**
-   * @return The total bytes read.  This will always be at least as
-   * high as the other numbers, since it includes all of them.
-   */
-  public synchronized long getTotalBytesRead() {
-    return totalBytesRead;
-  }
+    private long totalZeroCopyBytesRead;
 
-  /**
-   * @return The total local bytes read.  This will always be at least
-   * as high as totalShortCircuitBytesRead, since all short-circuit
-   * reads are also local.
-   */
-  public synchronized long getTotalLocalBytesRead() {
-    return totalLocalBytesRead;
-  }
+    private BlockType blockType = BlockType.CONTIGUOUS;
 
-  /**
-   * @return The total short-circuit local bytes read.
-   */
-  public synchronized long getTotalShortCircuitBytesRead() {
-    return totalShortCircuitBytesRead;
-  }
+    private long totalEcDecodingTimeMillis;
 
-  /**
-   * @return The total number of zero-copy bytes read.
-   */
-  public synchronized long getTotalZeroCopyBytesRead() {
-    return totalZeroCopyBytesRead;
-  }
+    public ReadStatistics() {
+        clear();
+    }
 
-  /**
-   * @return The total number of bytes read which were not local.
-   */
-  public synchronized long getRemoteBytesRead() {
-    return totalBytesRead - totalLocalBytesRead;
-  }
+    public ReadStatistics(ReadStatistics rhs) {
+        this.totalBytesRead = rhs.getTotalBytesRead();
+        this.totalLocalBytesRead = rhs.getTotalLocalBytesRead();
+        this.totalShortCircuitBytesRead = rhs.getTotalShortCircuitBytesRead();
+        this.totalZeroCopyBytesRead = rhs.getTotalZeroCopyBytesRead();
+    }
 
-  /**
-   * @return block type of the input stream. If block type != CONTIGUOUS,
-   * it is reading erasure coded data.
-   */
-  public synchronized BlockType getBlockType() {
-    return blockType;
-  }
+    /**
+     * @return The total bytes read.  This will always be at least as
+     * high as the other numbers, since it includes all of them.
+     */
+    public synchronized long getTotalBytesRead() {
+        return totalBytesRead;
+    }
 
-  /**
-   * Return the total time in milliseconds used for erasure coding decoding.
-   */
-  public synchronized long getTotalEcDecodingTimeMillis() {
-    return totalEcDecodingTimeMillis;
-  }
+    /**
+     * @return The total local bytes read.  This will always be at least
+     * as high as totalShortCircuitBytesRead, since all short-circuit
+     * reads are also local.
+     */
+    public synchronized long getTotalLocalBytesRead() {
+        return totalLocalBytesRead;
+    }
 
-  public synchronized void addRemoteBytes(long amt) {
-    this.totalBytesRead += amt;
-  }
+    /**
+     * @return The total short-circuit local bytes read.
+     */
+    public synchronized long getTotalShortCircuitBytesRead() {
+        return totalShortCircuitBytesRead;
+    }
 
-  public synchronized void addLocalBytes(long amt) {
-    this.totalBytesRead += amt;
-    this.totalLocalBytesRead += amt;
-  }
+    /**
+     * @return The total number of zero-copy bytes read.
+     */
+    public synchronized long getTotalZeroCopyBytesRead() {
+        return totalZeroCopyBytesRead;
+    }
 
-  public synchronized void addShortCircuitBytes(long amt) {
-    this.totalBytesRead += amt;
-    this.totalLocalBytesRead += amt;
-    this.totalShortCircuitBytesRead += amt;
-  }
+    /**
+     * @return The total number of bytes read which were not local.
+     */
+    public synchronized long getRemoteBytesRead() {
+        return totalBytesRead - totalLocalBytesRead;
+    }
 
-  public synchronized void addZeroCopyBytes(long amt) {
-    this.totalBytesRead += amt;
-    this.totalLocalBytesRead += amt;
-    this.totalShortCircuitBytesRead += amt;
-    this.totalZeroCopyBytesRead += amt;
-  }
+    /**
+     * @return block type of the input stream. If block type != CONTIGUOUS,
+     * it is reading erasure coded data.
+     */
+    public synchronized BlockType getBlockType() {
+        return blockType;
+    }
 
-  public synchronized void addErasureCodingDecodingTime(long millis) {
-    this.totalEcDecodingTimeMillis += millis;
-  }
+    /**
+     * Return the total time in milliseconds used for erasure coding decoding.
+     */
+    public synchronized long getTotalEcDecodingTimeMillis() {
+        return totalEcDecodingTimeMillis;
+    }
 
-  synchronized void setBlockType(BlockType blockType) {
-    this.blockType = blockType;
-  }
+    public synchronized void addRemoteBytes(long amt) {
+        this.totalBytesRead += amt;
+    }
 
-  public synchronized void clear() {
-    this.totalBytesRead = 0;
-    this.totalLocalBytesRead = 0;
-    this.totalShortCircuitBytesRead = 0;
-    this.totalZeroCopyBytesRead = 0;
-    this.totalEcDecodingTimeMillis = 0;
-  }
+    public synchronized void addLocalBytes(long amt) {
+        this.totalBytesRead += amt;
+        this.totalLocalBytesRead += amt;
+    }
+
+    public synchronized void addShortCircuitBytes(long amt) {
+        this.totalBytesRead += amt;
+        this.totalLocalBytesRead += amt;
+        this.totalShortCircuitBytesRead += amt;
+    }
+
+    public synchronized void addZeroCopyBytes(long amt) {
+        this.totalBytesRead += amt;
+        this.totalLocalBytesRead += amt;
+        this.totalShortCircuitBytesRead += amt;
+        this.totalZeroCopyBytesRead += amt;
+    }
+
+    public synchronized void addErasureCodingDecodingTime(long millis) {
+        this.totalEcDecodingTimeMillis += millis;
+    }
+
+    synchronized void setBlockType(BlockType blockType) {
+        this.blockType = blockType;
+    }
+
+    public synchronized void clear() {
+        this.totalBytesRead = 0;
+        this.totalLocalBytesRead = 0;
+        this.totalShortCircuitBytesRead = 0;
+        this.totalZeroCopyBytesRead = 0;
+        this.totalEcDecodingTimeMillis = 0;
+    }
 }

@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * Contains implementations of the state store API interfaces. All classes
  * derive from {@link
@@ -29,3 +28,4 @@ package org.apache.hadoop.hdfs.server.federation.store.impl;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

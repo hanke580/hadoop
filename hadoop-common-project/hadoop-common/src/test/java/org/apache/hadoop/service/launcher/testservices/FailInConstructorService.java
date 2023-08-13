@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.service.launcher.testservices;
 
 /**
@@ -23,11 +22,10 @@ package org.apache.hadoop.service.launcher.testservices;
  */
 public class FailInConstructorService extends FailureTestService {
 
-  public static final String NAME =
-      "org.apache.hadoop.service.launcher.testservices.FailInConstructorService";
+    public static final String NAME = "org.apache.hadoop.service.launcher.testservices.FailInConstructorService";
 
-  public FailInConstructorService() {
-    super(false, false, false, 0);
-    throw new NullPointerException("oops");
-  }
+    public FailInConstructorService() {
+        super(false, false, false, 0);
+        throw new NullPointerException("oops");
+    }
 }

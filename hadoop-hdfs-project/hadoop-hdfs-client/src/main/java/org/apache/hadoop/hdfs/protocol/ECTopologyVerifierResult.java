@@ -26,20 +26,20 @@ import org.apache.hadoop.classification.InterfaceAudience;
 @InterfaceAudience.Private
 public class ECTopologyVerifierResult {
 
-  private final String resultMessage;
-  private final boolean isSupported;
+    private final String resultMessage;
 
-  public ECTopologyVerifierResult(boolean isSupported,
-                                  String resultMessage) {
-    this.resultMessage = resultMessage;
-    this.isSupported = isSupported;
-  }
+    private final boolean isSupported;
 
-  public String getResultMessage() {
-    return resultMessage;
-  }
+    public ECTopologyVerifierResult(boolean isSupported, String resultMessage) {
+        this.resultMessage = resultMessage;
+        this.isSupported = isSupported;
+    }
 
-  public boolean isSupported() {
-    return isSupported;
-  }
+    public String getResultMessage() {
+        return resultMessage;
+    }
+
+    public boolean isSupported() {
+        return isSupported;
+    }
 }

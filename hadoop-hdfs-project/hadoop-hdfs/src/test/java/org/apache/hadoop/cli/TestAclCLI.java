@@ -27,66 +27,68 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class TestAclCLI extends CLITestHelperDFS {
-  private MiniDFSCluster cluster = null;
-  private FileSystem fs = null;
-  private String namenode = null;
-  private String username = null;
 
-  protected void initConf() {
-    conf.setBoolean(DFSConfigKeys.DFS_NAMENODE_ACLS_ENABLED_KEY, true);
-    conf.setBoolean(
-        DFSConfigKeys.DFS_NAMENODE_POSIX_ACL_INHERITANCE_ENABLED_KEY, false);
-  }
+    private MiniDFSCluster cluster = null;
 
-  @Before
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-    initConf();
-    cluster = new MiniDFSCluster.Builder(conf).numDataNodes(1).build();
-    fs = cluster.getFileSystem();
-    namenode = conf.get(DFSConfigKeys.FS_DEFAULT_NAME_KEY, "file:///");
-    username = System.getProperty("user.name");
-  }
+    private FileSystem fs = null;
 
-  @After
-  @Override
-  public void tearDown() throws Exception {
-    super.tearDown();
-    if (fs != null) {
-      fs.close();
-      fs = null;
+    private String namenode = null;
+
+    private String username = null;
+
+    protected void initConf() {
+        conf.setBoolean(DFSConfigKeys.DFS_NAMENODE_ACLS_ENABLED_KEY, true);
+        conf.setBoolean(DFSConfigKeys.DFS_NAMENODE_POSIX_ACL_INHERITANCE_ENABLED_KEY, false);
     }
-    if (cluster != null) {
-      cluster.shutdown();
-      cluster = null;
+
+    @Before
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        initConf();
+        cluster = new MiniDFSCluster.Builder(conf).numDataNodes(1).build();
+        fs = cluster.getFileSystem();
+        namenode = conf.get(DFSConfigKeys.FS_DEFAULT_NAME_KEY, "file:///");
+        username = System.getProperty("user.name");
     }
-  }
 
-  @Override
-  protected String getTestFile() {
-    return "testAclCLI.xml";
-  }
+    @After
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+        if (fs != null) {
+            fs.close();
+            fs = null;
+        }
+        if (cluster != null) {
+            cluster.shutdown();
+            cluster = null;
+        }
+    }
 
-  @Override
-  protected String expandCommand(final String cmd) {
-    String expCmd = cmd;
-    expCmd = expCmd.replaceAll("NAMENODE", namenode);
-    expCmd = expCmd.replaceAll("USERNAME", username);
-    expCmd = expCmd.replaceAll("#LF#",
-        System.getProperty("line.separator"));
-    expCmd = super.expandCommand(expCmd);
-    return expCmd;
-  }
+    @Override
+    protected String getTestFile() {
+        return "testAclCLI.xml";
+    }
 
-  @Override
-  protected Result execute(CLICommand cmd) throws Exception {
-    return cmd.getExecutor(namenode, conf).executeCommand(cmd.getCmd());
-  }
+    @Override
+    protected String expandCommand(final String cmd) {
+        String expCmd = cmd;
+        expCmd = expCmd.replaceAll("NAMENODE", namenode);
+        expCmd = expCmd.replaceAll("USERNAME", username);
+        expCmd = expCmd.replaceAll("#LF#", System.getProperty("line.separator"));
+        expCmd = super.expandCommand(expCmd);
+        return expCmd;
+    }
 
-  @Test
-  @Override
-  public void testAll() {
-    super.testAll();
-  }
+    @Override
+    protected Result execute(CLICommand cmd) throws Exception {
+        return cmd.getExecutor(namenode, conf).executeCommand(cmd.getCmd());
+    }
+
+    @Test
+    @Override
+    public void testAll() {
+        super.testAll();
+    }
 }

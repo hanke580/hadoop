@@ -21,69 +21,61 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
 
 /**
  * Test for {@link NameCache} class
  */
 public class TestNameCache {
-  @Test
-  public void testDictionary() throws Exception {
-    // Create dictionary with useThreshold 2
-    NameCache<String> cache = 
-      new NameCache<String>(2);
-    String[] matching = {"part1", "part10000000", "fileabc", "abc", "filepart"};
-    String[] notMatching = {"spart1", "apart", "abcd", "def"};
 
-    for (String s : matching) {
-      // Add useThreshold times so the names are promoted to dictionary
-      cache.put(s);
-      assertTrue(s == cache.put(s));
+    @Test
+    public void testDictionary() throws Exception {
+        // Create dictionary with useThreshold 2
+        NameCache<String> cache = new NameCache<String>(2);
+        String[] matching = { "part1", "part10000000", "fileabc", "abc", "filepart" };
+        String[] notMatching = { "spart1", "apart", "abcd", "def" };
+        for (String s : matching) {
+            // Add useThreshold times so the names are promoted to dictionary
+            cache.put(s);
+            assertTrue(s == cache.put(s));
+        }
+        for (String s : notMatching) {
+            // Add < useThreshold times so the names are not promoted to dictionary
+            cache.put(s);
+        }
+        // Mark dictionary as initialized
+        cache.initialized();
+        for (String s : matching) {
+            verifyNameReuse(cache, s, true);
+        }
+        // Check dictionary size
+        assertEquals(matching.length, cache.size());
+        for (String s : notMatching) {
+            verifyNameReuse(cache, s, false);
+        }
+        cache.reset();
+        cache.initialized();
+        for (String s : matching) {
+            verifyNameReuse(cache, s, false);
+        }
+        for (String s : notMatching) {
+            verifyNameReuse(cache, s, false);
+        }
     }
-    for (String s : notMatching) {
-      // Add < useThreshold times so the names are not promoted to dictionary
-      cache.put(s);
-    }
-    
-    // Mark dictionary as initialized
-    cache.initialized();
-    
-    for (String s : matching) {
-      verifyNameReuse(cache, s, true);
-    }
-    // Check dictionary size
-    assertEquals(matching.length, cache.size());
-    
-    for (String s : notMatching) {
-      verifyNameReuse(cache, s, false);
-    }
-    
-    cache.reset();
-    cache.initialized();
-    
-    for (String s : matching) {
-      verifyNameReuse(cache, s, false);
-    }
-    
-    for (String s : notMatching) {
-      verifyNameReuse(cache, s, false);
-    }
-  }
 
-  private void verifyNameReuse(NameCache<String> cache, String s, boolean reused) {
-    cache.put(s);
-    int lookupCount = cache.getLookupCount();
-    if (reused) {
-      // Dictionary returns non null internal value
-      assertNotNull(cache.put(s));
-      // Successful lookup increments lookup count
-      assertEquals(lookupCount + 1, cache.getLookupCount());
-    } else {
-      // Dictionary returns null - since name is not in the dictionary
-      assertNull(cache.put(s));
-      // Lookup count remains the same
-      assertEquals(lookupCount, cache.getLookupCount());
+    private void verifyNameReuse(NameCache<String> cache, String s, boolean reused) {
+        cache.put(s);
+        int lookupCount = cache.getLookupCount();
+        if (reused) {
+            // Dictionary returns non null internal value
+            assertNotNull(cache.put(s));
+            // Successful lookup increments lookup count
+            assertEquals(lookupCount + 1, cache.getLookupCount());
+        } else {
+            // Dictionary returns null - since name is not in the dictionary
+            assertNull(cache.put(s));
+            // Lookup count remains the same
+            assertEquals(lookupCount, cache.getLookupCount());
+        }
     }
-  }
 }

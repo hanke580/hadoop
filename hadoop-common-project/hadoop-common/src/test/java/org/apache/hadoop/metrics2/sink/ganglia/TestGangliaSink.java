@@ -15,26 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.metrics2.sink.ganglia;
 
 import org.apache.commons.configuration2.SubsetConfiguration;
 import org.apache.hadoop.metrics2.impl.ConfigBuilder;
 import org.junit.Test;
-
 import java.net.DatagramSocket;
 import java.net.MulticastSocket;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class TestGangliaSink {
+
     @Test
     public void testShouldCreateDatagramSocketByDefault() throws Exception {
-        SubsetConfiguration conf = new ConfigBuilder()
-                .subset("test.sink.ganglia");
-
+        SubsetConfiguration conf = new ConfigBuilder().subset("test.sink.ganglia");
         GangliaSink30 gangliaSink = new GangliaSink30();
         gangliaSink.init(conf);
         DatagramSocket socket = gangliaSink.getDatagramSocket();
@@ -43,9 +39,7 @@ public class TestGangliaSink {
 
     @Test
     public void testShouldCreateDatagramSocketIfMulticastIsDisabled() throws Exception {
-        SubsetConfiguration conf = new ConfigBuilder()
-                .add("test.sink.ganglia.multicast", false)
-                .subset("test.sink.ganglia");
+        SubsetConfiguration conf = new ConfigBuilder().add("test.sink.ganglia.multicast", false).subset("test.sink.ganglia");
         GangliaSink30 gangliaSink = new GangliaSink30();
         gangliaSink.init(conf);
         DatagramSocket socket = gangliaSink.getDatagramSocket();
@@ -54,9 +48,7 @@ public class TestGangliaSink {
 
     @Test
     public void testShouldCreateMulticastSocket() throws Exception {
-        SubsetConfiguration conf = new ConfigBuilder()
-                .add("test.sink.ganglia.multicast", true)
-                .subset("test.sink.ganglia");
+        SubsetConfiguration conf = new ConfigBuilder().add("test.sink.ganglia.multicast", true).subset("test.sink.ganglia");
         GangliaSink30 gangliaSink = new GangliaSink30();
         gangliaSink.init(conf);
         DatagramSocket socket = gangliaSink.getDatagramSocket();
@@ -67,10 +59,7 @@ public class TestGangliaSink {
 
     @Test
     public void testShouldSetMulticastSocketTtl() throws Exception {
-        SubsetConfiguration conf = new ConfigBuilder()
-                .add("test.sink.ganglia.multicast", true)
-                .add("test.sink.ganglia.multicast.ttl", 3)
-                .subset("test.sink.ganglia");
+        SubsetConfiguration conf = new ConfigBuilder().add("test.sink.ganglia.multicast", true).add("test.sink.ganglia.multicast.ttl", 3).subset("test.sink.ganglia");
         GangliaSink30 gangliaSink = new GangliaSink30();
         gangliaSink.init(conf);
         DatagramSocket socket = gangliaSink.getDatagramSocket();

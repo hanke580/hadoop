@@ -15,13 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.lib.wsrs;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.http.JettyUtils;
 import org.json.simple.JSONStreamAware;
-
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -40,28 +38,24 @@ import java.nio.charset.StandardCharsets;
 @Produces(MediaType.APPLICATION_JSON + "; " + JettyUtils.UTF_8)
 @InterfaceAudience.Private
 public class JSONProvider implements MessageBodyWriter<JSONStreamAware> {
-  private static final String ENTER = System.getProperty("line.separator");
 
-  @Override
-  public boolean isWriteable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
-    return JSONStreamAware.class.isAssignableFrom(aClass);
-  }
+    private static final String ENTER = System.getProperty("line.separator");
 
-  @Override
-  public long getSize(JSONStreamAware jsonStreamAware, Class<?> aClass, Type type, Annotation[] annotations,
-                      MediaType mediaType) {
-    return -1;
-  }
+    @Override
+    public boolean isWriteable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
+        return JSONStreamAware.class.isAssignableFrom(aClass);
+    }
 
-  @Override
-  public void writeTo(JSONStreamAware jsonStreamAware, Class<?> aClass, Type type, Annotation[] annotations,
-                      MediaType mediaType, MultivaluedMap<String, Object> stringObjectMultivaluedMap,
-                      OutputStream outputStream) throws IOException, WebApplicationException {
-    Writer writer =
-        new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
-    jsonStreamAware.writeJSONString(writer);
-    writer.write(ENTER);
-    writer.flush();
-  }
+    @Override
+    public long getSize(JSONStreamAware jsonStreamAware, Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
+        return -1;
+    }
 
+    @Override
+    public void writeTo(JSONStreamAware jsonStreamAware, Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> stringObjectMultivaluedMap, OutputStream outputStream) throws IOException, WebApplicationException {
+        Writer writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
+        jsonStreamAware.writeJSONString(writer);
+        writer.write(ENTER);
+        writer.flush();
+    }
 }

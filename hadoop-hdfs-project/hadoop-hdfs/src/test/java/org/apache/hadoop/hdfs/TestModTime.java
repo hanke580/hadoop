@@ -19,12 +19,10 @@ package org.apache.hadoop.hdfs;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.Random;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CommonConfigurationKeys;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -40,186 +38,177 @@ import org.junit.Test;
  * This class tests the decommissioning of nodes.
  */
 public class TestModTime {
-  
-  static final long seed = 0xDEADBEEFL;
-  static final int blockSize = 8192;
-  static final int fileSize = 16384;
-  static final int numDatanodes = 6;
 
+    static final long seed = 0xDEADBEEFL;
 
-  Random myrand = new Random();
-  Path hostsFile;
-  Path excludeFile;
-  
-  private void cleanupFile(FileSystem fileSys, Path name) throws IOException {
-    assertTrue(fileSys.exists(name));
-    fileSys.delete(name, true);
-    assertTrue(!fileSys.exists(name));
-  }
+    static final int blockSize = 8192;
 
-  private void printDatanodeReport(DatanodeInfo[] info) {
-    System.out.println("-------------------------------------------------");
-    for (int i = 0; i < info.length; i++) {
-      System.out.println(info[i].getDatanodeReport());
-      System.out.println();
+    static final int fileSize = 16384;
+
+    static final int numDatanodes = 6;
+
+    Random myrand = new Random();
+
+    Path hostsFile;
+
+    Path excludeFile;
+
+    private void cleanupFile(FileSystem fileSys, Path name) throws IOException {
+        assertTrue(fileSys.exists(name));
+        fileSys.delete(name, true);
+        assertTrue(!fileSys.exists(name));
     }
-  }
 
-  /**
-   * Tests modification time in DFS.
-   */
-  @Test
-  public void testModTime() throws IOException {
-    Configuration conf = new HdfsConfiguration();
-
-    MiniDFSCluster cluster = new MiniDFSCluster.Builder(conf)
-                                               .numDataNodes(numDatanodes).build();
-    cluster.waitActive();
-    InetSocketAddress addr = new InetSocketAddress("localhost", 
-                                                   cluster.getNameNodePort());
-    DFSClient client = new DFSClient(addr, conf);
-    DatanodeInfo[] info = client.datanodeReport(DatanodeReportType.LIVE);
-    assertEquals("Number of Datanodes ", numDatanodes, info.length);
-    FileSystem fileSys = cluster.getFileSystem();
-    int replicas = numDatanodes - 1;
-    assertTrue(fileSys instanceof DistributedFileSystem);
-
-    try {
-
-     //
-     // create file and record ctime and mtime of test file
-     //
-     System.out.println("Creating testdir1 and testdir1/test1.dat.");
-     Path dir1 = new Path("testdir1");
-     Path file1 = new Path(dir1, "test1.dat");
-     DFSTestUtil.createFile(fileSys, file1, fileSize, fileSize, blockSize,
-         (short) replicas, seed);
-     FileStatus stat = fileSys.getFileStatus(file1);
-     long mtime1 = stat.getModificationTime();
-     assertTrue(mtime1 != 0);
-     //
-     // record dir times
-     //
-     stat = fileSys.getFileStatus(dir1);
-     long mdir1 = stat.getModificationTime();
-
-     //
-     // create second test file
-     //
-     System.out.println("Creating testdir1/test2.dat.");
-     Path file2 = new Path(dir1, "test2.dat");
-     DFSTestUtil.createFile(fileSys, file2, fileSize, fileSize, blockSize,
-         (short) replicas, seed);
-     stat = fileSys.getFileStatus(file2);
-
-     //
-     // verify that mod time of dir remains the same
-     // as before. modification time of directory has increased.
-     //
-     stat = fileSys.getFileStatus(dir1);
-     assertTrue(stat.getModificationTime() >= mdir1);
-     mdir1 = stat.getModificationTime();
-     //
-     // create another directory
-     //
-     Path dir2 = fileSys.makeQualified(new Path("testdir2/"));
-     System.out.println("Creating testdir2 " + dir2);
-     assertTrue(fileSys.mkdirs(dir2));
-     stat = fileSys.getFileStatus(dir2);
-     long mdir2 = stat.getModificationTime();
-     //
-     // rename file1 from testdir into testdir2
-     //
-     Path newfile = new Path(dir2, "testnew.dat");
-     System.out.println("Moving " + file1 + " to " + newfile);
-     fileSys.rename(file1, newfile);
-     //
-     // verify that modification time of file1 did not change.
-     //
-     stat = fileSys.getFileStatus(newfile);
-     assertTrue(stat.getModificationTime() == mtime1);
-     //
-     // verify that modification time of  testdir1 and testdir2
-     // were changed. 
-     //
-     stat = fileSys.getFileStatus(dir1);
-     assertTrue(stat.getModificationTime() != mdir1);
-     mdir1 = stat.getModificationTime();
-
-     stat = fileSys.getFileStatus(dir2);
-     assertTrue(stat.getModificationTime() != mdir2);
-     mdir2 = stat.getModificationTime();
-     //
-     // delete newfile
-     //
-     System.out.println("Deleting testdir2/testnew.dat.");
-     assertTrue(fileSys.delete(newfile, true));
-     //
-     // verify that modification time of testdir1 has not changed.
-     //
-     stat = fileSys.getFileStatus(dir1);
-     assertTrue(stat.getModificationTime() == mdir1);
-     //
-     // verify that modification time of testdir2 has changed.
-     //
-     stat = fileSys.getFileStatus(dir2);
-     assertTrue(stat.getModificationTime() != mdir2);
-     mdir2 = stat.getModificationTime();
-
-     cleanupFile(fileSys, file2);
-     cleanupFile(fileSys, dir1);
-     cleanupFile(fileSys, dir2);
-    } catch (IOException e) {
-      info = client.datanodeReport(DatanodeReportType.ALL);
-      printDatanodeReport(info);
-      throw e;
-    } finally {
-      fileSys.close();
-      cluster.shutdown();
+    private void printDatanodeReport(DatanodeInfo[] info) {
+        System.out.println("-------------------------------------------------");
+        for (int i = 0; i < info.length; i++) {
+            System.out.println(info[i].getDatanodeReport());
+            System.out.println();
+        }
     }
-  }
-  
-  /**
-   * Regression test for HDFS-3864 - NN does not update internal file mtime for
-   * OP_CLOSE when reading from the edit log.
-   */
-  @Test
-  public void testModTimePersistsAfterRestart() throws IOException {
-    final long sleepTime = 10; // 10 milliseconds
-    MiniDFSCluster cluster = null;
-    FileSystem fs = null;
-    Configuration conf = new HdfsConfiguration();
-    try {
-      cluster = new MiniDFSCluster.Builder(conf).build();
-      fs = cluster.getFileSystem();
-      Path testPath = new Path("/test");
-      
-      // Open a file, and get its initial modification time.
-      OutputStream out = fs.create(testPath);
-      long initialModTime = fs.getFileStatus(testPath).getModificationTime();
-      assertTrue(initialModTime > 0);
-      
-      // Wait and then close the file. Ensure that the mod time goes up.
-      ThreadUtil.sleepAtLeastIgnoreInterrupts(sleepTime);
-      out.close();
-      long modTimeAfterClose = fs.getFileStatus(testPath).getModificationTime();
-      assertTrue(modTimeAfterClose >= initialModTime + sleepTime);
-      
-      // Restart the NN, and make sure that the later mod time is still used.
-      cluster.restartNameNode();
-      long modTimeAfterRestart = fs.getFileStatus(testPath).getModificationTime();
-      assertEquals(modTimeAfterClose, modTimeAfterRestart);
-    } finally {
-      if (fs != null) {
-        fs.close();
-      }
-      if (cluster != null) {
-        cluster.shutdown();
-      }
-    }
-  }
 
-  public static void main(String[] args) throws Exception {
-    new TestModTime().testModTime();
-  }
+    /**
+     * Tests modification time in DFS.
+     */
+    @Test
+    public void testModTime() throws IOException {
+        Configuration conf = new HdfsConfiguration();
+        MiniDFSCluster cluster = new MiniDFSCluster.Builder(conf).numDataNodes(numDatanodes).build();
+        cluster.waitActive();
+        InetSocketAddress addr = new InetSocketAddress("localhost", cluster.getNameNodePort());
+        DFSClient client = new DFSClient(addr, conf);
+        DatanodeInfo[] info = client.datanodeReport(DatanodeReportType.LIVE);
+        assertEquals("Number of Datanodes ", numDatanodes, info.length);
+        FileSystem fileSys = cluster.getFileSystem();
+        int replicas = numDatanodes - 1;
+        assertTrue(fileSys instanceof DistributedFileSystem);
+        try {
+            //
+            // create file and record ctime and mtime of test file
+            //
+            System.out.println("Creating testdir1 and testdir1/test1.dat.");
+            Path dir1 = new Path("testdir1");
+            Path file1 = new Path(dir1, "test1.dat");
+            DFSTestUtil.createFile(fileSys, file1, fileSize, fileSize, blockSize, (short) replicas, seed);
+            FileStatus stat = fileSys.getFileStatus(file1);
+            long mtime1 = stat.getModificationTime();
+            assertTrue(mtime1 != 0);
+            //
+            // record dir times
+            //
+            stat = fileSys.getFileStatus(dir1);
+            long mdir1 = stat.getModificationTime();
+            //
+            // create second test file
+            //
+            System.out.println("Creating testdir1/test2.dat.");
+            Path file2 = new Path(dir1, "test2.dat");
+            DFSTestUtil.createFile(fileSys, file2, fileSize, fileSize, blockSize, (short) replicas, seed);
+            stat = fileSys.getFileStatus(file2);
+            //
+            // verify that mod time of dir remains the same
+            // as before. modification time of directory has increased.
+            //
+            stat = fileSys.getFileStatus(dir1);
+            assertTrue(stat.getModificationTime() >= mdir1);
+            mdir1 = stat.getModificationTime();
+            //
+            // create another directory
+            //
+            Path dir2 = fileSys.makeQualified(new Path("testdir2/"));
+            System.out.println("Creating testdir2 " + dir2);
+            assertTrue(fileSys.mkdirs(dir2));
+            stat = fileSys.getFileStatus(dir2);
+            long mdir2 = stat.getModificationTime();
+            //
+            // rename file1 from testdir into testdir2
+            //
+            Path newfile = new Path(dir2, "testnew.dat");
+            System.out.println("Moving " + file1 + " to " + newfile);
+            fileSys.rename(file1, newfile);
+            //
+            // verify that modification time of file1 did not change.
+            //
+            stat = fileSys.getFileStatus(newfile);
+            assertTrue(stat.getModificationTime() == mtime1);
+            //
+            // verify that modification time of  testdir1 and testdir2
+            // were changed.
+            //
+            stat = fileSys.getFileStatus(dir1);
+            assertTrue(stat.getModificationTime() != mdir1);
+            mdir1 = stat.getModificationTime();
+            stat = fileSys.getFileStatus(dir2);
+            assertTrue(stat.getModificationTime() != mdir2);
+            mdir2 = stat.getModificationTime();
+            //
+            // delete newfile
+            //
+            System.out.println("Deleting testdir2/testnew.dat.");
+            assertTrue(fileSys.delete(newfile, true));
+            //
+            // verify that modification time of testdir1 has not changed.
+            //
+            stat = fileSys.getFileStatus(dir1);
+            assertTrue(stat.getModificationTime() == mdir1);
+            //
+            // verify that modification time of testdir2 has changed.
+            //
+            stat = fileSys.getFileStatus(dir2);
+            assertTrue(stat.getModificationTime() != mdir2);
+            mdir2 = stat.getModificationTime();
+            cleanupFile(fileSys, file2);
+            cleanupFile(fileSys, dir1);
+            cleanupFile(fileSys, dir2);
+        } catch (IOException e) {
+            info = client.datanodeReport(DatanodeReportType.ALL);
+            printDatanodeReport(info);
+            throw e;
+        } finally {
+            fileSys.close();
+            cluster.shutdown();
+        }
+    }
+
+    /**
+     * Regression test for HDFS-3864 - NN does not update internal file mtime for
+     * OP_CLOSE when reading from the edit log.
+     */
+    @Test
+    public void testModTimePersistsAfterRestart() throws IOException {
+        // 10 milliseconds
+        final long sleepTime = 10;
+        MiniDFSCluster cluster = null;
+        FileSystem fs = null;
+        Configuration conf = new HdfsConfiguration();
+        try {
+            cluster = new MiniDFSCluster.Builder(conf).build();
+            fs = cluster.getFileSystem();
+            Path testPath = new Path("/test");
+            // Open a file, and get its initial modification time.
+            OutputStream out = fs.create(testPath);
+            long initialModTime = fs.getFileStatus(testPath).getModificationTime();
+            assertTrue(initialModTime > 0);
+            // Wait and then close the file. Ensure that the mod time goes up.
+            ThreadUtil.sleepAtLeastIgnoreInterrupts(sleepTime);
+            out.close();
+            long modTimeAfterClose = fs.getFileStatus(testPath).getModificationTime();
+            assertTrue(modTimeAfterClose >= initialModTime + sleepTime);
+            // Restart the NN, and make sure that the later mod time is still used.
+            cluster.restartNameNode();
+            long modTimeAfterRestart = fs.getFileStatus(testPath).getModificationTime();
+            assertEquals(modTimeAfterClose, modTimeAfterRestart);
+        } finally {
+            if (fs != null) {
+                fs.close();
+            }
+            if (cluster != null) {
+                cluster.shutdown();
+            }
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        new TestModTime().testModTime();
+    }
 }

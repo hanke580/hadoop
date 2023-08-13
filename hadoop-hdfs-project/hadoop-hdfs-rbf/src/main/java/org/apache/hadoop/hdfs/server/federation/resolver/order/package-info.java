@@ -15,15 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * A federated location can be resolved to multiple subclusters. This package
  * takes care of the order in which this multiple destinations should be used.
  */
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
-
 package org.apache.hadoop.hdfs.server.federation.resolver.order;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+

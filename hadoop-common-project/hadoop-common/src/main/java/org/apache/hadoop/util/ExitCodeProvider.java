@@ -15,7 +15,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.hadoop.util;
 
 /**
@@ -24,12 +23,11 @@ package org.apache.hadoop.util;
  * it possible to retrofit exit codes onto existing classes,
  * and add exit code providers under all parts of the Exception tree.
  */
-
 public interface ExitCodeProvider {
 
-  /**
-   * Method to get the exit code.
-   * @return the exit code
-   */
-  int getExitCode();
+    /**
+     * Method to get the exit code.
+     * @return the exit code
+     */
+    int getExitCode();
 }

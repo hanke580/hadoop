@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.metrics2.util;
 
 import org.junit.Test;
@@ -25,43 +24,41 @@ import static org.junit.Assert.*;
  * Test the running sample stat computation
  */
 public class TestSampleStat {
-  private static final double EPSILON = 1e-42;
 
-  /**
-   * Some simple use cases
-   */
-  @Test public void testSimple() {
-    SampleStat stat = new SampleStat();
-    assertEquals("num samples", 0, stat.numSamples());
-    assertEquals("mean", 0.0, stat.mean(), EPSILON);
-    assertEquals("variance", 0.0, stat.variance(), EPSILON);
-    assertEquals("stddev", 0.0, stat.stddev(), EPSILON);
-    assertEquals("min", SampleStat.MinMax.DEFAULT_MIN_VALUE, stat.min(), EPSILON);
-    assertEquals("max", SampleStat.MinMax.DEFAULT_MAX_VALUE, stat.max(), EPSILON);
+    private static final double EPSILON = 1e-42;
 
-    stat.add(3);
-    assertEquals("num samples", 1L, stat.numSamples());
-    assertEquals("mean", 3.0, stat.mean(), EPSILON);
-    assertEquals("variance", 0.0, stat.variance(), EPSILON);
-    assertEquals("stddev", 0.0, stat.stddev(), EPSILON);
-    assertEquals("min", 3.0, stat.min(), EPSILON);
-    assertEquals("max", 3.0, stat.max(), EPSILON);
-
-    stat.add(2).add(1);
-    assertEquals("num samples", 3L, stat.numSamples());
-    assertEquals("mean", 2.0, stat.mean(), EPSILON);
-    assertEquals("variance", 1.0, stat.variance(), EPSILON);
-    assertEquals("stddev", 1.0, stat.stddev(), EPSILON);
-    assertEquals("min", 1.0, stat.min(), EPSILON);
-    assertEquals("max", 3.0, stat.max(), EPSILON);
-
-    stat.reset();
-    assertEquals("num samples", 0, stat.numSamples());
-    assertEquals("mean", 0.0, stat.mean(), EPSILON);
-    assertEquals("variance", 0.0, stat.variance(), EPSILON);
-    assertEquals("stddev", 0.0, stat.stddev(), EPSILON);
-    assertEquals("min", SampleStat.MinMax.DEFAULT_MIN_VALUE, stat.min(), EPSILON);
-    assertEquals("max", SampleStat.MinMax.DEFAULT_MAX_VALUE, stat.max(), EPSILON);
-  }
-
+    /**
+     * Some simple use cases
+     */
+    @Test
+    public void testSimple() {
+        SampleStat stat = new SampleStat();
+        assertEquals("num samples", 0, stat.numSamples());
+        assertEquals("mean", 0.0, stat.mean(), EPSILON);
+        assertEquals("variance", 0.0, stat.variance(), EPSILON);
+        assertEquals("stddev", 0.0, stat.stddev(), EPSILON);
+        assertEquals("min", SampleStat.MinMax.DEFAULT_MIN_VALUE, stat.min(), EPSILON);
+        assertEquals("max", SampleStat.MinMax.DEFAULT_MAX_VALUE, stat.max(), EPSILON);
+        stat.add(3);
+        assertEquals("num samples", 1L, stat.numSamples());
+        assertEquals("mean", 3.0, stat.mean(), EPSILON);
+        assertEquals("variance", 0.0, stat.variance(), EPSILON);
+        assertEquals("stddev", 0.0, stat.stddev(), EPSILON);
+        assertEquals("min", 3.0, stat.min(), EPSILON);
+        assertEquals("max", 3.0, stat.max(), EPSILON);
+        stat.add(2).add(1);
+        assertEquals("num samples", 3L, stat.numSamples());
+        assertEquals("mean", 2.0, stat.mean(), EPSILON);
+        assertEquals("variance", 1.0, stat.variance(), EPSILON);
+        assertEquals("stddev", 1.0, stat.stddev(), EPSILON);
+        assertEquals("min", 1.0, stat.min(), EPSILON);
+        assertEquals("max", 3.0, stat.max(), EPSILON);
+        stat.reset();
+        assertEquals("num samples", 0, stat.numSamples());
+        assertEquals("mean", 0.0, stat.mean(), EPSILON);
+        assertEquals("variance", 0.0, stat.variance(), EPSILON);
+        assertEquals("stddev", 0.0, stat.stddev(), EPSILON);
+        assertEquals("min", SampleStat.MinMax.DEFAULT_MIN_VALUE, stat.min(), EPSILON);
+        assertEquals("max", SampleStat.MinMax.DEFAULT_MAX_VALUE, stat.max(), EPSILON);
+    }
 }

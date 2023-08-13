@@ -27,44 +27,55 @@ import org.apache.hadoop.classification.InterfaceStability;
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
 public class BlockLocalPathInfo {
-  private final ExtendedBlock block;
-  private String localBlockPath = "";  // local file storing the data
-  private String localMetaPath = "";   // local file storing the checksum
 
-  /**
-   * Constructs BlockLocalPathInfo.
-   * @param b The block corresponding to this lock path info.
-   * @param file Block data file.
-   * @param metafile Metadata file for the block.
-   */
-  public BlockLocalPathInfo(ExtendedBlock b, String file, String metafile) {
-    block = b;
-    localBlockPath = file;
-    localMetaPath = metafile;
-  }
+    private final ExtendedBlock block;
 
-  /**
-   * Get the Block data file.
-   * @return Block data file.
-   */
-  public String getBlockPath() {return localBlockPath;}
+    // local file storing the data
+    private String localBlockPath = "";
 
-  /**
-   * @return the Block
-   */
-  public ExtendedBlock getBlock() { return block;}
+    // local file storing the checksum
+    private String localMetaPath = "";
 
-  /**
-   * Get the Block metadata file.
-   * @return Block metadata file.
-   */
-  public String getMetaPath() {return localMetaPath;}
+    /**
+     * Constructs BlockLocalPathInfo.
+     * @param b The block corresponding to this lock path info.
+     * @param file Block data file.
+     * @param metafile Metadata file for the block.
+     */
+    public BlockLocalPathInfo(ExtendedBlock b, String file, String metafile) {
+        block = b;
+        localBlockPath = file;
+        localMetaPath = metafile;
+    }
 
-  /**
-   * Get number of bytes in the block.
-   * @return Number of bytes in the block.
-   */
-  public long getNumBytes() {
-    return block.getNumBytes();
-  }
+    /**
+     * Get the Block data file.
+     * @return Block data file.
+     */
+    public String getBlockPath() {
+        return localBlockPath;
+    }
+
+    /**
+     * @return the Block
+     */
+    public ExtendedBlock getBlock() {
+        return block;
+    }
+
+    /**
+     * Get the Block metadata file.
+     * @return Block metadata file.
+     */
+    public String getMetaPath() {
+        return localMetaPath;
+    }
+
+    /**
+     * Get number of bytes in the block.
+     * @return Number of bytes in the block.
+     */
+    public long getNumBytes() {
+        return block.getNumBytes();
+    }
 }

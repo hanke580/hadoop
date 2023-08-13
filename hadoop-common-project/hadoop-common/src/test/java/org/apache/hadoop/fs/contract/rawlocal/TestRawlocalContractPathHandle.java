@@ -24,17 +24,14 @@ import org.apache.hadoop.fs.contract.AbstractFSContract;
 import org.apache.hadoop.fs.contract.localfs.LocalFSContract;
 import org.apache.hadoop.fs.contract.rawlocal.RawlocalFSContract;
 
-public class TestRawlocalContractPathHandle
-    extends AbstractContractPathHandleTest {
+public class TestRawlocalContractPathHandle extends AbstractContractPathHandleTest {
 
-  public TestRawlocalContractPathHandle(String testname,
-      Options.HandleOpt[] opts, boolean serialized) {
-    super(testname, opts, serialized);
-  }
+    public TestRawlocalContractPathHandle(String testname, Options.HandleOpt[] opts, boolean serialized) {
+        super(testname, opts, serialized);
+    }
 
-  @Override
-  protected AbstractFSContract createContract(Configuration conf) {
-    return new RawlocalFSContract(conf);
-  }
-
+    @Override
+    protected AbstractFSContract createContract(Configuration conf) {
+        return new RawlocalFSContract(conf);
+    }
 }

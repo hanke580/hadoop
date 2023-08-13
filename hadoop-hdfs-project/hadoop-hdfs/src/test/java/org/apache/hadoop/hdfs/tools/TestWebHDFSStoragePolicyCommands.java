@@ -21,22 +21,18 @@ import org.apache.hadoop.fs.CommonConfigurationKeysPublic;
 import org.apache.hadoop.hdfs.web.WebHdfsConstants;
 import org.apache.hadoop.hdfs.web.WebHdfsTestUtil;
 import org.junit.Before;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 
 /**
  * Test StoragePolicyAdmin commands with WebHDFS.
  */
-public class TestWebHDFSStoragePolicyCommands
-    extends TestStoragePolicyCommands {
+public class TestWebHDFSStoragePolicyCommands extends TestStoragePolicyCommands {
 
-  @Before
-  public void clusterSetUp() throws IOException, URISyntaxException {
-    super.clusterSetUp();
-    fs = WebHdfsTestUtil.getWebHdfsFileSystem(conf,
-        WebHdfsConstants.WEBHDFS_SCHEME);
-    conf.set(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY,
-        fs.getUri().toString());
-  }
+    @Before
+    public void clusterSetUp() throws IOException, URISyntaxException {
+        super.clusterSetUp();
+        fs = WebHdfsTestUtil.getWebHdfsFileSystem(conf, WebHdfsConstants.WEBHDFS_SCHEME);
+        conf.set(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY, fs.getUri().toString());
+    }
 }

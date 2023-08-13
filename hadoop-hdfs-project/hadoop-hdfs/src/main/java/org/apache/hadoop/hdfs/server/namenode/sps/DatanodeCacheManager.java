@@ -20,7 +20,6 @@ package org.apache.hadoop.hdfs.server.namenode.sps;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.StorageType;
@@ -44,78 +43,71 @@ import org.slf4j.LoggerFactory;
  */
 @InterfaceAudience.Private
 public class DatanodeCacheManager {
-  private static final Logger LOG = LoggerFactory
-      .getLogger(DatanodeCacheManager.class);
 
-  private final DatanodeMap datanodeMap;
-  private NetworkTopology cluster;
+    private static final Logger LOG = LoggerFactory.getLogger(DatanodeCacheManager.class);
 
-  /**
-   * Interval between scans in milliseconds.
-   */
-  private final long refreshIntervalMs;
+    private final DatanodeMap datanodeMap;
 
-  private long lastAccessedTime;
+    private NetworkTopology cluster;
 
-  public DatanodeCacheManager(Configuration conf) {
-    refreshIntervalMs = conf.getLong(
-        DFSConfigKeys.DFS_SPS_DATANODE_CACHE_REFRESH_INTERVAL_MS,
-        DFSConfigKeys.DFS_SPS_DATANODE_CACHE_REFRESH_INTERVAL_MS_DEFAULT);
+    /**
+     * Interval between scans in milliseconds.
+     */
+    private final long refreshIntervalMs;
 
-    LOG.info("DatanodeCacheManager refresh interval is {} milliseconds",
-        refreshIntervalMs);
-    datanodeMap = new DatanodeMap();
-  }
+    private long lastAccessedTime;
 
-  /**
-   * Returns the live datanodes and its storage details, which has available
-   * space (&gt; 0) to schedule block moves. This will return array of datanodes
-   * from its local cache. It has a configurable refresh interval in millis and
-   * periodically refresh the datanode cache by fetching latest
-   * {@link Context#getLiveDatanodeStorageReport()} once it elapsed refresh
-   * interval.
-   *
-   * @throws IOException
-   */
-  public DatanodeMap getLiveDatanodeStorageReport(
-      Context spsContext) throws IOException {
-    long now = Time.monotonicNow();
-    long elapsedTimeMs = now - lastAccessedTime;
-    boolean refreshNeeded = elapsedTimeMs >= refreshIntervalMs;
-    lastAccessedTime = now;
-    if (refreshNeeded) {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("elapsedTimeMs > refreshIntervalMs : {} > {},"
-            + " so refreshing cache", elapsedTimeMs, refreshIntervalMs);
-      }
-      datanodeMap.reset(); // clear all previously cached items.
-
-      // Fetch live datanodes from namenode and prepare DatanodeMap.
-      DatanodeStorageReport[] liveDns = spsContext
-          .getLiveDatanodeStorageReport();
-      for (DatanodeStorageReport storage : liveDns) {
-        StorageReport[] storageReports = storage.getStorageReports();
-        List<StorageType> storageTypes = new ArrayList<>();
-        List<Long> remainingSizeList = new ArrayList<>();
-        for (StorageReport t : storageReports) {
-          if (t.getRemaining() > 0) {
-            storageTypes.add(t.getStorage().getStorageType());
-            remainingSizeList.add(t.getRemaining());
-          }
-        }
-        datanodeMap.addTarget(storage.getDatanodeInfo(), storageTypes,
-            remainingSizeList);
-      }
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("LIVE datanodes: {}", datanodeMap);
-      }
-      // get network topology
-      cluster = spsContext.getNetworkTopology(datanodeMap);
+    public DatanodeCacheManager(Configuration conf) {
+        refreshIntervalMs = conf.getLong(DFSConfigKeys.DFS_SPS_DATANODE_CACHE_REFRESH_INTERVAL_MS, DFSConfigKeys.DFS_SPS_DATANODE_CACHE_REFRESH_INTERVAL_MS_DEFAULT);
+        LOG.info("DatanodeCacheManager refresh interval is {} milliseconds", refreshIntervalMs);
+        datanodeMap = new DatanodeMap();
     }
-    return datanodeMap;
-  }
 
-  NetworkTopology getCluster() {
-    return cluster;
-  }
+    /**
+     * Returns the live datanodes and its storage details, which has available
+     * space (&gt; 0) to schedule block moves. This will return array of datanodes
+     * from its local cache. It has a configurable refresh interval in millis and
+     * periodically refresh the datanode cache by fetching latest
+     * {@link Context#getLiveDatanodeStorageReport()} once it elapsed refresh
+     * interval.
+     *
+     * @throws IOException
+     */
+    public DatanodeMap getLiveDatanodeStorageReport(Context spsContext) throws IOException {
+        long now = Time.monotonicNow();
+        long elapsedTimeMs = now - lastAccessedTime;
+        boolean refreshNeeded = elapsedTimeMs >= refreshIntervalMs;
+        lastAccessedTime = now;
+        if (refreshNeeded) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("elapsedTimeMs > refreshIntervalMs : {} > {}," + " so refreshing cache", elapsedTimeMs, refreshIntervalMs);
+            }
+            // clear all previously cached items.
+            datanodeMap.reset();
+            // Fetch live datanodes from namenode and prepare DatanodeMap.
+            DatanodeStorageReport[] liveDns = spsContext.getLiveDatanodeStorageReport();
+            for (DatanodeStorageReport storage : liveDns) {
+                StorageReport[] storageReports = storage.getStorageReports();
+                List<StorageType> storageTypes = new ArrayList<>();
+                List<Long> remainingSizeList = new ArrayList<>();
+                for (StorageReport t : storageReports) {
+                    if (t.getRemaining() > 0) {
+                        storageTypes.add(t.getStorage().getStorageType());
+                        remainingSizeList.add(t.getRemaining());
+                    }
+                }
+                datanodeMap.addTarget(storage.getDatanodeInfo(), storageTypes, remainingSizeList);
+            }
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("LIVE datanodes: {}", datanodeMap);
+            }
+            // get network topology
+            cluster = spsContext.getNetworkTopology(datanodeMap);
+        }
+        return datanodeMap;
+    }
+
+    NetworkTopology getCluster() {
+        return cluster;
+    }
 }

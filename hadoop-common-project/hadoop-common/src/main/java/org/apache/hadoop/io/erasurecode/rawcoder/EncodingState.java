@@ -25,20 +25,22 @@ import org.apache.hadoop.classification.InterfaceAudience;
  */
 @InterfaceAudience.Private
 abstract class EncodingState {
-  RawErasureEncoder encoder;
-  int encodeLength;
 
-  /**
-   * Check and validate decoding parameters, throw exception accordingly.
-   * @param inputs input buffers to check
-   * @param outputs output buffers to check
-   */
-  <T> void checkParameters(T[] inputs, T[] outputs) {
-    if (inputs.length != encoder.getNumDataUnits()) {
-      throw new HadoopIllegalArgumentException("Invalid inputs length");
+    RawErasureEncoder encoder;
+
+    int encodeLength;
+
+    /**
+     * Check and validate decoding parameters, throw exception accordingly.
+     * @param inputs input buffers to check
+     * @param outputs output buffers to check
+     */
+    <T> void checkParameters(T[] inputs, T[] outputs) {
+        if (inputs.length != encoder.getNumDataUnits()) {
+            throw new HadoopIllegalArgumentException("Invalid inputs length");
+        }
+        if (outputs.length != encoder.getNumParityUnits()) {
+            throw new HadoopIllegalArgumentException("Invalid outputs length");
+        }
     }
-    if (outputs.length != encoder.getNumParityUnits()) {
-      throw new HadoopIllegalArgumentException("Invalid outputs length");
-    }
-  }
 }

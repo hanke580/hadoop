@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hdfs.server.datanode.extdataset;
 
 import java.io.File;
@@ -23,7 +22,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.channels.ClosedChannelException;
 import java.util.Collection;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.DF;
 import org.apache.hadoop.fs.StorageType;
@@ -37,103 +35,100 @@ import org.apache.hadoop.hdfs.server.datanode.fsdataset.FsVolumeReference;
 import org.apache.hadoop.hdfs.server.datanode.fsdataset.FsVolumeSpi;
 
 public class ExternalVolumeImpl implements FsVolumeSpi {
-  @Override
-  public FsVolumeReference obtainReference() throws ClosedChannelException {
-    return null;
-  }
 
-  @Override
-  public String[] getBlockPoolList() {
-    return null;
-  }
+    @Override
+    public FsVolumeReference obtainReference() throws ClosedChannelException {
+        return null;
+    }
 
-  @Override
-  public long getAvailable() throws IOException {
-    return 0;
-  }
+    @Override
+    public String[] getBlockPoolList() {
+        return null;
+    }
 
-  @Override
-  public String getStorageID() {
-    return null;
-  }
+    @Override
+    public long getAvailable() throws IOException {
+        return 0;
+    }
 
-  @Override
-  public StorageType getStorageType() {
-    return StorageType.DEFAULT;
-  }
+    @Override
+    public String getStorageID() {
+        return null;
+    }
 
-  @Override
-  public boolean isTransientStorage() {
-    return false;
-  }
+    @Override
+    public StorageType getStorageType() {
+        return StorageType.DEFAULT;
+    }
 
-  @Override
-  public void reserveSpaceForReplica(long bytesToReserve) {
-  }
+    @Override
+    public boolean isTransientStorage() {
+        return false;
+    }
 
-  @Override
-  public void releaseReservedSpace(long bytesToRelease) {
-  }
+    @Override
+    public void reserveSpaceForReplica(long bytesToReserve) {
+    }
 
-  @Override
-  public void releaseLockedMemory(long bytesToRelease) {
-  }
+    @Override
+    public void releaseReservedSpace(long bytesToRelease) {
+    }
 
-  @Override
-  public BlockIterator newBlockIterator(String bpid, String name) {
-    return null;
-  }
+    @Override
+    public void releaseLockedMemory(long bytesToRelease) {
+    }
 
-  @Override
-  public BlockIterator loadBlockIterator(String bpid, String name)
-      throws IOException {
-    return null;
-  }
+    @Override
+    public BlockIterator newBlockIterator(String bpid, String name) {
+        return null;
+    }
 
-  @Override
-  public FsDatasetSpi getDataset() {
-    return null;
-  }
+    @Override
+    public BlockIterator loadBlockIterator(String bpid, String name) throws IOException {
+        return null;
+    }
 
-  @Override
-  public StorageLocation getStorageLocation() {
-    return null;
-  }
+    @Override
+    public FsDatasetSpi getDataset() {
+        return null;
+    }
 
-  @Override
-  public URI getBaseURI() {
-    return null;
-  }
+    @Override
+    public StorageLocation getStorageLocation() {
+        return null;
+    }
 
-  @Override
-  public DF getUsageStats(Configuration conf) {
-    return null;
-  }
+    @Override
+    public URI getBaseURI() {
+        return null;
+    }
 
-  @Override
-  public byte[] loadLastPartialChunkChecksum(
-      File blockFile, File metaFile) throws IOException {
-    return null;
-  }
+    @Override
+    public DF getUsageStats(Configuration conf) {
+        return null;
+    }
 
-  @Override
-  public void compileReport(String bpid, Collection<ScanInfo> report,
-      ReportCompiler reportCompiler) throws InterruptedException, IOException {
-  }
+    @Override
+    public byte[] loadLastPartialChunkChecksum(File blockFile, File metaFile) throws IOException {
+        return null;
+    }
 
-  @Override
-  public FileIoProvider getFileIoProvider() {
-    return null;
-  }
+    @Override
+    public void compileReport(String bpid, Collection<ScanInfo> report, ReportCompiler reportCompiler) throws InterruptedException, IOException {
+    }
 
-  @Override
-  public DataNodeVolumeMetrics getMetrics() {
-    return null;
-  }
+    @Override
+    public FileIoProvider getFileIoProvider() {
+        return null;
+    }
 
-  @Override
-  public VolumeCheckResult check(VolumeCheckContext context)
-      throws Exception {
-    return VolumeCheckResult.HEALTHY;
-  }
+    @Override
+    public DataNodeVolumeMetrics getMetrics() {
+        return null;
+    }
+
+    @Override
+    public VolumeCheckResult check(VolumeCheckContext context) throws Exception {
+        return VolumeCheckResult.HEALTHY;
+    }
 }

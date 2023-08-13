@@ -18,7 +18,6 @@
 package org.apache.hadoop.hdfs.nfs.nfs3;
 
 import java.util.Comparator;
-
 import com.google.common.base.Preconditions;
 
 /**
@@ -26,52 +25,52 @@ import com.google.common.base.Preconditions;
  * is not a valid range.
  */
 public class OffsetRange {
-  
-  public static final Comparator<OffsetRange> ReverseComparatorOnMin = 
-      new Comparator<OffsetRange>() {
+
+    public static final Comparator<OffsetRange> ReverseComparatorOnMin = new Comparator<OffsetRange>() {
+
+        @Override
+        public int compare(OffsetRange o1, OffsetRange o2) {
+            if (o1.getMin() == o2.getMin()) {
+                return o1.getMax() < o2.getMax() ? 1 : (o1.getMax() > o2.getMax() ? -1 : 0);
+            } else {
+                return o1.getMin() < o2.getMin() ? 1 : -1;
+            }
+        }
+    };
+
+    private final long min;
+
+    private final long max;
+
+    OffsetRange(long min, long max) {
+        Preconditions.checkArgument(min >= 0 && max >= 0 && min < max);
+        this.min = min;
+        this.max = max;
+    }
+
+    long getMin() {
+        return min;
+    }
+
+    long getMax() {
+        return max;
+    }
+
     @Override
-    public int compare(OffsetRange o1, OffsetRange o2) {
-      if (o1.getMin() == o2.getMin()) {
-        return o1.getMax() < o2.getMax() ? 
-            1 : (o1.getMax() > o2.getMax() ? -1 : 0);
-      } else {
-        return o1.getMin() < o2.getMin() ? 1 : -1;
-      }
+    public int hashCode() {
+        return (int) (min ^ max);
     }
-  };
-  
-  private final long min;
-  private final long max;
 
-  OffsetRange(long min, long max) {
-    Preconditions.checkArgument(min >= 0 && max >= 0 && min < max);
-    this.min = min;
-    this.max = max;
-  }
-
-  long getMin() {
-    return min;
-  }
-
-  long getMax() {
-    return max;
-  }
-
-  @Override
-  public int hashCode() {
-    return (int) (min ^ max);
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (o instanceof OffsetRange) {
-      OffsetRange range = (OffsetRange) o;
-      return (min == range.getMin()) && (max == range.getMax());
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof OffsetRange) {
+            OffsetRange range = (OffsetRange) o;
+            return (min == range.getMin()) && (max == range.getMax());
+        }
+        return false;
     }
-    return false;
-  }
 
-  public String toString() {
-    return "[" + getMin() + ", " + getMax() + ")";
-  }
+    public String toString() {
+        return "[" + getMin() + ", " + getMax() + ")";
+    }
 }

@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.cli;
 
 import org.apache.hadoop.cli.util.CLICommand;
@@ -32,92 +31,90 @@ import org.junit.rules.Timeout;
 import org.xml.sax.SAXException;
 
 public class TestErasureCodingCLI extends CLITestHelper {
-  private final int NUM_OF_DATANODES = 3;
-  private MiniDFSCluster dfsCluster = null;
-  private DistributedFileSystem fs = null;
-  private String namenode = null;
 
-  @Rule
-  public Timeout globalTimeout = new Timeout(300000);
+    private final int NUM_OF_DATANODES = 3;
 
-  @Before
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-    dfsCluster = new MiniDFSCluster.Builder(conf)
-        .numDataNodes(NUM_OF_DATANODES).build();
-    dfsCluster.waitClusterUp();
-    namenode = conf.get(DFSConfigKeys.FS_DEFAULT_NAME_KEY, "file:///");
+    private MiniDFSCluster dfsCluster = null;
 
-    username = System.getProperty("user.name");
+    private DistributedFileSystem fs = null;
 
-    fs = dfsCluster.getFileSystem();
-    fs.enableErasureCodingPolicy("RS-6-3-1024k");
-    fs.enableErasureCodingPolicy("RS-3-2-1024k");
-    fs.enableErasureCodingPolicy("XOR-2-1-1024k");
-  }
+    private String namenode = null;
 
-  @Override
-  protected String getTestFile() {
-    return "testErasureCodingConf.xml";
-  }
+    @Rule
+    public Timeout globalTimeout = new Timeout(300000);
 
-  @After
-  @Override
-  public void tearDown() throws Exception {
-    if (fs != null) {
-      fs.close();
-      fs = null;
-    }
-    if (dfsCluster != null) {
-      dfsCluster.shutdown();
-      dfsCluster = null;
-    }
-    Thread.sleep(2000);
-    super.tearDown();
-  }
-
-  @Override
-  protected String expandCommand(final String cmd) {
-    String expCmd = cmd;
-    expCmd = expCmd.replaceAll("NAMENODE", namenode);
-    expCmd = expCmd.replaceAll("#LF#", System.getProperty("line.separator"));
-    expCmd = super.expandCommand(expCmd);
-    return expCmd;
-  }
-
-  @Override
-  protected TestConfigFileParser getConfigParser() {
-    return new TestErasureCodingAdmin();
-  }
-
-  private class TestErasureCodingAdmin extends
-      CLITestHelper.TestConfigFileParser {
+    @Before
     @Override
-    public void endElement(String uri, String localName, String qName)
-        throws SAXException {
-      if (qName.equals("ec-admin-command")) {
-        if (testCommands != null) {
-          testCommands.add(new CLITestCmdErasureCoding(charString,
-              new CLICommandErasureCodingCli()));
-        } else if (cleanupCommands != null) {
-          cleanupCommands.add(new CLITestCmdErasureCoding(charString,
-              new CLICommandErasureCodingCli()));
-        }
-      } else {
-        super.endElement(uri, localName, qName);
-      }
+    public void setUp() throws Exception {
+        super.setUp();
+        dfsCluster = new MiniDFSCluster.Builder(conf).numDataNodes(NUM_OF_DATANODES).build();
+        dfsCluster.waitClusterUp();
+        namenode = conf.get(DFSConfigKeys.FS_DEFAULT_NAME_KEY, "file:///");
+        username = System.getProperty("user.name");
+        fs = dfsCluster.getFileSystem();
+        fs.enableErasureCodingPolicy("RS-6-3-1024k");
+        fs.enableErasureCodingPolicy("RS-3-2-1024k");
+        fs.enableErasureCodingPolicy("XOR-2-1-1024k");
     }
-  }
 
-  @Override
-  protected Result execute(CLICommand cmd) throws Exception {
-    return cmd.getExecutor(namenode, conf).executeCommand(cmd.getCmd());
-  }
+    @Override
+    protected String getTestFile() {
+        return "testErasureCodingConf.xml";
+    }
 
-  @Test
-  @Override
-  public void testAll() {
-    super.testAll();
-  }
+    @After
+    @Override
+    public void tearDown() throws Exception {
+        if (fs != null) {
+            fs.close();
+            fs = null;
+        }
+        if (dfsCluster != null) {
+            dfsCluster.shutdown();
+            dfsCluster = null;
+        }
+        Thread.sleep(2000);
+        super.tearDown();
+    }
+
+    @Override
+    protected String expandCommand(final String cmd) {
+        String expCmd = cmd;
+        expCmd = expCmd.replaceAll("NAMENODE", namenode);
+        expCmd = expCmd.replaceAll("#LF#", System.getProperty("line.separator"));
+        expCmd = super.expandCommand(expCmd);
+        return expCmd;
+    }
+
+    @Override
+    protected TestConfigFileParser getConfigParser() {
+        return new TestErasureCodingAdmin();
+    }
+
+    private class TestErasureCodingAdmin extends CLITestHelper.TestConfigFileParser {
+
+        @Override
+        public void endElement(String uri, String localName, String qName) throws SAXException {
+            if (qName.equals("ec-admin-command")) {
+                if (testCommands != null) {
+                    testCommands.add(new CLITestCmdErasureCoding(charString, new CLICommandErasureCodingCli()));
+                } else if (cleanupCommands != null) {
+                    cleanupCommands.add(new CLITestCmdErasureCoding(charString, new CLICommandErasureCodingCli()));
+                }
+            } else {
+                super.endElement(uri, localName, qName);
+            }
+        }
+    }
+
+    @Override
+    protected Result execute(CLICommand cmd) throws Exception {
+        return cmd.getExecutor(namenode, conf).executeCommand(cmd.getCmd());
+    }
+
+    @Test
+    @Override
+    public void testAll() {
+        super.testAll();
+    }
 }

@@ -24,9 +24,9 @@ import org.junit.Before;
  */
 public class TestXORRawCoder extends TestXORRawCoderBase {
 
-  @Before
-  public void setup() {
-    this.encoderFactoryClass = XORRawErasureCoderFactory.class;
-    this.decoderFactoryClass = XORRawErasureCoderFactory.class;
-  }
+    @Before
+    public void setup() {
+        this.encoderFactoryClass = XORRawErasureCoderFactory.class;
+        this.decoderFactoryClass = XORRawErasureCoderFactory.class;
+    }
 }

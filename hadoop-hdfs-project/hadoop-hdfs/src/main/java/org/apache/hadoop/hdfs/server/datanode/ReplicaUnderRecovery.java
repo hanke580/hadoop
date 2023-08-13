@@ -23,128 +23,132 @@ import org.apache.hadoop.hdfs.server.protocol.ReplicaRecoveryInfo;
 
 /**
  * This class represents replicas that are under block recovery
- * It has a recovery id that is equal to the generation stamp 
+ * It has a recovery id that is equal to the generation stamp
  * that the replica will be bumped to after recovery
  * The recovery id is used to handle multiple concurrent block recoveries.
  * A recovery with higher recovery id preempts recoveries with a lower id.
- *
  */
 public class ReplicaUnderRecovery extends LocalReplica {
-  private LocalReplica original; // original replica to be recovered
-  private long recoveryId; // recovery id; it is also the generation stamp 
-                           // that the replica will be bumped to after recovery
 
-  public ReplicaUnderRecovery(ReplicaInfo replica, long recoveryId) {
-    super(replica, replica.getVolume(), ((LocalReplica)replica).getDir());
-    if ( replica.getState() != ReplicaState.FINALIZED &&
-         replica.getState() != ReplicaState.RBW &&
-         replica.getState() != ReplicaState.RWR ) {
-      throw new IllegalArgumentException("Cannot recover replica: " + replica);
+    // original replica to be recovered
+    private LocalReplica original;
+
+    // recovery id; it is also the generation stamp
+    private long recoveryId;
+
+    // that the replica will be bumped to after recovery
+    public ReplicaUnderRecovery(ReplicaInfo replica, long recoveryId) {
+        super(replica, replica.getVolume(), ((LocalReplica) replica).getDir());
+        if (replica.getState() != ReplicaState.FINALIZED && replica.getState() != ReplicaState.RBW && replica.getState() != ReplicaState.RWR) {
+            throw new IllegalArgumentException("Cannot recover replica: " + replica);
+        }
+        this.original = (LocalReplica) replica;
+        this.recoveryId = recoveryId;
     }
-    this.original = (LocalReplica) replica;
-    this.recoveryId = recoveryId;
-  }
 
-  /**
-   * Copy constructor.
-   * @param from where to copy from
-   */
-  public ReplicaUnderRecovery(ReplicaUnderRecovery from) {
-    super(from);
-    this.original = (LocalReplica) from.getOriginalReplica();
-    this.recoveryId = from.getRecoveryID();
-  }
-
-  @Override
-  public long getRecoveryID() {
-    return recoveryId;
-  }
-
-  @Override
-  public void setRecoveryID(long recoveryId) {
-    if (recoveryId > this.recoveryId) {
-      this.recoveryId = recoveryId;
-    } else {
-      throw new IllegalArgumentException("The new recovery id: " + recoveryId
-          + " must be greater than the current one: " + this.recoveryId);
+    /**
+     * Copy constructor.
+     * @param from where to copy from
+     */
+    public ReplicaUnderRecovery(ReplicaUnderRecovery from) {
+        super(from);
+        this.original = (LocalReplica) from.getOriginalReplica();
+        this.recoveryId = from.getRecoveryID();
     }
-  }
 
-  /**
-   * Get the original replica that's under recovery
-   * @return the original replica under recovery
-   */
-  @Override
-  public ReplicaInfo getOriginalReplica() {
-    return original;
-  }
-  
-  @Override //ReplicaInfo
-  public ReplicaState getState() {
-    return ReplicaState.RUR;
-  }
-  
-  @Override
-  public long getVisibleLength() {
-    return original.getVisibleLength();
-  }
+    @Override
+    public long getRecoveryID() {
+        return recoveryId;
+    }
 
-  @Override
-  public long getBytesOnDisk() {
-    return original.getBytesOnDisk();
-  }
+    @Override
+    public void setRecoveryID(long recoveryId) {
+        if (recoveryId > this.recoveryId) {
+            this.recoveryId = recoveryId;
+        } else {
+            throw new IllegalArgumentException("The new recovery id: " + recoveryId + " must be greater than the current one: " + this.recoveryId);
+        }
+    }
 
-  @Override  //org.apache.hadoop.hdfs.protocol.Block
-  public void setBlockId(long blockId) {
-    super.setBlockId(blockId);
-    original.setBlockId(blockId);
-  }
+    /**
+     * Get the original replica that's under recovery
+     * @return the original replica under recovery
+     */
+    @Override
+    public ReplicaInfo getOriginalReplica() {
+        return original;
+    }
 
-  @Override //org.apache.hadoop.hdfs.protocol.Block
-  public void setGenerationStamp(long gs) {
-    super.setGenerationStamp(gs);
-    original.setGenerationStamp(gs);
-  }
-  
-  @Override //org.apache.hadoop.hdfs.protocol.Block
-  public void setNumBytes(long numBytes) {
-    super.setNumBytes(numBytes);
-    original.setNumBytes(numBytes);
-  }
-  
-  @Override //ReplicaInfo
-  public void updateWithReplica(StorageLocation replicaLocation) {
-    super.updateWithReplica(replicaLocation);
-    original.updateWithReplica(replicaLocation);
-  }
-  
-  @Override //ReplicaInfo
-  void setVolume(FsVolumeSpi vol) {
-    super.setVolume(vol);
-    original.setVolume(vol);
-  }
-  
-  @Override  // Object
-  public boolean equals(Object o) {
-    return super.equals(o);
-  }
-  
-  @Override  // Object
-  public int hashCode() {
-    return super.hashCode();
-  }
+    //ReplicaInfo
+    @Override
+    public ReplicaState getState() {
+        return ReplicaState.RUR;
+    }
 
-  @Override
-  public String toString() {
-    return super.toString()
-        + "\n  recoveryId=" + recoveryId
-        + "\n  original=" + original;
-  }
+    @Override
+    public long getVisibleLength() {
+        return original.getVisibleLength();
+    }
 
-  @Override
-  public ReplicaRecoveryInfo createInfo() {
-    return new ReplicaRecoveryInfo(original.getBlockId(), 
-        original.getBytesOnDisk(), original.getGenerationStamp(),
-        original.getState()); 
-  }
+    @Override
+    public long getBytesOnDisk() {
+        return original.getBytesOnDisk();
+    }
+
+    //org.apache.hadoop.hdfs.protocol.Block
+    @Override
+    public void setBlockId(long blockId) {
+        super.setBlockId(blockId);
+        original.setBlockId(blockId);
+    }
+
+    //org.apache.hadoop.hdfs.protocol.Block
+    @Override
+    public void setGenerationStamp(long gs) {
+        super.setGenerationStamp(gs);
+        original.setGenerationStamp(gs);
+    }
+
+    //org.apache.hadoop.hdfs.protocol.Block
+    @Override
+    public void setNumBytes(long numBytes) {
+        super.setNumBytes(numBytes);
+        original.setNumBytes(numBytes);
+    }
+
+    //ReplicaInfo
+    @Override
+    public void updateWithReplica(StorageLocation replicaLocation) {
+        super.updateWithReplica(replicaLocation);
+        original.updateWithReplica(replicaLocation);
+    }
+
+    //ReplicaInfo
+    @Override
+    void setVolume(FsVolumeSpi vol) {
+        super.setVolume(vol);
+        original.setVolume(vol);
+    }
+
+    // Object
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o);
+    }
+
+    // Object
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + "\n  recoveryId=" + recoveryId + "\n  original=" + original;
+    }
+
+    @Override
+    public ReplicaRecoveryInfo createInfo() {
+        return new ReplicaRecoveryInfo(original.getBlockId(), original.getBytesOnDisk(), original.getGenerationStamp(), original.getState());
+    }
 }

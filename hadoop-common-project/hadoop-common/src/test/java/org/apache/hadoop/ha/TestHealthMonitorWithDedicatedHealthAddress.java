@@ -18,20 +18,16 @@
 package org.apache.hadoop.ha;
 
 import java.net.InetSocketAddress;
-
 import org.apache.hadoop.ha.HAServiceProtocol.HAServiceState;
 
 /**
  * Repeats all tests of {@link TestHealthMonitor}, but using a separate
  * dedicated health check RPC address.
  */
-public class TestHealthMonitorWithDedicatedHealthAddress
-    extends TestHealthMonitor {
+public class TestHealthMonitorWithDedicatedHealthAddress extends TestHealthMonitor {
 
-  @Override
-  protected DummyHAService createDummyHAService() {
-    return new DummyHAService(HAServiceState.ACTIVE,
-        new InetSocketAddress("0.0.0.0", 0),
-        new InetSocketAddress("0.0.0.0", 0), true);
-  }
+    @Override
+    protected DummyHAService createDummyHAService() {
+        return new DummyHAService(HAServiceState.ACTIVE, new InetSocketAddress("0.0.0.0", 0), new InetSocketAddress("0.0.0.0", 0), true);
+    }
 }
