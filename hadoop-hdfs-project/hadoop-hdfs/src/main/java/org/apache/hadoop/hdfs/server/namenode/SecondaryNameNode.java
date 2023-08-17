@@ -571,6 +571,11 @@ public class SecondaryNameNode implements Runnable, SecondaryNameNodeInfoMXBean 
      * @exception Exception if the filesystem does not exist.
      */
     public static void main(String[] argv) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         CommandLineOpts opts = SecondaryNameNode.parseArgs(argv);
         if (opts == null) {
             LOG.error("Failed to parse options");

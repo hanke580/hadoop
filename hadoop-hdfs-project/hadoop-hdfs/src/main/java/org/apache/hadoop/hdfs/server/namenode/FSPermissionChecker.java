@@ -222,25 +222,37 @@ public class FSPermissionChecker implements AccessControlEnforcer {
             String opType = operationType.get();
             if (this.authorizeWithContext && opType != null) {
                 INodeAttributeProvider.AuthorizationContext.Builder builder = new INodeAttributeProvider.AuthorizationContext.Builder();
-                builder.fsOwner(fsOwner).supergroup(supergroup).callerUgi(callerUgi).inodeAttrs(// single inode attr in the array
-                iNodeAttr).inodes(// single inode attr in the array
-                new INode[] { inode }).pathByNameArr(pathComponents).snapshotId(snapshotId).path(null).ancestorIndex(// this will skip checkTraverse()
-                -1).// because not checking ancestor here
-                doCheckOwner(false).ancestorAccess(null).parentAccess(null).access(// the target access to be checked against
-                access).// the inode
-                subAccess(// passing null sub access avoids checking
-                null).// children
-                ignoreEmptyDir(false).operationName(opType).callerContext(CallerContext.getCurrent());
+                // single inode attr in the array
+                builder.fsOwner(fsOwner).supergroup(supergroup).callerUgi(callerUgi).// single inode attr in the array
+                inodeAttrs(// single inode attr in the array
+                iNodeAttr).// single inode attr in the array
+                inodes(new INode[] { inode }).pathByNameArr(pathComponents).snapshotId(snapshotId).path(// this will skip checkTraverse()
+                null).// this will skip checkTraverse()
+                ancestorIndex(// because not checking ancestor here
+                -1).doCheckOwner(false).ancestorAccess(null).parentAccess(// the target access to be checked against
+                null).// the target access to be checked against
+                access(// the inode
+                access).// passing null sub access avoids checking
+                subAccess(// children
+                null).ignoreEmptyDir(false).operationName(opType).callerContext(CallerContext.getCurrent());
                 enforcer.checkPermissionWithContext(builder.build());
             } else {
-                enforcer.checkPermission(fsOwner, supergroup, callerUgi, // single inode attr in the array
-                iNodeAttr, // single inode in the array
-                new INode[] { inode }, pathComponents, snapshotId, // this will skip checkTraverse() because
-                null, // this will skip checkTraverse() because
-                -1, // not checking ancestor here
-                false, null, null, // the target access to be checked against the inode
-                access, // passing null sub access avoids checking children
-                null, false);
+                // single inode attr in the array
+                enforcer.// single inode attr in the array
+                checkPermission(// single inode attr in the array
+                fsOwner, // single inode attr in the array
+                supergroup, // single inode attr in the array
+                callerUgi, // single inode in the array
+                iNodeAttr, // this will skip checkTraverse() because
+                new INode[] { inode }, // this will skip checkTraverse() because
+                pathComponents, // this will skip checkTraverse() because
+                snapshotId, // this will skip checkTraverse() because
+                null, // not checking ancestor here
+                -1, // the target access to be checked against the inode
+                false, // the target access to be checked against the inode
+                null, // the target access to be checked against the inode
+                null, // passing null sub access avoids checking children
+                access, null, false);
             }
         } catch (AccessControlException ace) {
             throw new AccessControlException(toAccessControlString(nodeAttributes, inode.getFullPathName(), access));

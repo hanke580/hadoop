@@ -226,8 +226,9 @@ public class INodesInPath {
      * @return a new INodesInPath instance
      */
     public static INodesInPath replace(INodesInPath iip, int pos, INode inode) {
-        Preconditions.checkArgument(// no for root
-        iip.length() > 0 && pos > 0 && pos < iip.length());
+        // no for root
+        Preconditions.// no for root
+        checkArgument(iip.length() > 0 && pos > 0 && pos < iip.length());
         if (iip.getINode(pos) == null) {
             Preconditions.checkState(iip.getINode(pos - 1) != null);
         }

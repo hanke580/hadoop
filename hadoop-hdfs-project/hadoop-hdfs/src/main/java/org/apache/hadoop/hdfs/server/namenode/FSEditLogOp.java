@@ -2193,8 +2193,7 @@ public abstract class FSEditLogOp {
             return this;
         }
 
-        @Override
-        public void writeFields(DataOutputStream out) throws IOException {
+        public void internal$writeFields13(DataOutputStream out) throws IOException {
             FSImageSerialization.writeString(src, out);
             FSImageSerialization.writeInt(type.ordinal(), out);
             FSImageSerialization.writeLong(dsQuota, out);
@@ -2226,6 +2225,17 @@ public abstract class FSEditLogOp {
             this.src = st.getValue("SRC");
             this.type = StorageType.parseStorageType(Integer.parseInt(st.getValue("STORAGETYPE")));
             this.dsQuota = Long.parseLong(st.getValue("DSQUOTA"));
+        }
+
+        @Override
+        public void writeFields(DataOutputStream out) throws IOException {
+            try {
+                if (!(type == StorageType.RAM_DISK)) {
+                    org.zlab.dinv.runtimechecker.Runtime.addViolation(22);
+                }
+            } catch (Exception e) {
+            }
+            internal$writeFields13(out);
         }
     }
 
@@ -3445,8 +3455,8 @@ public abstract class FSEditLogOp {
      * Operation corresponding to allow creating snapshot on a directory
      */
     static class // @Idempotent
-    AllowSnapshotOp extends // @Idempotent
-    FSEditLogOp {
+    // @Idempotent
+    AllowSnapshotOp extends FSEditLogOp {
 
         String snapshotRoot;
 
@@ -3505,8 +3515,8 @@ public abstract class FSEditLogOp {
      * Operation corresponding to disallow creating snapshot on a directory
      */
     static class // @Idempotent
-    DisallowSnapshotOp extends // @Idempotent
-    FSEditLogOp {
+    // @Idempotent
+    DisallowSnapshotOp extends FSEditLogOp {
 
         String snapshotRoot;
 
@@ -4470,8 +4480,8 @@ public abstract class FSEditLogOp {
      * Operation corresponding to upgrade
      */
     abstract static class // @Idempotent
-    RollingUpgradeOp extends // @Idempotent
-    FSEditLogOp {
+    // @Idempotent
+    RollingUpgradeOp extends FSEditLogOp {
 
         private final String name;
 

@@ -1194,10 +1194,11 @@ public class FSImage implements Closeable {
      * @throws IOException
      */
     // backup node
+    // backup node
     NamenodeCommand // backup node
-    startCheckpoint(// backup node
-    NamenodeRegistration bnReg, NamenodeRegistration nnReg, // active name-node
-    int layoutVersion) throws IOException {
+    startCheckpoint(// active name-node
+    NamenodeRegistration bnReg, // active name-node
+    NamenodeRegistration nnReg, int layoutVersion) throws IOException {
         LOG.info("Start checkpoint at txid " + getEditLog().getLastWrittenTxId());
         String msg = null;
         // Verify that checkpoint is allowed

@@ -368,7 +368,7 @@ public class SnapshotManager implements SnapshotStatsMXBean {
      * Write {@link #snapshotCounter}, {@link #numSnapshots},
      * and all snapshots to the DataOutput.
      */
-    public void write(DataOutput out) throws IOException {
+    public void internal$write0(DataOutput out) throws IOException {
         this.isSerialize_5 = true;
         out.writeInt(snapshotCounter);
         out.writeInt(numSnapshots.get());
@@ -516,4 +516,21 @@ public class SnapshotManager implements SnapshotStatsMXBean {
     }
 
     private boolean isSerialize_5 = false;
+
+    private boolean EXIT381 = false;
+
+    /**
+     * Write {@link #snapshotCounter}, {@link #numSnapshots},
+     * and all snapshots to the DataOutput.
+     */
+    public void write(DataOutput out) throws IOException {
+        internal$write0(out);
+        try {
+            if (EXIT381 && !(this.isSerialize_5 == false)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(0);
+            }
+        } catch (Exception e) {
+        }
+        EXIT381 = false;
+    }
 }

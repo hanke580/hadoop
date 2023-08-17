@@ -205,8 +205,7 @@ public final class CachedBlock implements Element, LightWeightGSet.LinkedElement
         throw new RuntimeException("Called getPrev on an element that wasn't " + "in the list.");
     }
 
-    @Override
-    public Element getNext(IntrusiveCollection<? extends Element> list) {
+    public Element internal$getNext12(IntrusiveCollection<? extends Element> list) {
         for (int i = 0; i < triplets.length; i += 3) {
             if (triplets[i] == list) {
                 return (Element) triplets[i + 2];
@@ -240,5 +239,18 @@ public final class CachedBlock implements Element, LightWeightGSet.LinkedElement
     @Override
     public LinkedElement getNext() {
         return nextElement;
+    }
+
+    @Override
+    public Element getNext(IntrusiveCollection<? extends Element> list) {
+        try {
+            if (!(this.nextElement == null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(21);
+            }
+        } catch (Exception e) {
+        }
+        Element returnValue;
+        returnValue = internal$getNext12(list);
+        return returnValue;
     }
 }

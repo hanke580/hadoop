@@ -1336,9 +1336,10 @@ public class FSEditLog implements LogsPurgeable {
      * @param nnReg this (active) name-node registration.
      * @throws IOException
      */
-    synchronized void registerBackupNode(// backup node
-    NamenodeRegistration bnReg, // active name-node
-    NamenodeRegistration nnReg) throws IOException {
+    synchronized // backup node
+    void // backup node
+    registerBackupNode(// active name-node
+    NamenodeRegistration bnReg, NamenodeRegistration nnReg) throws IOException {
         if (bnReg.isRole(NamenodeRole.CHECKPOINT))
             // checkpoint node does not stream edits
             return;
