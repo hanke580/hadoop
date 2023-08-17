@@ -2230,7 +2230,7 @@ public abstract class FSEditLogOp {
         @Override
         public void writeFields(DataOutputStream out) throws IOException {
             try {
-                if (!(type == StorageType.RAM_DISK)) {
+                if (type == StorageType.SSD || type == StorageType.DISK) {
                     org.zlab.dinv.runtimechecker.Runtime.addViolation(22);
                 }
             } catch (Exception e) {
