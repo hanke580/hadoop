@@ -91,8 +91,8 @@ public class TestFileSink {
         outFile = getTestTempFile("test-file-sink-", ".out");
         final String outPath = outFile.getAbsolutePath();
         // NB: specify large period to avoid multiple metrics snapshotting:
-        new ConfigBuilder().add("*.period", 10000).add("test.sink.mysink0.class", FileSink.class.getName()).add("test.sink.mysink0.filename", outPath).// NB: we filter by context to exclude "metricssystem" context metrics:
-        add("test.sink.mysink0.context", "test1").save(TestMetricsConfig.getTestFilename("hadoop-metrics2-test"));
+        // NB: we filter by context to exclude "metricssystem" context metrics:
+        new ConfigBuilder().add("*.period", 10000).add("test.sink.mysink0.class", FileSink.class.getName()).add("test.sink.mysink0.filename", outPath).add("test.sink.mysink0.context", "test1").save(TestMetricsConfig.getTestFilename("hadoop-metrics2-test"));
         MetricsSystemImpl ms = new MetricsSystemImpl("test");
         ms.start();
         final MyMetrics1 mm1 = new MyMetrics1().registerWith(ms);
@@ -118,9 +118,10 @@ public class TestFileSink {
         //1360244820087 test1.testRecord1: Context=test1, testTag1=testTagValue1, testTag2=testTagValue2, Hostname=myhost, testMetric1=1, testMetric2=2
         //1360244820089 test1.testRecord2: Context=test1, testTag22=testTagValue22, Hostname=myhost
         // Note that in the below expression we allow tags and metrics to go in arbitrary order.
-        Pattern expectedContentPattern = Pattern.compile(// line #1:
-        "^\\d+\\s+test1.testRecord1:\\s+Context=test1,\\s+" + "(testTag1=testTagValue1,\\s+testTag2=testTagValue2|testTag2=testTagValue2,\\s+testTag1=testTagValue1)," + "\\s+Hostname=.*,\\s+(testMetric1=1,\\s+testMetric2=2|testMetric2=2,\\s+testMetric1=1)" + // line #2:
-        "$[\\n\\r]*^\\d+\\s+test1.testRecord2:\\s+Context=test1," + "\\s+testTag22=testTagValue22,\\s+Hostname=.*$[\\n\\r]*", Pattern.MULTILINE);
+        Pattern expectedContentPattern = // line #1:
+        Pattern.// line #1:
+        compile(// line #2:
+        "^\\d+\\s+test1.testRecord1:\\s+Context=test1,\\s+" + "(testTag1=testTagValue1,\\s+testTag2=testTagValue2|testTag2=testTagValue2,\\s+testTag1=testTagValue1)," + "\\s+Hostname=.*,\\s+(testMetric1=1,\\s+testMetric2=2|testMetric2=2,\\s+testMetric1=1)" + "$[\\n\\r]*^\\d+\\s+test1.testRecord2:\\s+Context=test1," + "\\s+testTag22=testTagValue22,\\s+Hostname=.*$[\\n\\r]*", Pattern.MULTILINE);
         assertTrue(expectedContentPattern.matcher(outFileContent).matches());
     }
 

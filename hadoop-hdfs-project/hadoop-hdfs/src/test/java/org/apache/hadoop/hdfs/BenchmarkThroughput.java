@@ -206,6 +206,11 @@ public class BenchmarkThroughput extends Configured implements Tool {
      * @param args arguments
      */
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         int res = ToolRunner.run(new HdfsConfiguration(), new BenchmarkThroughput(), args);
         System.exit(res);
     }

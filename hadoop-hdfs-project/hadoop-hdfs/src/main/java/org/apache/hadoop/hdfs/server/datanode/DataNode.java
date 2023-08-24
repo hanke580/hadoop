@@ -269,16 +269,17 @@ public class DataNode extends ReconfigurableBase implements InterDatanodeProtoco
         HdfsConfiguration.init();
     }
 
-    public static final String DN_CLIENTTRACE_FORMAT = // src IP
-    "src: %s" + // dst IP
-    ", dest: %s" + // byte count
-    ", bytes: %s" + // operation
-    ", op: %s" + // DFSClient id
-    ", cliID: %s" + // offset
-    ", offset: %s" + // DatanodeRegistration
-    ", srvID: %s" + // block id
-    ", blockid: %s" + // duration time
-    ", duration(ns): %s";
+    public static final // src IP
+    String // src IP
+    DN_CLIENTTRACE_FORMAT = // dst IP
+    "src: %s" + // byte count
+    ", dest: %s" + // operation
+    ", bytes: %s" + // DFSClient id
+    ", op: %s" + // offset
+    ", cliID: %s" + // DatanodeRegistration
+    ", offset: %s" + // block id
+    ", srvID: %s" + // duration time
+    ", blockid: %s" + ", duration(ns): %s";
 
     static final Log ClientTraceLog = LogFactory.getLog(DataNode.class.getName() + ".clienttrace");
 
@@ -2610,6 +2611,11 @@ public class DataNode extends ReconfigurableBase implements InterDatanodeProtoco
     }
 
     public static void main(String[] args) {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         if (DFSUtil.parseHelpArgument(args, DataNode.USAGE, System.out, true)) {
             System.exit(0);
         }

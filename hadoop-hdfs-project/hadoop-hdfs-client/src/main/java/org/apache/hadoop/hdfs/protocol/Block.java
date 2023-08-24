@@ -163,7 +163,7 @@ public class Block implements Writable, Comparable<Block> {
         this.numBytes = len;
     }
 
-    public long getGenerationStamp() {
+    public long internal$getGenerationStamp30() {
         return generationStamp;
     }
 
@@ -214,7 +214,7 @@ public class Block implements Writable, Comparable<Block> {
         readHelper(in);
     }
 
-    final void writeHelper(DataOutput out) throws IOException {
+    final void internal$writeHelper31(DataOutput out) throws IOException {
         out.writeLong(blockId);
         out.writeLong(numBytes);
         out.writeLong(generationStamp);
@@ -310,5 +310,33 @@ public class Block implements Writable, Comparable<Block> {
         } else {
             return a.blockId == b.blockId && a.generationStamp == b.generationStamp;
         }
+    }
+
+    public long getGenerationStamp() {
+        try {
+            if (!(this.generationStamp > 0 || this.generationStamp == 0)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(40);
+            }
+        } catch (Exception e) {
+        }
+        long returnValue;
+        returnValue = internal$getGenerationStamp30();
+        return returnValue;
+    }
+
+    final void writeHelper(DataOutput out) throws IOException {
+        try {
+            if (!(this.blockId == 1)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(41);
+            }
+        } catch (Exception e) {
+        }
+        try {
+            if (!(this != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(42);
+            }
+        } catch (Exception e) {
+        }
+        internal$writeHelper31(out);
     }
 }

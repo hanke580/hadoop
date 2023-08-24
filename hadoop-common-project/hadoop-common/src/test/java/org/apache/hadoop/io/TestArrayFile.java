@@ -154,6 +154,11 @@ public class TestArrayFile {
      * For debugging and testing.
      */
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         int count = 1024 * 1024;
         boolean create = true;
         boolean check = true;

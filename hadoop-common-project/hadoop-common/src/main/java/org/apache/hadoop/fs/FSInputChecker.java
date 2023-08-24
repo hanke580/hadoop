@@ -349,7 +349,7 @@ abstract public class FSInputChecker extends FSInputStream {
    *            the stream has been reached.
    * @throws IOException if an I/O error occurs.
    */
-    private int readChecksumChunk(byte[] b, final int off, final int len) throws IOException {
+    private int internal$readChecksumChunk13(byte[] b, final int off, final int len) throws IOException {
         // invalidate buffer
         count = pos = 0;
         int read = 0;
@@ -620,4 +620,32 @@ abstract public class FSInputChecker extends FSInputStream {
     private long left_43;
 
     private long left_42;
+
+    /* Read up one or more checksum chunk to array <i>b</i> at pos <i>off</i>
+   * It requires at least one checksum chunk boundary
+   * in between <cur_pos, cur_pos+len> 
+   * and it stops reading at the last boundary or at the end of the stream;
+   * Otherwise an IllegalArgumentException is thrown.
+   * This makes sure that all data read are checksum verified.
+   * 
+   * @param b   the buffer into which the data is read.
+   * @param off the start offset in array <code>b</code>
+   *            at which the data is written.
+   * @param len the maximum number of bytes to read.
+   * @return    the total number of bytes read into the buffer, or
+   *            <code>-1</code> if there is no more data because the end of
+   *            the stream has been reached.
+   * @throws IOException if an I/O error occurs.
+   */
+    private int readChecksumChunk(byte[] b, final int off, final int len) throws IOException {
+        try {
+            if (!(this.chunkPos > 0 || this.chunkPos == 0)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(19);
+            }
+        } catch (Exception e) {
+        }
+        int returnValue;
+        returnValue = internal$readChecksumChunk13(b, off, len);
+        return returnValue;
+    }
 }

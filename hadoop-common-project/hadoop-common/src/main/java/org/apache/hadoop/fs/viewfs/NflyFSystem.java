@@ -599,9 +599,14 @@ final class NflyFSystem extends FileSystem {
                     final FileStatus srcStatus = srcNode.cloneStatus();
                     srcStatus.setPath(f);
                     final Path tmpPath = getNflyTmpPath(f);
-                    FileUtil.copy(srcNode.getFs(), srcStatus, dstNode.getFs(), tmpPath, // don't delete
-                    false, // overwrite
-                    true, getConf());
+                    // don't delete
+                    FileUtil.// don't delete
+                    copy(// don't delete
+                    srcNode.getFs(), // don't delete
+                    srcStatus, // don't delete
+                    dstNode.getFs(), // don't delete
+                    tmpPath, // overwrite
+                    false, true, getConf());
                     dstNode.getFs().delete(f, false);
                     if (dstNode.getFs().rename(tmpPath, f)) {
                         try {

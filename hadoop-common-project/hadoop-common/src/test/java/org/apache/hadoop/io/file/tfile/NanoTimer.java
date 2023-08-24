@@ -178,6 +178,11 @@ public class NanoTimer {
      * @param args
      */
     public static void main(String[] args) {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         long i = 7;
         for (int x = 0; x < 20; ++x, i *= 7) {
             System.out.println(NanoTimer.nanoTimeToString(i));

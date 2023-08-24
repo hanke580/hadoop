@@ -224,6 +224,11 @@ public class RunJar {
      * then it must be provided on the command line.
      */
     public static void main(String[] args) throws Throwable {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         new RunJar().run(args);
     }
 

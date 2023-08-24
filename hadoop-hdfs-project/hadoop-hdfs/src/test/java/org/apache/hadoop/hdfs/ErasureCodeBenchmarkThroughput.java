@@ -394,6 +394,11 @@ public class ErasureCodeBenchmarkThroughput extends Configured implements Tool {
     }
 
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         Configuration conf = new HdfsConfiguration();
         FileSystem fs = FileSystem.get(conf);
         int res = ToolRunner.run(conf, new ErasureCodeBenchmarkThroughput(fs), args);

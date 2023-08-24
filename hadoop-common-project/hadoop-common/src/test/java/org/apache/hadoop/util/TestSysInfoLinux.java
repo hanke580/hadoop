@@ -151,10 +151,14 @@ public class TestSysInfoLinux {
         plugin.advanceTime(1L);
         updateStatFile(uTime, nTime, sTime);
         assertEquals(plugin.getCumulativeCpuTime(), FAKE_JIFFY_LENGTH * (uTime + nTime + sTime));
-        assertEquals(plugin.getCpuUsagePercentage(), 25F, // CPU usage is not updated.
-        0.0);
-        assertEquals(plugin.getNumVCoresUsed(), 2F, // CPU usage is not updated.
-        0.0);
+        // CPU usage is not updated.
+        assertEquals(// CPU usage is not updated.
+        plugin.getCpuUsagePercentage(), // CPU usage is not updated.
+        25F, 0.0);
+        // CPU usage is not updated.
+        assertEquals(// CPU usage is not updated.
+        plugin.getNumVCoresUsed(), // CPU usage is not updated.
+        2F, 0.0);
     }
 
     /**

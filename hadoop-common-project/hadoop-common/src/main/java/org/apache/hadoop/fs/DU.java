@@ -85,6 +85,11 @@ public class DU extends CachingGetSpaceUsed {
     }
 
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         String path = ".";
         if (args.length > 0) {
             path = args[0];

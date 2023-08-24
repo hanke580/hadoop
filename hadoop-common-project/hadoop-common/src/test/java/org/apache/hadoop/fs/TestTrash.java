@@ -261,8 +261,9 @@ public class TestTrash {
             // Clear out trash
             assertEquals("-expunge failed", 0, shell.run(new String[] { "-expunge" }));
             val = shell.run(args);
-            assertFalse("Expected TrashRoot (" + trashRoot + ") to exist in file system:" + trashRootFs.getUri(), // No new Current should be created
-            trashRootFs.exists(trashRoot));
+            // No new Current should be created
+            assertFalse(// No new Current should be created
+            "Expected TrashRoot (" + trashRoot + ") to exist in file system:" + trashRootFs.getUri(), trashRootFs.exists(trashRoot));
             assertFalse(fs.exists(myFile));
             assertEquals("Remove with skipTrash should return zero", 0, val);
         }

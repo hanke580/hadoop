@@ -257,8 +257,8 @@ public class TestEditLog {
     public void testPreTxIdEditLogNoEdits() throws Exception {
         FSNamesystem namesys = Mockito.mock(FSNamesystem.class);
         namesys.dir = Mockito.mock(FSDirectory.class);
-        long numEdits = testLoad(// just version number
-        StringUtils.hexStringToByte("ffffffed"), namesys);
+        long numEdits = // just version number
+        testLoad(StringUtils.hexStringToByte("ffffffed"), namesys);
         assertEquals(0, numEdits);
     }
 
@@ -990,23 +990,24 @@ public class TestEditLog {
         assertEquals("[[101,200]] CommittedTxId: 200", log.getEditLogManifest(101).toString());
         // Another simple case, different directories have different
         // sets of files
-        storage = mockStorageWithEdits("[1,100]|[101,200]", // nothing starting at 101
-        "[1,100]|[201,300]|[301,400]");
+        storage = // nothing starting at 101
+        mockStorageWithEdits(// nothing starting at 101
+        "[1,100]|[101,200]", "[1,100]|[201,300]|[301,400]");
         log = getFSEditLog(storage);
         log.initJournalsForWrite();
         assertEquals("[[1,100], [101,200], [201,300], [301,400]]" + " CommittedTxId: 400", log.getEditLogManifest(1).toString());
         // Case where one directory has an earlier finalized log, followed
         // by a gap. The returned manifest should start after the gap.
-        storage = mockStorageWithEdits(// gap from 101 to 300
-        "[1,100]|[301,400]", "[301,400]|[401,500]");
+        storage = // gap from 101 to 300
+        mockStorageWithEdits("[1,100]|[301,400]", "[301,400]|[401,500]");
         log = getFSEditLog(storage);
         log.initJournalsForWrite();
         assertEquals("[[301,400], [401,500]] CommittedTxId: 500", log.getEditLogManifest(1).toString());
         // Case where different directories have different length logs
         // starting at the same txid - should pick the longer one
-        storage = mockStorageWithEdits(// short log at 101
-        "[1,100]|[101,150]", // short log at 1
-        "[1,50]|[101,200]");
+        storage = // short log at 101
+        mockStorageWithEdits(// short log at 1
+        "[1,100]|[101,150]", "[1,50]|[101,200]");
         log = getFSEditLog(storage);
         log.initJournalsForWrite();
         assertEquals("[[1,100], [101,200]] CommittedTxId: 200", log.getEditLogManifest(1).toString());

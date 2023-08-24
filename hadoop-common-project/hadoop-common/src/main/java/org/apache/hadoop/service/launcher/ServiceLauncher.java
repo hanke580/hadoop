@@ -950,6 +950,11 @@ public class ServiceLauncher<S extends Service> implements LauncherExitCodes, La
      * @param args command line arguments.
      */
     public static void main(String[] args) {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         serviceMain(Arrays.asList(args));
     }
 

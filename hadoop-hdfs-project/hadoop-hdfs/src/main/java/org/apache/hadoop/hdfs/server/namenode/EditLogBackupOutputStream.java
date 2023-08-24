@@ -62,10 +62,10 @@ class EditLogBackupOutputStream extends EditLogOutputStream {
     private EditsDoubleBuffer doubleBuf;
 
     // backup node
-    EditLogBackupOutputStream(// backup node
+    // backup node
+    EditLogBackupOutputStream(// active name-node
     NamenodeRegistration bnReg, // active name-node
-    JournalInfo journalInfo, // active name-node
-    int logVersion) throws IOException {
+    JournalInfo journalInfo, int logVersion) throws IOException {
         super();
         this.bnRegistration = bnReg;
         this.journalInfo = journalInfo;

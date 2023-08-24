@@ -84,25 +84,25 @@ public class TestDFSStorageStateRecovery {
      *  6) previous directory should exist after recovery but before startup
      */
     static final boolean[][] testCases = new boolean[][] { // 1
-    new boolean[] { true, false, false, false, true, true, false }, // 2
-    new boolean[] { true, true, false, false, true, true, true }, // 3
+    // 2
+    new boolean[] { true, false, false, false, true, true, false }, // 3
+    new boolean[] { true, true, false, false, true, true, true }, // 4
     new boolean[] { true, false, true, false, true, true, true }, // 4
     new boolean[] { true, true, true, true, false, false, false }, // 4
     new boolean[] { true, true, true, false, false, false, false }, // 4
-    new boolean[] { false, true, true, true, false, false, false }, // 4
-    new boolean[] { false, true, true, false, false, false, false }, // 5
-    new boolean[] { false, false, false, false, false, false, false }, // 6
-    new boolean[] { false, true, false, false, false, false, false }, // 7
-    new boolean[] { false, false, true, false, true, true, false }, // 8
-    new boolean[] { true, false, false, true, true, true, false }, // 9
+    new boolean[] { false, true, true, true, false, false, false }, // 5
+    new boolean[] { false, true, true, false, false, false, false }, // 6
+    new boolean[] { false, false, false, false, false, false, false }, // 7
+    new boolean[] { false, true, false, false, false, false, false }, // 8
+    new boolean[] { false, false, true, false, true, true, false }, // 9
+    new boolean[] { true, false, false, true, true, true, false }, // 10
     new boolean[] { true, true, false, true, false, false, false }, // 10
     new boolean[] { true, true, true, true, false, false, false }, // 10
     new boolean[] { true, false, true, true, false, false, false }, // 10
-    new boolean[] { false, true, true, true, false, false, false }, // 10
-    new boolean[] { false, false, true, true, false, false, false }, // 11
-    new boolean[] { false, false, false, true, false, false, false }, // 12
-    new boolean[] { false, true, false, true, true, true, true }, // name-node specific cases
-    // 13
+    new boolean[] { false, true, true, true, false, false, false }, // 11
+    new boolean[] { false, false, true, true, false, false, false }, // 12
+    new boolean[] { false, false, false, true, false, false, false }, // name-node specific cases
+    new boolean[] { false, true, false, true, true, true, true }, // 13
     new boolean[] { true, true, false, false, true, true, false } };
 
     private static final int NUM_NN_TEST_CASES = testCases.length;

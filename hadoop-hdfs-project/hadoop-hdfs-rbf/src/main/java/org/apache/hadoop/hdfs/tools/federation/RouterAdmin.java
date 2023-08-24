@@ -103,6 +103,11 @@ public class RouterAdmin extends Configured implements Tool {
     private static final Pattern SLASHES = Pattern.compile("/+");
 
     public static void main(String[] argv) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         Configuration conf = new HdfsConfiguration();
         RouterAdmin admin = new RouterAdmin(conf);
         int res = ToolRunner.run(admin, argv);

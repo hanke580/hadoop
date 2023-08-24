@@ -23,6 +23,11 @@ import java.io.IOException;
 public class ListingBenchmark {
 
     public static void main(String[] args) throws IOException {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         HdfsConfiguration conf = new HdfsConfiguration();
         MiniDFSCluster cluster = new MiniDFSCluster.Builder(conf).numDataNodes(0).format(true).build();
         NameNode nn = cluster.getNameNode();

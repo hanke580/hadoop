@@ -66,6 +66,11 @@ public class LogLevel {
      * A command line implementation
      */
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         CLI cli = new CLI(new Configuration());
         System.exit(ToolRunner.run(cli, args));
     }

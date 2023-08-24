@@ -861,6 +861,11 @@ public class Balancer {
      * @param args Command line arguments
      */
     public static void main(String[] args) {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         if (DFSUtil.parseHelpArgument(args, USAGE, System.out, true)) {
             System.exit(0);
         }

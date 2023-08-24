@@ -78,8 +78,9 @@ public class DataNodeUGIProvider {
             } else {
                 final String usernameFromQuery = params.userName();
                 final String doAsUserFromQuery = params.doAsUser();
-                final String remoteUser = usernameFromQuery == null ? JspHelper.getDefaultWebUserName(// not specified in request
-                params.conf()) : usernameFromQuery;
+                final String remoteUser = usernameFromQuery == null ? // not specified in request
+                JspHelper.// not specified in request
+                getDefaultWebUserName(params.conf()) : usernameFromQuery;
                 ugi = ugiCache.get(buildNonTokenCacheKey(doAsUserFromQuery, remoteUser), new Callable<UserGroupInformation>() {
 
                     @Override

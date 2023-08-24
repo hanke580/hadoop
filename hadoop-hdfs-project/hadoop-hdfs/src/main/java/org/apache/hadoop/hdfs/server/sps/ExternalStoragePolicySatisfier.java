@@ -56,6 +56,11 @@ public final class ExternalStoragePolicySatisfier {
      * Main method to start SPS service.
      */
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         NameNodeConnector nnc = null;
         try {
             StringUtils.startupShutdownMessage(StoragePolicySatisfier.class, args, LOG);

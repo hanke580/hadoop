@@ -438,7 +438,7 @@ public class VolumeScanner extends Thread {
      * @return     The number of milliseconds to delay before running the loop
      *               again, or 0 to re-run the loop immediately.
      */
-    private long runLoop(ExtendedBlock suspectBlock) {
+    private long internal$runLoop43(ExtendedBlock suspectBlock) {
         long bytesScanned = -1;
         boolean scanError = false;
         ExtendedBlock block = null;
@@ -461,6 +461,7 @@ public class VolumeScanner extends Thread {
                         synchronized (stats) {
                             stats.nextBlockPoolScanStartMs = Time.monotonicNow() + timeout;
                         }
+                        EXIT464 = true;
                         return timeout;
                     }
                     synchronized (stats) {
@@ -695,4 +696,34 @@ public class VolumeScanner extends Thread {
     private long right_125;
 
     private long left_125;
+
+    private boolean EXIT464 = false;
+
+    /**
+     * Run an iteration of the VolumeScanner loop.
+     *
+     * @param suspectBlock   A suspect block which we should scan, or null to
+     *                       scan the next regularly scheduled block.
+     *
+     * @return     The number of milliseconds to delay before running the loop
+     *               again, or 0 to re-run the loop immediately.
+     */
+    private long runLoop(ExtendedBlock suspectBlock) {
+        try {
+            if (!(this.right_125 == this.left_125)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(60);
+            }
+        } catch (Exception e) {
+        }
+        long returnValue;
+        returnValue = internal$runLoop43(suspectBlock);
+        try {
+            if (EXIT464 && !(this.right_125 == this.left_125)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(61);
+            }
+        } catch (Exception e) {
+        }
+        EXIT464 = false;
+        return returnValue;
+    }
 }

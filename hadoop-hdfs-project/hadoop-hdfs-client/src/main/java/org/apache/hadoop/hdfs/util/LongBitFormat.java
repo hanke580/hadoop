@@ -77,7 +77,7 @@ public class LongBitFormat implements Serializable {
     /**
      * Combine the value to the record.
      */
-    public long combine(long value, long record) {
+    public long internal$combine25(long value, long record) {
         if (value < MIN) {
             throw new IllegalArgumentException("Illagal value: " + NAME + " = " + value + " < MIN = " + MIN);
         }
@@ -93,5 +93,26 @@ public class LongBitFormat implements Serializable {
 
     public int getLength() {
         return LENGTH;
+    }
+
+    /**
+     * Combine the value to the record.
+     */
+    public long combine(long value, long record) {
+        try {
+            if (!(this.OFFSET == 0 || this.OFFSET == 5)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(33);
+            }
+        } catch (Exception e) {
+        }
+        try {
+            if (!(this.MASK == 15 || this.MASK == 96)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(34);
+            }
+        } catch (Exception e) {
+        }
+        long returnValue;
+        returnValue = internal$combine25(value, record);
+        return returnValue;
     }
 }

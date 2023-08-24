@@ -58,8 +58,7 @@ public class LongWritable implements WritableComparable<LongWritable> {
         value = in.readLong();
     }
 
-    @Override
-    public void write(DataOutput out) throws IOException {
+    public void internal$write11(DataOutput out) throws IOException {
         out.writeLong(value);
     }
 
@@ -130,5 +129,16 @@ public class LongWritable implements WritableComparable<LongWritable> {
     static {
         // register default comparator
         WritableComparator.define(LongWritable.class, new Comparator());
+    }
+
+    @Override
+    public void write(DataOutput out) throws IOException {
+        try {
+            if (!(this.value == 5983620787766317669L || this.value == 6127731586535879762L)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(17);
+            }
+        } catch (Exception e) {
+        }
+        internal$write11(out);
     }
 }

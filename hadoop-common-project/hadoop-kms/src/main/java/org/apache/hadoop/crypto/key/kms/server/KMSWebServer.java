@@ -150,6 +150,11 @@ public class KMSWebServer {
     }
 
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         KMSConfiguration.initLogging();
         StringUtils.startupShutdownMessage(KMSWebServer.class, args, LOG);
         Configuration conf = KMSConfiguration.getKMSConf();

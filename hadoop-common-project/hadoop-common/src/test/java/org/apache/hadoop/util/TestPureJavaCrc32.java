@@ -165,6 +165,16 @@ public class TestPureJavaCrc32 {
          * Generate CRC-32 lookup tables
          */
         public static void main(String[] args) throws FileNotFoundException {
+            try {
+                Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
             if (args.length != 1) {
                 System.err.println("Usage: " + Table.class.getName() + " <polynomial>");
                 System.exit(1);
@@ -211,6 +221,16 @@ public class TestPureJavaCrc32 {
         }
 
         public static void main(String[] args) throws Exception {
+            try {
+                Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
             printSystemProperties(System.out);
             doBench(CRCS, System.out);
         }

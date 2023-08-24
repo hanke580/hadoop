@@ -220,9 +220,10 @@ ChecksumFs extends FilterFs {
                 assert checksum.length % CHECKSUM_SIZE == 0;
                 // we must read at least one chunk
                 assert len >= bytesPerSum;
-                final int checksumsToRead = Math.min(// number of checksums based on len to read
-                len / bytesPerSum, // size of checksum buffer
-                checksum.length / CHECKSUM_SIZE);
+                final int checksumsToRead = // number of checksums based on len to read
+                Math.// number of checksums based on len to read
+                min(// size of checksum buffer
+                len / bytesPerSum, checksum.length / CHECKSUM_SIZE);
                 long checksumPos = getChecksumFilePos(pos);
                 if (checksumPos != sums.getPos()) {
                     sums.seek(checksumPos);

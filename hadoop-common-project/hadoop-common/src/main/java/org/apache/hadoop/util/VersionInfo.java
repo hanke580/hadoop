@@ -163,6 +163,11 @@ public class VersionInfo {
     }
 
     public static void main(String[] args) {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         LOG.debug("version: " + getVersion());
         System.out.println("Hadoop " + getVersion());
         System.out.println("Source code repository " + getUrl() + " -r " + getRevision());

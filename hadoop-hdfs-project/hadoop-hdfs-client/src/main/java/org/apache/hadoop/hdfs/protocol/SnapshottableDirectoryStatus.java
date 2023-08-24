@@ -138,10 +138,11 @@ public class SnapshottableDirectoryStatus {
             maxSnapshotNum = maxLength(maxSnapshotNum, status.snapshotNumber);
             maxSnapshotQuota = maxLength(maxSnapshotQuota, status.snapshotQuota);
         }
-        String lineFormat = // permission string
-        "%s%s " + "%" + maxRepl + "s " + (maxOwner > 0 ? "%-" + maxOwner + "s " : "%s") + (maxGroup > 0 ? "%-" + maxGroup + "s " : "%s") + "%" + maxLen + "s " + // mod time
-        "%s " + "%" + maxSnapshotNum + "s " + "%" + maxSnapshotQuota + "s " + // path
-        "%s";
+        // permission string
+        String // permission string
+        lineFormat = // mod time
+        "%s%s " + "%" + maxRepl + "s " + (maxOwner > 0 ? "%-" + maxOwner + "s " : "%s") + (maxGroup > 0 ? "%-" + maxGroup + "s " : "%s") + "%" + maxLen + "s " + "%s " + "%" + maxSnapshotNum + "s " + "%" + maxSnapshotQuota + // path
+        "s " + "%s";
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         for (SnapshottableDirectoryStatus status : stats) {
             String line = String.format(lineFormat, "d", status.dirStatus.getPermission(), status.dirStatus.getReplication(), status.dirStatus.getOwner(), status.dirStatus.getGroup(), String.valueOf(status.dirStatus.getLen()), dateFormat.format(new Date(status.dirStatus.getModificationTime())), status.snapshotNumber, status.snapshotQuota, status.getFullPath().toString());

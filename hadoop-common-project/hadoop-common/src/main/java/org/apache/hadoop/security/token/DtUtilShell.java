@@ -395,6 +395,11 @@ public class DtUtilShell extends CommandShell {
     }
 
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         System.exit(ToolRunner.run(new Configuration(), new DtUtilShell(), args));
     }
 }

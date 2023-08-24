@@ -563,6 +563,11 @@ public class TestCodec {
     }
 
     public static void main(String[] args) throws IOException {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         int count = 10000;
         String codecClass = "org.apache.hadoop.io.compress.DefaultCodec";
         String usage = "TestCodec [-count N] [-codec <codec class>]";

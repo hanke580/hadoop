@@ -189,7 +189,7 @@ public class IntrusiveCollection<E extends IntrusiveCollection.Element> implemen
         }
     }
 
-    private Element removeElement(Element elem) {
+    private Element internal$removeElement5(Element elem) {
         Element prev = elem.getPrev(IntrusiveCollection.this);
         Element next = elem.getNext(IntrusiveCollection.this);
         elem.removeInternal(IntrusiveCollection.this);
@@ -365,5 +365,17 @@ public class IntrusiveCollection<E extends IntrusiveCollection.Element> implemen
             iter.next();
             iter.remove();
         }
+    }
+
+    private Element removeElement(Element elem) {
+        try {
+            if (!(this.size > 1 || this.size == 1)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(8);
+            }
+        } catch (Exception e) {
+        }
+        Element returnValue;
+        returnValue = internal$removeElement5(elem);
+        return returnValue;
     }
 }

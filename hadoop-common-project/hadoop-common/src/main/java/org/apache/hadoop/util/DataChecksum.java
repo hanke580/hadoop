@@ -193,7 +193,7 @@ public class DataChecksum implements Checksum {
     /**
      * Writes the checksum header to the output stream <i>out</i>.
      */
-    public void writeHeader(DataOutputStream out) throws IOException {
+    public void internal$writeHeader3(DataOutputStream out) throws IOException {
         out.writeByte(type.id);
         out.writeInt(bytesPerChecksum);
     }
@@ -300,7 +300,7 @@ public class DataChecksum implements Checksum {
         return ((dataSize - 1) / getBytesPerChecksum() + 1) * getChecksumSize();
     }
 
-    public int getBytesPerChecksum() {
+    public int internal$getBytesPerChecksum4() {
         return bytesPerChecksum;
     }
 
@@ -590,4 +590,29 @@ public class DataChecksum implements Checksum {
     private static long right_9;
 
     private static long left_9;
+
+    /**
+     * Writes the checksum header to the output stream <i>out</i>.
+     */
+    public void writeHeader(DataOutputStream out) throws IOException {
+        try {
+            if (!(this.bytesPerChecksum == 512)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(6);
+            }
+        } catch (Exception e) {
+        }
+        internal$writeHeader3(out);
+    }
+
+    public int getBytesPerChecksum() {
+        try {
+            if (!(this.bytesPerChecksum == 512)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(7);
+            }
+        } catch (Exception e) {
+        }
+        int returnValue;
+        returnValue = internal$getBytesPerChecksum4();
+        return returnValue;
+    }
 }

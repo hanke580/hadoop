@@ -145,8 +145,8 @@ public class TestSecurityTokenEditLog {
             //
             namesystem.getDelegationTokenSecretManager().stopThreads();
             int numKeys = namesystem.getDelegationTokenSecretManager().getNumberOfKeys();
-            int expectedTransactions = NUM_THREADS * opsPerTrans * NUM_TRANSACTIONS + numKeys + // + 2 for BEGIN and END txns
-            2;
+            int expectedTransactions = // + 2 for BEGIN and END txns
+            NUM_THREADS * opsPerTrans * NUM_TRANSACTIONS + numKeys + 2;
             for (StorageDirectory sd : fsimage.getStorage().dirIterable(NameNodeDirType.EDITS)) {
                 File editFile = NNStorage.getFinalizedEditsFile(sd, 1, 1 + expectedTransactions - 1);
                 System.out.println("Verifying file: " + editFile);

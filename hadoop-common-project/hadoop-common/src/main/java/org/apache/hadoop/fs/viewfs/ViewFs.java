@@ -345,8 +345,9 @@ ViewFs extends AbstractFileSystem {
 
     @Override
     public FileStatus getFileLinkStatus(final Path f) throws AccessControlException, FileNotFoundException, UnsupportedFileSystemException, IOException {
-        InodeTree.ResolveResult<AbstractFileSystem> res = // do not follow mount link
-        fsState.resolve(getUriPath(f), false);
+        // do not follow mount link
+        InodeTree.ResolveResult<AbstractFileSystem> // do not follow mount link
+        res = fsState.resolve(getUriPath(f), false);
         return res.targetFileSystem.getFileLinkStatus(res.remainingPath);
     }
 
@@ -472,8 +473,9 @@ ViewFs extends AbstractFileSystem {
 
     @Override
     public Path getLinkTarget(final Path f) throws IOException {
-        InodeTree.ResolveResult<AbstractFileSystem> res = // do not follow mount link
-        fsState.resolve(getUriPath(f), false);
+        // do not follow mount link
+        InodeTree.ResolveResult<AbstractFileSystem> // do not follow mount link
+        res = fsState.resolve(getUriPath(f), false);
         return res.targetFileSystem.getLinkTarget(res.remainingPath);
     }
 

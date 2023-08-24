@@ -54,6 +54,11 @@ public final class DFSRouter {
      * @param argv parameters.
      */
     public static void main(String[] argv) {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         if (DFSUtil.parseHelpArgument(argv, USAGE, System.out, true)) {
             System.exit(0);
         }

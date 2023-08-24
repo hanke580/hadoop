@@ -212,6 +212,11 @@ public class HtmlQuoting {
     }
 
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         for (String arg : args) {
             System.out.println("Original: " + arg);
             String quoted = quoteHtmlChars(arg);

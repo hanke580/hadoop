@@ -342,6 +342,11 @@ public class DFSck extends Configured implements Tool {
     }
 
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         // -files option is also used by GenericOptionsParser
         // Make sure that is not the first argument for fsck
         int res = -1;

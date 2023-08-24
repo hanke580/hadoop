@@ -50,8 +50,9 @@ public class TestMetricsCache {
         checkMetricValue("updated metric value", cr, "m", 2);
         checkMetricValue("old metric value", cr, "m1", 1);
         checkMetricValue("new metric value", cr, "m2", 42);
-        MetricsRecord mr3 = makeRecord("r", // different tag value
-        Arrays.asList(makeTag("t", "tv3")), Arrays.asList(makeMetric("m3", 3)));
+        MetricsRecord mr3 = // different tag value
+        makeRecord(// different tag value
+        "r", Arrays.asList(makeTag("t", "tv3")), Arrays.asList(makeMetric("m3", 3)));
         // should get a new record
         cr = cache.update(mr3);
         assertEquals("contains 1 metric", 1, cr.metrics().size());

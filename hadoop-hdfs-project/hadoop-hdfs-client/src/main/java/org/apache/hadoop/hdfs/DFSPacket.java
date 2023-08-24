@@ -170,7 +170,7 @@ public class DFSPacket {
      *
      * @throws IOException
      */
-    public synchronized void writeTo(DataOutputStream stm) throws IOException {
+    public synchronized void internal$writeTo32(DataOutputStream stm) throws IOException {
         checkBuffer();
         final int dataLen = dataPos - dataStart;
         final int checksumLen = checksumPos - checksumStart;
@@ -199,6 +199,7 @@ public class DFSPacket {
         stm.write(buf, headerStart, header.getSerializedSize() + checksumLen + dataLen);
         // undo corruption.
         if (DFSClientFaultInjector.get().uncorruptPacket()) {
+            EXIT202 = true;
             buf[headerStart + header.getSerializedSize() + checksumLen + dataLen - 1] ^= 0xff;
         }
     }
@@ -361,4 +362,22 @@ public class DFSPacket {
     }
 
     private boolean isSerialize_0 = false;
+
+    private boolean EXIT202 = false;
+
+    /**
+     * Write the full packet, including the header, to the given output stream.
+     *
+     * @throws IOException
+     */
+    public synchronized void writeTo(DataOutputStream stm) throws IOException {
+        internal$writeTo32(stm);
+        try {
+            if (EXIT202 && !(this.isSerialize_0 == false)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(43);
+            }
+        } catch (Exception e) {
+        }
+        EXIT202 = false;
+    }
 }

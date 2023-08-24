@@ -958,8 +958,8 @@ public class DFSInputStream extends FSInputStream implements ByteBufferReadable,
             // expanded to 9000ms.
             final int timeWindow = dfsClient.getConf().getTimeWindow();
             // grace period for the last round of attempt
-            double waitTime = timeWindow * failures + // expanding time window for each failure
-            timeWindow * (failures + 1) * ThreadLocalRandom.current().nextDouble();
+            double waitTime = // expanding time window for each failure
+            timeWindow * failures + timeWindow * (failures + 1) * ThreadLocalRandom.current().nextDouble();
             DFSClient.LOG.warn("DFS chooseDataNode: got # " + (failures + 1) + " IOException, will wait for " + waitTime + " msec.");
             Thread.sleep((long) waitTime);
         } catch (InterruptedException e) {

@@ -83,8 +83,9 @@ public class TestSequenceFile {
         config.setInt(CommonConfigurationKeys.IO_SORT_MB_KEY, 10);
         config.setInt(CommonConfigurationKeys.IO_SORT_FACTOR_KEY, 10);
         sorter = new SequenceFile.Sorter(fs, Text.class, Text.class, config);
-        assertEquals("Deprecated memory property " + CommonConfigurationKeys.IO_SORT_MB_KEY + " must get properly applied.", // In bytes
-        10 * 1024 * 1024, sorter.getMemory());
+        // In bytes
+        assertEquals(// In bytes
+        "Deprecated memory property " + CommonConfigurationKeys.IO_SORT_MB_KEY + " must get properly applied.", 10 * 1024 * 1024, sorter.getMemory());
         assertEquals("Deprecated sort factor property " + CommonConfigurationKeys.IO_SORT_FACTOR_KEY + " must get properly applied.", 10, sorter.getFactor());
         // Test regular properties (graceful deprecation)
         config = new Configuration();
@@ -92,8 +93,9 @@ public class TestSequenceFile {
         config.setInt(CommonConfigurationKeys.SEQ_IO_SORT_MB_KEY, 20);
         config.setInt(CommonConfigurationKeys.SEQ_IO_SORT_FACTOR_KEY, 20);
         sorter = new SequenceFile.Sorter(fs, Text.class, Text.class, config);
-        assertEquals("Memory property " + CommonConfigurationKeys.SEQ_IO_SORT_MB_KEY + " must get properly applied if present.", // In bytes
-        20 * 1024 * 1024, sorter.getMemory());
+        // In bytes
+        assertEquals(// In bytes
+        "Memory property " + CommonConfigurationKeys.SEQ_IO_SORT_MB_KEY + " must get properly applied if present.", 20 * 1024 * 1024, sorter.getMemory());
         assertEquals("Merge factor property " + CommonConfigurationKeys.SEQ_IO_SORT_FACTOR_KEY + " must get properly applied if present.", 20, sorter.getFactor());
     }
 
@@ -572,6 +574,11 @@ public class TestSequenceFile {
      * For debugging and testing.
      */
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         int count = 1024 * 1024;
         int megabytes = 1;
         int factor = 10;

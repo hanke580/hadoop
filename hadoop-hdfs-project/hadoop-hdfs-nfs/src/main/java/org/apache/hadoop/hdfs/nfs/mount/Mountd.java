@@ -36,6 +36,11 @@ public class Mountd extends MountdBase {
     }
 
     public static void main(String[] args) throws IOException {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         NfsConfiguration config = new NfsConfiguration();
         Mountd mountd = new Mountd(config, null, true);
         mountd.start(true);

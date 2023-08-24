@@ -74,6 +74,11 @@ public class MiniKdc {
     public static final String SUN_SECURITY_KRB5_DEBUG = "sun.security.krb5.debug";
 
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         if (args.length < 4) {
             System.out.println("Arguments: <WORKDIR> <MINIKDCPROPERTIES> " + "<KEYTABFILE> [<PRINCIPALS>]+");
             System.exit(1);

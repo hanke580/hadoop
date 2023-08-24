@@ -60,6 +60,11 @@ public class LsSnapshottableDir extends Configured implements Tool {
     }
 
     public static void main(String[] argv) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         int rc = ToolRunner.run(new LsSnapshottableDir(), argv);
         System.exit(rc);
     }

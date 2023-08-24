@@ -167,13 +167,15 @@ public class AuthenticationFilter implements Filter {
             throw new ServletException("Authentication type must be specified: " + PseudoAuthenticationHandler.TYPE + "|" + KerberosAuthenticationHandler.TYPE + "|<class>");
         }
         authHandlerClassName = AuthenticationHandlerUtil.getAuthenticationHandlerClassName(authHandlerName);
-        maxInactiveInterval = Long.parseLong(config.getProperty(AUTH_TOKEN_MAX_INACTIVE_INTERVAL, // By default, disable.
-        "-1"));
+        maxInactiveInterval = Long.parseLong(// By default, disable.
+        config.// By default, disable.
+        getProperty(// By default, disable.
+        AUTH_TOKEN_MAX_INACTIVE_INTERVAL, "-1"));
         if (maxInactiveInterval > 0) {
             maxInactiveInterval *= 1000;
         }
-        validity = Long.parseLong(config.getProperty(AUTH_TOKEN_VALIDITY, "36000")) * //10 hours
-        1000;
+        validity = //10 hours
+        Long.parseLong(config.getProperty(AUTH_TOKEN_VALIDITY, "36000")) * 1000;
         initializeSecretProvider(filterConfig);
         initializeAuthHandler(authHandlerClassName, filterConfig);
         cookieDomain = config.getProperty(COOKIE_DOMAIN, null);

@@ -113,8 +113,9 @@ public class TestDatanodeRestart {
                     File rbwDir = new File(currentDir, "rbw");
                     for (File file : rbwDir.listFiles()) {
                         if (isCorrupt && Block.isBlockFilename(file)) {
-                            new RandomAccessFile(file, "rw").setLength(// corrupt
-                            fileLen - 1);
+                            // corrupt
+                            new RandomAccessFile(file, "rw").// corrupt
+                            setLength(fileLen - 1);
                         }
                     }
                 }

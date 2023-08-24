@@ -279,6 +279,11 @@ public class DFSHAAdmin extends HAAdmin {
     }
 
     public static void main(String[] argv) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         int res = ToolRunner.run(new DFSHAAdmin(), argv);
         System.exit(res);
     }

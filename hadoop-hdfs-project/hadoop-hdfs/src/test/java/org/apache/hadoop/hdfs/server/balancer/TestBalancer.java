@@ -1866,8 +1866,13 @@ public class TestBalancer {
             capacities[i] = CAPACITY;
             racks[i] = (i < numDNs / 2 ? RACK0 : RACK1);
         }
-        doTest(conf, capacities, racks, CAPACITY, RACK2, // Use only 1 node and set the starting capacity to 50% to allow the
-        // balancing to complete in only one iteration. This is necessary
+        // Use only 1 node and set the starting capacity to 50% to allow the
+        doTest(// Use only 1 node and set the starting capacity to 50% to allow the
+        conf, // Use only 1 node and set the starting capacity to 50% to allow the
+        capacities, // Use only 1 node and set the starting capacity to 50% to allow the
+        racks, // Use only 1 node and set the starting capacity to 50% to allow the
+        CAPACITY, // Use only 1 node and set the starting capacity to 50% to allow the
+        RACK2, // balancing to complete in only one iteration. This is necessary
         // because the startGetBlocksTime and endGetBlocksTime measures across
         // all get block calls, so if two iterations are performed, the duration
         // also includes the time it took to perform the block move ops in the
@@ -1885,6 +1890,11 @@ public class TestBalancer {
      * @param args
      */
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         TestBalancer balancerTest = new TestBalancer();
         balancerTest.testBalancer0();
         balancerTest.testBalancer1();

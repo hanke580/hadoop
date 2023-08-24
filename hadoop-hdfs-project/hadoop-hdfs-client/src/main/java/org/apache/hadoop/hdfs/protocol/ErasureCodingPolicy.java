@@ -79,7 +79,7 @@ public final class ErasureCodingPolicy implements Serializable {
         return schema;
     }
 
-    public int getCellSize() {
+    public int internal$getCellSize27() {
         return cellSize;
     }
 
@@ -130,5 +130,17 @@ public final class ErasureCodingPolicy implements Serializable {
     @Override
     public String toString() {
         return "ErasureCodingPolicy=[" + "Name=" + name + ", " + "Schema=[" + schema.toString() + "], " + "CellSize=" + cellSize + ", " + "Id=" + id + "]";
+    }
+
+    public int getCellSize() {
+        try {
+            if (!(this.cellSize == 1048576)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(36);
+            }
+        } catch (Exception e) {
+        }
+        int returnValue;
+        returnValue = internal$getCellSize27();
+        return returnValue;
     }
 }

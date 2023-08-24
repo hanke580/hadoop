@@ -367,6 +367,11 @@ public final class FindClass extends Configured implements Tool {
      */
     public static void main(String[] args) {
         try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        try {
             int result = ToolRunner.run(new FindClass(), args);
             System.exit(result);
         } catch (Exception e) {

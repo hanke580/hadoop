@@ -59,8 +59,10 @@ public class TestDatanodeReport {
      */
     @Test
     public void testDatanodeReportWithUpgradeDomain() throws Exception {
-        conf.setInt(DFSConfigKeys.DFS_NAMENODE_HEARTBEAT_RECHECK_INTERVAL_KEY, // 0.5s
-        500);
+        // 0.5s
+        conf.// 0.5s
+        setInt(// 0.5s
+        DFSConfigKeys.DFS_NAMENODE_HEARTBEAT_RECHECK_INTERVAL_KEY, 500);
         conf.setLong(DFSConfigKeys.DFS_HEARTBEAT_INTERVAL_KEY, 1L);
         conf.setClass(DFSConfigKeys.DFS_NAMENODE_HOSTS_PROVIDER_CLASSNAME_KEY, CombinedHostFileManager.class, HostConfigManager.class);
         HostsFileWriter hostsFileWriter = new HostsFileWriter();
@@ -99,8 +101,10 @@ public class TestDatanodeReport {
      */
     @Test
     public void testDatanodeReport() throws Exception {
-        conf.setInt(DFSConfigKeys.DFS_NAMENODE_HEARTBEAT_RECHECK_INTERVAL_KEY, // 0.5s
-        500);
+        // 0.5s
+        conf.// 0.5s
+        setInt(// 0.5s
+        DFSConfigKeys.DFS_NAMENODE_HEARTBEAT_RECHECK_INTERVAL_KEY, 500);
         conf.setLong(DFSConfigKeys.DFS_HEARTBEAT_INTERVAL_KEY, 1L);
         MiniDFSCluster cluster = new MiniDFSCluster.Builder(conf).numDataNodes(NUM_OF_DATANODES).build();
         try {

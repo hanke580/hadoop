@@ -197,7 +197,7 @@ public abstract class AbstractDelegationTokenIdentifier extends TokenIdentifier 
     }
 
     @VisibleForTesting
-    void writeImpl(DataOutput out) throws IOException {
+    void internal$writeImpl6(DataOutput out) throws IOException {
         out.writeByte(VERSION);
         owner.write(out);
         renewer.write(out);
@@ -242,5 +242,22 @@ public abstract class AbstractDelegationTokenIdentifier extends TokenIdentifier 
         StringBuilder buffer = new StringBuilder();
         buffer.append("owner=").append(owner).append(", renewer=").append(renewer).append(", realUser=").append(realUser).append(", issueDate=").append(issueDate).append(", maxDate=").append(maxDate).append(", sequenceNumber=").append(sequenceNumber).append(", masterKeyId=").append(masterKeyId);
         return buffer.toString();
+    }
+
+    @VisibleForTesting
+    void writeImpl(DataOutput out) throws IOException {
+        try {
+            if (!(this.issueDate == 0)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(9);
+            }
+        } catch (Exception e) {
+        }
+        try {
+            if (!(this != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(10);
+            }
+        } catch (Exception e) {
+        }
+        internal$writeImpl6(out);
     }
 }

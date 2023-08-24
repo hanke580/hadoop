@@ -147,8 +147,8 @@ public class TestExternalBlockReader {
         @Override
         public ReplicaAccessor build() {
             if (visibleLength < 1024) {
-                LOG.info("SyntheticReplicaAccessorFactory returning null for a " + "smaller replica with size " + //trace
-                visibleLength);
+                LOG.info(//trace
+                "SyntheticReplicaAccessorFactory returning null for a " + "smaller replica with size " + visibleLength);
                 return null;
             }
             return new SyntheticReplicaAccessor(this);

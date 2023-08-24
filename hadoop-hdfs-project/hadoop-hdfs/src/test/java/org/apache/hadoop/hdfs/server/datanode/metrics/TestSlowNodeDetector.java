@@ -58,25 +58,25 @@ public class TestSlowNodeDetector {
     // expected Median Absolute Deviation. The small sets of size 1 and 2
     // exist to test the edge cases however in practice the MAD of a very
     // small set is not useful.
-    private Map<List<Double>, Pair<Double, Double>> medianTestMatrix = new ImmutableMap.Builder<List<Double>, Pair<Double, Double>>().// Single element.
-    put(new ImmutableList.Builder<Double>().add(9.6502431302).build(), Pair.of(9.6502431302, 0.0)).// Two elements.
-    put(new ImmutableList.Builder<Double>().add(1.72168104625).add(11.7872544459).build(), Pair.of(6.75446774606, 7.4616095611)).// The Remaining lists were randomly generated with sizes 3-10.
-    put(new ImmutableList.Builder<Double>().add(76.2635686249).add(27.0652018553).add(1.3868476443).add(49.7194624164).add(47.385680883).add(57.8721199173).build(), Pair.of(48.5525716497, 22.837202532)).put(new ImmutableList.Builder<Double>().add(86.0573389581).add(93.2399572424).add(64.9545429122).add(35.8509730085).add(1.6534313654).build(), Pair.of(64.9545429122, 41.9360180373)).put(new ImmutableList.Builder<Double>().add(5.00127007366).add(37.9790589127).add(67.5784746266).build(), Pair.of(37.9790589127, 43.8841594039)).put(new ImmutableList.Builder<Double>().add(1.43442932944).add(70.6769829947).add(37.47579656).add(51.1126141394).add(72.2465914419).add(32.2930549225).add(39.677459781).build(), Pair.of(39.677459781, 16.9537852208)).put(new ImmutableList.Builder<Double>().add(26.7913745214).add(68.9833706658).add(29.3882180746).add(68.3455244453).add(74.9277265022).add(12.1469972942).add(72.5395402683).add(7.87917492506).add(33.3253447774).add(72.2753759125).build(), Pair.of(50.8354346113, 31.9881230079)).put(new ImmutableList.Builder<Double>().add(38.6482290705).add(88.0690746319).add(50.6673611649).add(64.5329814115).add(25.2580979294).add(59.6709630711).add(71.5406993741).add(81.3073035091).add(20.5549547284).build(), Pair.of(59.6709630711, 31.1683520683)).put(new ImmutableList.Builder<Double>().add(87.352734249).add(65.4760359094).add(28.9206803169).add(36.5908574008).add(87.7407653175).add(99.3704511335).add(41.3227434076).add(46.2713494909).add(3.49940920921).build(), Pair.of(46.2713494909, 28.4729106898)).put(new ImmutableList.Builder<Double>().add(95.3251533286).add(27.2777870437).add(43.73477168).build(), Pair.of(43.73477168, 24.3991619317)).build();
+    private Map<List<Double>, Pair<Double, Double>> medianTestMatrix = // Single element.
+    new ImmutableMap.Builder<List<Double>, Pair<Double, Double>>().put(new ImmutableList.Builder<Double>().add(9.6502431302).build(), // Two elements.
+    Pair.of(9.6502431302, 0.0)).put(new ImmutableList.Builder<Double>().add(1.72168104625).add(11.7872544459).build(), // The Remaining lists were randomly generated with sizes 3-10.
+    Pair.of(6.75446774606, 7.4616095611)).put(new ImmutableList.Builder<Double>().add(76.2635686249).add(27.0652018553).add(1.3868476443).add(49.7194624164).add(47.385680883).add(57.8721199173).build(), Pair.of(48.5525716497, 22.837202532)).put(new ImmutableList.Builder<Double>().add(86.0573389581).add(93.2399572424).add(64.9545429122).add(35.8509730085).add(1.6534313654).build(), Pair.of(64.9545429122, 41.9360180373)).put(new ImmutableList.Builder<Double>().add(5.00127007366).add(37.9790589127).add(67.5784746266).build(), Pair.of(37.9790589127, 43.8841594039)).put(new ImmutableList.Builder<Double>().add(1.43442932944).add(70.6769829947).add(37.47579656).add(51.1126141394).add(72.2465914419).add(32.2930549225).add(39.677459781).build(), Pair.of(39.677459781, 16.9537852208)).put(new ImmutableList.Builder<Double>().add(26.7913745214).add(68.9833706658).add(29.3882180746).add(68.3455244453).add(74.9277265022).add(12.1469972942).add(72.5395402683).add(7.87917492506).add(33.3253447774).add(72.2753759125).build(), Pair.of(50.8354346113, 31.9881230079)).put(new ImmutableList.Builder<Double>().add(38.6482290705).add(88.0690746319).add(50.6673611649).add(64.5329814115).add(25.2580979294).add(59.6709630711).add(71.5406993741).add(81.3073035091).add(20.5549547284).build(), Pair.of(59.6709630711, 31.1683520683)).put(new ImmutableList.Builder<Double>().add(87.352734249).add(65.4760359094).add(28.9206803169).add(36.5908574008).add(87.7407653175).add(99.3704511335).add(41.3227434076).add(46.2713494909).add(3.49940920921).build(), Pair.of(46.2713494909, 28.4729106898)).put(new ImmutableList.Builder<Double>().add(95.3251533286).add(27.2777870437).add(43.73477168).build(), Pair.of(43.73477168, 24.3991619317)).build();
 
     // A test matrix that maps inputs to the expected output list of
     // slow nodes i.e. outliers.
-    private Map<Map<String, Double>, Set<String>> outlierTestMatrix = new ImmutableMap.Builder<Map<String, Double>, Set<String>>().// The number of samples is too low and all samples are below
-    // the low threshold. Nothing should be returned.
-    put(ImmutableMap.of("n1", 0.0, "n2", LOW_THRESHOLD + 1), ImmutableSet.of()).// A statistical outlier below the low threshold must not be
-    // returned.
-    put(ImmutableMap.of("n1", 1.0, "n2", 1.0, "n3", LOW_THRESHOLD - 1), ImmutableSet.of()).// A statistical outlier above the low threshold must be returned.
-    put(ImmutableMap.of("n1", 1.0, "n2", 1.0, "n3", LOW_THRESHOLD + 1), ImmutableSet.of("n3")).// A statistical outlier must not be returned if it is within a
-    // MEDIAN_MULTIPLIER multiple of the median.
-    put(ImmutableMap.of("n1", LOW_THRESHOLD + 0.1, "n2", LOW_THRESHOLD + 0.1, "n3", LOW_THRESHOLD * OutlierDetector.MEDIAN_MULTIPLIER - 0.1), ImmutableSet.of()).// A statistical outlier must be returned if it is outside a
-    // MEDIAN_MULTIPLIER multiple of the median.
-    put(ImmutableMap.of("n1", LOW_THRESHOLD + 0.1, "n2", LOW_THRESHOLD + 0.1, "n3", (LOW_THRESHOLD + 0.1) * OutlierDetector.MEDIAN_MULTIPLIER + 0.1), ImmutableSet.of("n3")).// Only the statistical outliers n3 and n11 should be returned.
-    put(new ImmutableMap.Builder<String, Double>().put("n1", 1029.4322).put("n2", 2647.876).put("n3", 9194.312).put("n4", 2.2).put("n5", 2012.92).put("n6", 1843.81).put("n7", 1201.43).put("n8", 6712.01).put("n9", 3278.554).put("n10", 2091.765).put("n11", 9194.77).build(), ImmutableSet.of("n3", "n11")).// The following input set has multiple outliers.
-    //   - The low outliers (n4, n6) should not be returned.
+    private Map<Map<String, Double>, Set<String>> outlierTestMatrix = // The number of samples is too low and all samples are below
+    new ImmutableMap.Builder<Map<String, Double>, Set<String>>().// the low threshold. Nothing should be returned.
+    put(ImmutableMap.of("n1", 0.0, "n2", LOW_THRESHOLD + 1), // A statistical outlier below the low threshold must not be
+    ImmutableSet.of()).// returned.
+    put(ImmutableMap.of("n1", 1.0, "n2", 1.0, "n3", LOW_THRESHOLD - 1), // A statistical outlier above the low threshold must be returned.
+    ImmutableSet.of()).put(ImmutableMap.of("n1", 1.0, "n2", 1.0, "n3", LOW_THRESHOLD + 1), // A statistical outlier must not be returned if it is within a
+    ImmutableSet.of("n3")).// MEDIAN_MULTIPLIER multiple of the median.
+    put(ImmutableMap.of("n1", LOW_THRESHOLD + 0.1, "n2", LOW_THRESHOLD + 0.1, "n3", LOW_THRESHOLD * OutlierDetector.MEDIAN_MULTIPLIER - 0.1), // A statistical outlier must be returned if it is outside a
+    ImmutableSet.of()).// MEDIAN_MULTIPLIER multiple of the median.
+    put(ImmutableMap.of("n1", LOW_THRESHOLD + 0.1, "n2", LOW_THRESHOLD + 0.1, "n3", (LOW_THRESHOLD + 0.1) * OutlierDetector.MEDIAN_MULTIPLIER + 0.1), // Only the statistical outliers n3 and n11 should be returned.
+    ImmutableSet.of("n3")).put(new ImmutableMap.Builder<String, Double>().put("n1", 1029.4322).put("n2", 2647.876).put("n3", 9194.312).put("n4", 2.2).put("n5", 2012.92).put("n6", 1843.81).put("n7", 1201.43).put("n8", 6712.01).put("n9", 3278.554).put("n10", 2091.765).put("n11", 9194.77).build(), // The following input set has multiple outliers.
+    ImmutableSet.of("n3", "n11")).//   - The low outliers (n4, n6) should not be returned.
     //   - High outlier n2 is within 3 multiples of the median
     //     and so it should not be returned.
     //   - Only the high outlier n8 should be returned.

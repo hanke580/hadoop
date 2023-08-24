@@ -310,13 +310,19 @@ public class KDiag extends Configured implements Tool, Closeable {
         }
         endln();
         title("Configuration Options");
-        for (String prop : new String[] { KERBEROS_KINIT_COMMAND, HADOOP_SECURITY_AUTHENTICATION, HADOOP_SECURITY_AUTHORIZATION, // not in 2.6
+        for (String prop : new String[] { // not in 2.6
+        KERBEROS_KINIT_COMMAND, // not in 2.6
+        HADOOP_SECURITY_AUTHENTICATION, // not in 2.6
+        HADOOP_SECURITY_AUTHORIZATION, // not in 2.6
         "hadoop.kerberos.min.seconds.before.relogin", // not in 2.6
         "hadoop.security.dns.interface", // not in 2.6
-        "hadoop.security.dns.nameserver", HADOOP_RPC_PROTECTION, HADOOP_SECURITY_SASL_PROPS_RESOLVER_CLASS, HADOOP_SECURITY_CRYPTO_CODEC_CLASSES_KEY_PREFIX, HADOOP_SECURITY_GROUP_MAPPING, // not in 2.6
+        "hadoop.security.dns.nameserver", // not in 2.6
+        HADOOP_RPC_PROTECTION, // not in 2.6
+        HADOOP_SECURITY_SASL_PROPS_RESOLVER_CLASS, // not in 2.6
+        HADOOP_SECURITY_CRYPTO_CODEC_CLASSES_KEY_PREFIX, // not in 2.6
+        HADOOP_SECURITY_GROUP_MAPPING, // HDFS
         "hadoop.security.impersonation.provider.class", // HDFS
-        DFS_DATA_TRANSFER_PROTECTION, // HDFS
-        DFS_DATA_TRANSFER_SASLPROPERTIES_RESOLVER_CLASS }) {
+        DFS_DATA_TRANSFER_PROTECTION, DFS_DATA_TRANSFER_SASLPROPERTIES_RESOLVER_CLASS }) {
             printConfOpt(prop);
         }
         // check that authentication is enabled
@@ -936,6 +942,11 @@ public class KDiag extends Configured implements Tool, Closeable {
      * @param argv args list
      */
     public static void main(String[] argv) {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         try {
             ExitUtil.terminate(exec(new Configuration(), argv));
         } catch (ExitUtil.ExitException e) {

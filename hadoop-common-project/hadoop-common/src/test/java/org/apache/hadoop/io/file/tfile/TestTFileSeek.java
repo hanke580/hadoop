@@ -396,6 +396,11 @@ public class TestTFileSeek {
     }
 
     public static void main(String[] argv) throws IOException {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         TestTFileSeek testCase = new TestTFileSeek();
         MyOptions options = new MyOptions(argv);
         if (options.proceed == false) {

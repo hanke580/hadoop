@@ -45,6 +45,11 @@ public class PlatformName {
     public static final boolean IBM_JAVA = JAVA_VENDOR_NAME.contains("IBM");
 
     public static void main(String[] args) {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         System.out.println(PLATFORM_NAME);
     }
 }

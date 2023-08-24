@@ -2086,6 +2086,11 @@ public class UserGroupInformation {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         System.out.println("Getting UGI for current user");
         UserGroupInformation ugi = getCurrentUser();
         ugi.print();

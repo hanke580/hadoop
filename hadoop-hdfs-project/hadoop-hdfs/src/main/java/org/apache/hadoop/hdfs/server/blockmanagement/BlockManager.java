@@ -1194,9 +1194,10 @@ public class BlockManager implements BlockStatsMXBean {
         }
         // Adjust safe-mode totals, since under-construction blocks don't
         // count in safe-mode.
-        bmSafeMode.adjustBlockTotals(// decrement safe if we had enough
-        hasMinStorage(lastBlock, targets.length) ? -1 : 0, // always decrement total blocks
-        -1);
+        // decrement safe if we had enough
+        bmSafeMode.// decrement safe if we had enough
+        adjustBlockTotals(// always decrement total blocks
+        hasMinStorage(lastBlock, targets.length) ? -1 : 0, -1);
         final long fileLength = bc.computeContentSummary(getStoragePolicySuite()).getLength();
         final long pos = fileLength - lastBlock.getNumBytes();
         return createLocatedBlock(null, lastBlock, pos, BlockTokenIdentifier.AccessMode.WRITE);
@@ -2656,11 +2657,14 @@ public class BlockManager implements BlockStatsMXBean {
         }
     }
 
-    private void reportDiffSorted(DatanodeStorageInfo storageInfo, Iterable<BlockReportReplica> newReport, // add to DatanodeDescriptor
-    Collection<BlockInfoToAdd> toAdd, // remove from DatanodeDescriptor
-    Collection<BlockInfo> toRemove, // should be removed from DN
-    Collection<Block> toInvalidate, // add to corrupt replicas list
-    Collection<BlockToMarkCorrupt> toCorrupt, Collection<StatefulBlockInfo> toUC) {
+    private // add to DatanodeDescriptor
+    void // add to DatanodeDescriptor
+    reportDiffSorted(// add to DatanodeDescriptor
+    DatanodeStorageInfo storageInfo, // add to DatanodeDescriptor
+    Iterable<BlockReportReplica> newReport, // remove from DatanodeDescriptor
+    Collection<BlockInfoToAdd> toAdd, // should be removed from DN
+    Collection<BlockInfo> toRemove, // add to corrupt replicas list
+    Collection<Block> toInvalidate, Collection<BlockToMarkCorrupt> toCorrupt, Collection<StatefulBlockInfo> toUC) {
         // add to under-construction list
         // The blocks must be sorted and the storagenodes blocks must be sorted
         Iterator<BlockInfo> storageBlocksIterator = storageInfo.getBlockIterator();

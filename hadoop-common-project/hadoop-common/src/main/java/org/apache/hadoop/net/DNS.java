@@ -77,9 +77,10 @@ public class DNS {
         DirContext ictx = new InitialDirContext();
         Attributes attribute;
         try {
-            attribute = ictx.getAttributes(// Use "dns:///" if the default
-            "dns://" + ((ns == null) ? "" : ns) + // nameserver is to be used
-            "/" + reverseIP, new String[] { "PTR" });
+            attribute = // Use "dns:///" if the default
+            ictx.// Use "dns:///" if the default
+            getAttributes(// nameserver is to be used
+            "dns://" + ((ns == null) ? "" : ns) + "/" + reverseIP, new String[] { "PTR" });
         } finally {
             ictx.close();
         }

@@ -36,6 +36,11 @@ import static org.junit.Assert.assertTrue;
 public class ManualTestKeytabLogins {
 
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         if (args.length != 4) {
             System.err.println("usage: ManualTestKeytabLogins <principal 1> <keytab 1> <principal 2> <keytab 2>");
             System.exit(1);

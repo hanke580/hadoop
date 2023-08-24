@@ -138,8 +138,8 @@ public class TestDFSUpgrade {
      */
     void startNameNodeShouldFail(StartupOption operation, Class<? extends Exception> exceptionClass, Pattern messagePattern) {
         try {
-            cluster = new MiniDFSCluster.Builder(conf).numDataNodes(0).startupOption(operation).format(false).manageDataDfsDirs(false).manageNameDfsDirs(false).// should fail
-            build();
+            cluster = // should fail
+            new MiniDFSCluster.Builder(conf).numDataNodes(0).startupOption(operation).format(false).manageDataDfsDirs(false).manageNameDfsDirs(false).build();
             fail("NameNode should have failed to start");
         } catch (Exception e) {
             // expect exception
@@ -366,6 +366,11 @@ public class TestDFSUpgrade {
     }
 
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         TestDFSUpgrade t = new TestDFSUpgrade();
         TestDFSUpgrade.initialize();
         t.testUpgrade();

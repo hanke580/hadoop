@@ -121,10 +121,11 @@ class AsyncLoggerSet {
     <V> Map<AsyncLogger, V> waitForWriteQuorum(QuorumCall<AsyncLogger, V> q, int timeoutMs, String operationName) throws IOException {
         int majority = getMajoritySize();
         try {
-            q.waitFor(// either all respond
-            loggers.size(), // or we get a majority successes
-            majority, // or we get a majority failures,
-            majority, timeoutMs, operationName);
+            // either all respond
+            q.// either all respond
+            waitFor(// or we get a majority successes
+            loggers.size(), // or we get a majority failures,
+            majority, majority, timeoutMs, operationName);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IOException("Interrupted waiting " + timeoutMs + "ms for a " + "quorum of nodes to respond.");

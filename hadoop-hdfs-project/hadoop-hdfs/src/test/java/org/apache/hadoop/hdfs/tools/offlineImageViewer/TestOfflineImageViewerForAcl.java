@@ -198,8 +198,9 @@ public class TestOfflineImageViewerForAcl {
         final String DELIMITER = "\t";
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         try (PrintStream o = new PrintStream(output)) {
-            PBImageDelimitedTextWriter v = // run in memory.
-            new PBImageDelimitedTextWriter(o, DELIMITER, "");
+            // run in memory.
+            PBImageDelimitedTextWriter // run in memory.
+            v = new PBImageDelimitedTextWriter(o, DELIMITER, "");
             v.visit(new RandomAccessFile(originalFsimage, "r"));
         }
         try (ByteArrayInputStream input = new ByteArrayInputStream(output.toByteArray());

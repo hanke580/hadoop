@@ -55,8 +55,11 @@ public class TestDefaultRetryPolicy {
     @Test
     public void testWithRetriable() throws Exception {
         Configuration conf = new Configuration();
-        RetryPolicy policy = RetryUtils.getDefaultRetryPolicy(conf, "Test.No.Such.Key", // defaultRetryPolicyEnabled = true
-        true, "Test.No.Such.Key", "10000,6", null);
+        RetryPolicy policy = // defaultRetryPolicyEnabled = true
+        RetryUtils.// defaultRetryPolicyEnabled = true
+        getDefaultRetryPolicy(// defaultRetryPolicyEnabled = true
+        conf, // defaultRetryPolicyEnabled = true
+        "Test.No.Such.Key", true, "Test.No.Such.Key", "10000,6", null);
         RetryPolicy.RetryAction action = policy.shouldRetry(new RetriableException("Dummy exception"), 0, 0, true);
         assertThat(action.action, is(RetryPolicy.RetryAction.RetryDecision.RETRY));
     }
@@ -71,8 +74,11 @@ public class TestDefaultRetryPolicy {
     @Test
     public void testWithWrappedRetriable() throws Exception {
         Configuration conf = new Configuration();
-        RetryPolicy policy = RetryUtils.getDefaultRetryPolicy(conf, "Test.No.Such.Key", // defaultRetryPolicyEnabled = true
-        true, "Test.No.Such.Key", "10000,6", null);
+        RetryPolicy policy = // defaultRetryPolicyEnabled = true
+        RetryUtils.// defaultRetryPolicyEnabled = true
+        getDefaultRetryPolicy(// defaultRetryPolicyEnabled = true
+        conf, // defaultRetryPolicyEnabled = true
+        "Test.No.Such.Key", true, "Test.No.Such.Key", "10000,6", null);
         RetryPolicy.RetryAction action = policy.shouldRetry(new RemoteException(RetriableException.class.getName(), "Dummy exception"), 0, 0, true);
         assertThat(action.action, is(RetryPolicy.RetryAction.RetryDecision.RETRY));
     }
@@ -86,8 +92,11 @@ public class TestDefaultRetryPolicy {
     @Test
     public void testWithRetriableAndRetryDisabled() throws Exception {
         Configuration conf = new Configuration();
-        RetryPolicy policy = RetryUtils.getDefaultRetryPolicy(conf, "Test.No.Such.Key", // defaultRetryPolicyEnabled = false
-        false, "Test.No.Such.Key", "10000,6", null);
+        RetryPolicy policy = // defaultRetryPolicyEnabled = false
+        RetryUtils.// defaultRetryPolicyEnabled = false
+        getDefaultRetryPolicy(// defaultRetryPolicyEnabled = false
+        conf, // defaultRetryPolicyEnabled = false
+        "Test.No.Such.Key", false, "Test.No.Such.Key", "10000,6", null);
         RetryPolicy.RetryAction action = policy.shouldRetry(new RetriableException("Dummy exception"), 0, 0, true);
         assertThat(action.action, is(RetryPolicy.RetryAction.RetryDecision.FAIL));
     }

@@ -281,13 +281,15 @@ public class TestDeleteRace {
                 }
                 // Delay the commitBlockSynchronization call
                 DelayAnswer delayer = new DelayAnswer(LOG);
-                Mockito.doAnswer(delayer).when(nnSpy).commitBlockSynchronization(Mockito.eq(blk), // new genstamp
-                Mockito.anyLong(), // new length
+                // new genstamp
+                Mockito.doAnswer(delayer).when(nnSpy).// new genstamp
+                commitBlockSynchronization(// new genstamp
+                Mockito.eq(blk), // new length
                 Mockito.anyLong(), // close file
-                Mockito.eq(true), // delete block
-                Mockito.eq(false), // new targets
-                Mockito.any(), // new target storages
-                Mockito.any());
+                Mockito.anyLong(), // delete block
+                Mockito.eq(true), // new targets
+                Mockito.eq(false), // new target storages
+                Mockito.any(), Mockito.any());
                 fs.recoverLease(fPath);
                 LOG.info("Waiting for commitBlockSynchronization call from primary");
                 delayer.waitForCall();

@@ -241,6 +241,11 @@ public class RegistryDNSServer extends CompositeService {
      * @throws IOException if command line options can't be parsed
      */
     public static void main(String[] args) throws IOException {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         StringUtils.startupShutdownMessage(RegistryDNSServer.class, args, LOG);
         Configuration conf = new RegistryConfiguration();
         new GenericOptionsParser(conf, args);

@@ -661,6 +661,11 @@ public class TestTFileSeqFileComparison {
     }
 
     public static void main(String[] args) throws IOException {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         TestTFileSeqFileComparison testCase = new TestTFileSeqFileComparison();
         MyOptions options = new MyOptions(args);
         if (options.proceed == false) {

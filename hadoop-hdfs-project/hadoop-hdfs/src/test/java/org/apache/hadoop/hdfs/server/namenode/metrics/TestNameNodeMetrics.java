@@ -743,8 +743,9 @@ public class TestNameNodeMetrics {
                 HATestUtil.waitForStandbyToCatchUp(nn0, nn1);
                 // Test to ensure tracking works before the first-ever
                 // checkpoint.
-                assertEquals("SBN failed to track 2 transactions pre-checkpoint.", // 2 txns added further when catch-up is called.
-                4L, cluster2.getNameNode(1).getNamesystem().getTransactionsSinceLastCheckpoint());
+                // 2 txns added further when catch-up is called.
+                assertEquals(// 2 txns added further when catch-up is called.
+                "SBN failed to track 2 transactions pre-checkpoint.", 4L, cluster2.getNameNode(1).getNamesystem().getTransactionsSinceLastCheckpoint());
                 // Complete up to the boundary required for
                 // an auto-checkpoint. Using 94 to expect fsimage
                 // rounded at 100, as 4 + 94 + 2 (catch-up call) = 100.

@@ -52,6 +52,11 @@ public class TestUdpServer {
     }
 
     public static void main(String[] args) throws InterruptedException {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         Thread t1 = new Runtest1();
         // TODO: cleanup
         //Thread t2 = new Runtest2();

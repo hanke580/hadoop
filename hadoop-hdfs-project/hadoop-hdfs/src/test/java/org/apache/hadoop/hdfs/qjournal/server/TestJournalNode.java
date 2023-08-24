@@ -267,8 +267,10 @@ public class TestJournalNode {
         // Attempt to retrieve via HTTP, ensure we get the data back
         // including the header we expected
         byte[] retrievedViaHttp = DFSTestUtil.urlGetBytes(new URL(urlRoot + "/getJournal?segmentTxId=1&jid=" + journalId));
-        byte[] expected = Bytes.concat(Ints.toByteArray(HdfsServerConstants.NAMENODE_LAYOUT_VERSION), // layout flags section
-        (new byte[] { 0, 0, 0, 0 }), EDITS_DATA);
+        byte[] expected = // layout flags section
+        Bytes.// layout flags section
+        concat(// layout flags section
+        Ints.toByteArray(HdfsServerConstants.NAMENODE_LAYOUT_VERSION), (new byte[] { 0, 0, 0, 0 }), EDITS_DATA);
         assertArrayEquals(expected, retrievedViaHttp);
         // Attempt to fetch a non-existent file, check that we get an
         // error status code

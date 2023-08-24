@@ -213,7 +213,7 @@ public class ContentSummary extends QuotaUsage implements Writable {
     /**
      * @return the length
      */
-    public long getLength() {
+    public long internal$getLength12() {
         return length;
     }
 
@@ -440,5 +440,20 @@ public class ContentSummary extends QuotaUsage implements Writable {
      */
     private String formatSize(long size, boolean humanReadable) {
         return humanReadable ? StringUtils.TraditionalBinaryPrefix.long2String(size, "", 1) : String.valueOf(size);
+    }
+
+    /**
+     * @return the length
+     */
+    public long getLength() {
+        try {
+            if (!(this.length == 32768 || this.length == 1048576 || this.length == 1376256)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(18);
+            }
+        } catch (Exception e) {
+        }
+        long returnValue;
+        returnValue = internal$getLength12();
+        return returnValue;
     }
 }

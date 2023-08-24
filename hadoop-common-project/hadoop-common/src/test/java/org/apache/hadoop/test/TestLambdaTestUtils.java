@@ -315,8 +315,10 @@ public class TestLambdaTestUtils extends Assert {
 
     @Test
     public void testInterceptAwaitLambdaDiagnostics() throws Throwable {
-        intercept(IOException.class, "generated", () -> await(5, () -> false, // force checks -1 timeout probes
-        () -> -1, (timeout, ex) -> new IOException("generated")));
+        intercept(IOException.class, "generated", () -> // force checks -1 timeout probes
+        await(// force checks -1 timeout probes
+        5, // force checks -1 timeout probes
+        () -> false, () -> -1, (timeout, ex) -> new IOException("generated")));
     }
 
     @Test

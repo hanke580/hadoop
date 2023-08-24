@@ -2231,6 +2231,11 @@ public class TestConfiguration {
     }
 
     public static void main(String[] argv) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         junit.textui.TestRunner.main(new String[] { TestConfiguration.class.getName() });
     }
 

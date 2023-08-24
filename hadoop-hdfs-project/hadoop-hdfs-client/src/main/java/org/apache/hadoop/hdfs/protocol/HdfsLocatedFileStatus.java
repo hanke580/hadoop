@@ -149,8 +149,7 @@ public class HdfsLocatedFileStatus extends LocatedFileStatus implements HdfsFile
         return fileId;
     }
 
-    @Override
-    public FileEncryptionInfo getFileEncryptionInfo() {
+    public FileEncryptionInfo internal$getFileEncryptionInfo28() {
         return feInfo;
     }
 
@@ -214,5 +213,24 @@ public class HdfsLocatedFileStatus extends LocatedFileStatus implements HdfsFile
         makeQualified(defaultUri, path);
         setBlockLocations(DFSUtilClient.locatedBlocks2Locations(getLocatedBlocks()));
         return this;
+    }
+
+    @Override
+    public FileEncryptionInfo getFileEncryptionInfo() {
+        try {
+            if (!(this.feInfo == null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(37);
+            }
+        } catch (Exception e) {
+        }
+        try {
+            if (!(this != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(38);
+            }
+        } catch (Exception e) {
+        }
+        FileEncryptionInfo returnValue;
+        returnValue = internal$getFileEncryptionInfo28();
+        return returnValue;
     }
 }

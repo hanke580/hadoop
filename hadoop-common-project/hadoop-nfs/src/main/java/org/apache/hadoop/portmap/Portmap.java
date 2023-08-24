@@ -62,6 +62,11 @@ final class Portmap {
     private final RpcProgramPortmap handler = new RpcProgramPortmap(allChannels);
 
     public static void main(String[] args) {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         StringUtils.startupShutdownMessage(Portmap.class, args, LOG);
         final int port = RpcProgram.RPCB_PORT;
         Portmap pm = new Portmap();

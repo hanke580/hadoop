@@ -197,8 +197,8 @@ public class FileJournalManager implements JournalManager {
     }
 
     private boolean isStaleInProgressLog(long minTxIdToKeep, EditLogFile log) {
-        return log.isInProgress() && !log.getFile().equals(currentInProgress) && log.getFirstTxId() >= minTxIdToKeep && // at last we check if this segment is not already marked as .trash,
-        // .empty or .corrupted, in which case it does not match the strict
+        return // at last we check if this segment is not already marked as .trash,
+        log.isInProgress() && !log.getFile().equals(currentInProgress) && log.getFirstTxId() >= minTxIdToKeep && // .empty or .corrupted, in which case it does not match the strict
         // regex pattern.
         EDITS_INPROGRESS_REGEX.matcher(log.getFile().getName()).matches();
     }

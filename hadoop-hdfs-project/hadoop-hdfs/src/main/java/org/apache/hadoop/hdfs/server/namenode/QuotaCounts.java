@@ -84,7 +84,7 @@ public class QuotaCounts {
             this.tsCounts = STORAGE_TYPE_DEFAULT;
         }
 
-        public Builder nameSpace(long val) {
+        public Builder internal$nameSpace45(long val) {
             nsSsCounts = setQuotaCounter(nsSsCounts, Quota.NAMESPACE, Quota.STORAGESPACE, val);
             return this;
         }
@@ -105,7 +105,7 @@ public class QuotaCounts {
             return this;
         }
 
-        public Builder typeSpaces(long val) {
+        public Builder internal$typeSpaces46(long val) {
             if (val == HdfsConstants.QUOTA_RESET) {
                 tsCounts = STORAGE_TYPE_RESET;
             } else if (val == 0) {
@@ -133,6 +133,30 @@ public class QuotaCounts {
         public QuotaCounts build() {
             return new QuotaCounts(this);
         }
+
+        public Builder nameSpace(long val) {
+            try {
+                if (!(this.nsSsCounts != null)) {
+                    org.zlab.dinv.runtimechecker.Runtime.addViolation(63);
+                }
+            } catch (Exception e) {
+            }
+            Builder returnValue;
+            returnValue = internal$nameSpace45(val);
+            return returnValue;
+        }
+
+        public Builder typeSpaces(long val) {
+            try {
+                if (!(this.tsCounts != null)) {
+                    org.zlab.dinv.runtimechecker.Runtime.addViolation(64);
+                }
+            } catch (Exception e) {
+            }
+            Builder returnValue;
+            returnValue = internal$typeSpaces46(val);
+            return returnValue;
+        }
     }
 
     private QuotaCounts(Builder builder) {
@@ -140,13 +164,13 @@ public class QuotaCounts {
         this.tsCounts = builder.tsCounts;
     }
 
-    public QuotaCounts add(QuotaCounts that) {
+    public QuotaCounts internal$add47(QuotaCounts that) {
         nsSsCounts = modify(nsSsCounts, ec -> ec.add(that.nsSsCounts));
         tsCounts = modify(tsCounts, ec -> ec.add(that.tsCounts));
         return this;
     }
 
-    public QuotaCounts subtract(QuotaCounts that) {
+    public QuotaCounts internal$subtract48(QuotaCounts that) {
         nsSsCounts = modify(nsSsCounts, ec -> ec.subtract(that.nsSsCounts));
         tsCounts = modify(tsCounts, ec -> ec.subtract(that.tsCounts));
         return this;
@@ -157,7 +181,7 @@ public class QuotaCounts {
      *
      * @return {@code -this}
      */
-    public QuotaCounts negation() {
+    public QuotaCounts internal$negation49() {
         QuotaCounts ret = new QuotaCounts.Builder().quotaCount(this).build();
         ret.nsSsCounts = modify(ret.nsSsCounts, ec -> ec.negation());
         ret.tsCounts = modify(ret.tsCounts, ec -> ec.negation());
@@ -168,11 +192,11 @@ public class QuotaCounts {
         return nsSsCounts.get(Quota.NAMESPACE);
     }
 
-    public void setNameSpace(long nameSpaceCount) {
+    public void internal$setNameSpace50(long nameSpaceCount) {
         nsSsCounts = setQuotaCounter(nsSsCounts, Quota.NAMESPACE, Quota.STORAGESPACE, nameSpaceCount);
     }
 
-    public void addNameSpace(long nsDelta) {
+    public void internal$addNameSpace51(long nsDelta) {
         nsSsCounts = modify(nsSsCounts, ec -> ec.add(Quota.NAMESPACE, nsDelta));
     }
 
@@ -180,11 +204,11 @@ public class QuotaCounts {
         return nsSsCounts.get(Quota.STORAGESPACE);
     }
 
-    public void setStorageSpace(long spaceCount) {
+    public void internal$setStorageSpace52(long spaceCount) {
         nsSsCounts = setQuotaCounter(nsSsCounts, Quota.STORAGESPACE, Quota.NAMESPACE, spaceCount);
     }
 
-    public void addStorageSpace(long dsDelta) {
+    public void internal$addStorageSpace53(long dsDelta) {
         nsSsCounts = modify(nsSsCounts, ec -> ec.add(Quota.STORAGESPACE, dsDelta));
     }
 
@@ -194,7 +218,7 @@ public class QuotaCounts {
         return ret;
     }
 
-    void setTypeSpaces(EnumCounters<StorageType> that) {
+    void internal$setTypeSpaces54(EnumCounters<StorageType> that) {
         if (that == STORAGE_TYPE_DEFAULT || that == STORAGE_TYPE_RESET) {
             tsCounts = that;
         } else if (that != null) {
@@ -210,7 +234,7 @@ public class QuotaCounts {
         tsCounts = modify(tsCounts, ec -> ec.set(type, spaceCount));
     }
 
-    public void addTypeSpace(StorageType type, long delta) {
+    public void internal$addTypeSpace55(StorageType type, long delta) {
         tsCounts = modify(tsCounts, ec -> ec.add(type, delta));
     }
 
@@ -273,5 +297,160 @@ public class QuotaCounts {
         assert false : "hashCode not designed";
         // any arbitrary constant will do
         return 42;
+    }
+
+    public QuotaCounts add(QuotaCounts that) {
+        try {
+            if (!(this.tsCounts != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(65);
+            }
+        } catch (Exception e) {
+        }
+        try {
+            if (!(this.nsSsCounts != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(66);
+            }
+        } catch (Exception e) {
+        }
+        try {
+            if (!(this != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(67);
+            }
+        } catch (Exception e) {
+        }
+        QuotaCounts returnValue;
+        returnValue = internal$add47(that);
+        return returnValue;
+    }
+
+    public QuotaCounts subtract(QuotaCounts that) {
+        try {
+            if (!(this.tsCounts != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(68);
+            }
+        } catch (Exception e) {
+        }
+        try {
+            if (!(this.nsSsCounts != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(69);
+            }
+        } catch (Exception e) {
+        }
+        try {
+            if (!(this != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(70);
+            }
+        } catch (Exception e) {
+        }
+        QuotaCounts returnValue;
+        returnValue = internal$subtract48(that);
+        return returnValue;
+    }
+
+    /**
+     * Returns a QuotaCounts whose value is {@code (-this)}.
+     *
+     * @return {@code -this}
+     */
+    public QuotaCounts negation() {
+        try {
+            if (!(this.tsCounts != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(71);
+            }
+        } catch (Exception e) {
+        }
+        try {
+            if (!(this.nsSsCounts != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(72);
+            }
+        } catch (Exception e) {
+        }
+        try {
+            if (!(this != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(73);
+            }
+        } catch (Exception e) {
+        }
+        QuotaCounts returnValue;
+        returnValue = internal$negation49();
+        return returnValue;
+    }
+
+    public void setNameSpace(long nameSpaceCount) {
+        try {
+            if (!(this != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(74);
+            }
+        } catch (Exception e) {
+        }
+        internal$setNameSpace50(nameSpaceCount);
+    }
+
+    public void addNameSpace(long nsDelta) {
+        try {
+            if (!(this.nsSsCounts != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(75);
+            }
+        } catch (Exception e) {
+        }
+        try {
+            if (!(this != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(76);
+            }
+        } catch (Exception e) {
+        }
+        internal$addNameSpace51(nsDelta);
+    }
+
+    public void setStorageSpace(long spaceCount) {
+        try {
+            if (!(this.nsSsCounts != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(77);
+            }
+        } catch (Exception e) {
+        }
+        try {
+            if (!(this != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(78);
+            }
+        } catch (Exception e) {
+        }
+        internal$setStorageSpace52(spaceCount);
+    }
+
+    public void addStorageSpace(long dsDelta) {
+        try {
+            if (!(this.nsSsCounts != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(79);
+            }
+        } catch (Exception e) {
+        }
+        try {
+            if (!(this != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(80);
+            }
+        } catch (Exception e) {
+        }
+        internal$addStorageSpace53(dsDelta);
+    }
+
+    void setTypeSpaces(EnumCounters<StorageType> that) {
+        try {
+            if (!(this != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(81);
+            }
+        } catch (Exception e) {
+        }
+        internal$setTypeSpaces54(that);
+    }
+
+    public void addTypeSpace(StorageType type, long delta) {
+        try {
+            if (!(this != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(82);
+            }
+        } catch (Exception e) {
+        }
+        internal$addTypeSpace55(type, delta);
     }
 }

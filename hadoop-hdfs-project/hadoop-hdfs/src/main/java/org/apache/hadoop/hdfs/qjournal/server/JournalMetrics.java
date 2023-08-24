@@ -63,9 +63,9 @@ class JournalMetrics {
     private MutableCounterLong numEditLogsSynced;
 
     private final int[] QUANTILE_INTERVALS = new int[] { // 1m
-    1 * 60, // 5m
-    5 * 60, // 1h
-    60 * 60 };
+    // 5m
+    1 * 60, // 1h
+    5 * 60, 60 * 60 };
 
     final MutableQuantiles[] syncsQuantiles;
 

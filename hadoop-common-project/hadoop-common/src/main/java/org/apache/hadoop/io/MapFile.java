@@ -585,8 +585,8 @@ public class MapFile {
             // make sure index is read
             readIndex();
             if (// seeked before
-            seekIndex != -1 && seekIndex + 1 < count && // before next indexed
-            comparator.compare(key, keys[seekIndex + 1]) < 0 && comparator.compare(key, nextKey) >= 0) {
+            // before next indexed
+            seekIndex != -1 && seekIndex + 1 < count && comparator.compare(key, keys[seekIndex + 1]) < 0 && comparator.compare(key, nextKey) >= 0) {
                 // but after last seeked
                 // do nothing
             } else {
@@ -971,6 +971,11 @@ public class MapFile {
     }
 
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         String usage = "Usage: MapFile inFile outFile";
         if (args.length != 2) {
             System.err.println(usage);

@@ -140,6 +140,11 @@ public class TestOutOfOrderWrite {
     }
 
     public static void main(String[] args) throws InterruptedException {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         Arrays.fill(data1, (byte) 7);
         Arrays.fill(data2, (byte) 8);
         Arrays.fill(data3, (byte) 9);

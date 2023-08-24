@@ -502,12 +502,12 @@ public class CBZip2InputStream extends InputStream implements BZip2Constants {
             // end of file
             complete();
         } else if (// '1'
-        magic0 != 0x31 || // ')'
-        magic1 != 0x41 || // 'Y'
-        magic2 != 0x59 || // '&'
-        magic3 != 0x26 || // 'S'
-        magic4 != 0x53 || // 'Y'
-        magic5 != 0x59) {
+        // ')'
+        magic0 != 0x31 || // 'Y'
+        magic1 != 0x41 || // '&'
+        magic2 != 0x59 || // 'S'
+        magic3 != 0x26 || // 'Y'
+        magic4 != 0x53 || magic5 != 0x59) {
             this.currentState = STATE.EOF;
             throw new IOException("bad block header");
         } else {

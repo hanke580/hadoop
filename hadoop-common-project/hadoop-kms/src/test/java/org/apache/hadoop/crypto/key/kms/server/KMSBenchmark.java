@@ -592,6 +592,11 @@ public class KMSBenchmark implements Tool {
     }
 
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         runBenchmark(new Configuration(), args);
     }
 

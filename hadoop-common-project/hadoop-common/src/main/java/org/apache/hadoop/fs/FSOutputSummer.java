@@ -167,7 +167,7 @@ abstract public class FSOutputSummer extends OutputStream {
     /* Forces any buffered output bytes to be checksumed and written out to
    * the underlying output stream. 
    */
-    protected synchronized void flushBuffer() throws IOException {
+    protected synchronized void internal$flushBuffer21() throws IOException {
         flushBuffer(false, true);
     }
 
@@ -181,7 +181,7 @@ abstract public class FSOutputSummer extends OutputStream {
    * Returns the number of bytes that were flushed but are still left in the
    * buffer (can only be non-zero if keep is true).
    */
-    protected synchronized int flushBuffer(boolean keep, boolean flushPartial) throws IOException {
+    protected synchronized int internal$flushBuffer22(boolean keep, boolean flushPartial) throws IOException {
         int bufLen = count;
         int partialLen = bufLen % sum.getBytesPerChecksum();
         int lenToFlush = flushPartial ? bufLen : bufLen - partialLen;
@@ -233,7 +233,7 @@ abstract public class FSOutputSummer extends OutputStream {
      * Generate checksums for the given data chunks and output chunks & checksums
      * to the underlying output stream.
      */
-    private void writeChecksumChunks(byte[] b, int off, int len) throws IOException {
+    private void internal$writeChecksumChunks23(byte[] b, int off, int len) throws IOException {
         sum.calculateChunkedSums(b, off, len, checksum, 0);
         TraceScope scope = createWriteTraceScope();
         try {
@@ -295,4 +295,65 @@ abstract public class FSOutputSummer extends OutputStream {
     private long left_61;
 
     private long left_60;
+
+    /* Forces any buffered output bytes to be checksumed and written out to
+   * the underlying output stream. 
+   */
+    protected synchronized void flushBuffer() throws IOException {
+        try {
+            if (!(this.count > 0 || this.count == 0)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(27);
+            }
+        } catch (Exception e) {
+        }
+        try {
+            if (!(org.zlab.dinv.runtimechecker.Quant.size(this.buf) == 4608)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(28);
+            }
+        } catch (Exception e) {
+        }
+        internal$flushBuffer21();
+    }
+
+    /* Forces buffered output bytes to be checksummed and written out to
+   * the underlying output stream. If there is a trailing partial chunk in the
+   * buffer,
+   * 1) flushPartial tells us whether to flush that chunk
+   * 2) if flushPartial is true, keep tells us whether to keep that chunk in the
+   * buffer (if flushPartial is false, it is always kept in the buffer)
+   *
+   * Returns the number of bytes that were flushed but are still left in the
+   * buffer (can only be non-zero if keep is true).
+   */
+    protected synchronized int flushBuffer(boolean keep, boolean flushPartial) throws IOException {
+        try {
+            if (!(this.count > 0 || this.count == 0)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(29);
+            }
+        } catch (Exception e) {
+        }
+        try {
+            if (!(org.zlab.dinv.runtimechecker.Quant.size(this.buf) == 4608)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(30);
+            }
+        } catch (Exception e) {
+        }
+        int returnValue;
+        returnValue = internal$flushBuffer22(keep, flushPartial);
+        return returnValue;
+    }
+
+    /**
+     * Generate checksums for the given data chunks and output chunks & checksums
+     * to the underlying output stream.
+     */
+    private void writeChecksumChunks(byte[] b, int off, int len) throws IOException {
+        try {
+            if (!(org.zlab.dinv.runtimechecker.Quant.size(this.checksum) == 36)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(31);
+            }
+        } catch (Exception e) {
+        }
+        internal$writeChecksumChunks23(b, off, len);
+    }
 }

@@ -2306,6 +2306,11 @@ public class TFile {
      *          A list of TFile paths.
      */
     public static void main(String[] args) {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         System.out.printf("TFile Dumper (TFile %s, BCFile %s)%n", TFile.API_VERSION.toString(), BCFile.API_VERSION.toString());
         if (args.length == 0) {
             System.out.println("Usage: java ... org.apache.hadoop.io.file.tfile.TFile tfile-path [tfile-path ...]");

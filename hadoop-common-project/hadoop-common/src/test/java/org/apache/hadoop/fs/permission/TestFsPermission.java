@@ -235,10 +235,10 @@ public class TestFsPermission {
         // 1644            932             1644            932
         int[][] permission_mask_maps = { // Octal                 Decimal    Unix Symbolic
         // 33188    -rw-r--
-        { 0100644, 0644, 0 }, // 33700    -rw-r-t
-        { 0101644, 01644, 1 }, // 16804    drw-r--
-        { 040644, 0644, 0 }, // 17316    drw-r-t
-        { 041644, 01644, 1 } };
+        // 33700    -rw-r-t
+        { 0100644, 0644, 0 }, // 16804    drw-r--
+        { 0101644, 01644, 1 }, // 17316    drw-r-t
+        { 040644, 0644, 0 }, { 041644, 01644, 1 } };
         for (int[] permission_mask_map : permission_mask_maps) {
             int original_permission_value = permission_mask_map[0];
             int masked_permission_value = permission_mask_map[1];

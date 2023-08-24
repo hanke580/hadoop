@@ -815,9 +815,12 @@ public class TestCacheDirectives {
         // the directory directive's stats are unchanged
         waitForCacheDirectiveStats(dfs, 4 * numBlocksPerFile * BLOCK_SIZE, 4 * numBlocksPerFile * BLOCK_SIZE, 2, 2, new CacheDirectiveInfo.Builder().setPath(new Path("/foo")).build(), "testWaitForCachedReplicasInDirectory:2:directive-1");
         // verify /foo/bar's stats
-        waitForCacheDirectiveStats(dfs, 4 * numBlocksPerFile * BLOCK_SIZE, // only 3 because the file only has 3 replicas, not 4 as requested.
-        3 * numBlocksPerFile * BLOCK_SIZE, 1, // only 0 because the file can't be fully cached
-        0, new CacheDirectiveInfo.Builder().setPath(new Path("/foo/bar")).build(), "testWaitForCachedReplicasInDirectory:2:directive-2");
+        // only 3 because the file only has 3 replicas, not 4 as requested.
+        waitForCacheDirectiveStats(// only 3 because the file only has 3 replicas, not 4 as requested.
+        dfs, // only 3 because the file only has 3 replicas, not 4 as requested.
+        4 * numBlocksPerFile * BLOCK_SIZE, // only 0 because the file can't be fully cached
+        3 * numBlocksPerFile * BLOCK_SIZE, // only 0 because the file can't be fully cached
+        1, 0, new CacheDirectiveInfo.Builder().setPath(new Path("/foo/bar")).build(), "testWaitForCachedReplicasInDirectory:2:directive-2");
         waitForCachePoolStats(dfs, (4 + 4) * numBlocksPerFile * BLOCK_SIZE, (4 + 3) * numBlocksPerFile * BLOCK_SIZE, 3, 2, poolInfo, "testWaitForCachedReplicasInDirectory:2:pool");
         // remove and watch numCached go to 0
         dfs.removeCacheDirective(id);

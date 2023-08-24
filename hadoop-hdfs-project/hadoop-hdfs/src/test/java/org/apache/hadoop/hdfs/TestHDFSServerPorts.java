@@ -355,8 +355,9 @@ public class TestHDFSServerPorts {
             // bind http server to the same port as name-node
             backup_config.set(DFSConfigKeys.DFS_NAMENODE_BACKUP_HTTP_ADDRESS_KEY, backup_config.get(DFSConfigKeys.DFS_NAMENODE_HTTP_ADDRESS_KEY));
             LOG.info("= Starting 1 on: " + backup_config.get(DFSConfigKeys.DFS_NAMENODE_BACKUP_HTTP_ADDRESS_KEY));
-            assertFalse("Backup started on same port as Namenode", // should fail
-            canStartBackupNode(backup_config));
+            // should fail
+            assertFalse(// should fail
+            "Backup started on same port as Namenode", canStartBackupNode(backup_config));
             // reset namenode backup address because Windows does not release
             // port used previously properly.
             backup_config.set(DFSConfigKeys.DFS_NAMENODE_BACKUP_ADDRESS_KEY, THIS_HOST);

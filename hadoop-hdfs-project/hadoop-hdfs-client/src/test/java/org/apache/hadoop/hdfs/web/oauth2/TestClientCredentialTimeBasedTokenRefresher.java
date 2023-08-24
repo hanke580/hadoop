@@ -80,8 +80,9 @@ public class TestClientCredentialTimeBasedTokenRefresher {
         credProvider.setConf(conf);
         // Build mock server to receive refresh request
         ClientAndServer mockServer = startClientAndServer(PORT);
-        HttpRequest expectedRequest = request().withMethod("POST").withPath("/refresh").withBody(// Note, OkHttp does not sort the param values, so we need to do
-        // it ourselves via the ordering provided to ParameterBody...
+        HttpRequest expectedRequest = // Note, OkHttp does not sort the param values, so we need to do
+        request().withMethod("POST").withPath("/refresh").// Note, OkHttp does not sort the param values, so we need to do
+        withBody(// it ourselves via the ordering provided to ParameterBody...
         ParameterBody.params(Parameter.param(CLIENT_SECRET, "myreallycoolcredential"), Parameter.param(GRANT_TYPE, CLIENT_CREDENTIALS), Parameter.param(CLIENT_ID, CLIENT_ID_FOR_TESTING)));
         MockServerClient mockServerClient = new MockServerClient("localhost", PORT);
         // https://tools.ietf.org/html/rfc6749#section-5.1

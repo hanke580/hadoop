@@ -90,9 +90,13 @@ public class TestGangliaMetrics {
     public void testGangliaMetrics2() throws Exception {
         // Setting long interval to avoid periodic publishing.
         // We manually publish metrics by MeticsSystem#publishMetricsNow here.
-        ConfigBuilder cb = new ConfigBuilder().add("*.period", 120).add(testNamePrefix + ".sink.gsink30.context", // filter out only "test"
-        testNamePrefix).add(testNamePrefix + ".sink.gsink31.context", // filter out only "test"
-        testNamePrefix).save(TestMetricsConfig.getTestFilename("hadoop-metrics2-" + testNamePrefix));
+        ConfigBuilder cb = // filter out only "test"
+        new ConfigBuilder().add("*.period", 120).// filter out only "test"
+        add(// filter out only "test"
+        testNamePrefix + ".sink.gsink30.context", // filter out only "test"
+        testNamePrefix).// filter out only "test"
+        add(// filter out only "test"
+        testNamePrefix + ".sink.gsink31.context", testNamePrefix).save(TestMetricsConfig.getTestFilename("hadoop-metrics2-" + testNamePrefix));
         MetricsSystemImpl ms = new MetricsSystemImpl(testNamePrefix);
         ms.start();
         TestSource s1 = ms.register("s1", "s1 desc", new TestSource("s1rec"));

@@ -167,8 +167,9 @@ public class DFSUtilClient {
             while (nextIndex < len && bytes[nextIndex] != separator) {
                 nextIndex++;
             }
-            result[i] = (nextIndex > 0) ? Arrays.copyOfRange(bytes, startIndex, nextIndex) : // reuse empty bytes for root.
-            DFSUtilClient.EMPTY_BYTES;
+            result[i] = // reuse empty bytes for root.
+            (nextIndex > 0) ? // reuse empty bytes for root.
+            Arrays.copyOfRange(bytes, startIndex, nextIndex) : DFSUtilClient.EMPTY_BYTES;
             do {
                 // skip over separators.
                 nextIndex++;

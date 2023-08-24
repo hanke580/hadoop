@@ -290,14 +290,14 @@ public class ProvidedStorageMap {
         public final static String NAME = "PROVIDED";
 
         ProvidedDescriptor() {
-            super(new DatanodeID(// String ipAddr,
-            null, // String hostName,
+            super(new // String ipAddr,
+            DatanodeID(// String hostName,
             null, // String datanodeUuid,
-            UUID.randomUUID().toString(), // int xferPort,
-            0, // int infoPort,
+            null, // int xferPort,
+            UUID.randomUUID().toString(), // int infoPort,
             0, // int infoSecurePort,
             0, // int ipcPort
-            0));
+            0, 0));
         }
 
         DatanodeStorageInfo getProvidedStorage(DatanodeDescriptor dn, DatanodeStorage s) {

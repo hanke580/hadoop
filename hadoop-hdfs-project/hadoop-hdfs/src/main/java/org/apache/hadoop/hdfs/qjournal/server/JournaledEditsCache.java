@@ -183,8 +183,8 @@ class JournaledEditsCache {
             long prevTxn = requestedStartTxn;
             byte[] prevBuf = null;
             // Stop when maximum transactions reached...
-            while ((txnCount < maxTxns) && // ... or there are no more entries ...
-            (incrBuffIter.hasNext() || prevBuf != null)) {
+            while (// ... or there are no more entries ...
+            (txnCount < maxTxns) && (incrBuffIter.hasNext() || prevBuf != null)) {
                 long currTxn;
                 byte[] currBuf;
                 if (incrBuffIter.hasNext()) {

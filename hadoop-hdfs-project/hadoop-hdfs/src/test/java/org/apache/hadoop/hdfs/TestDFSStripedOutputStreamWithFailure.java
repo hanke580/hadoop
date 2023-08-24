@@ -209,8 +209,8 @@ public class TestDFSStripedOutputStreamWithFailure extends TestDFSStripedOutputS
     public void testCloseWithExceptionsInStreamer() throws Exception {
         final HdfsConfiguration conf = newHdfsConfiguration();
         final int[] fileLengths = { // Full stripe then partial on cell boundary
-        cellSize * (dataBlocks * 2 - 2), // Full stripe and a partial on non-cell boundary
-        (cellSize * dataBlocks) + 123 };
+        // Full stripe and a partial on non-cell boundary
+        cellSize * (dataBlocks * 2 - 2), (cellSize * dataBlocks) + 123 };
         // select the two DNs with partial block to kill
         int[] dnIndex = null;
         if (parityBlocks > 1) {

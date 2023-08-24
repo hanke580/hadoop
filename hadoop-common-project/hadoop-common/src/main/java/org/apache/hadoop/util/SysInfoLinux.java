@@ -708,6 +708,11 @@ public class SysInfoLinux extends SysInfo {
      * @param args - arguments to this calculator test
      */
     public static void main(String[] args) {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         SysInfoLinux plugin = new SysInfoLinux();
         System.out.println("Physical memory Size (bytes) : " + plugin.getPhysicalMemorySize());
         System.out.println("Total Virtual memory Size (bytes) : " + plugin.getVirtualMemorySize());

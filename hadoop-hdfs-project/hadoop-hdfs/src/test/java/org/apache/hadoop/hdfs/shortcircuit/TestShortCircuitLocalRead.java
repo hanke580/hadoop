@@ -453,6 +453,11 @@ public class TestShortCircuitLocalRead {
      * <shortcircuit on?> <checsum on?> <Number of threads>
      */
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         if (args.length != 3) {
             System.out.println("Usage: test shortcircuit checksum threadCount");
             System.exit(1);

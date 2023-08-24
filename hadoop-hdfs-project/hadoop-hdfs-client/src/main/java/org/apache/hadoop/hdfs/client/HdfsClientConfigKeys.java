@@ -190,8 +190,9 @@ public interface HdfsClientConfigKeys {
 
     String DFS_CLIENT_KEY_PROVIDER_CACHE_EXPIRY_MS = "dfs.client.key.provider.cache.expiry";
 
-    long DFS_CLIENT_KEY_PROVIDER_CACHE_EXPIRY_DEFAULT = // 10 days
-    TimeUnit.DAYS.toMillis(10);
+    // 10 days
+    long // 10 days
+    DFS_CLIENT_KEY_PROVIDER_CACHE_EXPIRY_DEFAULT = TimeUnit.DAYS.toMillis(10);
 
     String DFS_CLIENT_BLOCK_READER_REMOTE_BUFFER_SIZE_KEY = "dfs.client.block.reader.remote.buffer.size";
 
@@ -227,13 +228,15 @@ public interface HdfsClientConfigKeys {
 
     String DFS_CLIENT_DEAD_NODE_DETECTION_PROBE_DEAD_NODE_INTERVAL_MS_KEY = "dfs.client.deadnode.detection.probe.deadnode.interval.ms";
 
-    long DFS_CLIENT_DEAD_NODE_DETECTION_PROBE_DEAD_NODE_INTERVAL_MS_DEFAULT = // 60s
-    60 * 1000;
+    // 60s
+    long // 60s
+    DFS_CLIENT_DEAD_NODE_DETECTION_PROBE_DEAD_NODE_INTERVAL_MS_DEFAULT = 60 * 1000;
 
     String DFS_CLIENT_DEAD_NODE_DETECTION_PROBE_SUSPECT_NODE_INTERVAL_MS_KEY = "dfs.client.deadnode.detection.probe.suspectnode.interval.ms";
 
-    long DFS_CLIENT_DEAD_NODE_DETECTION_PROBE_SUSPECT_NODE_INTERVAL_MS_DEFAULT = // 300ms
-    300;
+    // 300ms
+    long // 300ms
+    DFS_CLIENT_DEAD_NODE_DETECTION_PROBE_SUSPECT_NODE_INTERVAL_MS_DEFAULT = 300;
 
     // refreshing LocatedBlocks period. A value of 0 disables the feature.
     String DFS_CLIENT_REFRESH_READ_BLOCK_LOCATIONS_MS_KEY = "dfs.client.refresh.read-block-locations.ms";

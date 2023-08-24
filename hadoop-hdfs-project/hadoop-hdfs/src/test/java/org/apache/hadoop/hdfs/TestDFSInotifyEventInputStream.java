@@ -128,8 +128,9 @@ public class TestDFSInotifyEventInputStream {
             client.setOwner("/dir", "username", "groupname");
             // SymlinkOp -> CreateEvent
             client.createSymlink("/dir", "/dir2", false);
-            client.setXAttr("/file5", "user.field", "value".getBytes(), EnumSet.of(// SetXAttrOp -> MetadataUpdateEvent
-            XAttrSetFlag.CREATE));
+            client.setXAttr("/file5", "user.field", "value".getBytes(), // SetXAttrOp -> MetadataUpdateEvent
+            EnumSet.// SetXAttrOp -> MetadataUpdateEvent
+            of(XAttrSetFlag.CREATE));
             // RemoveXAttrOp -> MetadataUpdateEvent
             client.removeXAttr("/file5", "user.field");
             // SetAclOp -> MetadataUpdateEvent

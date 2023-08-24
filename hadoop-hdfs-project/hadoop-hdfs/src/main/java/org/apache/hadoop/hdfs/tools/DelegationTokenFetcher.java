@@ -75,6 +75,11 @@ public class DelegationTokenFetcher {
      * failed and exiting was disabled.
      */
     public static void main(final String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         main(new HdfsConfiguration(), args);
     }
 

@@ -43,6 +43,11 @@ import java.util.List;
 public class StoragePolicyAdmin extends Configured implements Tool {
 
     public static void main(String[] argsArray) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         final StoragePolicyAdmin admin = new StoragePolicyAdmin(new Configuration());
         int res = ToolRunner.run(admin, argsArray);
         System.exit(res);

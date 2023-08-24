@@ -218,6 +218,11 @@ public class JvmPauseMonitor extends AbstractService {
      */
     @SuppressWarnings("resource")
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         JvmPauseMonitor monitor = new JvmPauseMonitor();
         monitor.init(new Configuration());
         monitor.start();

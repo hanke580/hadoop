@@ -86,8 +86,8 @@ public class LightWeightCache<K, E extends K> extends LightWeightGSet<K, E> {
     };
 
     private static int updateRecommendedLength(int recommendedLength, int sizeLimit) {
-        return sizeLimit > 0 && sizeLimit < recommendedLength ? // 0.75 load factor
-        (sizeLimit / 4 * 3) : recommendedLength;
+        return // 0.75 load factor
+        sizeLimit > 0 && sizeLimit < recommendedLength ? (sizeLimit / 4 * 3) : recommendedLength;
     }
 
     /*

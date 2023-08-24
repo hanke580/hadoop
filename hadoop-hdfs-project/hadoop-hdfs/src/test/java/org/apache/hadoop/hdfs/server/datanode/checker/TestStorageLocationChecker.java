@@ -80,8 +80,9 @@ public class TestStorageLocationChecker {
      */
     @Test(timeout = 30000)
     public void testFailedLocationsBelowThreshold() throws Exception {
-        final List<StorageLocation> locations = // 2 healthy, 1 failed.
-        makeMockLocations(HEALTHY, HEALTHY, FAILED);
+        final // 2 healthy, 1 failed.
+        List<StorageLocation> // 2 healthy, 1 failed.
+        locations = makeMockLocations(HEALTHY, HEALTHY, FAILED);
         final Configuration conf = new HdfsConfiguration();
         conf.setInt(DFS_DATANODE_FAILED_VOLUMES_TOLERATED_KEY, 1);
         StorageLocationChecker checker = new StorageLocationChecker(conf, new FakeTimer());
@@ -97,8 +98,9 @@ public class TestStorageLocationChecker {
      */
     @Test(timeout = 30000)
     public void testFailedLocationsAboveThreshold() throws Exception {
-        final List<StorageLocation> locations = // 1 healthy, 2 failed.
-        makeMockLocations(HEALTHY, FAILED, FAILED);
+        final // 1 healthy, 2 failed.
+        List<StorageLocation> // 1 healthy, 2 failed.
+        locations = makeMockLocations(HEALTHY, FAILED, FAILED);
         final Configuration conf = new HdfsConfiguration();
         conf.setInt(DFS_DATANODE_FAILED_VOLUMES_TOLERATED_KEY, 1);
         thrown.expect(IOException.class);

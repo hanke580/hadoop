@@ -82,8 +82,10 @@ public class TestDataNodeMetricsLogger {
         conf.set(DFSConfigKeys.DFS_DATANODE_HTTP_ADDRESS_KEY, "0.0.0.0:0");
         conf.set(DFSConfigKeys.DFS_DATANODE_IPC_ADDRESS_KEY, "0.0.0.0:0");
         conf.setInt(CommonConfigurationKeys.IPC_CLIENT_CONNECT_MAX_RETRIES_KEY, 0);
-        conf.setInt(DFS_DATANODE_METRICS_LOGGER_PERIOD_SECONDS_KEY, // If enabled, log early and log often
-        enableMetricsLogging ? 1 : 0);
+        // If enabled, log early and log often
+        conf.// If enabled, log early and log often
+        setInt(// If enabled, log early and log often
+        DFS_DATANODE_METRICS_LOGGER_PERIOD_SECONDS_KEY, enableMetricsLogging ? 1 : 0);
         dn = InternalDataNodeTestUtils.startDNWithMockNN(conf, NN_ADDR, DATA_DIR);
     }
 

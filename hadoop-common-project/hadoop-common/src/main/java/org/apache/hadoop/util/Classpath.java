@@ -53,6 +53,11 @@ public final class Classpath {
      * @param args command-line arguments
      */
     public static void main(String[] args) {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         if (args.length < 1 || args[0].equals("-h") || args[0].equals("--help")) {
             System.out.println(usage);
             return;

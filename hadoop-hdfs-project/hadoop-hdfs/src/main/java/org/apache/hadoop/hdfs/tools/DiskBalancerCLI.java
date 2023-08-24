@@ -189,6 +189,11 @@ public class DiskBalancerCLI extends Configured implements Tool {
      * @throws Exception
      */
     public static void main(String[] argv) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         DiskBalancerCLI shell = new DiskBalancerCLI(new HdfsConfiguration());
         int res = 0;
         try {

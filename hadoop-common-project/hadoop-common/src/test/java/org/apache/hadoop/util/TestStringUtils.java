@@ -452,6 +452,11 @@ public class TestStringUtils extends UnitTestcaseTimeLimit {
 
     // Benchmark for StringUtils split
     public static void main(String[] args) {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         final String TO_SPLIT = "foo,bar,baz,blah,blah";
         for (boolean useOurs : new boolean[] { false, true }) {
             for (int outer = 0; outer < 10; outer++) {

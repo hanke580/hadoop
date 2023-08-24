@@ -402,8 +402,9 @@ public class CommonConfigurationKeys extends CommonConfigurationKeysPublic {
 
     public static final String HADOOP_SECURITY_UID_NAME_CACHE_TIMEOUT_KEY = "hadoop.security.uid.cache.secs";
 
-    public static final long HADOOP_SECURITY_UID_NAME_CACHE_TIMEOUT_DEFAULT = // 4 hours
-    4 * 60 * 60;
+    public static final // 4 hours
+    long // 4 hours
+    HADOOP_SECURITY_UID_NAME_CACHE_TIMEOUT_DEFAULT = 4 * 60 * 60;
 
     public static final String IPC_CLIENT_ASYNC_CALLS_MAX_KEY = "ipc.client.async.calls.max";
 

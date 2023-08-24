@@ -867,7 +867,7 @@ public class FoldedTreeSet<E> implements SortedSet<E> {
      *
      * @return The removed entry or null if not found
      */
-    public E removeAndGet(Object obj, Comparator<?> cmp) {
+    public E internal$removeAndGet34(Object obj, Comparator<?> cmp) {
         Objects.requireNonNull(obj);
         if (!isEmpty()) {
             Node<E> node = root;
@@ -885,6 +885,7 @@ public class FoldedTreeSet<E> implements SortedSet<E> {
                 if (result < 0) {
                     node = node.left;
                 } else if (result == 0) {
+                    EXIT888 = true;
                     return removeElementLeft(node);
                 } else {
                     int rightIndex = node.rightIndex;
@@ -920,6 +921,7 @@ public class FoldedTreeSet<E> implements SortedSet<E> {
                 }
             }
         }
+        EXIT923 = true;
         return null;
     }
 
@@ -930,7 +932,7 @@ public class FoldedTreeSet<E> implements SortedSet<E> {
      *
      * @return The removed entry or null if not found
      */
-    public E removeAndGet(Object obj) {
+    public E internal$removeAndGet35(Object obj) {
         return removeAndGet(obj, comparator);
     }
 
@@ -1327,4 +1329,63 @@ public class FoldedTreeSet<E> implements SortedSet<E> {
     private long right_104;
 
     private long left_105;
+
+    private boolean EXIT923 = false;
+
+    private boolean EXIT888 = false;
+
+    /**
+     * Remove object using a provided comparator, and return the removed entry.
+     *
+     * @param obj Lookup entry
+     * @param cmp User provided Comparator. The comparator should expect that the
+     *            proved obj will always be the first method parameter and any
+     *            stored object will be the second parameter.
+     *
+     * @return The removed entry or null if not found
+     */
+    public E removeAndGet(Object obj, Comparator<?> cmp) {
+        try {
+            if (!(this.right_106 == this.left_106)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(45);
+            }
+        } catch (Exception e) {
+        }
+        E returnValue;
+        returnValue = internal$removeAndGet34(obj, cmp);
+        try {
+            if (EXIT923 && !(this.right_106 == this.left_106)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(46);
+            }
+        } catch (Exception e) {
+        }
+        try {
+            if (EXIT888 && !(this.right_106 == this.left_106)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(47);
+            }
+        } catch (Exception e) {
+        }
+        EXIT923 = false;
+        EXIT888 = false;
+        return returnValue;
+    }
+
+    /**
+     * Remove object and return the removed entry.
+     *
+     * @param obj Lookup entry
+     *
+     * @return The removed entry or null if not found
+     */
+    public E removeAndGet(Object obj) {
+        try {
+            if (!(this.right_106 == this.left_106)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(48);
+            }
+        } catch (Exception e) {
+        }
+        E returnValue;
+        returnValue = internal$removeAndGet35(obj);
+        return returnValue;
+    }
 }

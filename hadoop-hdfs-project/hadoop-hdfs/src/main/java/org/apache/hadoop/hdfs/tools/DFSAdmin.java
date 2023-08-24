@@ -2076,6 +2076,11 @@ public class DFSAdmin extends FsShell {
      * @exception Exception if the filesystem does not exist.
      */
     public static void main(String[] argv) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         int res = ToolRunner.run(new DFSAdmin(), argv);
         System.exit(res);
     }

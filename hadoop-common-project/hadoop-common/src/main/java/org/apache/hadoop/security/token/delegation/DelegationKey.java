@@ -66,7 +66,7 @@ public class DelegationKey implements Writable {
         }
     }
 
-    public int getKeyId() {
+    public int internal$getKeyId7() {
         return keyId;
     }
 
@@ -140,5 +140,17 @@ public class DelegationKey implements Writable {
             DelegationKey r = (DelegationKey) right;
             return keyId == r.keyId && expiryDate == r.expiryDate && Arrays.equals(keyBytes, r.keyBytes);
         }
+    }
+
+    public int getKeyId() {
+        try {
+            if (!(this.keyId == 545581534 || this.keyId == 545581535)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(11);
+            }
+        } catch (Exception e) {
+        }
+        int returnValue;
+        returnValue = internal$getKeyId7();
+        return returnValue;
     }
 }

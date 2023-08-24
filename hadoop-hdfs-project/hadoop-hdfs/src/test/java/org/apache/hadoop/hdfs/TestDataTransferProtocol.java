@@ -141,13 +141,13 @@ public class TestDataTransferProtocol {
     }
 
     private void writeZeroLengthPacket(ExtendedBlock block, String description) throws IOException {
-        PacketHeader hdr = new PacketHeader(// size of packet
-        8, // OffsetInBlock
-        block.getNumBytes(), // sequencenumber
-        100, // lastPacketInBlock
-        true, // chunk length
-        0, // sync block
-        false);
+        PacketHeader hdr = new // size of packet
+        PacketHeader(// OffsetInBlock
+        8, // sequencenumber
+        block.getNumBytes(), // lastPacketInBlock
+        100, // chunk length
+        true, // sync block
+        0, false);
         hdr.write(sendOut);
         // zero checksum
         sendOut.writeInt(0);
@@ -322,12 +322,12 @@ public class TestDataTransferProtocol {
             sendBuf.reset();
             recvBuf.reset();
             writeBlock(poolId, ++newBlockId, DEFAULT_CHECKSUM);
-            PacketHeader hdr = new PacketHeader(// size of packet
-            4, // offset in block,
-            0, // seqno
-            100, // last packet
-            false, // bad datalen
-            -1 - random.nextInt(oneMil), false);
+            PacketHeader hdr = new // size of packet
+            PacketHeader(// offset in block,
+            4, // seqno
+            0, // last packet
+            100, // bad datalen
+            false, -1 - random.nextInt(oneMil), false);
             hdr.write(sendOut);
             sendResponse(Status.SUCCESS, "", null, recvOut);
             new PipelineAck(100, new int[] { PipelineAck.combineHeader(PipelineAck.ECN.DISABLED, Status.ERROR) }).write(recvOut);
@@ -336,12 +336,12 @@ public class TestDataTransferProtocol {
             sendBuf.reset();
             recvBuf.reset();
             writeBlock(poolId, ++newBlockId, DEFAULT_CHECKSUM);
-            hdr = new PacketHeader(// size of packet
-            8, // OffsetInBlock
-            0, // sequencenumber
-            100, // lastPacketInBlock
-            true, // chunk length
-            0, false);
+            hdr = new // size of packet
+            PacketHeader(// OffsetInBlock
+            8, // sequencenumber
+            0, // lastPacketInBlock
+            100, // chunk length
+            true, 0, false);
             hdr.write(sendOut);
             // zero checksum
             sendOut.writeInt(0);
@@ -392,12 +392,12 @@ public class TestDataTransferProtocol {
 
     @Test
     public void testPacketHeader() throws IOException {
-        PacketHeader hdr = new PacketHeader(// size of packet
-        4, // OffsetInBlock
-        1024, // sequencenumber
-        100, // lastPacketInBlock
-        false, // chunk length
-        4096, false);
+        PacketHeader hdr = new // size of packet
+        PacketHeader(// OffsetInBlock
+        4, // sequencenumber
+        1024, // lastPacketInBlock
+        100, // chunk length
+        false, 4096, false);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         hdr.write(new DataOutputStream(baos));
         // Read back using DataInput

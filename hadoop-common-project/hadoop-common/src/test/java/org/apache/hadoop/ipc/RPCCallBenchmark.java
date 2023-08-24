@@ -329,6 +329,11 @@ public class RPCCallBenchmark extends TestRpcBase implements Tool {
     }
 
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         int rc = ToolRunner.run(new RPCCallBenchmark(), args);
         System.exit(rc);
     }

@@ -181,8 +181,8 @@ public class TestLeaseRecovery {
         // CRC32 & CRC32C
         final int CHECKSUM_SIZE = 4;
         final int bytesPerChecksum = conf.getInt(DFSConfigKeys.DFS_BYTES_PER_CHECKSUM_KEY, DFSConfigKeys.DFS_BYTES_PER_CHECKSUM_DEFAULT);
-        final int metaFileSize = (FILE_SIZE + bytesPerChecksum - 1) / bytesPerChecksum * CHECKSUM_SIZE + // meta file header is 8 bytes
-        8;
+        final int metaFileSize = // meta file header is 8 bytes
+        (FILE_SIZE + bytesPerChecksum - 1) / bytesPerChecksum * CHECKSUM_SIZE + 8;
         final int newMetaFileSize = metaFileSize - CHECKSUM_SIZE;
         // Corrupt the block meta file by dropping checksum for bytesPerChecksum
         // bytes. Lease recovery is expected to recover the uncorrupted file length.

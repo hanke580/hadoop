@@ -538,6 +538,11 @@ public class TestByteArrayManager {
     }
 
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         GenericTestUtils.setLogLevel(LoggerFactory.getLogger(ByteArrayManager.class), Level.OFF);
         //64k
         final int arrayLength = 64 * 1024;

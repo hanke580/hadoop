@@ -126,7 +126,7 @@ public abstract class ChecksumFileSystem extends FilterFileSystem {
     /**
      * Return the bytes Per Checksum
      */
-    public int getBytesPerSum() {
+    public int internal$getBytesPerSum20() {
         return bytesPerChecksum;
     }
 
@@ -182,12 +182,11 @@ public abstract class ChecksumFileSystem extends FilterFileSystem {
             }
         }
 
-        private long getChecksumFilePos(long dataPos) {
+        private long internal$getChecksumFilePos16(long dataPos) {
             return HEADER_LENGTH + 4 * (dataPos / bytesPerSum);
         }
 
-        @Override
-        protected long getChunkPosition(long dataPos) {
+        protected long internal$getChunkPosition17(long dataPos) {
             return dataPos / bytesPerSum * bytesPerSum;
         }
 
@@ -228,8 +227,7 @@ public abstract class ChecksumFileSystem extends FilterFileSystem {
             return sums.seekToNewSource(sumsPos) || newDataSource;
         }
 
-        @Override
-        protected int readChunk(long pos, byte[] buf, int offset, int len, byte[] checksum) throws IOException {
+        protected int internal$readChunk18(long pos, byte[] buf, int offset, int len, byte[] checksum) throws IOException {
             boolean eof = false;
             if (needChecksum()) {
                 // we have a checksum buffer
@@ -238,9 +236,10 @@ public abstract class ChecksumFileSystem extends FilterFileSystem {
                 assert checksum.length % CHECKSUM_SIZE == 0;
                 // we must read at least one chunk
                 assert len >= bytesPerSum;
-                final int checksumsToRead = Math.min(// number of checksums based on len to read
-                len / bytesPerSum, // size of checksum buffer
-                checksum.length / CHECKSUM_SIZE);
+                final int checksumsToRead = // number of checksums based on len to read
+                Math.// number of checksums based on len to read
+                min(// size of checksum buffer
+                len / bytesPerSum, checksum.length / CHECKSUM_SIZE);
                 long checksumPos = getChecksumFilePos(pos);
                 if (checksumPos != sums.getPos()) {
                     sums.seek(checksumPos);
@@ -266,6 +265,44 @@ public abstract class ChecksumFileSystem extends FilterFileSystem {
             }
             return nread;
         }
+
+        private long getChecksumFilePos(long dataPos) {
+            try {
+                if (!(this.bytesPerSum == 512)) {
+                    org.zlab.dinv.runtimechecker.Runtime.addViolation(22);
+                }
+            } catch (Exception e) {
+            }
+            long returnValue;
+            returnValue = internal$getChecksumFilePos16(dataPos);
+            return returnValue;
+        }
+
+        @Override
+        protected long getChunkPosition(long dataPos) {
+            try {
+                if (!(this.bytesPerSum == 1 || this.bytesPerSum == 512)) {
+                    org.zlab.dinv.runtimechecker.Runtime.addViolation(23);
+                }
+            } catch (Exception e) {
+            }
+            long returnValue;
+            returnValue = internal$getChunkPosition17(dataPos);
+            return returnValue;
+        }
+
+        @Override
+        protected int readChunk(long pos, byte[] buf, int offset, int len, byte[] checksum) throws IOException {
+            try {
+                if (!(this.bytesPerSum == 1 || this.bytesPerSum == 512)) {
+                    org.zlab.dinv.runtimechecker.Runtime.addViolation(24);
+                }
+            } catch (Exception e) {
+            }
+            int returnValue;
+            returnValue = internal$readChunk18(pos, buf, offset, len, checksum);
+            return returnValue;
+        }
     }
 
     private static class FSDataBoundedInputStream extends FSDataInputStream {
@@ -288,7 +325,7 @@ public abstract class ChecksumFileSystem extends FilterFileSystem {
         }
 
         /* Return the file length */
-        private long getFileLength() throws IOException {
+        private long internal$getFileLength19() throws IOException {
             if (fileLen == -1L) {
                 fileLen = fs.getContentSummary(file).getLength();
             }
@@ -336,6 +373,19 @@ public abstract class ChecksumFileSystem extends FilterFileSystem {
                 throw new EOFException("Cannot seek after EOF");
             }
             super.seek(pos);
+        }
+
+        /* Return the file length */
+        private long getFileLength() throws IOException {
+            try {
+                if (!(this.fileLen == -1)) {
+                    org.zlab.dinv.runtimechecker.Runtime.addViolation(25);
+                }
+            } catch (Exception e) {
+            }
+            long returnValue;
+            returnValue = internal$getFileLength19();
+            return returnValue;
         }
     }
 
@@ -828,5 +878,20 @@ public abstract class ChecksumFileSystem extends FilterFileSystem {
             default:
                 return super.hasPathCapability(p, capability);
         }
+    }
+
+    /**
+     * Return the bytes Per Checksum
+     */
+    public int getBytesPerSum() {
+        try {
+            if (!(this.bytesPerChecksum == 512)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(26);
+            }
+        } catch (Exception e) {
+        }
+        int returnValue;
+        returnValue = internal$getBytesPerSum20();
+        return returnValue;
     }
 }

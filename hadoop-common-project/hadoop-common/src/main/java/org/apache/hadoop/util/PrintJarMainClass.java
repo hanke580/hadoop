@@ -32,6 +32,11 @@ public class PrintJarMainClass {
      * @param args
      */
     public static void main(String[] args) {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         try (JarFile jar_file = new JarFile(args[0])) {
             Manifest manifest = jar_file.getManifest();
             if (manifest != null) {

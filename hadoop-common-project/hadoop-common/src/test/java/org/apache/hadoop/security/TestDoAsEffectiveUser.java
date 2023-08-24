@@ -182,8 +182,10 @@ public class TestDoAsEffectiveUser extends TestRpcBase {
     @Test
     public void testRealUserIPAuthorizationFailure() throws IOException {
         final Configuration conf = new Configuration();
-        conf.setStrings(DefaultImpersonationProvider.getTestProvider().getProxySuperuserIpConfKey(REAL_USER_SHORT_NAME), //Authorized IP address
-        "20.20.20.20");
+        //Authorized IP address
+        conf.//Authorized IP address
+        setStrings(//Authorized IP address
+        DefaultImpersonationProvider.getTestProvider().getProxySuperuserIpConfKey(REAL_USER_SHORT_NAME), "20.20.20.20");
         conf.setStrings(DefaultImpersonationProvider.getTestProvider().getProxySuperuserGroupConfKey(REAL_USER_SHORT_NAME), "group1");
         RPC.setProtocolEngine(conf, TestRpcService.class, ProtobufRpcEngine2.class);
         UserGroupInformation.setConfiguration(conf);

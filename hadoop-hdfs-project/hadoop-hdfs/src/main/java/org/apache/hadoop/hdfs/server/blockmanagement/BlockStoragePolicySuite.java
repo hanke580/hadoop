@@ -47,8 +47,13 @@ public class BlockStoragePolicySuite {
     public static BlockStoragePolicySuite createDefaultSuite() {
         final BlockStoragePolicy[] policies = new BlockStoragePolicy[1 << ID_BIT_LENGTH];
         final byte lazyPersistId = HdfsConstants.MEMORY_STORAGE_POLICY_ID;
-        policies[lazyPersistId] = new BlockStoragePolicy(lazyPersistId, HdfsConstants.MEMORY_STORAGE_POLICY_NAME, new StorageType[] { StorageType.RAM_DISK, StorageType.DISK }, new StorageType[] { StorageType.DISK }, new StorageType[] { StorageType.DISK }, // Cannot be changed on regular files, but inherited.
-        true);
+        policies[lazyPersistId] = new // Cannot be changed on regular files, but inherited.
+        BlockStoragePolicy(// Cannot be changed on regular files, but inherited.
+        lazyPersistId, // Cannot be changed on regular files, but inherited.
+        HdfsConstants.MEMORY_STORAGE_POLICY_NAME, // Cannot be changed on regular files, but inherited.
+        new StorageType[] { StorageType.RAM_DISK, StorageType.DISK }, // Cannot be changed on regular files, but inherited.
+        new StorageType[] { StorageType.DISK }, // Cannot be changed on regular files, but inherited.
+        new StorageType[] { StorageType.DISK }, true);
         final byte allssdId = HdfsConstants.ALLSSD_STORAGE_POLICY_ID;
         policies[allssdId] = new BlockStoragePolicy(allssdId, HdfsConstants.ALLSSD_STORAGE_POLICY_NAME, new StorageType[] { StorageType.SSD }, new StorageType[] { StorageType.DISK }, new StorageType[] { StorageType.DISK });
         final byte onessdId = HdfsConstants.ONESSD_STORAGE_POLICY_ID;

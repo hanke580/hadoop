@@ -169,8 +169,10 @@ public class TestMetricsSourceAdapter {
         // Wake up every 2 JMX cache TTL so updateJmxCache() will try to update
         // JMX cache.
         SourceReader srcReader = new SourceReader(source, sourceAdapter, hasError);
-        ScheduledFuture<?> readerFuture = readerExecutor.scheduleAtFixedRate(srcReader, // set JMX info cache at the beginning
-        0, 2 * sourceAdapter.getJmxCacheTTL(), TimeUnit.MILLISECONDS);
+        ScheduledFuture<?> readerFuture = // set JMX info cache at the beginning
+        readerExecutor.// set JMX info cache at the beginning
+        scheduleAtFixedRate(// set JMX info cache at the beginning
+        srcReader, 0, 2 * sourceAdapter.getJmxCacheTTL(), TimeUnit.MILLISECONDS);
         srcReader.setFuture(readerFuture);
         // Let the threads do their work.
         Thread.sleep(RACE_TEST_RUNTIME);

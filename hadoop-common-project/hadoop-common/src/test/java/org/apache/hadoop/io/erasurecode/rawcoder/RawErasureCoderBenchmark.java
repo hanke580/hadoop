@@ -95,6 +95,11 @@ public final class RawErasureCoderBenchmark {
     }
 
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         String opType = null;
         int coderIndex = 0;
         // default values

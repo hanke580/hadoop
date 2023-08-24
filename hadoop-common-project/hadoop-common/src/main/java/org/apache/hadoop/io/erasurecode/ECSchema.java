@@ -163,7 +163,7 @@ public final class ECSchema implements Serializable {
      * Get required parity units count in a coding group
      * @return count of parity units
      */
-    public int getNumParityUnits() {
+    public int internal$getNumParityUnits10() {
         return numParityUnits;
     }
 
@@ -202,5 +202,21 @@ public final class ECSchema implements Serializable {
     @Override
     public int hashCode() {
         return new HashCodeBuilder(1273158869, 1555022101).append(codecName).append(extraOptions).append(numDataUnits).append(numParityUnits).toHashCode();
+    }
+
+    /**
+     * Get required parity units count in a coding group
+     * @return count of parity units
+     */
+    public int getNumParityUnits() {
+        try {
+            if (!(this.numParityUnits > 1 || this.numParityUnits == 1)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(16);
+            }
+        } catch (Exception e) {
+        }
+        int returnValue;
+        returnValue = internal$getNumParityUnits10();
+        return returnValue;
     }
 }

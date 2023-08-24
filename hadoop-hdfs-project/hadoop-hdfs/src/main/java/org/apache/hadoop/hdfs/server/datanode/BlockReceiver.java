@@ -857,10 +857,11 @@ class BlockReceiver implements Closeable {
         ((PacketResponder) responder.getRunnable()).sendOOBResponse(PipelineAck.getRestartOOBStatus());
     }
 
-    void receiveBlock(// output to next datanode
-    DataOutputStream mirrOut, // input from next datanode
-    DataInputStream mirrIn, // output to previous datanode
-    DataOutputStream replyOut, String mirrAddr, DataTransferThrottler throttlerArg, DatanodeInfo[] downstreams, boolean isReplaceBlock) throws IOException {
+    // output to next datanode
+    void // output to next datanode
+    receiveBlock(// input from next datanode
+    DataOutputStream mirrOut, // output to previous datanode
+    DataInputStream mirrIn, DataOutputStream replyOut, String mirrAddr, DataTransferThrottler throttlerArg, DatanodeInfo[] downstreams, boolean isReplaceBlock) throws IOException {
         syncOnClose = datanode.getDnConf().syncOnClose;
         dirSyncOnFinalize = syncOnClose;
         boolean responderClosed = false;

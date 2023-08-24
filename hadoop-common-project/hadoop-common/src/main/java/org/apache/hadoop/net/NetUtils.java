@@ -569,8 +569,8 @@ public class NetUtils {
         }
     }
 
-    private static final // Pattern for matching ip[:port]
-    Pattern // Pattern for matching ip[:port]
+    private static final Pattern // Pattern for matching ip[:port]
+    // Pattern for matching ip[:port]
     ipPortPattern = Pattern.compile("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(:\\d+)?");
 
     /**

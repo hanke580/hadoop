@@ -124,8 +124,8 @@ public class JspHelper {
             }
         } else {
             // Security's not on, pull from url or use default web user
-            remoteUser = (usernameFromQuery == null) ? // not specified in request
-            getDefaultWebUserName(conf) : usernameFromQuery;
+            remoteUser = // not specified in request
+            (usernameFromQuery == null) ? getDefaultWebUserName(conf) : usernameFromQuery;
         }
         if (ugi == null) {
             // security is off, or there's no token

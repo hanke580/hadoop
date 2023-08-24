@@ -52,8 +52,13 @@ class MBeanInfoBuilder implements MetricsVisitor {
     }
 
     MBeanAttributeInfo newAttrInfo(String name, String desc, String type) {
-        return new MBeanAttributeInfo(getAttrName(name), type, desc, true, false, // read-only, non-is
-        false);
+        return new // read-only, non-is
+        MBeanAttributeInfo(// read-only, non-is
+        getAttrName(name), // read-only, non-is
+        type, // read-only, non-is
+        desc, // read-only, non-is
+        true, // read-only, non-is
+        false, false);
     }
 
     MBeanAttributeInfo newAttrInfo(MetricsInfo info, String type) {
@@ -107,7 +112,12 @@ class MBeanInfoBuilder implements MetricsVisitor {
         }
         MetricsSystemImpl.LOG.debug("{}", attrs);
         MBeanAttributeInfo[] attrsArray = new MBeanAttributeInfo[attrs.size()];
-        return new MBeanInfo(name, description, attrs.toArray(attrsArray), null, null, // no ops/ctors/notifications
-        null);
+        return new // no ops/ctors/notifications
+        MBeanInfo(// no ops/ctors/notifications
+        name, // no ops/ctors/notifications
+        description, // no ops/ctors/notifications
+        attrs.toArray(attrsArray), // no ops/ctors/notifications
+        null, // no ops/ctors/notifications
+        null, null);
     }
 }

@@ -213,8 +213,9 @@ public class ObserverReadProxyProvider<T> extends AbstractNNFailoverProxyProvide
         combinedInfo.append(']');
         T wrappedProxy = (T) Proxy.newProxyInstance(ObserverReadInvocationHandler.class.getClassLoader(), new Class<?>[] { xface }, new ObserverReadInvocationHandler());
         combinedProxy = new ProxyInfo<>(wrappedProxy, combinedInfo.toString());
-        autoMsyncPeriodMs = conf.getTimeDuration(// The host of the URI is the nameservice ID
-        AUTO_MSYNC_PERIOD_KEY_PREFIX + "." + uri.getHost(), AUTO_MSYNC_PERIOD_DEFAULT, TimeUnit.MILLISECONDS);
+        autoMsyncPeriodMs = // The host of the URI is the nameservice ID
+        conf.// The host of the URI is the nameservice ID
+        getTimeDuration(AUTO_MSYNC_PERIOD_KEY_PREFIX + "." + uri.getHost(), AUTO_MSYNC_PERIOD_DEFAULT, TimeUnit.MILLISECONDS);
         observerProbeRetryPeriodMs = conf.getTimeDuration(OBSERVER_PROBE_RETRY_PERIOD_KEY, OBSERVER_PROBE_RETRY_PERIOD_DEFAULT, TimeUnit.MILLISECONDS);
         // TODO : make this configurable or remove this variable
         if (wrappedProxy instanceof ClientProtocol) {

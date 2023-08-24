@@ -227,7 +227,7 @@ public class BlockStoragePolicy implements BlockStoragePolicySpi {
         return getClass().getSimpleName() + "{" + name + ":" + id + ", storageTypes=" + Arrays.asList(storageTypes) + ", creationFallbacks=" + Arrays.asList(creationFallbacks) + ", replicationFallbacks=" + Arrays.asList(replicationFallbacks) + "}";
     }
 
-    public byte getId() {
+    public byte internal$getId29() {
         return id;
     }
 
@@ -263,5 +263,17 @@ public class BlockStoragePolicy implements BlockStoragePolicySpi {
     @Override
     public boolean isCopyOnCreateFile() {
         return copyOnCreateFile;
+    }
+
+    public byte getId() {
+        try {
+            if (!(this.id == 7)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(39);
+            }
+        } catch (Exception e) {
+        }
+        byte returnValue;
+        returnValue = internal$getId29();
+        return returnValue;
     }
 }

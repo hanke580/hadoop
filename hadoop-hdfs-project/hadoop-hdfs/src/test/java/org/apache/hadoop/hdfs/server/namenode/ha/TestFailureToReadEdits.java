@@ -104,9 +104,9 @@ public class TestFailureToReadEdits {
      */
     @Parameters
     public static Iterable<Object[]> data() {
-        return Arrays.asList(new Object[][] { { TestType.SHARED_DIR_HA, Boolean.FALSE }, //{TestType.SHARED_DIR_HA, Boolean.TRUE},
-        { TestType.QJM_HA, Boolean.FALSE } //{TestType.QJM_HA, Boolean.TRUE},
-        });
+        return Arrays.asList(new Object[][] { //{TestType.SHARED_DIR_HA, Boolean.TRUE},
+        { TestType.SHARED_DIR_HA, Boolean.FALSE }, //{TestType.QJM_HA, Boolean.TRUE},
+        { TestType.QJM_HA, Boolean.FALSE } });
     }
 
     public TestFailureToReadEdits(TestType clusterType, Boolean useAsyncEditLogging) {

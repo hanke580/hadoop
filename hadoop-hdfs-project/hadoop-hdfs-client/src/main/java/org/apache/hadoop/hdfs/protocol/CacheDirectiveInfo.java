@@ -147,8 +147,9 @@ public class CacheDirectiveInfo {
         /**
          * The maximum value we accept for a relative expiry.
          */
-        public static final long MAX_RELATIVE_EXPIRY_MS = // This helps prevent weird overflow bugs
-        Long.MAX_VALUE / 4;
+        public static final // This helps prevent weird overflow bugs
+        long // This helps prevent weird overflow bugs
+        MAX_RELATIVE_EXPIRY_MS = Long.MAX_VALUE / 4;
 
         /**
          * An relative Expiration that never expires.

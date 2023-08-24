@@ -108,7 +108,7 @@ public class XAttr {
         return name;
     }
 
-    public byte[] getValue() {
+    public byte[] internal$getValue33() {
         return value;
     }
 
@@ -155,5 +155,17 @@ public class XAttr {
     @Override
     public String toString() {
         return "XAttr [ns=" + ns + ", name=" + name + ", value=" + Arrays.toString(value) + "]";
+    }
+
+    public byte[] getValue() {
+        try {
+            if (!(org.zlab.dinv.runtimechecker.Quant.size(this.value) == 3)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(44);
+            }
+        } catch (Exception e) {
+        }
+        byte[] returnValue;
+        returnValue = internal$getValue33();
+        return returnValue;
     }
 }

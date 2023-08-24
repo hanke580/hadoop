@@ -781,8 +781,9 @@ public class TestDecommissionWithStriped {
         // Wake up to reconstruct the block.
         BlockManagerTestUtil.wakeupPendingReconstructionTimerThread(bm);
         // Wait for decommissioning
-        GenericTestUtils.waitFor(// Whether there are 8 live replicas after decommission.
-        () -> bm.countNodes(blockInfo).liveReplicas() == 9, 100, 60000);
+        // Whether there are 8 live replicas after decommission.
+        GenericTestUtils.// Whether there are 8 live replicas after decommission.
+        waitFor(() -> bm.countNodes(blockInfo).liveReplicas() == 9, 100, 60000);
         StripedFileTestUtil.checkData(dfs, ecFile, writeBytes, decommisionNodes, null, blockGroupSize);
         cleanupFile(dfs, ecFile);
     }

@@ -80,8 +80,9 @@ public class DFSConfigKeys extends CommonConfigurationKeys {
 
     public static final String DFS_WEBHDFS_UGI_EXPIRE_AFTER_ACCESS_KEY = "dfs.webhdfs.ugi.expire.after.access";
 
-    public static final int DFS_WEBHDFS_UGI_EXPIRE_AFTER_ACCESS_DEFAULT = //10 minutes
-    10 * 60 * 1000;
+    public static final //10 minutes
+    int //10 minutes
+    DFS_WEBHDFS_UGI_EXPIRE_AFTER_ACCESS_DEFAULT = 10 * 60 * 1000;
 
     public static final String DFS_WEBHDFS_USE_IPC_CALLQ = "dfs.webhdfs.use.ipc.callq";
 
@@ -132,8 +133,9 @@ public class DFSConfigKeys extends CommonConfigurationKeys {
 
     public static final String DFS_DATANODE_DATA_TRANSFER_BANDWIDTHPERSEC_KEY = "dfs.datanode.data.transfer.bandwidthPerSec";
 
-    public static final long DFS_DATANODE_DATA_TRANSFER_BANDWIDTHPERSEC_DEFAULT = // A value of zero indicates no limit
-    0;
+    public static final // A value of zero indicates no limit
+    long // A value of zero indicates no limit
+    DFS_DATANODE_DATA_TRANSFER_BANDWIDTHPERSEC_DEFAULT = 0;
 
     public static final String DFS_DATANODE_DATA_WRITE_BANDWIDTHPERSEC_KEY = "dfs.datanode.data.write.bandwidthPerSec";
 
@@ -759,8 +761,9 @@ public class DFSConfigKeys extends CommonConfigurationKeys {
     // Threshold for how long the lock warnings must be suppressed
     public static final String DFS_LOCK_SUPPRESS_WARNING_INTERVAL_KEY = "dfs.lock.suppress.warning.interval";
 
-    public static final long DFS_LOCK_SUPPRESS_WARNING_INTERVAL_DEFAULT = //ms
-    10000;
+    public static final //ms
+    long //ms
+    DFS_LOCK_SUPPRESS_WARNING_INTERVAL_DEFAULT = 10000;
 
     public static final String DFS_DATANODE_LOCK_FAIR_KEY = "dfs.datanode.lock.fair";
 
@@ -1279,8 +1282,9 @@ public class DFSConfigKeys extends CommonConfigurationKeys {
 
     public static final String DFS_IMAGE_TRANSFER_BOOTSTRAP_STANDBY_RATE_KEY = "dfs.image.transfer-bootstrap-standby.bandwidthPerSec";
 
-    public static final long DFS_IMAGE_TRANSFER_BOOTSTRAP_STANDBY_RATE_DEFAULT = //no throttling
-    0;
+    public static final //no throttling
+    long //no throttling
+    DFS_IMAGE_TRANSFER_BOOTSTRAP_STANDBY_RATE_DEFAULT = 0;
 
     // Image transfer timeout
     public static final String DFS_IMAGE_TRANSFER_TIMEOUT_KEY = "dfs.image.transfer.timeout";
@@ -1971,8 +1975,9 @@ public class DFSConfigKeys extends CommonConfigurationKeys {
     public static final String DFS_CLIENT_WRITE_EXCLUDE_NODES_CACHE_EXPIRY_INTERVAL = HdfsClientConfigKeys.Write.EXCLUDE_NODES_CACHE_EXPIRY_INTERVAL_KEY;
 
     @Deprecated
-    public static final long DFS_CLIENT_WRITE_EXCLUDE_NODES_CACHE_EXPIRY_INTERVAL_DEFAULT = // 10 minutes, in ms
-    HdfsClientConfigKeys.Write.EXCLUDE_NODES_CACHE_EXPIRY_INTERVAL_DEFAULT;
+    public static final // 10 minutes, in ms
+    long // 10 minutes, in ms
+    DFS_CLIENT_WRITE_EXCLUDE_NODES_CACHE_EXPIRY_INTERVAL_DEFAULT = HdfsClientConfigKeys.Write.EXCLUDE_NODES_CACHE_EXPIRY_INTERVAL_DEFAULT;
 
     @Deprecated
     public static final String DFS_CLIENT_WRITE_BYTE_ARRAY_MANAGER_ENABLED_KEY = HdfsClientConfigKeys.Write.ByteArrayManager.ENABLED_KEY;

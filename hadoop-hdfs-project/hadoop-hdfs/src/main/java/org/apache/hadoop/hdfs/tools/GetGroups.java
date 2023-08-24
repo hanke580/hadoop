@@ -80,6 +80,11 @@ public class GetGroups extends GetGroupsBase {
     }
 
     public static void main(String[] argv) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         if (DFSUtil.parseHelpArgument(argv, USAGE, System.out, true)) {
             System.exit(0);
         }

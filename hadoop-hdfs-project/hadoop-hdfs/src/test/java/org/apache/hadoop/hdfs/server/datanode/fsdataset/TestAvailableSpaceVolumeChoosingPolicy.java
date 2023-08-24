@@ -41,8 +41,10 @@ public class TestAvailableSpaceVolumeChoosingPolicy {
     private static void initPolicy(VolumeChoosingPolicy<FsVolumeSpi> policy, float preferencePercent) {
         Configuration conf = new Configuration();
         // Set the threshold to consider volumes imbalanced to 1MB
-        conf.setLong(DFS_DATANODE_AVAILABLE_SPACE_VOLUME_CHOOSING_POLICY_BALANCED_SPACE_THRESHOLD_KEY, // 1MB
-        1024 * 1024);
+        // 1MB
+        conf.// 1MB
+        setLong(// 1MB
+        DFS_DATANODE_AVAILABLE_SPACE_VOLUME_CHOOSING_POLICY_BALANCED_SPACE_THRESHOLD_KEY, 1024 * 1024);
         conf.setFloat(DFS_DATANODE_AVAILABLE_SPACE_VOLUME_CHOOSING_POLICY_BALANCED_SPACE_PREFERENCE_FRACTION_KEY, preferencePercent);
         ((Configurable) policy).setConf(conf);
     }
@@ -180,8 +182,9 @@ public class TestAvailableSpaceVolumeChoosingPolicy {
         // Second volume with 3MB free space, which is a difference of 2MB, more
         // than the threshold of 1MB.
         volumes.add(Mockito.mock(FsVolumeSpi.class));
-        Mockito.when(volumes.get(1).getAvailable()).thenReturn(1024L * 1024L * 3).thenReturn(1024L * 1024L * 3).thenReturn(1024L * 1024L * 3).thenReturn(// After the third check, return 1MB.
-        1024L * 1024L * 1);
+        // After the third check, return 1MB.
+        Mockito.when(volumes.get(1).getAvailable()).thenReturn(1024L * 1024L * 3).thenReturn(1024L * 1024L * 3).thenReturn(1024L * 1024L * 3).// After the third check, return 1MB.
+        thenReturn(1024L * 1024L * 1);
         // Should still be able to get a volume for the replica even though the
         // available space on the second volume changed.
         Assert.assertEquals(volumes.get(1), policy.chooseVolume(volumes, 100, null));

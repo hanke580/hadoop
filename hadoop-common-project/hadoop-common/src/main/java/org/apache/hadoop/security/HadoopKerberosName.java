@@ -82,6 +82,11 @@ public class HadoopKerberosName extends KerberosName {
     }
 
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         setConfiguration(new Configuration());
         for (String arg : args) {
             HadoopKerberosName name = new HadoopKerberosName(arg);

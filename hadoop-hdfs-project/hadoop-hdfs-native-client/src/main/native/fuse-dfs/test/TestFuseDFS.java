@@ -192,14 +192,16 @@ public class TestFuseDFS {
         // NB: We're mounting via an unprivileged user, therefore
         // user_allow_other needs to be set in /etc/fuse.conf, which also
         // needs to be world readable.
-        String[] mountCmd = { fuseCmd, nameNode, mountPoint, // "-odebug",              // Don't daemonize
-        // Allow >4kb writes
-        "-obig_writes", // Don't cache dents long
-        "-oentry_timeout=0.1", // Don't cache attributes long
-        "-oattribute_timeout=0.1", // Don't complain about junk in mount point
-        "-ononempty", // Don't background the process
-        "-f", // Read buffer size in kb
-        "-ordbuffer=32768", "rw" };
+        String[] mountCmd = { // "-odebug",              // Don't daemonize
+        fuseCmd, // "-odebug",              // Don't daemonize
+        nameNode, // "-odebug",              // Don't daemonize
+        mountPoint, // Allow >4kb writes
+        // Don't cache dents long
+        "-obig_writes", // Don't cache attributes long
+        "-oentry_timeout=0.1", // Don't complain about junk in mount point
+        "-oattribute_timeout=0.1", // Don't background the process
+        "-ononempty", // Read buffer size in kb
+        "-f", "-ordbuffer=32768", "rw" };
         String[] env = { "CLASSPATH=" + cp, "LD_LIBRARY_PATH=" + lp, "PATH=/usr/bin:/bin" };
         execWaitRet("fusermount -u " + mountPoint);
         execAssertSucceeds("rm -rf " + mountPoint);

@@ -103,8 +103,8 @@ public class TestMetricsSystemImpl {
     @Test
     public void testInitFirstVerifyStopInvokedImmediately() throws Exception {
         DefaultMetricsSystem.shutdown();
-        new ConfigBuilder().add("*.period", 8).//.add("test.sink.plugin.urls", getPluginUrlsAsString())
-        add("test.sink.test.class", TestSink.class.getName()).add("test.*.source.filter.exclude", "s0").add("test.source.s1.metric.filter.exclude", "X*").add("test.sink.sink1.metric.filter.exclude", "Y*").add("test.sink.sink2.metric.filter.exclude", "Y*").save(TestMetricsConfig.getTestFilename("hadoop-metrics2-test"));
+        //.add("test.sink.plugin.urls", getPluginUrlsAsString())
+        new ConfigBuilder().add("*.period", 8).add("test.sink.test.class", TestSink.class.getName()).add("test.*.source.filter.exclude", "s0").add("test.source.s1.metric.filter.exclude", "X*").add("test.sink.sink1.metric.filter.exclude", "Y*").add("test.sink.sink2.metric.filter.exclude", "Y*").save(TestMetricsConfig.getTestFilename("hadoop-metrics2-test"));
         MetricsSystemImpl ms = new MetricsSystemImpl("Test");
         ms.start();
         ms.register("s0", "s0 desc", new TestSource("s0rec"));
@@ -140,8 +140,8 @@ public class TestMetricsSystemImpl {
     @Test
     public void testInitFirstVerifyCallBacks() throws Exception {
         DefaultMetricsSystem.shutdown();
-        new ConfigBuilder().add("*.period", 8).//.add("test.sink.plugin.urls", getPluginUrlsAsString())
-        add("test.sink.test.class", TestSink.class.getName()).add("test.*.source.filter.exclude", "s0").add("test.source.s1.metric.filter.exclude", "X*").add("test.sink.sink1.metric.filter.exclude", "Y*").add("test.sink.sink2.metric.filter.exclude", "Y*").save(TestMetricsConfig.getTestFilename("hadoop-metrics2-test"));
+        //.add("test.sink.plugin.urls", getPluginUrlsAsString())
+        new ConfigBuilder().add("*.period", 8).add("test.sink.test.class", TestSink.class.getName()).add("test.*.source.filter.exclude", "s0").add("test.source.s1.metric.filter.exclude", "X*").add("test.sink.sink1.metric.filter.exclude", "Y*").add("test.sink.sink2.metric.filter.exclude", "Y*").save(TestMetricsConfig.getTestFilename("hadoop-metrics2-test"));
         MetricsSystemImpl ms = new MetricsSystemImpl("Test");
         ms.start();
         ms.register("s0", "s0 desc", new TestSource("s0rec"));

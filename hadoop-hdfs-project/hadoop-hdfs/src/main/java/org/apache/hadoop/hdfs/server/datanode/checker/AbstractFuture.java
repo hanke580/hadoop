@@ -412,8 +412,9 @@ public abstract class AbstractFuture<V> implements ListenableFuture<V> {
     public V get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException, ExecutionException {
         // NOTE: if timeout < 0, remainingNanos will be < 0 and we will fall into
         // the while(true) loop at the bottom and throw a timeoutexception.
-        long remainingNanos = unit.toNanos(// we rely on the implicit null check on unit.
-        timeout);
+        long remainingNanos = // we rely on the implicit null check on unit.
+        unit.// we rely on the implicit null check on unit.
+        toNanos(timeout);
         if (Thread.interrupted()) {
             throw new InterruptedException();
         }

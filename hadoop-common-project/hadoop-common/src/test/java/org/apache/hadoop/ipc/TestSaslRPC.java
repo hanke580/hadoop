@@ -861,6 +861,11 @@ public class TestSaslRPC extends TestRpcBase {
     }
 
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         System.out.println("Testing Kerberos authentication over RPC");
         if (args.length != 2) {
             System.err.println("Usage: java <options> org.apache.hadoop.ipc.TestSaslRPC " + " <serverPrincipal> <keytabFile>");

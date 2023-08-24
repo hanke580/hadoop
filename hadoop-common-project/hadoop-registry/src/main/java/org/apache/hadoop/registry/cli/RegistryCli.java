@@ -99,6 +99,11 @@ public class RegistryCli extends Configured implements Tool, Closeable {
 
     @SuppressWarnings("UseOfSystemOutOrSystemErr")
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         int res = -1;
         try (RegistryCli cli = new RegistryCli(System.out, System.err)) {
             res = ToolRunner.run(cli, args);

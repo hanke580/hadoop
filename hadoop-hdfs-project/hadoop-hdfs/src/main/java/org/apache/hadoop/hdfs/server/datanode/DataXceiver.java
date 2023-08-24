@@ -716,8 +716,8 @@ class DataXceiver extends Receiver implements Runnable {
                     }
                 } catch (IOException e) {
                     if (isClient) {
-                        BlockOpResponseProto.newBuilder().setStatus(ERROR).// NB: Unconditionally using the xfer addr w/o hostname
-                        setFirstBadLink(targets[0].getXferAddr()).build().writeDelimitedTo(replyOut);
+                        // NB: Unconditionally using the xfer addr w/o hostname
+                        BlockOpResponseProto.newBuilder().setStatus(ERROR).setFirstBadLink(targets[0].getXferAddr()).build().writeDelimitedTo(replyOut);
                         replyOut.flush();
                     }
                     IOUtils.closeStream(mirrorOut);

@@ -56,10 +56,12 @@ public class TestZKUtil {
 
     @Test
     public void testInvalidACLs() {
-        badAcl("a:b", // not enough parts
-        "ACL 'a:b' not of expected form scheme:id:perm");
-        badAcl("a", // not enough parts
-        "ACL 'a' not of expected form scheme:id:perm");
+        // not enough parts
+        badAcl(// not enough parts
+        "a:b", "ACL 'a:b' not of expected form scheme:id:perm");
+        // not enough parts
+        badAcl(// not enough parts
+        "a", "ACL 'a' not of expected form scheme:id:perm");
         badAcl("password:foo:rx", "Invalid permission 'x' in permission string 'rx'");
     }
 

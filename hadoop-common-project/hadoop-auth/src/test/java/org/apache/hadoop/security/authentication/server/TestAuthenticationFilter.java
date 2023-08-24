@@ -711,9 +711,12 @@ public class TestAuthenticationFilter {
         // The server shall authorize the access, but should not drop a new cookie
         long maxInactives = System.currentTimeMillis() + TOKEN_MAX_INACTIVE_INTERVAL;
         long expires = System.currentTimeMillis() + TOKEN_VALIDITY_SEC;
-        _testDoFilterAuthenticationMaxInactiveInterval(maxInactives, -1, expires, //authorized
-        true, //newCookie
-        false);
+        //authorized
+        _testDoFilterAuthenticationMaxInactiveInterval(//authorized
+        maxInactives, //authorized
+        -1, //authorized
+        expires, //newCookie
+        true, false);
         // Provide token containing valid maxInactive value.
         // The token is active.
         // The server has maxInactiveInterval configured to value
@@ -722,9 +725,12 @@ public class TestAuthenticationFilter {
         // with renewed activity interval
         maxInactives = System.currentTimeMillis() + TOKEN_MAX_INACTIVE_INTERVAL;
         expires = System.currentTimeMillis() + TOKEN_VALIDITY_SEC;
-        _testDoFilterAuthenticationMaxInactiveInterval(maxInactives, TOKEN_MAX_INACTIVE_INTERVAL, expires, //authorized
-        true, //newCookie
-        true);
+        //authorized
+        _testDoFilterAuthenticationMaxInactiveInterval(//authorized
+        maxInactives, //authorized
+        TOKEN_MAX_INACTIVE_INTERVAL, //authorized
+        expires, //newCookie
+        true, true);
     }
 
     @Test
@@ -735,9 +741,12 @@ public class TestAuthenticationFilter {
         // The server should deny access and expire the token.
         long maxInactives = System.currentTimeMillis() - TOKEN_MAX_INACTIVE_INTERVAL;
         long expires = System.currentTimeMillis() + TOKEN_VALIDITY_SEC;
-        _testDoFilterAuthenticationMaxInactiveInterval(maxInactives, -1, expires, //authorized
-        false, //newCookie
-        false);
+        //authorized
+        _testDoFilterAuthenticationMaxInactiveInterval(//authorized
+        maxInactives, //authorized
+        -1, //authorized
+        expires, //newCookie
+        false, false);
         // Provide token containing invalid maxInactive value.
         // The token is inactive.
         // The server has maxInactiveInterval configured to value
@@ -745,9 +754,12 @@ public class TestAuthenticationFilter {
         // The server should deny access and expire the token.
         maxInactives = System.currentTimeMillis() + TOKEN_MAX_INACTIVE_INTERVAL;
         expires = System.currentTimeMillis() + TOKEN_VALIDITY_SEC;
-        _testDoFilterAuthenticationMaxInactiveInterval(maxInactives, -1, expires, //authorized
-        true, //newCookie
-        false);
+        //authorized
+        _testDoFilterAuthenticationMaxInactiveInterval(//authorized
+        maxInactives, //authorized
+        -1, //authorized
+        expires, //newCookie
+        true, false);
     }
 
     @Test
@@ -756,17 +768,23 @@ public class TestAuthenticationFilter {
         // The server has maxInactiveInterval configured to -1.
         // The server shall authorize the access, but should not drop a new cookie
         long expires = System.currentTimeMillis() + TOKEN_VALIDITY_SEC;
-        _testDoFilterAuthenticationMaxInactiveInterval(-1, -1, expires, //authorized
-        true, //newCookie
-        false);
+        //authorized
+        _testDoFilterAuthenticationMaxInactiveInterval(//authorized
+        -1, //authorized
+        -1, //authorized
+        expires, //newCookie
+        true, false);
         // Provide token which does not contain  maxInactive value.
         // The server has maxInactiveInterval to some value
         // The server shall authorize the access and drop a new cookie
         // with renewed activity interval
         expires = System.currentTimeMillis() + TOKEN_VALIDITY_SEC;
-        _testDoFilterAuthenticationMaxInactiveInterval(-1, TOKEN_MAX_INACTIVE_INTERVAL, expires, //authorized
-        true, //newCookie
-        true);
+        //authorized
+        _testDoFilterAuthenticationMaxInactiveInterval(//authorized
+        -1, //authorized
+        TOKEN_MAX_INACTIVE_INTERVAL, //authorized
+        expires, //newCookie
+        true, true);
     }
 
     private void _testDoFilterAuthenticationMaxInactiveInterval(long maxInactivesInToken, long expires, boolean authorized) throws Exception {

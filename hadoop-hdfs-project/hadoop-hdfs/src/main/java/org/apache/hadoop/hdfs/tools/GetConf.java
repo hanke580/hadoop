@@ -345,6 +345,11 @@ public class GetConf extends Configured implements Tool {
     }
 
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         if (DFSUtil.parseHelpArgument(args, USAGE, System.out, true)) {
             System.exit(0);
         }

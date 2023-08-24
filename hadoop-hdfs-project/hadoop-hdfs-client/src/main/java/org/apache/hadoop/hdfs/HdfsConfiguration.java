@@ -69,6 +69,11 @@ public class HdfsConfiguration extends Configuration {
     }
 
     public static void main(String[] args) {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         init();
         Configuration.dumpDeprecatedKeys();
     }

@@ -101,10 +101,14 @@ class HeartbeatManager implements DatanodeStatistics {
         this.namesystem = namesystem;
         this.blockManager = blockManager;
         boolean avoidStaleDataNodesForWrite = conf.getBoolean(DFSConfigKeys.DFS_NAMENODE_AVOID_STALE_DATANODE_FOR_WRITE_KEY, DFSConfigKeys.DFS_NAMENODE_AVOID_STALE_DATANODE_FOR_WRITE_DEFAULT);
-        long recheckInterval = conf.getInt(DFSConfigKeys.DFS_NAMENODE_HEARTBEAT_RECHECK_INTERVAL_KEY, // 5 min
-        DFSConfigKeys.DFS_NAMENODE_HEARTBEAT_RECHECK_INTERVAL_DEFAULT);
-        long staleInterval = conf.getLong(DFSConfigKeys.DFS_NAMENODE_STALE_DATANODE_INTERVAL_KEY, // 30s
-        DFSConfigKeys.DFS_NAMENODE_STALE_DATANODE_INTERVAL_DEFAULT);
+        long recheckInterval = // 5 min
+        conf.// 5 min
+        getInt(// 5 min
+        DFSConfigKeys.DFS_NAMENODE_HEARTBEAT_RECHECK_INTERVAL_KEY, DFSConfigKeys.DFS_NAMENODE_HEARTBEAT_RECHECK_INTERVAL_DEFAULT);
+        long staleInterval = // 30s
+        conf.// 30s
+        getLong(// 30s
+        DFSConfigKeys.DFS_NAMENODE_STALE_DATANODE_INTERVAL_KEY, DFSConfigKeys.DFS_NAMENODE_STALE_DATANODE_INTERVAL_DEFAULT);
         enableLogStaleNodes = conf.getBoolean(DFSConfigKeys.DFS_NAMENODE_ENABLE_LOG_STALE_DATANODE_KEY, DFSConfigKeys.DFS_NAMENODE_ENABLE_LOG_STALE_DATANODE_DEFAULT);
         if (avoidStaleDataNodesForWrite && staleInterval < recheckInterval) {
             this.heartbeatRecheckInterval = staleInterval;

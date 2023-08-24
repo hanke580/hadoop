@@ -402,6 +402,11 @@ public class DebugAdmin extends Configured implements Tool {
     }
 
     public static void main(String[] argsArray) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         DebugAdmin debugAdmin = new DebugAdmin(new Configuration());
         int res = ToolRunner.run(debugAdmin, argsArray);
         System.exit(res);

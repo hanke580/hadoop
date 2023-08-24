@@ -279,8 +279,10 @@ public class DatanodeManager {
             dnsToSwitchMapping.resolve(locations);
         }
         heartbeatIntervalSeconds = conf.getTimeDuration(DFSConfigKeys.DFS_HEARTBEAT_INTERVAL_KEY, DFSConfigKeys.DFS_HEARTBEAT_INTERVAL_DEFAULT, TimeUnit.SECONDS);
-        heartbeatRecheckInterval = conf.getInt(DFSConfigKeys.DFS_NAMENODE_HEARTBEAT_RECHECK_INTERVAL_KEY, // 5 minutes
-        DFSConfigKeys.DFS_NAMENODE_HEARTBEAT_RECHECK_INTERVAL_DEFAULT);
+        heartbeatRecheckInterval = // 5 minutes
+        conf.// 5 minutes
+        getInt(// 5 minutes
+        DFSConfigKeys.DFS_NAMENODE_HEARTBEAT_RECHECK_INTERVAL_KEY, DFSConfigKeys.DFS_NAMENODE_HEARTBEAT_RECHECK_INTERVAL_DEFAULT);
         this.heartbeatExpireInterval = 2 * heartbeatRecheckInterval + 10 * 1000 * heartbeatIntervalSeconds;
         // Effected block invalidate limit is the bigger value between
         // value configured in hdfs-site.xml, and 20 * HB interval.

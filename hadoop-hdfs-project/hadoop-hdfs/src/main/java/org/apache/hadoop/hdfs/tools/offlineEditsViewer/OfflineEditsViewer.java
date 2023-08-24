@@ -211,6 +211,11 @@ public class OfflineEditsViewer extends Configured implements Tool {
      * @param argv Command line parameters.
      */
     public static void main(String[] argv) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         int res = ToolRunner.run(new OfflineEditsViewer(), argv);
         System.exit(res);
     }

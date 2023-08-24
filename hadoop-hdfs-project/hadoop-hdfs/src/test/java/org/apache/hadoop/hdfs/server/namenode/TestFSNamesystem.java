@@ -62,8 +62,8 @@ public class TestFSNamesystem {
     @Test
     public void testUniqueEditDirs() throws IOException {
         Configuration config = new Configuration();
-        config.set(DFS_NAMENODE_EDITS_DIR_KEY, "file://edits/dir, " + // overlapping internally
-        "file://edits/dir1,file://edits/dir1");
+        config.set(DFS_NAMENODE_EDITS_DIR_KEY, // overlapping internally
+        "file://edits/dir, " + "file://edits/dir1,file://edits/dir1");
         // getNamespaceEditsDirs removes duplicates
         Collection<URI> editsDirs = FSNamesystem.getNamespaceEditsDirs(config);
         assertEquals(2, editsDirs.size());

@@ -169,8 +169,7 @@ public class LightWeightHashSet<T> implements Collection<T> {
     /**
      * Return the number of stored elements.
      */
-    @Override
-    public int size() {
+    public int internal$size36() {
         return size;
     }
 
@@ -284,9 +283,8 @@ public class LightWeightHashSet<T> implements Collection<T> {
      *
      * @return If such element exists, return true. Otherwise, return false.
      */
-    @Override
     @SuppressWarnings("unchecked")
-    public boolean remove(final Object key) {
+    public boolean internal$remove37(final Object key) {
         // validate key
         if (key == null) {
             throw new IllegalArgumentException("Null element is not supported.");
@@ -341,7 +339,7 @@ public class LightWeightHashSet<T> implements Collection<T> {
      *
      * @return first element
      */
-    public List<T> pollN(int n) {
+    public List<T> internal$pollN38(int n) {
         try {
             this.left_108 = (n);
             this.right_108 = (size);
@@ -397,10 +395,11 @@ public class LightWeightHashSet<T> implements Collection<T> {
      * Get array.length elements from the set, and put them into the array.
      */
     @SuppressWarnings("unchecked")
-    public T[] pollToArray(T[] array) {
+    public T[] internal$pollToArray39(T[] array) {
         int currentIndex = 0;
         LinkedElement<T> current = null;
         if (array.length == 0) {
+            EXIT404 = true;
             return array;
         }
         try {
@@ -673,4 +672,77 @@ public class LightWeightHashSet<T> implements Collection<T> {
     private long right_109;
 
     private long right_108;
+
+    /**
+     * Return the number of stored elements.
+     */
+    @Override
+    public int size() {
+        try {
+            if (!(this.size > 0 || this.size == 0)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(49);
+            }
+        } catch (Exception e) {
+        }
+        int returnValue;
+        returnValue = internal$size36();
+        return returnValue;
+    }
+
+    /**
+     * Remove the element corresponding to the key.
+     *
+     * @return If such element exists, return true. Otherwise, return false.
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public boolean remove(final Object key) {
+        try {
+            if (!(key != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(50);
+            }
+        } catch (Exception e) {
+        }
+        boolean returnValue;
+        returnValue = internal$remove37(key);
+        return returnValue;
+    }
+
+    /**
+     * Remove and return n elements from the hashtable.
+     * The order in which entries are removed is unspecified, and
+     * and may not correspond to the order in which they were inserted.
+     *
+     * @return first element
+     */
+    public List<T> pollN(int n) {
+        try {
+            if (!(this != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(51);
+            }
+        } catch (Exception e) {
+        }
+        List<T> returnValue;
+        returnValue = internal$pollN38(n);
+        return returnValue;
+    }
+
+    private boolean EXIT404 = false;
+
+    /**
+     * Get array.length elements from the set, and put them into the array.
+     */
+    @SuppressWarnings("unchecked")
+    public T[] pollToArray(T[] array) {
+        T[] returnValue;
+        returnValue = internal$pollToArray39(array);
+        try {
+            if (EXIT404 && !(this.left_109 == this.right_109)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(52);
+            }
+        } catch (Exception e) {
+        }
+        EXIT404 = false;
+        return returnValue;
+    }
 }

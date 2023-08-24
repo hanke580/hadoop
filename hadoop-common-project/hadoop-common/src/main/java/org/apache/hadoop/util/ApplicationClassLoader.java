@@ -206,9 +206,9 @@ public class ApplicationClassLoader extends URLClassLoader {
                 }
                 if (canonicalName.startsWith(c)) {
                     if (// package
-                    c.endsWith(".") || // class
-                    canonicalName.length() == c.length() || // nested
-                    canonicalName.length() > c.length() && canonicalName.charAt(c.length()) == '$') {
+                    // class
+                    c.endsWith(".") || // nested
+                    canonicalName.length() == c.length() || canonicalName.length() > c.length() && canonicalName.charAt(c.length()) == '$') {
                         if (shouldInclude) {
                             result = true;
                         } else {

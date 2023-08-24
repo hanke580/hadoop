@@ -149,6 +149,11 @@ public class DFSZKFailoverController extends ZKFailoverController {
     }
 
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         StringUtils.startupShutdownMessage(DFSZKFailoverController.class, args, LOG);
         if (DFSUtil.parseHelpArgument(args, ZKFailoverController.USAGE, System.out, true)) {
             System.exit(0);

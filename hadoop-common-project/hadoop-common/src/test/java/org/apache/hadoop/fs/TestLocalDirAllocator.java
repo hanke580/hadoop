@@ -457,8 +457,9 @@ public class TestLocalDirAllocator {
             // test #next() while no element to iterate any more:
             try {
                 Path p = pathIterable.iterator().next();
-                assertFalse("NoSuchElementException must be thrown, but returned [" + p + "] instead.", // exception expected
-                true);
+                // exception expected
+                assertFalse(// exception expected
+                "NoSuchElementException must be thrown, but returned [" + p + "] instead.", true);
             } catch (NoSuchElementException nsee) {
                 // okay
             }

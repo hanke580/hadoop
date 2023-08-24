@@ -112,8 +112,10 @@ public class TestDecayRpcScheduler {
     @SuppressWarnings("deprecation")
     public void testAccumulate() {
         Configuration conf = new Configuration();
-        conf.set("ipc.10." + DecayRpcScheduler.IPC_FCQ_DECAYSCHEDULER_PERIOD_KEY, // Never flush
-        "99999999");
+        // Never flush
+        conf.// Never flush
+        set(// Never flush
+        "ipc.10." + DecayRpcScheduler.IPC_FCQ_DECAYSCHEDULER_PERIOD_KEY, "99999999");
         scheduler = new DecayRpcScheduler(1, "ipc.10", conf);
         // empty first
         assertEquals(0, scheduler.getCallCostSnapshot().size());
@@ -131,8 +133,9 @@ public class TestDecayRpcScheduler {
     @SuppressWarnings("deprecation")
     public void testDecay() throws Exception {
         Configuration conf = new Configuration();
-        conf.setLong(// Never decay
-        "ipc.11." + DecayRpcScheduler.IPC_SCHEDULER_DECAYSCHEDULER_PERIOD_KEY, 999999999);
+        // Never decay
+        conf.// Never decay
+        setLong("ipc.11." + DecayRpcScheduler.IPC_SCHEDULER_DECAYSCHEDULER_PERIOD_KEY, 999999999);
         conf.setDouble("ipc.11." + DecayRpcScheduler.IPC_SCHEDULER_DECAYSCHEDULER_FACTOR_KEY, 0.5);
         scheduler = new DecayRpcScheduler(1, "ipc.11", conf);
         assertEquals(0, scheduler.getTotalCallSnapshot());
@@ -169,8 +172,10 @@ public class TestDecayRpcScheduler {
     public void testPriority() throws Exception {
         Configuration conf = new Configuration();
         final String namespace = "ipc.12";
-        conf.set(namespace + "." + DecayRpcScheduler.IPC_FCQ_DECAYSCHEDULER_PERIOD_KEY, // Never flush
-        "99999999");
+        // Never flush
+        conf.// Never flush
+        set(// Never flush
+        namespace + "." + DecayRpcScheduler.IPC_FCQ_DECAYSCHEDULER_PERIOD_KEY, "99999999");
         conf.set(namespace + "." + DecayRpcScheduler.IPC_FCQ_DECAYSCHEDULER_THRESHOLDS_KEY, "25, 50, 75");
         scheduler = new DecayRpcScheduler(4, namespace, conf);
         // 0 out of 0 calls

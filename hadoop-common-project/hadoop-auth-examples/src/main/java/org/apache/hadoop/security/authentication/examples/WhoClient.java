@@ -27,6 +27,11 @@ public class WhoClient {
 
     public static void main(String[] args) {
         try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        try {
             if (args.length != 1) {
                 System.err.println("Usage: <URL>");
                 System.exit(-1);

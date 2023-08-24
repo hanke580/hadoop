@@ -389,8 +389,8 @@ class BlockReaderLocal implements BlockReader {
     }
 
     private boolean createNoChecksumContext() {
-        return !verifyChecksum || // Checksums are not stored for replicas on transient storage.  We do
-        // not anchor, because we do not intend for client activity to block
+        return // Checksums are not stored for replicas on transient storage.  We do
+        !verifyChecksum || // not anchor, because we do not intend for client activity to block
         // eviction from transient storage on the DataNode side.
         (storageType != null && storageType.isTransient()) || replica.addNoChecksumAnchor();
     }

@@ -268,8 +268,8 @@ public class TestSpaceReservation {
                     public Boolean get() {
                         return (volume.getReservedForReplicas() == 0);
                     }
-                }, 500, // Wait until the test times out.
-                Integer.MAX_VALUE);
+                }, // Wait until the test times out.
+                500, Integer.MAX_VALUE);
             }
         }
     }
@@ -572,8 +572,8 @@ public class TestSpaceReservation {
                         LOG.info("dn " + dn.getDisplayName() + " space : " + volume.getReservedForReplicas());
                         return (volume.getReservedForReplicas() == 0);
                     }
-                }, 100, // Wait until the test times out.
-                Integer.MAX_VALUE);
+                }, // Wait until the test times out.
+                100, Integer.MAX_VALUE);
             }
         }
     }

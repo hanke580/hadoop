@@ -164,8 +164,9 @@ public class BlockTokenSecretManager extends SecretManager<BlockTokenIdentifier>
     /**
      * Initialize block keys
      */
-    private synchronized void generateKeys() {
+    private synchronized void internal$generateKeys41() {
         if (!isMaster) {
+            EXIT169 = true;
             return;
         }
         /*
@@ -541,4 +542,41 @@ public class BlockTokenSecretManager extends SecretManager<BlockTokenIdentifier>
     private long right_112;
 
     private long left_112;
+
+    private boolean EXIT189 = false;
+
+    private boolean EXIT169 = false;
+
+    /**
+     * Initialize block keys
+     */
+    private synchronized void generateKeys() {
+        try {
+            if (!(this.currentKey == null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(55);
+            }
+        } catch (Exception e) {
+        }
+        internal$generateKeys41();
+        try {
+            if (EXIT189 && !(this.currentKey != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(56);
+            }
+        } catch (Exception e) {
+        }
+        try {
+            if (EXIT189 && !(this.nextKey != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(57);
+            }
+        } catch (Exception e) {
+        }
+        try {
+            if (EXIT169 && !(this.currentKey == null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(58);
+            }
+        } catch (Exception e) {
+        }
+        EXIT189 = false;
+        EXIT169 = false;
+    }
 }

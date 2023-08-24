@@ -184,8 +184,8 @@ public class TestDataNodeVolumeFailure {
         // delete/make non-writable one of the directories (failed volume)
         data_fail = cluster.getInstanceStorageDir(1, 0);
         failedDir = MiniDFSCluster.getFinalizedDir(data_fail, cluster.getNamesystem().getBlockPoolId());
-        if (failedDir.exists() && //!FileUtil.fullyDelete(failedDir)
-        !deteteBlocks(failedDir)) {
+        if (//!FileUtil.fullyDelete(failedDir)
+        failedDir.exists() && !deteteBlocks(failedDir)) {
             throw new IOException("Could not delete hdfs directory '" + failedDir + "'");
         }
         data_fail.setReadOnly();

@@ -94,8 +94,8 @@ public class TestDFSRollback {
     void startNameNodeShouldFail(String searchString) {
         try {
             NameNode.doRollback(conf, false);
-            cluster = new MiniDFSCluster.Builder(conf).numDataNodes(0).format(false).manageDataDfsDirs(false).manageNameDfsDirs(false).// should fail
-            build();
+            cluster = // should fail
+            new MiniDFSCluster.Builder(conf).numDataNodes(0).format(false).manageDataDfsDirs(false).manageNameDfsDirs(false).build();
             throw new AssertionError("NameNode should have failed to start");
         } catch (Exception expected) {
             if (!expected.getMessage().contains(searchString)) {
@@ -264,6 +264,11 @@ public class TestDFSRollback {
     }
 
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         new TestDFSRollback().testRollback();
     }
 }

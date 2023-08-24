@@ -4372,8 +4372,9 @@ public abstract class FileSystem extends Configured implements Closeable, Delega
         @Override
         public CompletableFuture<FSDataInputStream> build() throws IOException {
             Optional<Path> optionalPath = getOptionalPath();
-            OpenFileParameters parameters = new OpenFileParameters().withMandatoryKeys(getMandatoryKeys()).withOptions(getOptions()).withBufferSize(getBufferSize()).withStatus(// explicit to avoid IDE warnings
-            super.getStatus());
+            OpenFileParameters parameters = // explicit to avoid IDE warnings
+            new OpenFileParameters().withMandatoryKeys(getMandatoryKeys()).withOptions(getOptions()).withBufferSize(getBufferSize()).// explicit to avoid IDE warnings
+            withStatus(super.getStatus());
             if (optionalPath.isPresent()) {
                 return getFS().openFileWithOptions(optionalPath.get(), parameters);
             } else {

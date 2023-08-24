@@ -90,29 +90,109 @@ public class TestDFSStartupVersions {
         String invalidClusterID = "testClusterID";
         String bpid = UpgradeUtilities.getCurrentBlockPoolID(null);
         String invalidBpid = "invalidBpid";
-        return new StorageData[] { new StorageData(layoutVersionOld, namespaceIdCur, clusterID, fsscTimeOld, // 0
-        bpid), new StorageData(layoutVersionOld, namespaceIdCur, clusterID, fsscTimeCur, // 1
-        bpid), new StorageData(layoutVersionOld, namespaceIdCur, clusterID, fsscTimeNew, // 2
-        bpid), new StorageData(layoutVersionOld, namespaceIdOld, clusterID, fsscTimeOld, // 3
-        bpid), new StorageData(layoutVersionOld, namespaceIdOld, clusterID, fsscTimeCur, // 4
-        bpid), new StorageData(layoutVersionOld, namespaceIdOld, clusterID, fsscTimeNew, // 5
-        bpid), new StorageData(layoutVersionCur, namespaceIdCur, clusterID, fsscTimeOld, // 6
-        bpid), new StorageData(layoutVersionCur, namespaceIdCur, clusterID, fsscTimeCur, // 7
-        bpid), new StorageData(layoutVersionCur, namespaceIdCur, clusterID, fsscTimeNew, // 8
-        bpid), new StorageData(layoutVersionCur, namespaceIdOld, clusterID, fsscTimeOld, // 9
-        bpid), new StorageData(layoutVersionCur, namespaceIdOld, clusterID, fsscTimeCur, // 10
-        bpid), new StorageData(layoutVersionCur, namespaceIdOld, clusterID, fsscTimeNew, // 11
-        bpid), new StorageData(layoutVersionNew, namespaceIdCur, clusterID, fsscTimeOld, // 12
-        bpid), new StorageData(layoutVersionNew, namespaceIdCur, clusterID, fsscTimeCur, // 13
-        bpid), new StorageData(layoutVersionNew, namespaceIdCur, clusterID, fsscTimeNew, // 14
-        bpid), new StorageData(layoutVersionNew, namespaceIdOld, clusterID, fsscTimeOld, // 15
-        bpid), new StorageData(layoutVersionNew, namespaceIdOld, clusterID, fsscTimeCur, // 16
-        bpid), new StorageData(layoutVersionNew, namespaceIdOld, clusterID, fsscTimeNew, // 17
-        bpid), // Test with invalid clusterId
-        new StorageData(layoutVersionCur, namespaceIdCur, invalidClusterID, fsscTimeCur, // 18
-        bpid), // Test with invalid block pool Id
-        new StorageData(layoutVersionCur, namespaceIdCur, clusterID, fsscTimeCur, // 19
-        invalidBpid) };
+        return new StorageData[] { new // 0
+        StorageData(// 0
+        layoutVersionOld, // 0
+        namespaceIdCur, // 0
+        clusterID, // 0
+        fsscTimeOld, bpid), new // 1
+        StorageData(// 1
+        layoutVersionOld, // 1
+        namespaceIdCur, // 1
+        clusterID, // 1
+        fsscTimeCur, bpid), new // 2
+        StorageData(// 2
+        layoutVersionOld, // 2
+        namespaceIdCur, // 2
+        clusterID, // 2
+        fsscTimeNew, bpid), new // 3
+        StorageData(// 3
+        layoutVersionOld, // 3
+        namespaceIdOld, // 3
+        clusterID, // 3
+        fsscTimeOld, bpid), new // 4
+        StorageData(// 4
+        layoutVersionOld, // 4
+        namespaceIdOld, // 4
+        clusterID, // 4
+        fsscTimeCur, bpid), new // 5
+        StorageData(// 5
+        layoutVersionOld, // 5
+        namespaceIdOld, // 5
+        clusterID, // 5
+        fsscTimeNew, bpid), new // 6
+        StorageData(// 6
+        layoutVersionCur, // 6
+        namespaceIdCur, // 6
+        clusterID, // 6
+        fsscTimeOld, bpid), new // 7
+        StorageData(// 7
+        layoutVersionCur, // 7
+        namespaceIdCur, // 7
+        clusterID, // 7
+        fsscTimeCur, bpid), new // 8
+        StorageData(// 8
+        layoutVersionCur, // 8
+        namespaceIdCur, // 8
+        clusterID, // 8
+        fsscTimeNew, bpid), new // 9
+        StorageData(// 9
+        layoutVersionCur, // 9
+        namespaceIdOld, // 9
+        clusterID, // 9
+        fsscTimeOld, bpid), new // 10
+        StorageData(// 10
+        layoutVersionCur, // 10
+        namespaceIdOld, // 10
+        clusterID, // 10
+        fsscTimeCur, bpid), new // 11
+        StorageData(// 11
+        layoutVersionCur, // 11
+        namespaceIdOld, // 11
+        clusterID, // 11
+        fsscTimeNew, bpid), new // 12
+        StorageData(// 12
+        layoutVersionNew, // 12
+        namespaceIdCur, // 12
+        clusterID, // 12
+        fsscTimeOld, bpid), new // 13
+        StorageData(// 13
+        layoutVersionNew, // 13
+        namespaceIdCur, // 13
+        clusterID, // 13
+        fsscTimeCur, bpid), new // 14
+        StorageData(// 14
+        layoutVersionNew, // 14
+        namespaceIdCur, // 14
+        clusterID, // 14
+        fsscTimeNew, bpid), new // 15
+        StorageData(// 15
+        layoutVersionNew, // 15
+        namespaceIdOld, // 15
+        clusterID, // 15
+        fsscTimeOld, bpid), new // 16
+        StorageData(// 16
+        layoutVersionNew, // 16
+        namespaceIdOld, // 16
+        clusterID, // 16
+        fsscTimeCur, bpid), new // 17
+        StorageData(// 17
+        layoutVersionNew, // 17
+        namespaceIdOld, // 17
+        clusterID, // 17
+        fsscTimeNew, // Test with invalid clusterId
+        bpid), new // 18
+        StorageData(// 18
+        layoutVersionCur, // 18
+        namespaceIdCur, // 18
+        invalidClusterID, // 18
+        fsscTimeCur, // Test with invalid block pool Id
+        bpid), new // 19
+        StorageData(// 19
+        layoutVersionCur, // 19
+        namespaceIdCur, // 19
+        clusterID, // 19
+        fsscTimeCur, invalidBpid) };
     }
 
     /**
@@ -236,6 +316,11 @@ public class TestDFSStartupVersions {
     }
 
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         new TestDFSStartupVersions().testVersions();
     }
 }

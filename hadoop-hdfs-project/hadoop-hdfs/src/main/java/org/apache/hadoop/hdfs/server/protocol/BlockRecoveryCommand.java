@@ -89,7 +89,7 @@ public class BlockRecoveryCommand extends DatanodeCommand {
          * Return the new generation stamp of the block,
          * which also plays role of the recovery id.
          */
-        public long getNewGenerationStamp() {
+        public long internal$getNewGenerationStamp58() {
             return newGenerationStamp;
         }
 
@@ -98,6 +98,28 @@ public class BlockRecoveryCommand extends DatanodeCommand {
          */
         public Block getNewBlock() {
             return recoveryBlock;
+        }
+
+        /**
+         * Return the new generation stamp of the block,
+         * which also plays role of the recovery id.
+         */
+        public long getNewGenerationStamp() {
+            try {
+                if (!(this.newGenerationStamp == 100)) {
+                    org.zlab.dinv.runtimechecker.Runtime.addViolation(85);
+                }
+            } catch (Exception e) {
+            }
+            try {
+                if (!(this != null)) {
+                    org.zlab.dinv.runtimechecker.Runtime.addViolation(86);
+                }
+            } catch (Exception e) {
+            }
+            long returnValue;
+            returnValue = internal$getNewGenerationStamp58();
+            return returnValue;
         }
     }
 

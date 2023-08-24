@@ -89,6 +89,11 @@ public class CacheAdmin extends Configured implements Tool {
     }
 
     public static void main(String[] argsArray) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         CacheAdmin cacheAdmin = new CacheAdmin(new Configuration());
         int res = ToolRunner.run(cacheAdmin, argsArray);
         System.exit(res);

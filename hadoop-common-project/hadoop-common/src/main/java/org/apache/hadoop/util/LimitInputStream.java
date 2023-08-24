@@ -70,14 +70,14 @@ public final class LimitInputStream extends FilterInputStream {
         return result;
     }
 
-    @Override
-    public int read(byte[] b, int off, int len) throws IOException {
+    public int internal$read2(byte[] b, int off, int len) throws IOException {
         if (len == 0) {
             return 0;
         }
         if (left == 0) {
             return -1;
         }
+        EXIT81 = true;
         len = (int) Math.min(len, left);
         int result = in.read(b, off, len);
         if (result != -1) {
@@ -104,5 +104,36 @@ public final class LimitInputStream extends FilterInputStream {
         long skipped = in.skip(n);
         left -= skipped;
         return skipped;
+    }
+
+    private boolean EXIT89 = false;
+
+    private boolean EXIT81 = false;
+
+    @Override
+    public int read(byte[] b, int off, int len) throws IOException {
+        try {
+            if (!(this.left == 0 || this.left == 4 || this.left == 7)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(3);
+            }
+        } catch (Exception e) {
+        }
+        int returnValue;
+        returnValue = internal$read2(b, off, len);
+        try {
+            if (EXIT89 && !(this.left == 0)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(4);
+            }
+        } catch (Exception e) {
+        }
+        try {
+            if (EXIT81 && !(this.left == 0)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(5);
+            }
+        } catch (Exception e) {
+        }
+        EXIT89 = false;
+        EXIT81 = false;
+        return returnValue;
     }
 }

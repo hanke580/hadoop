@@ -375,6 +375,11 @@ public class FsShell extends Configured implements Tool {
      * @throws Exception upon error
      */
     public static void main(String[] argv) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         FsShell shell = newShellInstance();
         Configuration conf = new Configuration();
         conf.setQuietMode(false);

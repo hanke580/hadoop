@@ -84,6 +84,11 @@ public class DUHelper {
     }
 
     public static void main(String[] args) {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         if (Shell.WINDOWS)
             System.out.println("Windows: " + DUHelper.getFolderUsage(args[0]));
         else

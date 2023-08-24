@@ -825,8 +825,8 @@ public class DataStorage extends Storage {
         prevInfo.readPreviousVersionProperties(sd);
         // We allow rollback to a state, which is either consistent with
         // the namespace state or can be further upgraded to it.
-        if (!(prevInfo.getLayoutVersion() >= HdfsServerConstants.DATANODE_LAYOUT_VERSION && // cannot rollback
-        prevInfo.getCTime() <= nsInfo.getCTime()))
+        if (!(// cannot rollback
+        prevInfo.getLayoutVersion() >= HdfsServerConstants.DATANODE_LAYOUT_VERSION && prevInfo.getCTime() <= nsInfo.getCTime()))
             throw new InconsistentFSStateException(sd.getRoot(), "Cannot rollback to a newer state.\nDatanode previous state: LV = " + prevInfo.getLayoutVersion() + " CTime = " + prevInfo.getCTime() + " is newer than the namespace state: LV = " + HdfsServerConstants.DATANODE_LAYOUT_VERSION + " CTime = " + nsInfo.getCTime());
         LOG.info("Rolling back storage directory {}.\n   target LV = {}; target " + "CTime = {}", sd.getRoot(), HdfsServerConstants.DATANODE_LAYOUT_VERSION, nsInfo.getCTime());
         File tmpDir = sd.getRemovedTmp();

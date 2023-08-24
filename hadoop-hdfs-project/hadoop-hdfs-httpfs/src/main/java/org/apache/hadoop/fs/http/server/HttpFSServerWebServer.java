@@ -149,6 +149,11 @@ public class HttpFSServerWebServer {
     }
 
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         startupShutdownMessage(HttpFSServerWebServer.class, args, LOG);
         Configuration conf = new Configuration(true);
         Configuration sslConf = SSLFactory.readSSLConfiguration(conf, SSLFactory.Mode.SERVER);

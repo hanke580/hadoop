@@ -75,6 +75,11 @@ public class DataNodeCluster {
     }
 
     public static void main(String[] args) throws InterruptedException {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         int numDataNodes = 0;
         int numRacks = 0;
         boolean inject = false;

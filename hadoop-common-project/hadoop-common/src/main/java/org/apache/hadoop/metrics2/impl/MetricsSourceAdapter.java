@@ -90,8 +90,14 @@ class MetricsSourceAdapter implements DynamicMBean {
     }
 
     MetricsSourceAdapter(String prefix, String name, String description, MetricsSource source, Iterable<MetricsTag> injectedTags, long period, MetricsConfig conf) {
-        this(prefix, name, description, source, injectedTags, conf.getFilter(RECORD_FILTER_KEY), conf.getFilter(METRIC_FILTER_KEY), // hack to avoid most of the "innocuous" races.
-        period + 1, conf.getBoolean(START_MBEANS_KEY, true));
+        this(// hack to avoid most of the "innocuous" races.
+        prefix, // hack to avoid most of the "innocuous" races.
+        name, // hack to avoid most of the "innocuous" races.
+        description, // hack to avoid most of the "innocuous" races.
+        source, // hack to avoid most of the "innocuous" races.
+        injectedTags, // hack to avoid most of the "innocuous" races.
+        conf.getFilter(RECORD_FILTER_KEY), // hack to avoid most of the "innocuous" races.
+        conf.getFilter(METRIC_FILTER_KEY), period + 1, conf.getBoolean(START_MBEANS_KEY, true));
     }
 
     void start() {

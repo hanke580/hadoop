@@ -42,6 +42,11 @@ public class NativeLibraryChecker {
      * A tool to test native library availability,
      */
     public static void main(String[] args) {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         String usage = "NativeLibraryChecker [-a|-h]\n" + "  -a  use -a to check all libraries are available\n" + "      by default just check hadoop library (and\n" + "      winutils.exe on Windows OS) is available\n" + "      exit with error code 1 if check failed\n" + "  -h  print this message\n";
         if (args.length > 1 || (args.length == 1 && !(args[0].equals("-a") || args[0].equals("-h")))) {
             System.err.println(usage);

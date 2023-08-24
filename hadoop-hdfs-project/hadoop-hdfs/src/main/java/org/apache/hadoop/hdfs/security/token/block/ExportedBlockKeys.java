@@ -67,7 +67,7 @@ public class ExportedBlockKeys implements Writable {
         return tokenLifetime;
     }
 
-    public BlockKey getCurrentKey() {
+    public BlockKey internal$getCurrentKey40() {
         return currentKey;
     }
 
@@ -116,5 +116,23 @@ public class ExportedBlockKeys implements Writable {
             allKeys[i] = new BlockKey();
             allKeys[i].readFields(in);
         }
+    }
+
+    public BlockKey getCurrentKey() {
+        try {
+            if (!(this.currentKey != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(53);
+            }
+        } catch (Exception e) {
+        }
+        try {
+            if (!(this != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(54);
+            }
+        } catch (Exception e) {
+        }
+        BlockKey returnValue;
+        returnValue = internal$getCurrentKey40();
+        return returnValue;
     }
 }

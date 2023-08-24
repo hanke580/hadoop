@@ -1009,9 +1009,10 @@ public class Configuration implements Iterable<Map.Entry<String, String>>, Writa
         // scanning for a brace first because it's less frequent than $
         // that can occur in nested class names
         //
-        match_loop: for (matchStart = 1, leftBrace = eval.indexOf('{', matchStart); // minimum left brace position (follows '$')
-        leftBrace > 0 && // right brace of a smallest valid expression "${c}"
-        leftBrace + "{c".length() < eval.length(); leftBrace = eval.indexOf('{', matchStart)) {
+        match_loop: for (// minimum left brace position (follows '$')
+        matchStart = 1, // minimum left brace position (follows '$')
+        leftBrace = eval.indexOf('{', matchStart); // right brace of a smallest valid expression "${c}"
+        leftBrace > 0 && leftBrace + "{c".length() < eval.length(); leftBrace = eval.indexOf('{', matchStart)) {
             int matchedLen = 0;
             if (eval.charAt(leftBrace - 1) == '$') {
                 // after '{'
@@ -3706,6 +3707,11 @@ public class Configuration implements Iterable<Map.Entry<String, String>>, Writa
      * For debugging.  List non-default properties to the terminal and exit.
      */
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         new Configuration().writeXml(System.out);
     }
 

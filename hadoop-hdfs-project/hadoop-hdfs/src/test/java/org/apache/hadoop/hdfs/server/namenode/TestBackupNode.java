@@ -138,8 +138,10 @@ public class TestBackupNode {
         c.set(DFSConfigKeys.FS_DEFAULT_NAME_KEY, "hdfs://127.0.0.1:" + ServerSocketUtil.getPort(0, 100));
         c.set(DFSConfigKeys.DFS_NAMENODE_HTTP_ADDRESS_KEY, "127.0.0.1:0");
         c.set(DFSConfigKeys.DFS_BLOCKREPORT_INITIAL_DELAY_KEY, "0");
-        c.setInt(DFSConfigKeys.DFS_DATANODE_SCAN_PERIOD_HOURS_KEY, // disable block scanner
-        -1);
+        // disable block scanner
+        c.// disable block scanner
+        setInt(// disable block scanner
+        DFSConfigKeys.DFS_DATANODE_SCAN_PERIOD_HOURS_KEY, -1);
         c.setInt(DFSConfigKeys.DFS_NAMENODE_CHECKPOINT_TXNS_KEY, 1);
         c.set(DFSConfigKeys.DFS_NAMENODE_NAME_DIR_KEY, dirs);
         c.set(DFSConfigKeys.DFS_NAMENODE_EDITS_DIR_KEY, "${" + DFSConfigKeys.DFS_NAMENODE_NAME_DIR_KEY + "}");

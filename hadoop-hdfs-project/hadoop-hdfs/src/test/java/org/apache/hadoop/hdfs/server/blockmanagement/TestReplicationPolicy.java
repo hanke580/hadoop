@@ -158,8 +158,16 @@ public class TestReplicationPolicy extends BaseReplicationPolicyTest {
      */
     @Test
     public void testChooseTarget1() throws Exception {
-        updateHeartbeatWithUsage(dataNodes[0], 2 * HdfsServerConstants.MIN_BLOCKS_FOR_WRITE * BLOCK_SIZE, 0L, HdfsServerConstants.MIN_BLOCKS_FOR_WRITE * BLOCK_SIZE, 0L, 0L, 0L, 4, // overloaded
-        0);
+        // overloaded
+        updateHeartbeatWithUsage(// overloaded
+        dataNodes[0], // overloaded
+        2 * HdfsServerConstants.MIN_BLOCKS_FOR_WRITE * BLOCK_SIZE, // overloaded
+        0L, // overloaded
+        HdfsServerConstants.MIN_BLOCKS_FOR_WRITE * BLOCK_SIZE, // overloaded
+        0L, // overloaded
+        0L, // overloaded
+        0L, // overloaded
+        4, 0);
         DatanodeStorageInfo[] targets;
         targets = chooseTarget(0);
         assertEquals(targets.length, 0);
@@ -256,8 +264,16 @@ public class TestReplicationPolicy extends BaseReplicationPolicyTest {
     @Test
     public void testChooseTarget3() throws Exception {
         // make data node 0 to be not qualified to choose
-        updateHeartbeatWithUsage(dataNodes[0], 2 * HdfsServerConstants.MIN_BLOCKS_FOR_WRITE * BLOCK_SIZE, 0L, (HdfsServerConstants.MIN_BLOCKS_FOR_WRITE - 1) * BLOCK_SIZE, 0L, 0L, 0L, 0, // no space
-        0);
+        // no space
+        updateHeartbeatWithUsage(// no space
+        dataNodes[0], // no space
+        2 * HdfsServerConstants.MIN_BLOCKS_FOR_WRITE * BLOCK_SIZE, // no space
+        0L, // no space
+        (HdfsServerConstants.MIN_BLOCKS_FOR_WRITE - 1) * BLOCK_SIZE, // no space
+        0L, // no space
+        0L, // no space
+        0L, // no space
+        0, 0);
         DatanodeStorageInfo[] targets;
         targets = chooseTarget(0);
         assertEquals(targets.length, 0);

@@ -968,9 +968,9 @@ public class TestBPOfferService {
 
     @Test(timeout = 15000)
     public void testRefreshLeaseId() throws Exception {
-        Mockito.when(mockNN1.sendHeartbeat(Mockito.any(DatanodeRegistration.class), Mockito.any(StorageReport[].class), Mockito.anyLong(), Mockito.anyLong(), Mockito.anyInt(), Mockito.anyInt(), Mockito.anyInt(), Mockito.any(VolumeFailureSummary.class), Mockito.anyBoolean(), Mockito.any(SlowPeerReports.class), Mockito.any(SlowDiskReports.class))).//heartbeat to old NN instance
-        thenAnswer(new HeartbeatAnswer(0)).//heartbeat to new NN instance with Register Command
-        thenAnswer(new HeartbeatRegisterAnswer(0)).thenAnswer(new HeartbeatAnswer(0));
+        //heartbeat to old NN instance
+        Mockito.when(mockNN1.sendHeartbeat(Mockito.any(DatanodeRegistration.class), Mockito.any(StorageReport[].class), Mockito.anyLong(), Mockito.anyLong(), Mockito.anyInt(), Mockito.anyInt(), Mockito.anyInt(), Mockito.any(VolumeFailureSummary.class), Mockito.anyBoolean(), Mockito.any(SlowPeerReports.class), Mockito.any(SlowDiskReports.class))).thenAnswer(//heartbeat to new NN instance with Register Command
+        new HeartbeatAnswer(0)).thenAnswer(new HeartbeatRegisterAnswer(0)).thenAnswer(new HeartbeatAnswer(0));
         Mockito.when(mockNN1.blockReport(Mockito.any(DatanodeRegistration.class), Mockito.anyString(), Mockito.any(StorageBlockReport[].class), Mockito.any(BlockReportContext.class))).thenAnswer(new Answer() {
 
             @Override

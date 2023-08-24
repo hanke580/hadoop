@@ -267,6 +267,11 @@ public class JenkinsHash extends Hash {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         if (args.length != 1) {
             System.err.println("Usage: JenkinsHash filename");
             System.exit(-1);

@@ -219,6 +219,13 @@ https://maven.apache.org/xsd/maven-4.0.0.xsd">
         <artifactId>assertj-core</artifactId>
         <scope>test</scope>
     </dependency>
+    <dependency>
+        <groupId>org.zlab</groupId>
+        <artifactId>dinv-monitor</artifactId>
+        <version>1.0</version>
+        <scope>system</scope>
+        <systemPath>${project.basedir}/lib/dinv-monitor-shadow.jar</systemPath>
+    </dependency>
   </dependencies>
 
   <build>

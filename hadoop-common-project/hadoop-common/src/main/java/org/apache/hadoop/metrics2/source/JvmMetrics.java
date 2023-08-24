@@ -141,8 +141,7 @@ public class JvmMetrics implements MetricsSource {
         Singleton.INSTANCE.shutdown();
     }
 
-    @Override
-    public void getMetrics(MetricsCollector collector, boolean all) {
+    public void internal$getMetrics0(MetricsCollector collector, boolean all) {
         MetricsRecordBuilder rb = collector.addRecord(JvmMetrics).setContext("jvm").tag(ProcessName, processName).tag(SessionId, sessionId);
         getMemoryUsage(rb);
         getGcUsage(rb);
@@ -283,5 +282,16 @@ public class JvmMetrics implements MetricsSource {
 
     private void getEventCounters(MetricsRecordBuilder rb) {
         rb.addCounter(LogFatal, EventCounter.getFatal()).addCounter(LogError, EventCounter.getError()).addCounter(LogWarn, EventCounter.getWarn()).addCounter(LogInfo, EventCounter.getInfo());
+    }
+
+    @Override
+    public void getMetrics(MetricsCollector collector, boolean all) {
+        try {
+            if (!(this.sessionId == null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(0);
+            }
+        } catch (Exception e) {
+        }
+        internal$getMetrics0(collector, all);
     }
 }

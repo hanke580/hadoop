@@ -52,8 +52,11 @@ public class TestWriteBlockGetsBlockLengthHint {
             cluster.waitActive();
             // FsDatasetChecker#createRbw asserts during block creation if the test
             // fails.
-            DFSTestUtil.createFile(cluster.getFileSystem(), path, // Buffer size.
-            4096, EXPECTED_BLOCK_LENGTH, EXPECTED_BLOCK_LENGTH, (short) 1, 0x1BAD5EED);
+            // Buffer size.
+            DFSTestUtil.// Buffer size.
+            createFile(// Buffer size.
+            cluster.getFileSystem(), // Buffer size.
+            path, 4096, EXPECTED_BLOCK_LENGTH, EXPECTED_BLOCK_LENGTH, (short) 1, 0x1BAD5EED);
         } finally {
             cluster.shutdown();
         }

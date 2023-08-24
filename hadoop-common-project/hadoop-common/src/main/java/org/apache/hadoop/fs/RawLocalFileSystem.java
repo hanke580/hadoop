@@ -137,8 +137,7 @@ public class RawLocalFileSystem extends FileSystem {
             this.position = pos;
         }
 
-        @Override
-        public long getPos() throws IOException {
+        public long internal$getPos14() throws IOException {
             return this.position;
         }
 
@@ -188,8 +187,7 @@ public class RawLocalFileSystem extends FileSystem {
             }
         }
 
-        @Override
-        public int read(byte[] b, int off, int len) throws IOException {
+        public int internal$read15(byte[] b, int off, int len) throws IOException {
             // parameter check
             validatePositionedReadArgs(position, b, off, len);
             try {
@@ -268,6 +266,32 @@ public class RawLocalFileSystem extends FileSystem {
         private long left_54;
 
         private long left_53;
+
+        @Override
+        public long getPos() throws IOException {
+            try {
+                if (!(this.position > 0 || this.position == 0)) {
+                    org.zlab.dinv.runtimechecker.Runtime.addViolation(20);
+                }
+            } catch (Exception e) {
+            }
+            long returnValue;
+            returnValue = internal$getPos14();
+            return returnValue;
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            try {
+                if (!(this.position > 0 || this.position == 0)) {
+                    org.zlab.dinv.runtimechecker.Runtime.addViolation(21);
+                }
+            } catch (Exception e) {
+            }
+            int returnValue;
+            returnValue = internal$read15(b, off, len);
+            return returnValue;
+        }
     }
 
     @Override

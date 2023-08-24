@@ -285,10 +285,10 @@ public class TestQuota {
         args = new String[] { "-setQuota", "1", parent.toString() };
         runCommand(admin, args, false);
         // for space quota
+        // for space quota
         runCommand(// for space quota
         admin, // for space quota
-        false, // for space quota
-        "-setSpaceQuota", Integer.toString(fileLen), args[2]);
+        false, "-setSpaceQuota", Integer.toString(fileLen), args[2]);
         // 12: set the quota of /test/data0 to be 1
         args = new String[] { "-setQuota", "1", childDir0.toString() };
         runCommand(admin, args, false);
@@ -316,11 +316,11 @@ public class TestQuota {
         args = new String[] { "-setQuota", "1", nonExistentPath.toString() };
         runCommand(admin, args, true);
         // for space quota
+        // for space quota
         runCommand(// for space quota
         admin, // for space quota
         true, // for space quota
-        "-setSpaceQuota", // for space quota
-        "1g", nonExistentPath.toString());
+        "-setSpaceQuota", "1g", nonExistentPath.toString());
         // 14b: set quota on a file
         assertTrue(dfs.isFile(childFile0));
         args[1] = childFile0.toString();

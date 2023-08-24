@@ -45,8 +45,9 @@ public class TestProtoBufRpcServerHandoff {
         TestProtoBufRpcServerHandoffServer serverImpl = new TestProtoBufRpcServerHandoffServer();
         BlockingService blockingService = TestProtobufRpcHandoffProto.newReflectiveBlockingService(serverImpl);
         RPC.setProtocolEngine(conf, TestProtoBufRpcServerHandoffProtocol.class, ProtobufRpcEngine2.class);
-        RPC.Server server = new RPC.Builder(conf).setProtocol(TestProtoBufRpcServerHandoffProtocol.class).setInstance(blockingService).setVerbose(true).setNumHandlers(// Num Handlers explicitly set to 1 for test.
-        1).build();
+        RPC.Server server = // Num Handlers explicitly set to 1 for test.
+        new RPC.Builder(conf).setProtocol(TestProtoBufRpcServerHandoffProtocol.class).setInstance(blockingService).setVerbose(true).// Num Handlers explicitly set to 1 for test.
+        setNumHandlers(1).build();
         server.start();
         InetSocketAddress address = server.getListenerAddress();
         long serverStartTime = System.currentTimeMillis();

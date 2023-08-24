@@ -337,6 +337,11 @@ public class MiniRPCBenchmark {
     }
 
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         System.out.println("Benchmark: RPC session establishment.");
         if (args.length < 1)
             printUsage();

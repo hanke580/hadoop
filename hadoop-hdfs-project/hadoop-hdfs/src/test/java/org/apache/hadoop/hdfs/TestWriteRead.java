@@ -425,6 +425,11 @@ public class TestWriteRead {
      */
     public static void main(String[] args) {
         try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        try {
             TestWriteRead trw = new TestWriteRead();
             trw.initClusterModeTest();
             trw.getCmdLineOption(args);

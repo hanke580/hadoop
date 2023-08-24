@@ -319,8 +319,7 @@ public class Token<T extends TokenIdentifier> implements Writable {
         service.readFields(in);
     }
 
-    @Override
-    public void write(DataOutput out) throws IOException {
+    public void internal$write8(DataOutput out) throws IOException {
         WritableUtils.writeVInt(out, identifier.length);
         out.write(identifier);
         WritableUtils.writeVInt(out, password.length);
@@ -529,4 +528,21 @@ public class Token<T extends TokenIdentifier> implements Writable {
     }
 
     private static final TokenRenewer TRIVIAL_RENEWER = new TrivialRenewer();
+
+    @Override
+    public void write(DataOutput out) throws IOException {
+        try {
+            if (!(org.zlab.dinv.runtimechecker.Quant.size(this.identifier) == 2 || org.zlab.dinv.runtimechecker.Quant.size(this.identifier) == 33)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(12);
+            }
+        } catch (Exception e) {
+        }
+        try {
+            if (!(org.zlab.dinv.runtimechecker.Quant.size(this.password) == 1 || org.zlab.dinv.runtimechecker.Quant.size(this.password) == 3)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(13);
+            }
+        } catch (Exception e) {
+        }
+        internal$write8(out);
+    }
 }

@@ -106,11 +106,11 @@ public abstract class AbstractContractMkdirTest extends AbstractFSContractTestBa
         describe("verify mkdir slash handling");
         FileSystem fs = getFileSystem();
         final Path[] paths = new Path[] { // w/o trailing slash
-        path("testMkdirSlashHandling/a"), // w/ trailing slash
-        path("testMkdirSlashHandling/b/"), // unqualified w/o trailing slash
-        new Path(getContract().getTestPath() + "/testMkdirSlashHandling/c"), // unqualified w/ trailing slash
-        new Path(getContract().getTestPath() + "/testMkdirSlashHandling/d/"), // unqualified w/ multiple trailing slashes
-        new Path(getContract().getTestPath() + "/testMkdirSlashHandling/e///") };
+        // w/ trailing slash
+        path("testMkdirSlashHandling/a"), // unqualified w/o trailing slash
+        path("testMkdirSlashHandling/b/"), // unqualified w/ trailing slash
+        new Path(getContract().getTestPath() + "/testMkdirSlashHandling/c"), // unqualified w/ multiple trailing slashes
+        new Path(getContract().getTestPath() + "/testMkdirSlashHandling/d/"), new Path(getContract().getTestPath() + "/testMkdirSlashHandling/e///") };
         for (Path path : paths) {
             assertTrue(fs.mkdirs(path));
             assertPathExists(path + " does not exist after mkdirs", path);

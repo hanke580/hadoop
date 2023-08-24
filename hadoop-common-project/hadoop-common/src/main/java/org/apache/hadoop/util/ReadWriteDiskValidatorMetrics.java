@@ -44,9 +44,9 @@ public class ReadWriteDiskValidatorMetrics {
     private static final MetricsInfo RECORD_INFO = info("ReadWriteDiskValidatorMetrics", "Metrics for the DiskValidator");
 
     private final int[] quantileIntervals = new int[] { // 1h
-    60 * 60, //1 day
-    24 * 60 * 60, //10 day
-    10 * 24 * 60 * 60 };
+    //1 day
+    60 * 60, //10 day
+    24 * 60 * 60, 10 * 24 * 60 * 60 };
 
     private final MutableQuantiles[] fileReadQuantiles;
 

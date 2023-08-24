@@ -203,12 +203,13 @@ public class TestBpServiceActorScheduler {
     }
 
     List<Long> getTimestamps() {
-        return Arrays.asList(// test boundaries
+        return // test boundaries
+        Arrays.// test boundaries
+        asList(// test boundaries
         0L, // test boundaries
-        Long.MIN_VALUE, // test boundaries
-        Long.MAX_VALUE, // test integer overflow
-        Long.MAX_VALUE - 1, // positive random
-        abs(random.nextLong()), // negative random
-        -abs(random.nextLong()));
+        Long.MIN_VALUE, // test integer overflow
+        Long.MAX_VALUE, // positive random
+        Long.MAX_VALUE - 1, // negative random
+        abs(random.nextLong()), -abs(random.nextLong()));
     }
 }

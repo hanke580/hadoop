@@ -796,6 +796,11 @@ public class Mover {
      * @param args Command line arguments
      */
     public static void main(String[] args) {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         if (DFSUtil.parseHelpArgument(args, Cli.USAGE, System.out, true)) {
             System.exit(0);
         }

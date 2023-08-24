@@ -122,9 +122,9 @@ public class TestKMSAudit {
         kmsAudit.evictCacheForTesting();
         String out = getAndResetLogOutput();
         System.out.println(out);
-        Assert.assertTrue(out.matches("OK\\[op=DECRYPT_EEK, key=k1, user=luser, accessCount=1, interval=[^m]{1,4}ms\\] testmsg" + // Not aggregated !!
-        "OK\\[op=DELETE_KEY, key=k1, user=luser\\] testmsg" + "OK\\[op=ROLL_NEW_VERSION, key=k1, user=luser\\] testmsg" + "OK\\[op=INVALIDATE_CACHE, key=k1, user=luser\\] testmsg" + // Aggregated
-        "OK\\[op=DECRYPT_EEK, key=k1, user=luser, accessCount=6, interval=[^m]{1,4}ms\\] testmsg" + "OK\\[op=DECRYPT_EEK, key=k1, user=luser, accessCount=1, interval=[^m]{1,4}ms\\] testmsg" + "OK\\[op=REENCRYPT_EEK, key=k1, user=luser, accessCount=1, interval=[^m]{1,4}ms\\] testmsg" + "OK\\[op=REENCRYPT_EEK, key=k1, user=luser, accessCount=3, interval=[^m]{1,4}ms\\] testmsg" + "OK\\[op=REENCRYPT_EEK_BATCH, key=k1, user=luser\\] testmsg" + "OK\\[op=REENCRYPT_EEK_BATCH, key=k1, user=luser\\] testmsg"));
+        Assert.assertTrue(out.matches(// Not aggregated !!
+        "OK\\[op=DECRYPT_EEK, key=k1, user=luser, accessCount=1, interval=[^m]{1,4}ms\\] testmsg" + "OK\\[op=DELETE_KEY, key=k1, user=luser\\] testmsg" + "OK\\[op=ROLL_NEW_VERSION, key=k1, user=luser\\] testmsg" + // Aggregated
+        "OK\\[op=INVALIDATE_CACHE, key=k1, user=luser\\] testmsg" + "OK\\[op=DECRYPT_EEK, key=k1, user=luser, accessCount=6, interval=[^m]{1,4}ms\\] testmsg" + "OK\\[op=DECRYPT_EEK, key=k1, user=luser, accessCount=1, interval=[^m]{1,4}ms\\] testmsg" + "OK\\[op=REENCRYPT_EEK, key=k1, user=luser, accessCount=1, interval=[^m]{1,4}ms\\] testmsg" + "OK\\[op=REENCRYPT_EEK, key=k1, user=luser, accessCount=3, interval=[^m]{1,4}ms\\] testmsg" + "OK\\[op=REENCRYPT_EEK_BATCH, key=k1, user=luser\\] testmsg" + "OK\\[op=REENCRYPT_EEK_BATCH, key=k1, user=luser\\] testmsg"));
     }
 
     @Test

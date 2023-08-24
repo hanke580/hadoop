@@ -175,6 +175,11 @@ public class TraceAdmin extends Configured implements Tool {
     }
 
     public static void main(String[] argv) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         TraceAdmin admin = new TraceAdmin();
         admin.setConf(new Configuration());
         System.exit(admin.run(argv));

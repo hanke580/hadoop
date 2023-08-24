@@ -78,8 +78,8 @@ public class TestRefreshTokenTimeBasedTokenRefresher {
         tokenProvider.setConf(conf);
         // Build mock server to receive refresh request
         ClientAndServer mockServer = startClientAndServer(PORT);
-        HttpRequest expectedRequest = request().withMethod("POST").withPath("/refresh").// Note, OkHttp does not sort the param values, so we need to
-        // do it ourselves via the ordering provided to ParameterBody...
+        HttpRequest expectedRequest = // Note, OkHttp does not sort the param values, so we need to
+        request().withMethod("POST").withPath("/refresh").// do it ourselves via the ordering provided to ParameterBody...
         withBody(ParameterBody.params(Parameter.param(CLIENT_ID, "joebob"), Parameter.param(GRANT_TYPE, REFRESH_TOKEN), Parameter.param(REFRESH_TOKEN, "refresh token key")));
         MockServerClient mockServerClient = new MockServerClient("localhost", PORT);
         // https://tools.ietf.org/html/rfc6749#section-5.1

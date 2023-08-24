@@ -53,6 +53,11 @@ public class ECAdmin extends Configured implements Tool {
     public static final String NAME = "ec";
 
     public static void main(String[] args) throws Exception {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         final ECAdmin admin = new ECAdmin(new Configuration());
         int res = ToolRunner.run(admin, args);
         System.exit(res);

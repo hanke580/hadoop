@@ -110,8 +110,8 @@ public class TestHAConfiguration {
     @Test
     public void testHAUniqueEditDirs() throws IOException {
         Configuration conf = new Configuration();
-        conf.set(DFS_NAMENODE_EDITS_DIR_KEY, "file://edits/dir, " + // overlapping
-        "file://edits/shared/dir");
+        conf.set(DFS_NAMENODE_EDITS_DIR_KEY, // overlapping
+        "file://edits/dir, " + "file://edits/shared/dir");
         conf.set(DFS_NAMENODE_SHARED_EDITS_DIR_KEY, "file://edits/shared/dir");
         // getNamespaceEditsDirs removes duplicates across edits and shared.edits
         Collection<URI> editsDirs = FSNamesystem.getNamespaceEditsDirs(conf);

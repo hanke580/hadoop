@@ -46,9 +46,9 @@ public class TestShellBasedIdMapping {
     @Test
     public void testStaticMapParsing() throws IOException {
         File tempStaticMapFile = File.createTempFile("nfs-", ".map");
-        final String staticMapFileContents = "uid 10 100\n" + "gid 10 200\n" + "uid 11 201 # comment at the end of a line\n" + "uid 12 301\n" + "# Comment at the beginning of a line\n" + "    # Comment that starts late in the line\n" + "uid 10000 10001# line without whitespace before comment\n" + "uid 13 302\n" + // Tabs instead of spaces.
-        "gid\t11\t201\n" + // Entirely empty line.
-        "\n" + "gid 12 202\n" + "uid 4294967294 123\n" + "gid 4294967295 321";
+        final String staticMapFileContents = // Tabs instead of spaces.
+        "uid 10 100\n" + "gid 10 200\n" + "uid 11 201 # comment at the end of a line\n" + "uid 12 301\n" + "# Comment at the beginning of a line\n" + "    # Comment that starts late in the line\n" + "uid 10000 10001# line without whitespace before comment\n" + "uid 13 302\n" + // Entirely empty line.
+        "gid\t11\t201\n" + "\n" + "gid 12 202\n" + "uid 4294967294 123\n" + "gid 4294967295 321";
         createStaticMapFile(tempStaticMapFile, staticMapFileContents);
         StaticMapping parsedMap = ShellBasedIdMapping.parseStaticMap(tempStaticMapFile);
         assertEquals(10, (int) parsedMap.uidMapping.get(100));

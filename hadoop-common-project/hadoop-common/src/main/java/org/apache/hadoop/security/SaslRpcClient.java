@@ -331,7 +331,7 @@ public class SaslRpcClient {
      * @return AuthMethod used to negotiate the connection
      * @throws IOException
      */
-    public AuthMethod saslConnect(IpcStreams ipcStreams) throws IOException {
+    public AuthMethod internal$saslConnect9(IpcStreams ipcStreams) throws IOException {
         // redefined if/when a SASL negotiation starts, can be queried if the
         // negotiation fails
         authMethod = AuthMethod.SIMPLE;
@@ -661,5 +661,30 @@ public class SaslRpcClient {
                 rc.setText(rc.getDefaultText());
             }
         }
+    }
+
+    /**
+     * Do client side SASL authentication with server via the given IpcStreams.
+     *
+     * @param ipcStreams
+     * @return AuthMethod used to negotiate the connection
+     * @throws IOException
+     */
+    public AuthMethod saslConnect(IpcStreams ipcStreams) throws IOException {
+        try {
+            if (!(this.authMethod == null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(14);
+            }
+        } catch (Exception e) {
+        }
+        try {
+            if (!(this != null)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(15);
+            }
+        } catch (Exception e) {
+        }
+        AuthMethod returnValue;
+        returnValue = internal$saslConnect9(ipcStreams);
+        return returnValue;
     }
 }

@@ -495,8 +495,9 @@ public class TestDFSShell {
             assertEquals(3, in.nextLong());
             //FILE_COUNT
             assertEquals(3, in.nextLong());
-            assertEquals(fileLength + file2Length + newFileLength, //CONTENT_SIZE
-            in.nextLong());
+            //CONTENT_SIZE
+            assertEquals(//CONTENT_SIZE
+            fileLength + file2Length + newFileLength, in.nextLong());
             out.reset();
             // test -count -x on /test. Include header for easier debugging.
             val = -1;

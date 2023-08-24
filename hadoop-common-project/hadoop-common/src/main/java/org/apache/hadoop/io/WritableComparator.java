@@ -40,8 +40,9 @@ import org.apache.hadoop.util.ReflectionUtils;
 @InterfaceStability.Stable
 public class WritableComparator implements RawComparator, Configurable {
 
-    private static final ConcurrentHashMap<Class, WritableComparator> comparators = // registry
-    new ConcurrentHashMap<Class, WritableComparator>();
+    private static final // registry
+    ConcurrentHashMap<Class, WritableComparator> // registry
+    comparators = new ConcurrentHashMap<Class, WritableComparator>();
 
     private Configuration conf;
 

@@ -254,8 +254,8 @@ public class MetricsSystemImpl extends MetricsSystem implements MetricsSource {
         MetricsInfo si = sb.info();
         String name2 = name == null ? si.name() : name;
         final String finalDesc = desc == null ? si.description() : desc;
-        final // be friendly to non-metrics tests
-        String // be friendly to non-metrics tests
+        final String // be friendly to non-metrics tests
+        // be friendly to non-metrics tests
         finalName = DefaultMetricsSystem.sourceName(name2, !monitoring);
         allSources.put(finalName, s);
         LOG.debug(finalName + ", " + finalDesc);

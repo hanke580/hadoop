@@ -67,7 +67,7 @@ public class BlockMetadataHeader {
     /**
      * Get the version
      */
-    public short getVersion() {
+    public short internal$getVersion26() {
         return version;
     }
 
@@ -214,4 +214,19 @@ public class BlockMetadataHeader {
     private static long right_74;
 
     private static long left_74;
+
+    /**
+     * Get the version
+     */
+    public short getVersion() {
+        try {
+            if (!(this.version == 1)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(35);
+            }
+        } catch (Exception e) {
+        }
+        short returnValue;
+        returnValue = internal$getVersion26();
+        return returnValue;
+    }
 }

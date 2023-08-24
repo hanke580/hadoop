@@ -574,8 +574,8 @@ public class RegistrySecurity extends AbstractService {
      * JAAS template: {@value}
      * Note the semicolon on the last entry
      */
-    private static final String JAAS_ENTRY = (IBM_JAVA ? "%s { %n" + " %s required%n" + " useKeytab=\"%s\"%n" + " debug=true%n" + " principal=\"%s\"%n" + " credsType=both%n" + " refreshKrb5Config=true;%n" + "}; %n" : "%s { %n" + " %s required%n" + // kerberos module
-    " keyTab=\"%s\"%n" + " debug=true%n" + " principal=\"%s\"%n" + " useKeyTab=true%n" + " useTicketCache=false%n" + " doNotPrompt=true%n" + " storeKey=true;%n" + "}; %n");
+    private static final String JAAS_ENTRY = (IBM_JAVA ? "%s { %n" + " %s required%n" + " useKeytab=\"%s\"%n" + " debug=true%n" + " principal=\"%s\"%n" + " credsType=both%n" + " refreshKrb5Config=true;%n" + "}; %n" : // kerberos module
+    "%s { %n" + " %s required%n" + " keyTab=\"%s\"%n" + " debug=true%n" + " principal=\"%s\"%n" + " useKeyTab=true%n" + " useTicketCache=false%n" + " doNotPrompt=true%n" + " storeKey=true;%n" + "}; %n");
 
     /**
      * Create a JAAS entry for insertion

@@ -258,6 +258,11 @@ public class JMXGet {
     }
 
     public static void main(String[] args) {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         int res = -1;
         // parse arguments
         Options opts = new Options();

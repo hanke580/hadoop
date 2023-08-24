@@ -430,10 +430,10 @@ public class Path implements Comparable<Path>, Serializable, ObjectInputValidati
         }
         if (uri.getPath() != null) {
             String path = uri.getPath();
-            if (path.indexOf('/') == 0 && // has windows drive
-            hasWindowsDrive(path) && // but no scheme
-            uri.getScheme() == null && // or authority
-            uri.getAuthority() == null)
+            if (// has windows drive
+            path.indexOf('/') == 0 && // but no scheme
+            hasWindowsDrive(path) && // or authority
+            uri.getScheme() == null && uri.getAuthority() == null)
                 // remove slash before drive
                 path = path.substring(1);
             buffer.append(path);

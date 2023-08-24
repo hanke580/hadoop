@@ -176,8 +176,7 @@ public abstract class ProvidedReplica extends ReplicaInfo {
         }
     }
 
-    @Override
-    public InputStream getDataInputStream(long seekOffset) throws IOException {
+    public InputStream internal$getDataInputStream42(long seekOffset) throws IOException {
         if (remoteFS != null) {
             FSDataInputStream ins;
             try {
@@ -321,5 +320,18 @@ public abstract class ProvidedReplica extends ReplicaInfo {
     @VisibleForTesting
     public void setPathHandle(PathHandle pathHandle) {
         this.pathHandle = pathHandle;
+    }
+
+    @Override
+    public InputStream getDataInputStream(long seekOffset) throws IOException {
+        try {
+            if (!(this.fileOffset > 0 || this.fileOffset == 0)) {
+                org.zlab.dinv.runtimechecker.Runtime.addViolation(59);
+            }
+        } catch (Exception e) {
+        }
+        InputStream returnValue;
+        returnValue = internal$getDataInputStream42(seekOffset);
+        return returnValue;
     }
 }

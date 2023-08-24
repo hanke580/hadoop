@@ -24,6 +24,11 @@ package org.apache.hadoop.util;
 public class ClassLoaderCheckMain {
 
     public static void main(String[] args) {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         // ClassLoaderCheckMain should be loaded by the application classloader
         ClassLoaderCheck.checkClassLoader(ClassLoaderCheckMain.class, true);
         // ClassLoaderCheckSecond should NOT be loaded by the application

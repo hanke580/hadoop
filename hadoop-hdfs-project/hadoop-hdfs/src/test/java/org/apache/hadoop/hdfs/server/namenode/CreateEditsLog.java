@@ -115,6 +115,11 @@ public class CreateEditsLog {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         long startingBlockId = 1;
         int numFiles = 0;
         short replication = 1;

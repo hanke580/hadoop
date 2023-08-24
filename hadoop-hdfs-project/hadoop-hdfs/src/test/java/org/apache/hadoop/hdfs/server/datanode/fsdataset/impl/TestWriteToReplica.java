@@ -178,8 +178,11 @@ public class TestWriteToReplica {
             blocks[FINALIZED].setNumBytes(expectedLen);
         }
         newGS = blocks[RBW].getGenerationStamp() + 1;
-        dataSet.append(blocks[FINALIZED], newGS, // successful
-        blocks[FINALIZED].getNumBytes());
+        // successful
+        dataSet.// successful
+        append(// successful
+        blocks[FINALIZED], // successful
+        newGS, blocks[FINALIZED].getNumBytes());
         blocks[FINALIZED].setGenerationStamp(newGS);
         try {
             dataSet.append(blocks[TEMPORARY], blocks[TEMPORARY].getGenerationStamp() + 1, blocks[TEMPORARY].getNumBytes());
@@ -212,8 +215,11 @@ public class TestWriteToReplica {
             Assert.assertEquals(ReplicaNotFoundException.NON_EXISTENT_REPLICA + blocks[NON_EXISTENT], e.getMessage());
         }
         newGS = blocks[FINALIZED].getGenerationStamp() + 1;
-        dataSet.recoverAppend(blocks[FINALIZED], newGS, // successful
-        blocks[FINALIZED].getNumBytes());
+        // successful
+        dataSet.// successful
+        recoverAppend(// successful
+        blocks[FINALIZED], // successful
+        newGS, blocks[FINALIZED].getNumBytes());
         blocks[FINALIZED].setGenerationStamp(newGS);
         try {
             dataSet.recoverAppend(blocks[TEMPORARY], blocks[TEMPORARY].getGenerationStamp() + 1, blocks[TEMPORARY].getNumBytes());
@@ -246,8 +252,11 @@ public class TestWriteToReplica {
 
     private void testClose(FsDatasetSpi<?> dataSet, ExtendedBlock[] blocks) throws IOException {
         long newGS = blocks[FINALIZED].getGenerationStamp() + 1;
-        dataSet.recoverClose(blocks[FINALIZED], newGS, // successful
-        blocks[FINALIZED].getNumBytes());
+        // successful
+        dataSet.// successful
+        recoverClose(// successful
+        blocks[FINALIZED], // successful
+        newGS, blocks[FINALIZED].getNumBytes());
         blocks[FINALIZED].setGenerationStamp(newGS);
         try {
             dataSet.recoverClose(blocks[TEMPORARY], blocks[TEMPORARY].getGenerationStamp() + 1, blocks[TEMPORARY].getNumBytes());
@@ -301,8 +310,12 @@ public class TestWriteToReplica {
             Assert.fail("Should not have created a replica that had created as " + "temporary " + blocks[TEMPORARY]);
         } catch (ReplicaAlreadyExistsException e) {
         }
-        dataSet.recoverRbw(blocks[RBW], blocks[RBW].getGenerationStamp() + 1, 0L, // expect to be successful
-        blocks[RBW].getNumBytes());
+        // expect to be successful
+        dataSet.// expect to be successful
+        recoverRbw(// expect to be successful
+        blocks[RBW], // expect to be successful
+        blocks[RBW].getGenerationStamp() + 1, // expect to be successful
+        0L, blocks[RBW].getNumBytes());
         try {
             dataSet.createRbw(StorageType.DEFAULT, null, blocks[RBW], false);
             Assert.fail("Should not have created a replica that had created as RBW " + blocks[RBW]);

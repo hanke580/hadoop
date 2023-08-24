@@ -427,6 +427,11 @@ public class TestProxyUsers {
      * @param args
      */
     public static void main(String[] args) {
+        try {
+            Class.forName("org.zlab.dinv.runtimechecker.Runtime");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         String ipValues = null;
         if (args.length != 3 || (!args[0].equals("ip") && !args[0].equals("range"))) {
             System.out.println("Invalid invocation. The right syntax is ip/range <numberofIps/cidr> <testRange>");

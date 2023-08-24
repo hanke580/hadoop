@@ -40,6 +40,13 @@
 
   <dependencies>
     <dependency>
+        <groupId>org.zlab</groupId>
+        <artifactId>dinv-monitor</artifactId>
+        <version>1.0</version>
+        <scope>system</scope>
+        <systemPath>${project.basedir}/lib/dinv-monitor-shadow.jar</systemPath>
+    </dependency>
+    <dependency>
       <groupId>org.apache.hadoop.thirdparty</groupId>
       <artifactId>hadoop-shaded-protobuf_3_7</artifactId>
     </dependency>
