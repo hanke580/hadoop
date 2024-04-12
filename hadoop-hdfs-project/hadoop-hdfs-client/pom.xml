@@ -113,6 +113,13 @@ https://maven.apache.org/xsd/maven-4.0.0.xsd">
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
     </dependency>
+    <dependency>
+        <groupId>org.zlab</groupId>
+        <artifactId>ssg-runtime</artifactId>
+        <version>1.0</version>
+        <scope>system</scope>
+        <systemPath>${project.basedir}/lib/ssgFatJar.jar</systemPath>
+    </dependency>
   </dependencies>
 
   <build>

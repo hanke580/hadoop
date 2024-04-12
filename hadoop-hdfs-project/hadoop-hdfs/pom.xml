@@ -223,6 +223,13 @@ https://maven.apache.org/xsd/maven-4.0.0.xsd">
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-annotations</artifactId>
     </dependency>
+    <dependency>
+        <groupId>org.zlab</groupId>
+        <artifactId>ssg-runtime</artifactId>
+        <version>1.0</version>
+        <scope>system</scope>
+        <systemPath>${project.basedir}/lib/ssgFatJar.jar</systemPath>
+    </dependency>
   </dependencies>
 
   <build>
