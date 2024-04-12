@@ -33,41 +33,39 @@ import org.apache.hadoop.util.SequentialNumber;
  */
 @InterfaceAudience.Private
 public class SequentialBlockIdGenerator extends SequentialNumber {
-  /**
-   * The last reserved block ID.
-   */
-  public static final long LAST_RESERVED_BLOCK_ID = 1024L * 1024 * 1024;
 
-  private final BlockManager blockManager;
+    /**
+     * The last reserved block ID.
+     */
+    public static final long LAST_RESERVED_BLOCK_ID = 1024L * 1024 * 1024;
 
-  SequentialBlockIdGenerator(BlockManager blockManagerRef) {
-    super(LAST_RESERVED_BLOCK_ID);
-    this.blockManager = blockManagerRef;
-  }
+    private final BlockManager blockManager;
 
-  @Override // NumberGenerator
-  public long nextValue() {
-    Block b = new Block(super.nextValue());
-
-    // There may be an occasional conflict with randomly generated
-    // block IDs. Skip over the conflicts.
-    while(isValidBlock(b)) {
-      b.setBlockId(super.nextValue());
+    SequentialBlockIdGenerator(BlockManager blockManagerRef) {
+        super(LAST_RESERVED_BLOCK_ID);
+        this.blockManager = blockManagerRef;
     }
-    if (b.getBlockId() < 0) {
-      throw new IllegalStateException("All positive block IDs are used, " +
-          "wrapping to negative IDs, " +
-          "which might conflict with erasure coded block groups.");
-    }
-    return b.getBlockId();
-  }
 
-  /**
-   * Returns whether the given block is one pointed-to by a file.
-   */
-  private boolean isValidBlock(Block b) {
-    BlockInfo bi = blockManager.getStoredBlock(b);
-    return bi != null && bi.getBlockCollectionId() !=
-        INodeId.INVALID_INODE_ID;
-  }
+    // NumberGenerator
+    @Override
+    public long nextValue() {
+        Block b = ((Block) org.zlab.ocov.tracker.Runtime.update(new Block(super.nextValue()), 8));
+        // There may be an occasional conflict with randomly generated
+        // block IDs. Skip over the conflicts.
+        while (isValidBlock(b)) {
+            b.setBlockId(super.nextValue());
+        }
+        if (b.getBlockId() < 0) {
+            throw new IllegalStateException("All positive block IDs are used, " + "wrapping to negative IDs, " + "which might conflict with erasure coded block groups.");
+        }
+        return b.getBlockId();
+    }
+
+    /**
+     * Returns whether the given block is one pointed-to by a file.
+     */
+    private boolean isValidBlock(Block b) {
+        BlockInfo bi = blockManager.getStoredBlock(b);
+        return bi != null && bi.getBlockCollectionId() != INodeId.INVALID_INODE_ID;
+    }
 }

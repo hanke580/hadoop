@@ -22,7 +22,6 @@ import org.apache.hadoop.util.Preconditions;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,75 +38,70 @@ import java.util.function.Consumer;
 @InterfaceAudience.Private
 public class FileMonitoringTimerTask extends TimerTask {
 
-  static final Logger LOG = LoggerFactory.getLogger(FileMonitoringTimerTask.class);
+    static final Logger LOG = LoggerFactory.getLogger(FileMonitoringTimerTask.class);
 
-  @VisibleForTesting
-  static final String PROCESS_ERROR_MESSAGE =
-      "Could not process file change : ";
+    @VisibleForTesting
+    static final String PROCESS_ERROR_MESSAGE = "Could not process file change : ";
 
-  final private List<Path> filePaths;
-  final private Consumer<Path> onFileChange;
-  final Consumer<Throwable> onChangeFailure;
-  private List<Long> lastProcessed;
+    final private List<Path> filePaths;
 
-  /**
-   * See {@link #FileMonitoringTimerTask(List, Consumer, Consumer)}.
-   *
-   * @param filePath The file to monitor.
-   * @param onFileChange What to do when the file changes.
-   * @param onChangeFailure What to do when <code>onFileChange</code>
-   *                        throws an exception.
-   */
-  public FileMonitoringTimerTask(Path filePath, Consumer<Path> onFileChange,
-                                 Consumer<Throwable> onChangeFailure) {
-    this(Collections.singletonList(filePath), onFileChange, onChangeFailure);
-  }
+    final private Consumer<Path> onFileChange;
 
-  /**
-   * Create file monitoring task to be scheduled using a standard
-   * Java {@link java.util.Timer} instance.
-   *
-   * @param filePaths The path to the file to monitor.
-   * @param onFileChange The function to call when the file has changed.
-   * @param onChangeFailure The function to call when an exception is
-   *                       thrown during the file change processing.
-   */
-  public FileMonitoringTimerTask(List<Path> filePaths,
-                                 Consumer<Path> onFileChange,
-                                 Consumer<Throwable> onChangeFailure) {
-    Preconditions.checkNotNull(filePaths,
-        "path to monitor disk file is not set");
-    Preconditions.checkNotNull(onFileChange,
-        "action to monitor disk file is not set");
+    final Consumer<Throwable> onChangeFailure;
 
-    this.filePaths = new ArrayList<Path>(filePaths);
-    this.lastProcessed = new ArrayList<Long>();
-    this.filePaths.forEach(path ->
-        this.lastProcessed.add(path.toFile().lastModified()));
-    this.onFileChange = onFileChange;
-    this.onChangeFailure = onChangeFailure;
-  }
+    private List<Long> lastProcessed;
 
-  @Override
-  public void run() {
-    int modified = -1;
-    for (int i = 0; i < filePaths.size() && modified < 0; i++) {
-      if (lastProcessed.get(i) != filePaths.get(i).toFile().lastModified()) {
-        modified = i;
-      }
+    /**
+     * See {@link #FileMonitoringTimerTask(List, Consumer, Consumer)}.
+     *
+     * @param filePath The file to monitor.
+     * @param onFileChange What to do when the file changes.
+     * @param onChangeFailure What to do when <code>onFileChange</code>
+     *                        throws an exception.
+     */
+    public FileMonitoringTimerTask(Path filePath, Consumer<Path> onFileChange, Consumer<Throwable> onChangeFailure) {
+        this(Collections.singletonList(filePath), onFileChange, onChangeFailure);
     }
-    if (modified > -1) {
-      Path filePath = filePaths.get(modified);
-      try {
-        onFileChange.accept(filePath);
-      } catch (Throwable t) {
-        if (onChangeFailure  != null) {
-          onChangeFailure.accept(t);
-        } else {
-          LOG.error(PROCESS_ERROR_MESSAGE + filePath.toString(), t);
+
+    /**
+     * Create file monitoring task to be scheduled using a standard
+     * Java {@link java.util.Timer} instance.
+     *
+     * @param filePaths The path to the file to monitor.
+     * @param onFileChange The function to call when the file has changed.
+     * @param onChangeFailure The function to call when an exception is
+     *                       thrown during the file change processing.
+     */
+    public FileMonitoringTimerTask(List<Path> filePaths, Consumer<Path> onFileChange, Consumer<Throwable> onChangeFailure) {
+        Preconditions.checkNotNull(filePaths, "path to monitor disk file is not set");
+        Preconditions.checkNotNull(onFileChange, "action to monitor disk file is not set");
+        this.filePaths = new ArrayList<Path>(filePaths);
+        this.lastProcessed = new ArrayList<Long>();
+        this.filePaths.forEach(path -> this.lastProcessed.add(path.toFile().lastModified()));
+        this.onFileChange = onFileChange;
+        this.onChangeFailure = onChangeFailure;
+    }
+
+    @Override
+    public void run() {
+        int modified = -1;
+        for (int i = 0; i < filePaths.size() && modified < 0; i++) {
+            if (lastProcessed.get(i) != filePaths.get(i).toFile().lastModified()) {
+                modified = i;
+            }
         }
-      }
-      lastProcessed.set(modified, filePath.toFile().lastModified());
+        if ((org.zlab.ocov.tracker.Runtime.updateBranch(modified > -1, 45))) {
+            Path filePath = filePaths.get(modified);
+            try {
+                onFileChange.accept(filePath);
+            } catch (Throwable t) {
+                if (onChangeFailure != null) {
+                    onChangeFailure.accept(t);
+                } else {
+                    LOG.error(PROCESS_ERROR_MESSAGE + filePath.toString(), t);
+                }
+            }
+            lastProcessed.set(modified, filePath.toFile().lastModified());
+        }
     }
-  }
 }
