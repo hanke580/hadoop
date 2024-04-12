@@ -19,7 +19,6 @@ package org.apache.hadoop.hdfs.server.datanode.erasurecode;
 
 import java.io.IOException;
 import java.security.MessageDigest;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.io.DataOutputBuffer;
 import org.apache.hadoop.io.MD5Hash;
@@ -28,47 +27,41 @@ import org.apache.hadoop.io.MD5Hash;
  * Computes running MD5-of-CRC over reconstructed chunk CRCs.
  */
 @InterfaceAudience.Private
-public class StripedBlockChecksumMd5CrcReconstructor
-    extends StripedBlockChecksumReconstructor {
-  private MD5Hash md5;
-  private MessageDigest digester;
+public class StripedBlockChecksumMd5CrcReconstructor extends StripedBlockChecksumReconstructor {
 
-  public StripedBlockChecksumMd5CrcReconstructor(ErasureCodingWorker worker,
-      StripedReconstructionInfo stripedReconInfo,
-      DataOutputBuffer checksumWriter,
-      long requestedBlockLength) throws IOException {
-    super(worker, stripedReconInfo, checksumWriter, requestedBlockLength);
-  }
+    private MD5Hash md5;
 
-  @Override
-  public Object getDigestObject() {
-    return md5;
-  }
+    private MessageDigest digester;
 
-  @Override
-  void prepareDigester() throws IOException {
-    digester = MD5Hash.getDigester();
-  }
-
-  @Override
-  void updateDigester(byte[] checksumBytes, int dataBytesPerChecksum)
-      throws IOException {
-    if (digester == null) {
-      throw new IOException(String.format(
-          "Called updatedDigester with checksumBytes.length=%d, "
-          + "dataBytesPerChecksum=%d but digester is null",
-          checksumBytes.length, dataBytesPerChecksum));
+    public StripedBlockChecksumMd5CrcReconstructor(ErasureCodingWorker worker, StripedReconstructionInfo stripedReconInfo, DataOutputBuffer checksumWriter, long requestedBlockLength) throws IOException {
+        super(worker, stripedReconInfo, checksumWriter, requestedBlockLength);
     }
-    digester.update(checksumBytes, 0, checksumBytes.length);
-  }
 
-  @Override
-  void commitDigest() throws IOException {
-    if (digester == null) {
-      throw new IOException("Called commitDigest() but digester is null");
+    @Override
+    public Object getDigestObject() {
+        return md5;
     }
-    byte[] digest = digester.digest();
-    md5 = new MD5Hash(digest);
-    md5.write(getChecksumWriter());
-  }
+
+    @Override
+    void prepareDigester() throws IOException {
+        digester = MD5Hash.getDigester();
+    }
+
+    @Override
+    void updateDigester(byte[] checksumBytes, int dataBytesPerChecksum) throws IOException {
+        if (digester == null) {
+            throw new IOException(String.format("Called updatedDigester with checksumBytes.length=%d, " + "dataBytesPerChecksum=%d but digester is null", checksumBytes.length, dataBytesPerChecksum));
+        }
+        digester.update(checksumBytes, 0, checksumBytes.length);
+    }
+
+    @Override
+    void commitDigest() throws IOException {
+        if (digester == null) {
+            throw new IOException("Called commitDigest() but digester is null");
+        }
+        byte[] digest = digester.digest();
+        md5 = ((MD5Hash) org.zlab.ocov.tracker.Runtime.update(new MD5Hash(digest), 22));
+        md5.write(getChecksumWriter());
+    }
 }
