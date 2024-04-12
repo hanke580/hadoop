@@ -1658,6 +1658,7 @@ public class NameNode extends ReconfigurableBase implements NameNodeStatusMXBean
     /**
      */
     public static void main(String[] argv) throws Exception {
+        org.zlab.ocov.tracker.Runtime.init();
         if (DFSUtil.parseHelpArgument(argv, NameNode.USAGE, System.out, true)) {
             System.exit(0);
         }

@@ -398,6 +398,13 @@
       <artifactId>lz4-java</artifactId>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+        <groupId>org.zlab</groupId>
+        <artifactId>ssg-runtime</artifactId>
+        <version>1.0</version>
+        <scope>system</scope>
+        <systemPath>${project.basedir}/lib/ssgFatJar.jar</systemPath>
+    </dependency>
   </dependencies>
 
   <build>
