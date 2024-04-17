@@ -20,9 +20,7 @@ package org.apache.hadoop.hdfs.protocolPB;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-
 import javax.net.SocketFactory;
-
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.conf.Configuration;
@@ -39,9 +37,7 @@ import org.apache.hadoop.ipc.ProtocolMetaInterface;
 import org.apache.hadoop.ipc.RPC;
 import org.apache.hadoop.ipc.RpcClientUtil;
 import org.apache.hadoop.security.UserGroupInformation;
-
 import org.apache.hadoop.thirdparty.protobuf.RpcController;
-
 import static org.apache.hadoop.ipc.internal.ShadedProtobufHelper.ipc;
 
 /**
@@ -51,68 +47,50 @@ import static org.apache.hadoop.ipc.internal.ShadedProtobufHelper.ipc;
  */
 @InterfaceAudience.Private
 @InterfaceStability.Stable
-public class InterDatanodeProtocolTranslatorPB implements
-    ProtocolMetaInterface, InterDatanodeProtocol, Closeable {
-  /** RpcController is not used and hence is set to null */
-  private final static RpcController NULL_CONTROLLER = null;
-  final private InterDatanodeProtocolPB rpcProxy;
+public class InterDatanodeProtocolTranslatorPB implements ProtocolMetaInterface, InterDatanodeProtocol, Closeable {
 
-  public InterDatanodeProtocolTranslatorPB(InetSocketAddress addr,
-      UserGroupInformation ugi, Configuration conf, SocketFactory factory,
-      int socketTimeout)
-      throws IOException {
-    RPC.setProtocolEngine(conf, InterDatanodeProtocolPB.class,
-        ProtobufRpcEngine2.class);
-    rpcProxy = RPC.getProxy(InterDatanodeProtocolPB.class,
-        RPC.getProtocolVersion(InterDatanodeProtocolPB.class), addr, ugi, conf,
-        factory, socketTimeout);
-  }
+    /**
+     * RpcController is not used and hence is set to null
+     */
+    private final static RpcController NULL_CONTROLLER = null;
 
-  @Override
-  public void close() {
-    RPC.stopProxy(rpcProxy);
-  }
+    final private InterDatanodeProtocolPB rpcProxy;
 
-  @Override
-  public ReplicaRecoveryInfo initReplicaRecovery(RecoveringBlock rBlock)
-      throws IOException {
-    InitReplicaRecoveryRequestProto req = InitReplicaRecoveryRequestProto
-        .newBuilder().setBlock(PBHelper.convert(rBlock)).build();
-    InitReplicaRecoveryResponseProto resp;
-    resp = ipc(() -> rpcProxy.initReplicaRecovery(NULL_CONTROLLER, req));
-    if (!resp.getReplicaFound()) {
-      // No replica found on the remote node.
-      return null;
-    } else {
-      if (!resp.hasBlock() || !resp.hasState()) {
-        throw new IOException("Replica was found but missing fields. " +
-            "Req: " + req + "\n" +
-            "Resp: " + resp);
-      }
+    public InterDatanodeProtocolTranslatorPB(InetSocketAddress addr, UserGroupInformation ugi, Configuration conf, SocketFactory factory, int socketTimeout) throws IOException {
+        RPC.setProtocolEngine(conf, InterDatanodeProtocolPB.class, ProtobufRpcEngine2.class);
+        rpcProxy = RPC.getProxy(InterDatanodeProtocolPB.class, RPC.getProtocolVersion(InterDatanodeProtocolPB.class), addr, ugi, conf, factory, socketTimeout);
     }
-    
-    BlockProto b = resp.getBlock();
-    return new ReplicaRecoveryInfo(b.getBlockId(), b.getNumBytes(),
-        b.getGenStamp(), PBHelper.convert(resp.getState()));
-  }
 
-  @Override
-  public String updateReplicaUnderRecovery(ExtendedBlock oldBlock,
-      long recoveryId, long newBlockId, long newLength) throws IOException {
-    UpdateReplicaUnderRecoveryRequestProto req = 
-        UpdateReplicaUnderRecoveryRequestProto.newBuilder()
-        .setBlock(PBHelperClient.convert(oldBlock))
-        .setNewLength(newLength).setNewBlockId(newBlockId)
-        .setRecoveryId(recoveryId).build();
-    return ipc(() -> rpcProxy.updateReplicaUnderRecovery(NULL_CONTROLLER, req)
-        .getStorageUuid());
+    @Override
+    public void close() {
+        RPC.stopProxy(rpcProxy);
+    }
 
-  }
+    @Override
+    public ReplicaRecoveryInfo initReplicaRecovery(RecoveringBlock rBlock) throws IOException {
+        InitReplicaRecoveryRequestProto req = InitReplicaRecoveryRequestProto.newBuilder().setBlock(PBHelper.convert(rBlock)).build();
+        InitReplicaRecoveryResponseProto resp;
+        resp = ipc(() -> rpcProxy.initReplicaRecovery(NULL_CONTROLLER, req));
+        if (!resp.getReplicaFound()) {
+            // No replica found on the remote node.
+            return null;
+        } else {
+            if (!resp.hasBlock() || !resp.hasState()) {
+                throw new IOException("Replica was found but missing fields. " + "Req: " + req + "\n" + "Resp: " + resp);
+            }
+        }
+        BlockProto b = resp.getBlock();
+        return new ReplicaRecoveryInfo(b.getBlockId(), b.getNumBytes(), b.getGenStamp(), PBHelper.convert(resp.getState()));
+    }
 
-  @Override
-  public boolean isMethodSupported(String methodName) throws IOException {
-    return RpcClientUtil.isMethodSupported(rpcProxy,
-        InterDatanodeProtocolPB.class, RPC.RpcKind.RPC_PROTOCOL_BUFFER,
-        RPC.getProtocolVersion(InterDatanodeProtocolPB.class), methodName);
-  }
+    @Override
+    public String updateReplicaUnderRecovery(ExtendedBlock oldBlock, long recoveryId, long newBlockId, long newLength) throws IOException {
+        UpdateReplicaUnderRecoveryRequestProto req = UpdateReplicaUnderRecoveryRequestProto.newBuilder().setBlock(PBHelperClient.convert(oldBlock)).setNewLength(newLength).setNewBlockId(newBlockId).setRecoveryId(recoveryId).build();
+        return ipc(() -> rpcProxy.updateReplicaUnderRecovery(NULL_CONTROLLER, req).getStorageUuid());
+    }
+
+    @Override
+    public boolean isMethodSupported(String methodName) throws IOException {
+        return RpcClientUtil.isMethodSupported(rpcProxy, InterDatanodeProtocolPB.class, RPC.RpcKind.RPC_PROTOCOL_BUFFER, RPC.getProtocolVersion(InterDatanodeProtocolPB.class), methodName);
+    }
 }

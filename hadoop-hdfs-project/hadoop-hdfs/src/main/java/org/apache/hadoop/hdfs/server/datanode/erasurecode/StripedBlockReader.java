@@ -37,7 +37,6 @@ import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.net.NetUtils;
 import org.apache.hadoop.security.token.Token;
 import org.slf4j.Logger;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -57,65 +56,67 @@ import java.util.concurrent.Callable;
  */
 @InterfaceAudience.Private
 class StripedBlockReader {
-  private static final Logger LOG = DataNode.LOG;
 
-  private StripedReader stripedReader;
-  private final DataNode datanode;
-  private final Configuration conf;
+    private static final Logger LOG = DataNode.LOG;
 
-  private final short index; // internal block index
-  private final ExtendedBlock block;
-  private final DatanodeInfo source;
-  private BlockReader blockReader;
-  private ByteBuffer buffer;
-  private boolean isLocal;
+    private StripedReader stripedReader;
 
-  StripedBlockReader(StripedReader stripedReader, DataNode datanode,
-                     Configuration conf, short index, ExtendedBlock block,
-                     DatanodeInfo source, long offsetInBlock) {
-    this.stripedReader = stripedReader;
-    this.datanode = datanode;
-    this.conf = conf;
+    private final DataNode datanode;
 
-    this.index = index;
-    this.source = source;
-    this.block = block;
-    this.isLocal = false;
+    private final Configuration conf;
 
-    BlockReader tmpBlockReader = createBlockReader(offsetInBlock);
-    if (tmpBlockReader != null) {
-      this.blockReader = tmpBlockReader;
+    // internal block index
+    private final short index;
+
+    private final ExtendedBlock block;
+
+    private final DatanodeInfo source;
+
+    private BlockReader blockReader;
+
+    private ByteBuffer buffer;
+
+    private boolean isLocal;
+
+    StripedBlockReader(StripedReader stripedReader, DataNode datanode, Configuration conf, short index, ExtendedBlock block, DatanodeInfo source, long offsetInBlock) {
+        this.stripedReader = stripedReader;
+        this.datanode = datanode;
+        this.conf = conf;
+        this.index = index;
+        this.source = source;
+        this.block = block;
+        this.isLocal = false;
+        BlockReader tmpBlockReader = createBlockReader(offsetInBlock);
+        if (tmpBlockReader != null) {
+            this.blockReader = tmpBlockReader;
+        }
     }
-  }
 
-  ByteBuffer getReadBuffer() {
-    if (buffer == null) {
-      this.buffer = stripedReader.allocateReadBuffer();
+    ByteBuffer getReadBuffer() {
+        if (buffer == null) {
+            this.buffer = stripedReader.allocateReadBuffer();
+        }
+        return buffer;
     }
-    return buffer;
-  }
 
-  void freeReadBuffer() {
-    DataNodeFaultInjector.get().interceptFreeBlockReaderBuffer();
-    buffer = null;
-  }
-
-  void resetBlockReader(long offsetInBlock) {
-    this.blockReader = createBlockReader(offsetInBlock);
-  }
-
-  private BlockReader createBlockReader(long offsetInBlock) {
-    if (offsetInBlock >= block.getNumBytes()) {
-      return null;
+    void freeReadBuffer() {
+        DataNodeFaultInjector.get().interceptFreeBlockReaderBuffer();
+        buffer = null;
     }
-    Peer peer = null;
-    try {
-      InetSocketAddress dnAddr =
-          stripedReader.getSocketAddress4Transfer(source);
-      Token<BlockTokenIdentifier> blockToken = datanode.getBlockAccessToken(
-          block, EnumSet.of(BlockTokenIdentifier.AccessMode.READ),
-          StorageType.EMPTY_ARRAY, new String[0]);
-        /*
+
+    void resetBlockReader(long offsetInBlock) {
+        this.blockReader = createBlockReader(offsetInBlock);
+    }
+
+    private BlockReader createBlockReader(long offsetInBlock) {
+        if ((org.zlab.ocov.tracker.Runtime.updateBranch(offsetInBlock, block.getNumBytes(), ">=", 34))) {
+            return null;
+        }
+        Peer peer = null;
+        try {
+            InetSocketAddress dnAddr = stripedReader.getSocketAddress4Transfer(source);
+            Token<BlockTokenIdentifier> blockToken = datanode.getBlockAccessToken(block, EnumSet.of(BlockTokenIdentifier.AccessMode.READ), StorageType.EMPTY_ARRAY, new String[0]);
+            /*
          * This can be further improved if the replica is local, then we can
          * read directly from DN and need to check the replica is FINALIZED
          * state, notice we should not use short-circuit local read which
@@ -124,100 +125,88 @@ class StripedBlockReader {
          *
          * TODO: add proper tracer
          */
-      peer = newConnectedPeer(block, dnAddr, blockToken, source);
-      if (peer.isLocal()) {
-        this.isLocal = true;
-      }
-      return BlockReaderRemote.newBlockReader(
-          "dummy", block, blockToken, offsetInBlock,
-          block.getNumBytes() - offsetInBlock, true, "", peer, source,
-          null, stripedReader.getCachingStrategy(), -1, conf);
-    } catch (IOException e) {
-      LOG.info("Exception while creating remote block reader, datanode {}",
-          source, e);
-      IOUtils.closeStream(peer);
-      return null;
-    }
-  }
-
-  private Peer newConnectedPeer(ExtendedBlock b, InetSocketAddress addr,
-                                Token<BlockTokenIdentifier> blockToken,
-                                DatanodeID datanodeId)
-      throws IOException {
-    Peer peer = null;
-    boolean success = false;
-    Socket sock = null;
-    final int socketTimeout = datanode.getDnConf().getSocketTimeout();
-    try {
-      sock = NetUtils.getDefaultSocketFactory(conf).createSocket();
-      NetUtils.connect(sock, addr, socketTimeout);
-      peer = DFSUtilClient.peerFromSocketAndKey(datanode.getSaslClient(),
-          sock, datanode.getDataEncryptionKeyFactoryForBlock(b),
-          blockToken, datanodeId, socketTimeout);
-      success = true;
-      return peer;
-    } finally {
-      if (!success) {
-        IOUtils.cleanupWithLogger(null, peer);
-        IOUtils.closeSocket(sock);
-      }
-    }
-  }
-
-  Callable<BlockReadStats> readFromBlock(final int length,
-                               final CorruptedBlocks corruptedBlocks) {
-    return new Callable<BlockReadStats>() {
-
-      @Override
-      public BlockReadStats call() throws Exception {
-        try {
-          getReadBuffer().limit(length);
-          return actualReadFromBlock();
-        } catch (ChecksumException e) {
-          LOG.warn("Found Checksum error for {} from {} at {}", block,
-              source, e.getPos());
-          corruptedBlocks.addCorruptedBlock(block, source);
-          throw e;
+            peer = newConnectedPeer(block, dnAddr, blockToken, source);
+            if (peer.isLocal()) {
+                this.isLocal = true;
+            }
+            return BlockReaderRemote.newBlockReader("dummy", block, blockToken, offsetInBlock, block.getNumBytes() - offsetInBlock, true, "", peer, source, null, stripedReader.getCachingStrategy(), -1, conf);
         } catch (IOException e) {
-          LOG.info(e.getMessage());
-          throw e;
-        } finally {
-          DataNodeFaultInjector.get().interceptBlockReader();
+            LOG.info("Exception while creating remote block reader, datanode {}", source, e);
+            IOUtils.closeStream(peer);
+            return null;
         }
-      }
-    };
-  }
-
-  /**
-   * Perform actual reading of bytes from block.
-   */
-  private BlockReadStats actualReadFromBlock() throws IOException {
-    DataNodeFaultInjector.get().delayBlockReader();
-    int len = buffer.remaining();
-    int n = 0;
-    while (n < len) {
-      int nread = blockReader.read(buffer);
-      if (nread <= 0) {
-        break;
-      }
-      n += nread;
-      stripedReader.getReconstructor().incrBytesRead(isLocal, nread);
     }
-    return new BlockReadStats(n, blockReader.isShortCircuit(),
-        blockReader.getNetworkDistance());
-  }
 
-  // close block reader
-  void closeBlockReader() {
-    IOUtils.closeStream(blockReader);
-    blockReader = null;
-  }
+    private Peer newConnectedPeer(ExtendedBlock b, InetSocketAddress addr, Token<BlockTokenIdentifier> blockToken, DatanodeID datanodeId) throws IOException {
+        Peer peer = null;
+        boolean success = false;
+        Socket sock = null;
+        final int socketTimeout = datanode.getDnConf().getSocketTimeout();
+        try {
+            sock = NetUtils.getDefaultSocketFactory(conf).createSocket();
+            NetUtils.connect(sock, addr, socketTimeout);
+            peer = DFSUtilClient.peerFromSocketAndKey(datanode.getSaslClient(), sock, datanode.getDataEncryptionKeyFactoryForBlock(b), blockToken, datanodeId, socketTimeout);
+            success = true;
+            return peer;
+        } finally {
+            if (!success) {
+                IOUtils.cleanupWithLogger(null, peer);
+                IOUtils.closeSocket(sock);
+            }
+        }
+    }
 
-  short getIndex() {
-    return index;
-  }
+    Callable<BlockReadStats> readFromBlock(final int length, final CorruptedBlocks corruptedBlocks) {
+        return new Callable<BlockReadStats>() {
 
-  BlockReader getBlockReader() {
-    return blockReader;
-  }
+            @Override
+            public BlockReadStats call() throws Exception {
+                try {
+                    getReadBuffer().limit(length);
+                    return actualReadFromBlock();
+                } catch (ChecksumException e) {
+                    LOG.warn("Found Checksum error for {} from {} at {}", block, source, e.getPos());
+                    corruptedBlocks.addCorruptedBlock(block, source);
+                    throw e;
+                } catch (IOException e) {
+                    LOG.info(e.getMessage());
+                    throw e;
+                } finally {
+                    DataNodeFaultInjector.get().interceptBlockReader();
+                }
+            }
+        };
+    }
+
+    /**
+     * Perform actual reading of bytes from block.
+     */
+    private BlockReadStats actualReadFromBlock() throws IOException {
+        DataNodeFaultInjector.get().delayBlockReader();
+        int len = buffer.remaining();
+        int n = 0;
+        while (n < len) {
+            int nread = blockReader.read(buffer);
+            if (nread <= 0) {
+                break;
+            }
+            n += nread;
+            stripedReader.getReconstructor().incrBytesRead(isLocal, nread);
+        }
+        return new BlockReadStats(n, blockReader.isShortCircuit(), blockReader.getNetworkDistance());
+    }
+
+    // close block reader
+    void closeBlockReader() {
+        IOUtils.closeStream(blockReader);
+        blockReader = null;
+    }
+
+    short getIndex() {
+        return index;
+    }
+
+    BlockReader getBlockReader() {
+        return blockReader;
+    }
 }
