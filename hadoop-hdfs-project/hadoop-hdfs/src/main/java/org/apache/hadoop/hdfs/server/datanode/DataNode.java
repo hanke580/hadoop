@@ -2823,6 +2823,7 @@ public class DataNode extends ReconfigurableBase
   }
 
   public static void main(String args[]) {
+    org.zlab.ocov.tracker.Runtime.init();
     if (DFSUtil.parseHelpArgument(args, DataNode.USAGE, System.out, true)) {
       System.exit(0);
     }
