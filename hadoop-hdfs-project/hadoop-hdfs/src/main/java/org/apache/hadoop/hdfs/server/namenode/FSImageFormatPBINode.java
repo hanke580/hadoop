@@ -791,6 +791,8 @@ public final class FSImageFormatPBINode {
       INodeSection.INode r = buildINodeCommon(n)
           .setType(INodeSection.INode.Type.DIRECTORY).setDirectory(b).build();
       LOG.info("[hklog] Saving INodeDirectory, invoke ocov 1001");
+      int tmpSize = r.getDirectory().getTypeQuotas().getQuotasList().size();
+      LOG.info("[hklog] quota size: " + tmpSize + ", dir name = " + n.getFullPathName());
       org.zlab.ocov.tracker.Runtime.update(r, 1001);
       r.writeDelimitedTo(out);
     }
