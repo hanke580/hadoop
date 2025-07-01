@@ -790,6 +790,7 @@ public final class FSImageFormatPBINode {
           parent.getSaverContext());
       INodeSection.INode r = buildINodeCommon(n)
           .setType(INodeSection.INode.Type.DIRECTORY).setDirectory(b).build();
+      org.zlab.ocov.tracker.Runtime.update(r, 1001);
       r.writeDelimitedTo(out);
     }
 
